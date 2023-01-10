@@ -21,8 +21,8 @@ var Team = func(modules co_interface.IModules) *cTeam[co_interface.IModules] {
 	}
 }
 
-func (c *cTeam[T]) GetTeamById(ctx context.Context, req *co_v1.GetTeamByIdReq) (*co_v1.TeamRes, error) {
-	return funs.ProxyFunc1[*co_v1.TeamRes](
+func (c *cTeam[T]) GetTeamById(ctx context.Context, req *co_v1.GetTeamByIdReq) (*co_model.TeamRes, error) {
+	return funs.ProxyFunc1[*co_model.TeamRes](
 		ctx, req.Id,
 		c.modules.Team().GetTeamById, nil,
 		co_enum.Team.PermissionType(c.modules).ViewDetail,
@@ -52,8 +52,8 @@ func (c *cTeam[T]) QueryTeamList(ctx context.Context, req *co_v1.QueryTeamListRe
 	)
 }
 
-func (c *cTeam[T]) CreateTeam(ctx context.Context, req *co_v1.CreateTeamReq) (*co_v1.TeamRes, error) {
-	return funs.ProxyFunc1[*co_v1.TeamRes](
+func (c *cTeam[T]) CreateTeam(ctx context.Context, req *co_v1.CreateTeamReq) (*co_model.TeamRes, error) {
+	return funs.ProxyFunc1[*co_model.TeamRes](
 		ctx, &req.Team,
 		c.modules.Team().CreateTeam,
 		nil,
@@ -61,8 +61,8 @@ func (c *cTeam[T]) CreateTeam(ctx context.Context, req *co_v1.CreateTeamReq) (*c
 	)
 }
 
-func (c *cTeam[T]) UpdateTeam(ctx context.Context, req *co_v1.UpdateTeamReq) (*co_v1.TeamRes, error) {
-	return funs.ProxyFunc3[*co_v1.TeamRes](ctx,
+func (c *cTeam[T]) UpdateTeam(ctx context.Context, req *co_v1.UpdateTeamReq) (*co_model.TeamRes, error) {
+	return funs.ProxyFunc3[*co_model.TeamRes](ctx,
 		req.Id, req.Name, req.Remark,
 		c.modules.Team().UpdateTeam, nil,
 		co_enum.Team.PermissionType(c.modules).Update,
