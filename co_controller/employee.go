@@ -21,8 +21,8 @@ var Employee = func(modules co_interface.IModules) *cEmployee[co_interface.IModu
 	}
 }
 
-func (c *cEmployee[T]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (*co_v1.EmployeeRes, error) {
-	return funs.ProxyFunc1[*co_v1.EmployeeRes](
+func (c *cEmployee[T]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
+	return funs.ProxyFunc1[*co_model.EmployeeRes](
 		ctx, req.Id,
 		c.modules.Employee().GetEmployeeById, nil,
 		co_enum.Employee.PermissionType(c.modules).ViewDetail,
@@ -30,8 +30,8 @@ func (c *cEmployee[T]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmploy
 }
 
 // GetEmployeeDetailById 获取员工详情信息
-func (c *cEmployee[T]) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (res *co_v1.EmployeeRes, err error) {
-	return funs.ProxyFunc1[*co_v1.EmployeeRes](
+func (c *cEmployee[T]) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
+	return funs.ProxyFunc1[*co_model.EmployeeRes](
 		ctx, req.Id,
 		c.modules.Employee().GetEmployeeDetailById, nil,
 		co_enum.Employee.PermissionType(c.modules).MoreDetail,
@@ -75,8 +75,8 @@ func (c *cEmployee[T]) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEm
 }
 
 // CreateEmployee 创建员工信息
-func (c *cEmployee[T]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (*co_v1.EmployeeRes, error) {
-	return funs.ProxyFunc1[*co_v1.EmployeeRes](
+func (c *cEmployee[T]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
+	return funs.ProxyFunc1[*co_model.EmployeeRes](
 		ctx, &req.Employee,
 		c.modules.Employee().CreateEmployee, nil,
 		co_enum.Employee.PermissionType(c.modules).Create,
@@ -84,8 +84,8 @@ func (c *cEmployee[T]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmpl
 }
 
 // UpdateEmployee 更新员工信息
-func (c *cEmployee[T]) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (*co_v1.EmployeeRes, error) {
-	return funs.ProxyFunc1[*co_v1.EmployeeRes](
+func (c *cEmployee[T]) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
+	return funs.ProxyFunc1[*co_model.EmployeeRes](
 		ctx, &req.Employee,
 		c.modules.Employee().UpdateEmployee, nil,
 		co_enum.Employee.PermissionType(c.modules).Update,
