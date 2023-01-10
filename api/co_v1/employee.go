@@ -20,7 +20,7 @@ type HasEmployeeByNameReq struct {
 }
 
 type HasEmployeeByNoReq struct {
-	g.Meta      `method:"post" summary:"判断名称是否存在" tags:"员工"`
+	g.Meta      `method:"post" summary:"判断工号是否存在" tags:"员工"`
 	No          string `json:"no" dc:"工号"`
 	UnionMainId int64  `json:"unionMainId" dc:"关联主体ID"`
 	ExcludeId   int64  `json:"excludeId" dc:"要排除的员工ID"`
