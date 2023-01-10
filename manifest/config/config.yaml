@@ -1,0 +1,64 @@
+server:
+  address: ":7769"
+  serverRoot: "/resources"
+  dumpRouterMap: true
+  routeOverWrite: true
+  accessLogEnabled: false
+  SessionIdName: "GfAdminProCompanySessionId"
+  sessionPath: "temp/sessions/gf_admin_pro/company_sessions"    # Session文件存储目录
+  openapiPath: "/gf_admin-pro/company/openapi.json"
+  swaggerPath: "/gf_admin-pro/company/docs"
+
+
+service:
+  # 用户表ID生成器，分布式终端标识，取值范围 1 ~ 63，解决分布式多服务横向扩展时保证生成的ID不重复
+  idGeneratorWorkerId: 1
+  # 接口前缀
+  apiPrefix: "/api"
+  # Token Sign Key
+  tokenSignKey: "GfAdminProCompanyTokenSignKey"
+  # 用户默认类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营商；独立调用创建用户、查询用户信息等相关接口时强制过滤类型
+  userDefaultType: 32
+  # 是否运行注册用户，false时用户注册接口将强制返回失败
+  userAllowRegister: false
+  # 新增用户默认类型：0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心、-1超级管理员
+  # -1超级管理员，不支持注册为超级管理员
+  # 业务层有自定义类型时将忽略这里的设置
+  defaultUserRegisterType: 0
+  # 不允许登录的用户类型，多个用半角逗号隔开，支持扩展自定义类型
+  notAllowLoginUserType: [ 0 ]
+  # 需要存储到数据库中的日志，支持：all,error,warn,info
+  logLevelToDatabase: [ "all" ]
+  # 业务审核服务时限，超过时限需要重新申请审核，相关业务有自定义设置时，将自动忽略这里的设置
+  auditExpireDay:
+    default: 15
+
+# 日志配置
+logger:
+  path: "temp/logs/default"
+  level: "all"
+  stdout: true
+  ctxKeys: [ "RequestId" ]
+
+# 文件上传设置
+upload:
+  # 用戶1分钟内限制上传最大文件数量
+  fileMaxUploadCountMinute: 10
+  # 文件上传的默认保存路径
+  path: "resources/upload"
+
+# 数据库连接配置
+database:
+  logger:
+    path: "temp/logs/sql"
+    level: "all"
+    stdout: true
+    ctxKeys: ["RequestId"]
+
+  # 根目录如有 .env 文件并设置了数据库链接信息，则这里的配置将会被覆盖
+  default:
+    #数据库类型，该参数必须项
+    type: "pgsql"
+    #数据库链接
+    link: "postgres://dbUsername:dbPassword@127.0.0.1:5432/dbName?sslmode=disable"
+    debug: true
