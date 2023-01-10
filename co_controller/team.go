@@ -31,7 +31,7 @@ func (c *cTeam[T]) GetTeamById(ctx context.Context, req *co_v1.GetTeamByIdReq) (
 func (c *cTeam[T]) HasTeamByName(ctx context.Context, req *co_v1.HasTeamByNameReq) (api_v1.BoolRes, error) {
 	return funs.ProxyFunc[api_v1.BoolRes](
 		ctx,
-		func(ctx context.Context) (bool, error) {
+		func(ctx context.Context) (api_v1.BoolRes, error) {
 			return c.modules.Team().HasTeamByName(ctx, req.Name, req.UnionMainId, req.ExcludeId) == true, nil
 		}, false,
 	)
