@@ -3,7 +3,6 @@ package co_v1
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -31,5 +30,3 @@ type UpdateCompanyReq struct {
 	g.Meta `method:"post" summary:"更新组织单位|信息" tags:"组织单位"`
 	co_model.Company
 }
-
-type CompanyRes co_entity.Company

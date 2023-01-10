@@ -17,4 +17,6 @@ type Employee struct {
 	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期" description:"入职日期"`
 }
 
+type EmployeeRes co_entity.CompanyEmployee
+
 type EmployeeListRes sys_model.CollectRes[*co_entity.CompanyEmployee]
