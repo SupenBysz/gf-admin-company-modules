@@ -15,16 +15,17 @@ type global struct {
 var (
 	Global = global{
 		Company: co_module.NewModules(&co_model.Config{
-			I18n:             nil,
-			AllowEmptyNo:     true,
-			HardDeleteWaitAt: 0,
-			CompanyName:      "公司",
-			KeyIndex:         "Company",
-			RoutePrefix:      "/company",
-			StoragePath:      "/company",
-			UserType:         sys_enum.User.Type.Operator,
-			TableName:        co_model.TableName{},
-			Identifier:       co_model.Identifier{},
+			I18n:                           nil,
+			AllowEmptyNo:                   true,
+			IsCreateDefaultEmployeeAndRole: false,
+			HardDeleteWaitAt:               0,
+			CompanyName:                    "公司",
+			KeyIndex:                       "Company",
+			RoutePrefix:                    "/company",
+			StoragePath:                    "/company",
+			UserType:                       sys_enum.User.Type.Operator,
+			TableName:                      co_model.TableName{},
+			Identifier:                     co_model.Identifier{},
 		}),
 	}
 	// PermissionTree 权限信息定义
