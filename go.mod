@@ -44,5 +44,3 @@ require (
 	golang.org/x/text v0.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
-
-replace github.com/SupenBysz/gf-admin-community => E:\CodeSpace.localized\kysionProject\kysion\gf-admin-community
