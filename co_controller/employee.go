@@ -42,7 +42,7 @@ func (c *cEmployee[T]) GetEmployeeDetailById(ctx context.Context, req *co_v1.Get
 func (c *cEmployee[T]) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
 	return funs.ProxyFunc[api_v1.BoolRes](
 		ctx,
-		func(ctx context.Context) (bool, error) {
+		func(ctx context.Context) (api_v1.BoolRes, error) {
 			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.UnionMainId, req.ExcludeId) == true, nil
 		}, false,
 	)
@@ -52,7 +52,7 @@ func (c *cEmployee[T]) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmpl
 func (c *cEmployee[T]) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
 	return funs.ProxyFunc[api_v1.BoolRes](
 		ctx,
-		func(ctx context.Context) (bool, error) {
+		func(ctx context.Context) (api_v1.BoolRes, error) {
 			return c.modules.Employee().HasEmployeeByName(ctx, req.No, req.UnionMainId, req.ExcludeId) == true, nil
 		}, false,
 	)

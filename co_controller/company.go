@@ -36,7 +36,7 @@ func (c *cCompany[T]) GetCompanyById(ctx context.Context, req *co_v1.GetCompanyB
 // HasCompanyByName 公司名称是否存在
 func (c *cCompany[T]) HasCompanyByName(ctx context.Context, req *co_v1.HasCompanyByNameReq) (api_v1.BoolRes, error) {
 	return funs.ProxyFunc[api_v1.BoolRes](ctx,
-		func(ctx context.Context) (bool, error) {
+		func(ctx context.Context) (api_v1.BoolRes, error) {
 			return c.modules.Company().HasCompanyByName(ctx, req.Name) == true, nil
 		}, false,
 	)
