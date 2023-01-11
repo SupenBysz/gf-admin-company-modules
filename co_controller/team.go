@@ -84,10 +84,10 @@ func (c *cTeam[T]) GetTeamMemberList(ctx context.Context, req *co_v1.GetTeamMemb
 	)
 }
 
-func (c *cTeam[T]) QueryTeamByEmployeeList(ctx context.Context, req *co_v1.QueryTeamByEmployeeListReq) (*co_model.TeamListRes, error) {
+func (c *cTeam[T]) QueryTeamListByEmployee(ctx context.Context, req *co_v1.QueryTeamByEmployeeListReq) (*co_model.TeamListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamListRes, error) {
-			return c.modules.Team().QueryTeamByEmployeeList(ctx, req.EmployeeId, req.UnionMainId)
+			return c.modules.Team().QueryTeamListByEmployee(ctx, req.EmployeeId, req.UnionMainId)
 		},
 		co_enum.Team.PermissionType(c.modules).List,
 	)

@@ -47,7 +47,7 @@ func TeamGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Ro
 	group.POST(routePrefix+"/CreateTeam", co_controller.Team(module).CreateTeam)
 	group.POST(routePrefix+"/UpdateTeam", co_controller.Team(module).UpdateTeam)
 	group.POST(routePrefix+"/GetTeamMemberList", co_controller.Team(module).GetTeamMemberList)
-	group.POST(routePrefix+"/QueryTeamByEmployeeList", co_controller.Team(module).QueryTeamByEmployeeList)
+	group.POST(routePrefix+"/QueryTeamByEmployeeList", co_controller.Team(module).QueryTeamListByEmployee)
 	group.POST(routePrefix+"/SetTeamMember", co_controller.Team(module).SetTeamMember)
 	group.POST(routePrefix+"/SetTeamOwner", co_controller.Team(module).SetTeamOwner)
 	group.POST(routePrefix+"/SetTeamCaptain", co_controller.Team(module).SetTeamCaptain)
