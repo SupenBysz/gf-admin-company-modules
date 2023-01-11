@@ -330,9 +330,9 @@ func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool,
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", co_dao.CompanyEmployee.Table())
 	}
 
-	fileInfo.Src = s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
+	storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
 
-	_, err = sys_service.File().SaveFile(ctx, fileInfo.Src, fileInfo)
+	_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "头像文件保存失败，请重新上传", co_dao.CompanyEmployee.Table())
