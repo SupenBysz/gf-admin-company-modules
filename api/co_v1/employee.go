@@ -3,7 +3,6 @@ package co_v1
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -61,5 +60,3 @@ type GetEmployeeDetailByIdReq struct {
 	g.Meta `method:"post" summary:"获取员工详情|信息" tags:"员工"`
 	Id     int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
 }
-
-type EmployeeRes co_entity.CompanyEmployee

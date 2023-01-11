@@ -3,7 +3,6 @@ package co_v1
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -33,7 +32,7 @@ type UpdateTeamReq struct {
 	g.Meta `method:"post" summary:"更新团队或小组|信息" tags:"团队&小组"`
 	Id     int64  `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 	Name   string `json:"name" v:"required#名称不能为空" dc:"名称"`
-	Remark string `json:"name" dc:"备注"`
+	Remark string `json:"remark" dc:"备注"`
 }
 
 type DeleteTeamReq struct {
@@ -69,5 +68,3 @@ type SetTeamCaptainReq struct {
 	Id         int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 	EmployeeId int64 `json:"employeeId" v:"required#团队队长ID校验失败" dc:"团队队长ID"`
 }
-
-type TeamRes co_entity.CompanyTeam
