@@ -215,8 +215,8 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 	})
 }
 
-// QueryTeamByEmployeeList 根据员工查询团队
-func (s *sTeam) QueryTeamByEmployeeList(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
+// QueryTeamListByEmployee 根据员工查询团队
+func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
 	data := &[]*co_entity.CompanyTeamMember{}
 
 	if unionMainId == 0 {
@@ -224,7 +224,7 @@ func (s *sTeam) QueryTeamByEmployeeList(ctx context.Context, employeeId int64, u
 	}
 
 	err := co_dao.CompanyTeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-		Where(co_do.CompanyTeamMember{Id: employeeId, UnionMainId: unionMainId}).
+		Where(co_do.CompanyTeamMember{EmployeeId: employeeId, UnionMainId: unionMainId}).
 		Scan(data)
 
 	if err != nil {
