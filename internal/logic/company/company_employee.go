@@ -142,6 +142,10 @@ func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee)
 func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "禁止跨主体创建或修改员工信息", co_dao.CompanyEmployee.Table())
+	}
+
 	// 校验员工名称是否已存在
 	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工名称已存在，请修改后提交", co_dao.CompanyEmployee.Table())
@@ -157,7 +161,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工工号已存在，请修改后提交", co_dao.CompanyEmployee.Table())
 	}
 
-	data := &co_entity.CompanyEmployee{}
+	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
 
 	err := co_dao.CompanyEmployee.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
@@ -204,7 +208,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 				data.Id = newUser.UserInfo.Id
 			}
 
-			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitNilData().Data(data).Insert()
+			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
 			if err != nil {
 				return err
 			}
@@ -213,7 +217,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 
-			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitEmptyData().Data(data).Where(co_do.CompanyEmployee{Id: data.Id}).Update()
+			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}).Update()
 			if err != nil {
 				return err
 			}

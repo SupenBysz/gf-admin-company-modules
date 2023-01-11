@@ -13,7 +13,7 @@ type Employee struct {
 	Name        string      `json:"name"         v:"required|max-length:16#名称不能为空|工号长度超出限定16字符" description:"姓名"`
 	Mobile      string      `json:"mobile"       v:"phone#手机号校验失败" description:"手机号"`
 	State       int         `json:"state"        v:"in:-2,-1,0,1#请选择员工状态" description:"状态： -2已注销，-1已离职，0待认证，1已入职"`
-	UnionMainId int64       `json:"-"  json:"unionMainId"   description:"所属主体"`
+	UnionMainId int64       `json:"unionMainId"  v:"required|请选择员工归属主体" description:"所属主体"`
 	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期" description:"入职日期"`
 }
 
