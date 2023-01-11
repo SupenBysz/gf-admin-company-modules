@@ -157,12 +157,12 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工工号已存在，请修改后提交", co_dao.CompanyEmployee.Table())
 	}
 
-	data := &co_do.CompanyEmployee{}
+	data := &co_entity.CompanyEmployee{}
 	gconv.Struct(info, data)
 
 	err := co_dao.CompanyEmployee.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
-		if info.Avatar != "nil" {
+		if info.Avatar != "" {
 			// 校验员工头像并保存
 			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), "头像文件无效，请重新上传")
 
@@ -180,10 +180,13 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			data.Id = idgen.NextId()
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
+			data.UnionMainId = info.UnionMainId
 
 			{
 				// 创建登录信息
-				password := gstr.SubStr(gconv.String(data.Id), len(gconv.String(data.Id))-6, 6)
+				passwordLen := len(gconv.String(data.Id))
+				password := gstr.SubStr(gconv.String(data.Id), passwordLen-6, 6)
+
 				newUser, err := sys_service.SysUser().CreateUser(ctx, sys_model.UserInnerRegister{
 					Username:        strconv.FormatInt(gconv.Int64(data.Id), 36),
 					Password:        password,
@@ -192,6 +195,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 				},
 					sys_enum.User.State.Normal,
 					s.modules.GetConfig().UserType,
+					gconv.Int64(data.Id),
 				)
 				if err != nil {
 					return err
@@ -200,17 +204,16 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 				data.Id = newUser.UserInfo.Id
 			}
 
-			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitEmptyData().Data(data).Insert()
+			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitNilData().Data(data).Insert()
 			if err != nil {
 				return err
 			}
 		} else {
 			// 更新员工信息
-			data.Avatar = nil
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 
-			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitEmptyData().Data(data).Insert()
+			_, err := co_dao.CompanyEmployee.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitEmptyData().Data(data).Where(co_do.CompanyEmployee{Id: data.Id}).Update()
 			if err != nil {
 				return err
 			}
