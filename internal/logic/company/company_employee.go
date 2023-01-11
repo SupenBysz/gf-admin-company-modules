@@ -142,6 +142,18 @@ func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee)
 func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	if sessionUser.Type > 0 && info.UnionMainId == 0 {
+		info.UnionMainId = sessionUser.UnionMainId
+	}
+
+	if info.UnionMainId == 0 {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工所属主体不能为空，请选择后提交", co_dao.CompanyEmployee.Table())
+	}
+
+	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工所属主体校验失败，请确认后提交", co_dao.CompanyEmployee.Table())
+	}
+
 	// 校验员工名称是否已存在
 	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工名称已存在，请修改后提交", co_dao.CompanyEmployee.Table())
