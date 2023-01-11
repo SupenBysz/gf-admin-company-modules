@@ -38,7 +38,7 @@ type (
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity.CompanyTeam, error)
 		UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_entity.CompanyTeam, error)
 		GetTeamMemberList(ctx context.Context, id int64) (*co_model.EmployeeListRes, error)
-		QueryTeamByEmployeeList(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error)
+		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error)
 		SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error)
 		SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)

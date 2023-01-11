@@ -141,7 +141,7 @@ func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee)
 // saveEmployee 保存员工信息
 func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-	
+
 	if sessionUser.Type > 0 && info.UnionMainId == 0 {
 		info.UnionMainId = sessionUser.UnionMainId
 	}
