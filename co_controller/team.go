@@ -95,10 +95,10 @@ func (c *cTeam[T]) GetTeamMemberList(ctx context.Context, req *co_v1.GetTeamMemb
 	)
 }
 
-func (c *cTeam[T]) QueryTeamByEmployeeList(ctx context.Context, req *co_v1.QueryTeamByEmployeeListReq) (*co_model.TeamListRes, error) {
+func (c *cTeam[T]) QueryTeamListByEmployee(ctx context.Context, req *co_v1.QueryTeamByEmployeeListReq) (*co_model.TeamListRes, error) {
 	return funs.ProxyFunc2[*co_model.TeamListRes](
 		ctx, req.EmployeeId, req.UnionMainId,
-		c.modules.Team().QueryTeamByEmployeeList,
+		c.modules.Team().QueryTeamListByEmployee,
 		&co_model.TeamListRes{
 			PaginationRes: sys_model.PaginationRes{
 				Pagination: sys_model.Pagination{

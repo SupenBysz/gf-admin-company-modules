@@ -105,7 +105,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "团队队长信息不存在", co_dao.CompanyTeam.Table())
 		}
 
-		data, err := s.QueryTeamByEmployeeList(ctx, employee.Id, employee.UnionMainId)
+		data, err := s.QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
 		if err != nil && err != sql.ErrNoRows {
 			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "团队队长信息不存在", co_dao.CompanyTeam.Table())
 		}
@@ -448,7 +448,7 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 	canCaptain := false
 	{
 		// 查询员工所在的所有团队信息
-		data, err := s.QueryTeamByEmployeeList(ctx, employee.Id, employee.UnionMainId)
+		data, err := s.QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
 		if err != nil && err != sql.ErrNoRows {
 			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "团队队长信息不存在", co_dao.CompanyTeam.Table())
 		}
