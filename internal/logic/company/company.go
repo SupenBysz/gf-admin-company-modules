@@ -118,6 +118,9 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"名称已被占用，请修改后再试", co_dao.Company.Table())
 	}
 
+	// 构建公司ID
+	UnionMainId := idgen.NextId()
+
 	data := co_do.Company{
 		Name:          info.Name,
 		ContactName:   info.ContactName,
@@ -130,23 +133,58 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 	// 启用事务
 	err := co_dao.Company.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
+		// 构建员工信息
+		employee, err := s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+			No:          "001",
+			Name:        info.ContactName,
+			Mobile:      info.ContactMobile,
+			UnionMainId: UnionMainId,
+			HiredAt:     gtime.Now(),
+		})
+		if err != nil {
+			return err
+		}
+
+		// 构建公司信息
 		if info.Id == 0 {
-			data.Id = idgen.NextId()
+			data.Id = UnionMainId
+			// data.Id = idgen.NextId()
 			data.CreatedBy = user.Id
 			data.CreatedAt = gtime.Now()
-
+			data.UserId = employee.Id
 			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
 
 		} else {
 			data.UpdatedBy = user.Id
 			data.UpdatedAt = gtime.Now()
-			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
+			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).OmitNilData().Where(co_do.Company{Id: info.Id}).Update(data)
 		}
+
+		// 构建角色信息
+		roleData := sys_model.SysRole{
+			Name:        "管理员",
+			UnionMainId: UnionMainId,
+			IsSystem:    true,
+		}
+
+		// 创建角色，设置用户的角色 自己内部管理员 BOOS
+		roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
+		if err != nil {
+			return err
+		}
+
+		_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
+		if err != nil {
+			return err
+		}
+
+		// 构建财务账号
+
 		return err
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "创建公司组织信息失败", co_dao.Company.Table())
 	}
 
 	return s.GetCompanyById(ctx, data.Id.(int64))
