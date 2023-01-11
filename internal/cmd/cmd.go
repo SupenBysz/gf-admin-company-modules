@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
+	"github.com/SupenBysz/gf-admin-company-modules/co_module"
 	"github.com/SupenBysz/gf-admin-company-modules/co_router"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -63,6 +64,9 @@ var (
 				// company.NewCompany(co_consts.Global.Conf)
 			}
 
+			// 注入HOOK
+			co_module.GetModule(co_consts.Global.Company.GetConfig().KeyIndex).Company().InjectHook()
+
 			// 初始化路由
 			apiPrefix := g.Cfg().MustGet(ctx, "service.apiPrefix").String()
 			s.Group(apiPrefix, func(group *ghttp.RouterGroup) {
@@ -97,7 +101,7 @@ var (
 						sys_service.Middleware().Auth,
 					)
 
-					// 注册公司模块路由
+					// 注册公司模块路由 （包含：公司、团队、员工）
 					co_router.ModulesGroup(co_consts.Global.Company, group)
 				})
 			})
