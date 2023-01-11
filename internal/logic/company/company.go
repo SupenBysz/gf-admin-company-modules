@@ -2,7 +2,9 @@ package company
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/gogf/gf/v2/errors/gerror"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -27,6 +29,30 @@ func NewCompany(modules co_interface.IModules) co_interface.ICompany {
 	return &sCompany{
 		modules: modules,
 	}
+}
+
+// InjectHook 注入Audit的Hook
+func (s *sCompany) InjectHook() {
+	sys_service.Jwt().InstallHook(sys_enum.User.Type.Operator, s.JwtHookFunc)
+}
+
+// JwtHookFunc Jwt钩子函数
+func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
+	// 获取到当前user的主体id
+	employee, err := s.modules.Employee().GetEmployeeById(ctx, claims.Id)
+	if employee == nil {
+		return claims, err
+	}
+
+	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	if company == nil || err != nil {
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", co_dao.Company.Table())
+	}
+
+	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
+	claims.UnionMainId = company.Id
+
+	return claims, nil
 }
 
 // GetCompanyById 根据ID获取获取公司信息
@@ -93,7 +119,11 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"名称已被占用，请修改后再试", co_dao.Company.Table())
 	}
 
+	// 构建公司ID
+	UnionMainId := idgen.NextId()
+
 	data := co_do.Company{
+		Id:            info.Id,
 		Name:          info.Name,
 		ContactName:   info.ContactName,
 		ContactMobile: info.ContactMobile,
@@ -101,23 +131,42 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	}
 
 	// 获取登录用户
-	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 启用事务
 	err := co_dao.Company.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
-		if info.Id == 0 {
-			data.Id = idgen.NextId()
-			data.CreatedBy = user.Id
-			data.CreatedAt = gtime.Now()
+		var employee *co_entity.CompanyEmployee
+		// 是否创建默认员工和角色
+		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
+			// 构建员工信息
+			employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+				No:          "001",
+				Name:        info.ContactName,
+				Mobile:      info.ContactMobile,
+				UnionMainId: UnionMainId,
+				HiredAt:     gtime.Now(),
+			})
+			if err != nil {
+				return err
+			}
+		}
 
+		if info.Id == 0 {
+			data.Id = UnionMainId
+			data.UserId = employee.Id
+			data.CreatedBy = sessionUser.Id
+			data.CreatedAt = gtime.Now()
 			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
 
 		} else {
-			data.UpdatedBy = user.Id
+			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
 		}
-		return err
+		if err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"保存信息失败", co_dao.Company.Table())
+		}
+		return nil
 	})
 
 	if err != nil {
