@@ -181,7 +181,7 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "保存团队信息失败", co_dao.CompanyTeam.Table())
 	}
 
-	return s.GetTeamById(ctx, data.Id.(int64))
+	return s.GetTeamById(ctx, id)
 }
 
 // GetTeamMemberList 获取团队成员|列表
