@@ -1,3 +1,4 @@
+## 权限
 permission_Company_Name: "公司管理"
 permission_Company_ViewDetail: "查看"
 permission_Company_Create: "新增"
@@ -9,3 +10,40 @@ permission_Company_SetAdminUser: "设置管理员"
 permission_Company_ViewLicense: "查看资质认证信息"
 permission_Company_AuditLicense: "审核资质认证信息"
 permission_Company_UpdateLicense: "更新资质认证信息"
+
+## 称呼
+employee_Name: "员工"
+teamOrGroup: "团队或小组"
+TeamOwnerEmployee: "团队管理人"
+TeamCaptainEmployee: "团队队长"
+Data: "信息"
+Team: "团队"
+TeamMember: "团队成员"
+
+## 错误信息
+error_Data_Save_Failed: "保存信息失败"
+error_Data_NotFound : "信息不存在"
+error_Data_Get_Failed: "信息查询失败"
+error_Employee_Delete_Failed: "删除员工信息失败"
+error_Employee_Save_Failed: "保存员工信息失败"
+error_Employee_SetMobile_Failed: "新手机号保存失败"
+error_CheckLoginUser_Failed: "校验当前登录信息失败"
+error_NotHasServerPermission: "当前账号没有当前业务的操作权限"
+
+## 有关文件的错误信息
+error_File_FileVoid: "文件无效，请重新上传"
+error_File_Save_failed: "文件保存失败，请重新上传"
+
+## 有关团队的错误信息
+error_Team_ParentTeamNotFound: "父级团队信息不存在"
+error_Team_TeamNameExist: "团队名称已存在，请修改后再创建"
+error_Team_Save_Failed: "保存团队信息失败"
+error_Team_NotFound: "没有找到对应的团队"
+error_Team_DeleteMember_Failed: "移除团队成员失败"
+error_Team_MemberIsHasTeam: "团队成员不能是其它团队成员"
+error_TeamOrEmployee_Check_Failed: "团队或员工信息校验失败"
+error_GroupOrEmployee_Check_Failed: "小组或员工信息校验失败"
+error_TeamCaptainEmployee_MustInTeam: "团队队长必须是团队里的成员"
+error_NeedRemoveTeamMember: "需要先移除团队成员后再继续"
+error_NewTeam_NotFoundMembers: "新团队成员中有成员信息不存在，请再次确认后再试"
+error_Group_ParentMustIsTeam: "小组父级只能是某个团队"
