@@ -137,7 +137,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	err := co_dao.Company.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
 		var employee *co_entity.CompanyEmployee
 		// 是否创建默认员工和角色
-		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
+		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {
 			// 构建员工信息
 			employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
 				No:          "001",
