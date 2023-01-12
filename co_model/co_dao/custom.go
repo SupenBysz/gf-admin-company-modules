@@ -14,7 +14,7 @@ type IDao[T any] interface {
 	Columns() T
 	Group() string
 	Ctx(ctx context.Context) *gdb.Model
-	Transaction(ctx context.Context, f func(ctx context.Context, tx *gdb.TX) error) (err error)
+	Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error)
 }
 
 type CustomDao[T any] struct {
@@ -91,6 +91,6 @@ func (d *CustomDao[T]) Dao() IDao[T] {
 // 如果函数f返回nil，则提交事务并返回nil。
 //
 // 注意，你不应该在函数f中提交或回滚事务, 因为它由这个函数自动处理。
-func (d *CustomDao[T]) Transaction(ctx context.Context, f func(ctx context.Context, tx *gdb.TX) error) (err error) {
+func (d *CustomDao[T]) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return d.Ctx(ctx).Transaction(ctx, f)
 }

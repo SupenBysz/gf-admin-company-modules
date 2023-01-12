@@ -119,10 +119,10 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 	}
 
 	items := make([]*co_entity.CompanyEmployee, 0)
-	for _, employeeInfo := range *result.List {
+	for _, employeeInfo := range result.Records {
 		items = append(items, s.masker(employeeInfo))
 	}
-	result.List = &items
+	result.Records = items
 
 	return (*co_model.EmployeeListRes)(result), nil
 }
@@ -172,7 +172,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
 
-	err := co_dao.CompanyEmployee(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	err := co_dao.CompanyEmployee(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
 		if info.Avatar != "" {
 			// 校验员工头像并保存
@@ -255,7 +255,7 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 		return false, err
 	}
 
-	err = co_dao.CompanyEmployee(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	err = co_dao.CompanyEmployee(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		if s.modules.GetConfig().HardDeleteWaitAt > 0 && employee.DeletedAt == nil {
 			// 设置账户状态为已注销
 			_, err = sys_service.SysUser().SetUserState(ctx, employee.Id, sys_enum.User.State.Canceled)
