@@ -89,10 +89,10 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	if data.Total > 0 {
 		items := make([]*co_entity.Company, 0)
 		// 脱敏处理
-		for _, item := range *data.List {
+		for _, item := range data.Records {
 			items = append(items, s.masker(item))
 		}
-		data.List = &items
+		data.Records = items
 	}
 
 	return (*co_model.CompanyListRes)(data), nil
@@ -134,7 +134,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 启用事务
-	err := co_dao.Company(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
+	err := co_dao.Company(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee *co_entity.CompanyEmployee
 		// 是否创建默认员工和角色
 		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {

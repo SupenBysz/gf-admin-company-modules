@@ -111,7 +111,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 		}
 
 		if info.ParentId == 0 {
-			for _, team := range *data.List {
+			for _, team := range data.Records {
 				if team.ParentId == 0 {
 					return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+"不能是其它团队的队员", co_dao.CompanyTeam(s.modules).Table())
 				}
@@ -137,7 +137,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 		JoinAt:      gtime.Now(),
 	}
 
-	err := co_dao.CompanyTeam(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	err := co_dao.CompanyTeam(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 创建团队
 		_, err := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
 		if err != nil {
@@ -336,7 +336,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 			},
 		),
 		Pagination: sys_model.Pagination{
-			Page:     1,
+			PageNum:  1,
 			PageSize: 1000,
 		},
 	})
@@ -360,7 +360,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 		}
 	}
 
-	err = co_dao.CompanyTeamMember(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) error {
+	err = co_dao.CompanyTeamMember(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 清理团队成员
 		_, err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			WhereIn(co_dao.CompanyTeamMember(s.modules).Columns().Id, existIds).
@@ -463,7 +463,7 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+s.modules.T(ctx, "error_Data_NotFound"), co_dao.CompanyTeam(s.modules).Table())
 		}
 
-		for _, item := range *data.List {
+		for _, item := range data.Records {
 			// 判断要设置的是团队还是小组 ParentId == 0团队，ParentId > 0小组
 			if team.ParentId == 0 && item.ParentId == 0 {
 				// 如果员工是其它团队成员则返回
