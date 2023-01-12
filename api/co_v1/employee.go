@@ -46,8 +46,8 @@ type DeleteEmployeeReq struct {
 }
 
 type SetEmployeeMobileReq struct {
-	g.Meta  `method:"post" summary:"删除员工|信息" tags:"员工"`
-	Mobile  int64  `json:"id" v:"required|phone#请数据手机号|手机号错误" dc:"手机号"`
+	g.Meta  `method:"post" summary:"设置员工手机号|信息" tags:"员工"`
+	Mobile  int64  `json:"mobile" v:"required|phone#请数据手机号|手机号错误" dc:"手机号"`
 	Captcha string `json:"captcha" v:"required#请输入手机验证码"`
 }
 
