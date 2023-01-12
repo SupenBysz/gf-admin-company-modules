@@ -191,13 +191,17 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 		return nil, err
 	}
 
-	var items *[]*co_entity.CompanyTeamMember
+	// 团队成员信息
+	var items []co_entity.CompanyTeamMember
 	err = co_dao.CompanyTeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
 		TeamId:      team.Id,
 		UnionMainId: team.UnionMainId,
-	}).Scan(items)
+	}).Scan(&items)
 
 	ids := make([]int64, 0)
+	for _, item := range items {
+		ids = append(ids, item.EmployeeId)
+	}
 
 	return s.modules.Employee().QueryEmployeeList(ctx, &sys_model.SearchParams{
 		Filter: append(make([]sys_model.FilterInfo, 0),
