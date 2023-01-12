@@ -1,6 +1,7 @@
 package co_module
 
 import (
+	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -37,6 +38,10 @@ func (m *Modules[C, E, T, TM]) Employee() co_interface.IEmployee {
 
 func (m *Modules[C, E, T, TM]) GetConfig() *co_model.Config {
 	return m.conf
+}
+
+func (m *Modules[C, E, T, TM]) T(ctx context.Context, content string) string {
+	return m.GetConfig().I18n.Translate(ctx, content)
 }
 
 var (

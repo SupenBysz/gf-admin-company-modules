@@ -51,4 +51,5 @@ type IModules interface {
 	Team() ITeam
 	Employee() IEmployee
 	GetConfig() *co_model.Config
+	T(ctx context.Context, content string) string
 }

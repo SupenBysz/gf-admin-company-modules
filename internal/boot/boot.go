@@ -2,9 +2,10 @@ package boot
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 
 	"github.com/gogf/gf/v2/i18n/gi18n"
-	
+
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/utility/permission"
@@ -15,32 +16,40 @@ import (
 )
 
 func init() {
-	company := co_module.NewModules(&co_model.Config{
-		RoutePrefix: "company",
-		CompanyName: "公司",
-		TableName: co_model.TableName{
-			Company:    "pro_company",
-			Employee:   "pro_company_employee",
-			Team:       "pro_company_team",
-			TeamMember: "pro_company_team_member",
-		},
+	company := co_module.NewModules[
+		co_dao.CompanyDao,
+		co_dao.CompanyEmployeeDao,
+		co_dao.CompanyTeamDao,
+		co_dao.CompanyTeamDao,
+	](&co_model.Config{
+		I18n:                           nil,
+		AllowEmptyNo:                   true,
+		IsCreateDefaultEmployeeAndRole: false,
+		HardDeleteWaitAt:               0,
+		CompanyName:                    "公司",
+		KeyIndex:                       "Company",
+		RoutePrefix:                    "/company",
+		StoragePath:                    "./resources/company",
+		UserType:                       sys_enum.User.Type.Operator,
 		Identifier: co_model.Identifier{
 			Company:  "company",
 			Employee: "employee",
 			Team:     "team",
 		},
 	})
-	InitI18n(company.GetConfig().I18n)
+	company.GetConfig().I18n = InitI18n(company.GetConfig().I18n)
+	co_consts.Global.Company = company
 	InitPermissionTree(company.GetConfig())
 }
 
-func InitI18n(i18n *gi18n.Manager) {
+func InitI18n(i18n *gi18n.Manager) *gi18n.Manager {
 	if i18n == nil {
 		i18n = gi18n.New()
 		i18n.SetPath("i18n/company")
 		i18n.SetLanguage("zh-CN")
 	}
 
+	return i18n
 }
 
 func InitPermissionTree(conf *co_model.Config) {
