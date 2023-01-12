@@ -175,7 +175,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				data.UserId = employee.Id
 			}
 
-			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
+			_, err = co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
 
 		} else {
 			data.UpdatedBy = sessionUser.Id

@@ -193,7 +193,7 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 	// 团队成员信息
 	var items []co_entity.CompanyTeamMember
-	err = co_dao.CompanyTeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
+	err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
 		TeamId:      team.Id,
 		UnionMainId: team.UnionMainId,
 	}).Scan(&items)
