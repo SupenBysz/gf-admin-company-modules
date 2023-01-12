@@ -1,7 +1,7 @@
 server:
   address: ":7769"
   serverRoot: "/resources"
-  dumpRouterMap: true
+  dumpRouterMap: false
   routeOverWrite: true
   accessLogEnabled: false
   SessionIdName: "GfAdminProCompanySessionId"
