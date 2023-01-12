@@ -30,7 +30,11 @@ var (
 			RoutePrefix:                    "/company",
 			StoragePath:                    "./resources/company",
 			UserType:                       sys_enum.User.Type.Operator,
-			Identifier:                     co_model.Identifier{},
+			Identifier: co_model.Identifier{
+				Company:  "company",
+				Employee: "employee",
+				Team:     "team",
+			},
 		}),
 	}
 	// PermissionTree 权限信息定义
