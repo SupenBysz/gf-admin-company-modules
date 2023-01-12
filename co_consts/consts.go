@@ -22,7 +22,7 @@ var (
 			CompanyName:                    "公司",
 			KeyIndex:                       "Company",
 			RoutePrefix:                    "/company",
-			StoragePath:                    "/company",
+			StoragePath:                    "./resources/company",
 			UserType:                       sys_enum.User.Type.Operator,
 			TableName:                      co_model.TableName{},
 			Identifier:                     co_model.Identifier{},
