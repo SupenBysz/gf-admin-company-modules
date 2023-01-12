@@ -31,6 +31,6 @@ type Config struct {
 	RoutePrefix                    string            `p:"routePrefix" dc:"路由前缀"`
 	StoragePath                    string            `p:"storagePath" dc:"资源存储路径"`
 	UserType                       sys_enum.UserType `p:"userType" dc:"用户类型"`
-	TableName                      TableName         `p:"tableName" dc:"表名"`
 	Identifier                     Identifier        `p:"identifier" dc:"标识符"`
+	TableName                      TableName         `p:"tableName" dc:"模块表名"`
 }

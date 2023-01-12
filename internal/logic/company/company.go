@@ -46,7 +46,7 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 
 	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
 	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", co_dao.Company.Table())
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", co_dao.Company(s.modules).Table())
 	}
 
 	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
@@ -57,10 +57,10 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error) {
-	data, err := daoctl.GetByIdWithError[co_entity.Company](co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
+	data, err := daoctl.GetByIdWithError[co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
 	}
 
 	return s.masker(data), nil
@@ -68,10 +68,10 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 
 // HasCompanyByName 判断名称是否存在
 func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeId ...int64) bool {
-	model := co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler)
+	model := co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler)
 
 	if len(excludeId) > 0 {
-		model = model.WhereNotIn(co_dao.Company.Columns().Id, excludeId)
+		model = model.WhereNotIn(co_dao.Company(s.modules).Columns().Id, excludeId)
 	}
 
 	count, _ := model.Where(co_do.Company{Name: name}).Count()
@@ -80,10 +80,10 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeId 
 
 // QueryCompanyList 查询公司列表
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
-	data, err := daoctl.Query[*co_entity.Company](co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
+	data, err := daoctl.Query[*co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
 	}
 
 	if data.Total > 0 {
@@ -107,7 +107,7 @@ func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*
 // UpdateCompany 更新公司信息
 func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	if info.Id <= 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
 	}
 	return s.saveCompany(ctx, info)
 }
@@ -116,7 +116,7 @@ func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*
 func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	// 名称重名检测
 	if s.HasCompanyByName(ctx, info.Name, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"名称已被占用，请修改后再试", co_dao.Company.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"名称已被占用，请修改后再试", co_dao.Company(s.modules).Table())
 	}
 
 	// 构建公司ID
@@ -134,7 +134,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 启用事务
-	err := co_dao.Company.Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
+	err := co_dao.Company(s.modules).Transaction(ctx, func(ctx context.Context, tx *gdb.TX) (err error) {
 		var employee *co_entity.CompanyEmployee
 		// 是否创建默认员工和角色
 		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {
@@ -180,10 +180,10 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		} else {
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
-			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
+			_, err = co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
 		}
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"保存信息失败", co_dao.Company.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"保存信息失败", co_dao.Company(s.modules).Table())
 		}
 		return nil
 	})

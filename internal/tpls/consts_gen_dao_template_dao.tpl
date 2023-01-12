@@ -8,18 +8,11 @@ import (
 	"{TplImportPrefix}/internal"
 )
 
-// internal{TplTableNameCamelCase}Dao is internal type for wrapping internal DAO implements.
-type internal{TplTableNameCamelCase}Dao = *internal.{TplTableNameCamelCase}Dao
-
-// {TplTableNameCamelLowerCase}Dao is the data access object for table {TplTableName}.
-// You can define custom methods on it to extend its functionality as you wish.
-type {TplTableNameCamelLowerCase}Dao struct {
-	internal{TplTableNameCamelCase}Dao
-}
+type {TplTableNameCamelCase}Dao = internal.{TplTableNameCamelCase}Dao
 
 var (
 	// {TplTableNameCamelCase} is globally public accessible object for table {TplTableName} operations.
-	{TplTableNameCamelCase} = {TplTableNameCamelLowerCase}Dao{
-		internal.New{TplTableNameCamelCase}Dao(),
-	}
+	{TplTableNameCamelCase} = func(module co_interface.IModules) IDao[internal.{TplTableNameCamelCase}Columns] {
+        return NewDao[internal.{TplTableNameCamelCase}Columns](module.GetConfig(), internal.New{TplTableNameCamelCase}Dao())
+    }
 )

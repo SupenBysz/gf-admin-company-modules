@@ -5,21 +5,15 @@
 package co_dao
 
 import (
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
 )
 
-// internalCompanyEmployeeDao is internal type for wrapping internal DAO implements.
-type internalCompanyEmployeeDao = *internal.CompanyEmployeeDao
-
-// companyEmployeeDao is the data access object for table pro_company_employee.
-// You can define custom methods on it to extend its functionality as you wish.
-type companyEmployeeDao struct {
-	internalCompanyEmployeeDao
-}
+type CompanyEmployeeDao = internal.CompanyEmployeeDao
 
 var (
 	// CompanyEmployee is globally public accessible object for table pro_company_employee operations.
-	CompanyEmployee = companyEmployeeDao{
-		internal.NewCompanyEmployeeDao(),
+	CompanyEmployee = func(module co_interface.IModules) IDao[internal.CompanyEmployeeColumns] {
+		return NewDao[internal.CompanyEmployeeColumns](module.GetConfig(), internal.NewCompanyEmployeeDao())
 	}
 )
