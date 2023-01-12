@@ -187,7 +187,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			info.Avatar = gconv.String(fileInfo.Id)
 		}
 
-		if gconv.Int64(data.Id) == 0 {
+		if info.Id == 0 {
 			// 创建员工信息
 			data.Id = idgen.NextId()
 			data.CreatedBy = sessionUser.Id
