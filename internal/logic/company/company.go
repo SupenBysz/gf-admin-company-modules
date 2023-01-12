@@ -149,6 +149,21 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			if err != nil {
 				return err
 			}
+
+			// 构建角色信息
+			roleData := sys_model.SysRole{
+				Name:        "管理员",
+				UnionMainId: UnionMainId,
+				IsSystem:    true,
+			}
+			roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
+			if err != nil {
+				return err
+			}
+			_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
+			if err != nil {
+				return err
+			}
 		}
 
 		if info.Id == 0 {
