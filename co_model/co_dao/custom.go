@@ -56,6 +56,9 @@ func NewDao[T any, TC IDao[T]](conf *co_model.Config, dao TC) IDao[T] {
 
 // DB 检索并返回当前DAO的底层原始数据库管理对象。
 func (d *CustomDao[T]) DB() gdb.DB {
+	if d.conf.DB != nil {
+		return d.conf.DB
+	}
 	return g.DB(d.Group())
 }
 

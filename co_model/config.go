@@ -21,7 +21,7 @@ type Identifier struct {
 }
 
 type Config struct {
-	db                             gdb.DB            `p:"-" dc:"数据库连接"`
+	DB                             gdb.DB            `p:"-" dc:"数据库连接"`
 	I18n                           *gi18n.Manager    `p:"-" dc:"国际化"`
 	AllowEmptyNo                   bool              `p:"allowEmptyNo" dc:"允许员工工号为空" default:"false"`
 	IsCreateDefaultEmployeeAndRole bool              `p:"isCreateDefaultEmployeeAndRole" dc:"是否创建默认员工和角色"`
