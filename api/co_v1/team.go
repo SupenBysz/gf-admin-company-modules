@@ -45,7 +45,7 @@ type GetTeamMemberListReq struct {
 	Id     int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 }
 
-type QueryTeamByEmployeeListReq struct {
+type QueryTeamListByEmployeeReq struct {
 	g.Meta      `method:"post" summary:"根据员工查询团队|列表" tags:"团队|小组"`
 	EmployeeId  int64 `json:"employeeId" v:"required#员工ID校验失败" dc:"员工ID"`
 	UnionMainId int64 `json:"unionMainId" dc:"关联主体，默认当前主体"`
