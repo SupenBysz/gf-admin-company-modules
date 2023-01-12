@@ -266,7 +266,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 		Where(co_do.CompanyTeamMember{
 			TeamId:      teamId,
 			UnionMainId: sessionUser.UnionMainId,
-		}).Scan(teamMemberArr)
+		}).Scan(&teamMemberArr)
 
 	// 待移除的团队成员
 	waitIds := make([]int64, 0)
@@ -275,6 +275,10 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	// 遍历所有旧成员
 	for _, member := range teamMemberArr {
+		if len(employeeIds) == 0 {
+			existIds = append(existIds, member.EmployeeId)
+			continue
+		}
 		// 遍历待加入团队的员工
 		for _, employeeId := range employeeIds {
 			if member.EmployeeId != employeeId {
