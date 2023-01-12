@@ -143,10 +143,12 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 		if err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), co_dao.CompanyTeam(s.modules).Table())
 		}
-		// 创建团队队长
-		_, err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(captain).Insert()
-		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed")+"无法保存"+s.modules.T(ctx, "TeamCaptainEmployee")+"信息", co_dao.CompanyTeam(s.modules).Table())
+		if info.CaptainEmployeeId > 0 {
+			// 创建团队队长
+			_, err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(captain).Insert()
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed")+"无法保存"+s.modules.T(ctx, "TeamCaptainEmployee")+"信息", co_dao.CompanyTeam(s.modules).Table())
+			}
 		}
 		return nil
 	})
