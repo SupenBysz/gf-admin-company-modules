@@ -153,9 +153,13 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 		if info.Id == 0 {
 			data.Id = UnionMainId
-			data.UserId = employee.Id
+			data.UserId = 0
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
+			if employee != nil {
+				data.UserId = employee.Id
+			}
+
 			_, err = co_dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
 
 		} else {
