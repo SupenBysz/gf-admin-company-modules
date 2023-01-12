@@ -60,7 +60,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 	data, err := daoctl.GetByIdWithError[co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
 	}
 
 	return s.masker(data), nil
@@ -83,7 +83,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	data, err := daoctl.Query[*co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
 	}
 
 	if data.Total > 0 {
@@ -107,7 +107,7 @@ func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*
 // UpdateCompany 更新公司信息
 func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	if info.Id <= 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"信息不存在", co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
 	}
 	return s.saveCompany(ctx, info)
 }
@@ -183,7 +183,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			_, err = co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
 		}
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"保存信息失败", co_dao.Company(s.modules).Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
 		}
 		return nil
 	})
