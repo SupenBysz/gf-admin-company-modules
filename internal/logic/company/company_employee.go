@@ -319,7 +319,7 @@ func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, capt
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	_, err = co_dao.CompanyEmployee(s.modules).Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile}).
+		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
 		Where(co_do.CompanyEmployee{Id: sessionUser.Id}).
 		Update()
 
