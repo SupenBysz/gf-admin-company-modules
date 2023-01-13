@@ -97,7 +97,7 @@ var (
 						sys_service.Middleware().Auth,
 					)
 
-					// 注册公司模块路由
+					// 注册公司模块路由 （包含：公司、团队、员工）
 					co_router.ModulesGroup(co_consts.Global.Company, group)
 				})
 			})
