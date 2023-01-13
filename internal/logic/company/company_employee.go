@@ -96,7 +96,7 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_entity.CompanyEmployee, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	if user.Type != sys_enum.User.Type.Facilitator.Code() {
+	if user.Type != s.modules.GetConfig().UserType.Code() {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NotHasServerPermission"), co_dao.CompanyEmployee(s.modules).Table())
 	}
 
