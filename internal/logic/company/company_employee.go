@@ -369,7 +369,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 	err := model.Where(co_do.CompanyEmployee{Id: id}).Scan(&data)
 
 	if err != nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "employee_Name")+"详情信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	return kconv.StructWithError(data, &co_entity.CompanyEmployee{})
