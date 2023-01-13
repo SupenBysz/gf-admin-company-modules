@@ -38,9 +38,9 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTe
 	err := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Scan(&data, co_do.CompanyTeam{Id: id})
 
 	if err != nil {
-		message := s.modules.T(ctx, "teamOrGroup") + s.modules.T(ctx, "error_Data_NotFound")
+		message := s.modules.T(ctx, "{#teamOrGroup}{#error_Data_NotFound}")
 		if err != sql.ErrNoRows {
-			message = s.modules.T(ctx, "teamOrGroup") + s.modules.T(ctx, "error_Data_Get_Failed")
+			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
@@ -95,19 +95,19 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 	if info.OwnerEmployeeId > 0 {
 		_, err := s.modules.Employee().GetEmployeeById(ctx, info.OwnerEmployeeId)
 		if err != nil {
-			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamOwnerEmployee")+s.modules.T(ctx, "error_Data_NotFound"), co_dao.CompanyTeam(s.modules).Table())
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), co_dao.CompanyTeam(s.modules).Table())
 		}
 	}
 
 	if info.CaptainEmployeeId > 0 {
 		employee, err := s.modules.Employee().GetEmployeeById(ctx, info.CaptainEmployeeId)
 		if err != nil || employee.UnionMainId != sessionUser.UnionMainId {
-			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+s.modules.T(ctx, "error_Data_NotFound"), co_dao.CompanyTeam(s.modules).Table())
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), co_dao.CompanyTeam(s.modules).Table())
 		}
 
 		data, err := s.QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
 		if err != nil && err != sql.ErrNoRows {
-			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+s.modules.T(ctx, "error_Data_NotFound"), co_dao.CompanyTeam(s.modules).Table())
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), co_dao.CompanyTeam(s.modules).Table())
 		}
 
 		if info.ParentId == 0 {
@@ -460,7 +460,7 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 		// 查询员工所在的所有团队信息
 		data, err := s.QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
 		if err != nil && err != sql.ErrNoRows {
-			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+s.modules.T(ctx, "error_Data_NotFound"), co_dao.CompanyTeam(s.modules).Table())
+			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamCaptainEmployee}{#error_Data_NotFound}"), co_dao.CompanyTeam(s.modules).Table())
 		}
 
 		for _, item := range data.Records {
@@ -507,7 +507,7 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 		}).Count()
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamMember")+s.modules.T(ctx, "error_Data_Get_Failed"), co_dao.CompanyTeam(s.modules).Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamMember}{#error_Data_Get_Failed}"), co_dao.CompanyTeam(s.modules).Table())
 	}
 
 	if count > 0 {

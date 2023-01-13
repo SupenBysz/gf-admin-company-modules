@@ -2,7 +2,6 @@ package company
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/gogf/gf/v2/errors/gerror"
 
@@ -33,7 +32,7 @@ func NewCompany(modules co_interface.IModules) co_interface.ICompany {
 
 // InjectHook 注入Audit的Hook
 func (s *sCompany) InjectHook() {
-	sys_service.Jwt().InstallHook(sys_enum.User.Type.Operator, s.JwtHookFunc)
+	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.JwtHookFunc)
 }
 
 // JwtHookFunc Jwt钩子函数
