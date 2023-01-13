@@ -30,7 +30,7 @@ func init() {
 		KeyIndex:                       "Company",
 		RoutePrefix:                    "/company",
 		StoragePath:                    "./resources/company",
-		UserType:                       sys_enum.User.Type.Operator,
+		UserType:                       sys_enum.User.Type.SuperAdmin,
 		Identifier: co_model.Identifier{
 			Company:  "company",
 			Employee: "employee",
