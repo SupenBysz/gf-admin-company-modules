@@ -71,7 +71,7 @@ func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMai
 	return count > 0
 }
 
-// HasEmployeeByNo 员工名称是否存在
+// HasEmployeeByNo 员工工号是否存在
 func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeId ...int64) bool { // 如果工号为空则直接返回
 	// 工号为空，且允许工号为空则不做校验
 	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
