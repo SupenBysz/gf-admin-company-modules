@@ -5,6 +5,8 @@
 package co_dao
 
 import (
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 	"{TplImportPrefix}/internal"
 )
 
@@ -12,7 +14,7 @@ type {TplTableNameCamelCase}Dao = internal.{TplTableNameCamelCase}Dao
 
 var (
 	// {TplTableNameCamelCase} is globally public accessible object for table {TplTableName} operations.
-	{TplTableNameCamelCase} = func(module co_interface.IModules) IDao[internal.{TplTableNameCamelCase}Columns] {
-        return NewDao[internal.{TplTableNameCamelCase}Columns](module.GetConfig(), internal.New{TplTableNameCamelCase}Dao())
+	{TplTableNameCamelCase} = func(module co_interface.IModules) dao_helper.IDao[internal.{TplTableNameCamelCase}Columns] {
+        return dao_helper.NewDao[internal.{TplTableNameCamelCase}Columns](module.GetConfig(), internal.New{TplTableNameCamelCase}Dao())
     }
 )
