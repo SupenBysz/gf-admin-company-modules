@@ -378,6 +378,9 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 
 // Masker 员工信息脱敏
 func (s *sEmployee) masker(employee *co_entity.CompanyEmployee) *co_entity.CompanyEmployee {
+	if employee == nil {
+		return nil
+	}
 	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
 	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
 	return employee
