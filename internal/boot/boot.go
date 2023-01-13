@@ -2,8 +2,6 @@ package boot
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-
 	"github.com/gogf/gf/v2/i18n/gi18n"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
@@ -16,12 +14,7 @@ import (
 )
 
 func init() {
-	company := co_module.NewModules[
-		co_dao.CompanyDao,
-		co_dao.CompanyEmployeeDao,
-		co_dao.CompanyTeamDao,
-		co_dao.CompanyTeamDao,
-	](&co_model.Config{
+	company := co_module.NewModules(&co_model.Config{
 		I18n:                           nil,
 		AllowEmptyNo:                   true,
 		IsCreateDefaultEmployeeAndRole: false,

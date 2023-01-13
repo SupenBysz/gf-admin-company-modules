@@ -10,11 +10,35 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 )
 
-type CompanyTeamDao = internal.CompanyTeamDao
+type internalCompanyTeamDao = *dao_helper.CustomDao[internal.CompanyTeamColumns]
+
+// CompanyTeamDao 是 pro_company_team 表的数据访问对象。
+// 您可以在其上定义自定义方法，以根据需要扩展其功能。
+type companyTeamDao struct {
+	internalCompanyTeamDao
+}
 
 var (
-	// CompanyTeam is globally public accessible object for table pro_company_team operations.
-	CompanyTeam = func(module co_interface.IModules) dao_helper.IDao[internal.CompanyTeamColumns] {
-		return dao_helper.NewDao[internal.CompanyTeamColumns](module.GetConfig(), internal.NewCompanyTeamDao())
+	_companyTeamDao *companyTeamDao
+	// CompanyTeam 表 pro_company_team 操作的全局公共可访问对象。
+	CompanyTeam = func(module ...co_interface.IModules) *companyTeamDao {
+		if _companyTeamDao != nil {
+			return _companyTeamDao
+		}
+		if len(module) == 0 {
+			_companyTeamDao = &companyTeamDao{
+				&dao_helper.CustomDao[internal.CompanyTeamColumns]{},
+			}
+			return _companyTeamDao
+		}
+		_companyTeamDao = &companyTeamDao{
+			internalCompanyTeamDao: dao_helper.NewDao[internal.CompanyTeamColumns](
+				module[0].GetConfig(),
+				&dao_helper.CustomDao[internal.CompanyTeamColumns]{
+					IDao: internal.NewCompanyTeamDao(),
+				},
+			),
+		}
+		return _companyTeamDao
 	}
 )

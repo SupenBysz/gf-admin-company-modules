@@ -3,22 +3,14 @@ package dao_helper
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/utility/kmap"
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-type IDao[T any] interface {
-	DB() gdb.DB
-	Table() string
-	Columns() T
-	Group() string
-	Ctx(ctx context.Context) *gdb.Model
-	Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error)
-}
-
 type CustomDao[T any] struct {
-	IDao[T]
+	co_interface.IDao[T]
 	conf *co_model.Config
 }
 
@@ -26,23 +18,25 @@ var (
 	daoMap = kmap.New[string, interface{}]()
 )
 
-func NewDao[T any, TC IDao[T]](conf *co_model.Config, dao TC) IDao[T] {
+func NewDao[T any, TC co_interface.IDao[T]](conf *co_model.Config, dao TC) TC {
+	var value interface{} = dao
+	v, ok := value.(*CustomDao[T])
+	if ok {
+		v.conf = conf
+	}
+	return dao
+}
+
+func NewDaoMap[T any, TC co_interface.IDao[T]](conf *co_model.Config, dao TC) co_interface.IDao[T] {
 	value, found := daoMap.Search(conf.KeyIndex)
 	if value != nil && found {
-		v, ok := value.(IDao[T])
+		v, ok := value.(co_interface.IDao[T])
 		if ok {
 			return v
 		} else {
 			panic("数据访问对象类型校验失败")
 		}
 	}
-
-	// if dao.Table() != conf.TableName.Company &&
-	// 	gstr.HasSuffix(dao.Table(), "employee") &&
-	// 	gstr.HasSuffix(dao.Table(), "team") &&
-	// 	gstr.HasSuffix(dao.Table(), "team_member") {
-	// 	panic("数据访问对象表名校验失败")
-	// }
 
 	result := &CustomDao[T]{
 		IDao: dao,
@@ -82,7 +76,7 @@ func (d *CustomDao[T]) Ctx(ctx context.Context) *gdb.Model {
 	return d.DB().Model(d.Table()).Safe().Ctx(ctx)
 }
 
-func (d *CustomDao[T]) Dao() IDao[T] {
+func (d *CustomDao[T]) Dao() co_interface.IDao[T] {
 	return d.IDao
 }
 
