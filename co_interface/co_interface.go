@@ -52,4 +52,5 @@ type IModules interface {
 	Employee() IEmployee
 	GetConfig() *co_model.Config
 	T(ctx context.Context, content string) string
+	Tf(ctx context.Context, format string, values ...interface{}) string
 }

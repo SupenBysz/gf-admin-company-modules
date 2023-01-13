@@ -44,6 +44,11 @@ func (m *Modules[C, E, T, TM]) T(ctx context.Context, content string) string {
 	return m.GetConfig().I18n.Translate(ctx, content)
 }
 
+// Tf is alias of TranslateFormat for convenience.
+func (m *Modules[C, E, T, TM]) Tf(ctx context.Context, format string, values ...interface{}) string {
+	return m.GetConfig().I18n.TranslateFormat(ctx, format, values...)
+}
+
 var (
 	modulesMap = gmap.NewStrAnyMap()
 )
