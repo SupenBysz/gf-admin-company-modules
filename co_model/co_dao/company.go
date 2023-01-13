@@ -12,22 +12,33 @@ import (
 
 type internalCompanyDao = *dao_helper.CustomDao[internal.CompanyColumns]
 
-// companyDao 是 company 表的数据访问对象。
+// CompanyDao 是 pro_company 表的数据访问对象。
 // 您可以在其上定义自定义方法，以根据需要扩展其功能。
 type companyDao struct {
 	internalCompanyDao
 }
 
 var (
+	_companyDao *companyDao
 	// Company 表 pro_company 操作的全局公共可访问对象。
-	Company = func(module co_interface.IModules) *companyDao {
-		return &companyDao{
+	Company = func(module ...co_interface.IModules) *companyDao {
+		if _companyDao != nil {
+			return _companyDao
+		}
+		if len(module) == 0 {
+			_companyDao = &companyDao{
+				&dao_helper.CustomDao[internal.CompanyColumns]{},
+			}
+			return _companyDao
+		}
+		_companyDao = &companyDao{
 			internalCompanyDao: dao_helper.NewDao[internal.CompanyColumns](
-				module.GetConfig(),
+				module[0].GetConfig(),
 				&dao_helper.CustomDao[internal.CompanyColumns]{
 					IDao: internal.NewCompanyDao(),
 				},
 			),
 		}
+		return _companyDao
 	}
 )
