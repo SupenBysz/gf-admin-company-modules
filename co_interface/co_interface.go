@@ -6,7 +6,17 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/gogf/gf/v2/database/gdb"
 )
+
+type IDao[T any] interface {
+	DB() gdb.DB
+	Table() string
+	Columns() T
+	Group() string
+	Ctx(ctx context.Context) *gdb.Model
+	Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error)
+}
 
 type (
 	ICompany interface {
