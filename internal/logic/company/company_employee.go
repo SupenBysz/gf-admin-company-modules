@@ -19,7 +19,6 @@ import (
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	// "github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
@@ -48,9 +47,9 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 	err := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Scan(&data, co_do.CompanyEmployee{Id: id})
 
 	if err != nil {
-		message := s.modules.T(ctx, "employee_Name") + s.modules.T(ctx, "error_Data_NotFound")
+		message := s.modules.T(ctx, "{#employee_Name}{#error_Data_NotFound}")
 		if err != sql.ErrNoRows {
-			message = s.modules.T(ctx, "employee_Name") + s.modules.T(ctx, "Data")
+			message = s.modules.T(ctx, "{#employee_Name}{#Data}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
@@ -72,7 +71,7 @@ func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMai
 	return count > 0
 }
 
-// HasEmployeeByNo 员工名称是否存在
+// HasEmployeeByNo 员工工号是否存在
 func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeId ...int64) bool { // 如果工号为空则直接返回
 	// 工号为空，且允许工号为空则不做校验
 	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
