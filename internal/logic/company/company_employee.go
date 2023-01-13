@@ -48,9 +48,9 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 	err := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Scan(&data, co_do.CompanyEmployee{Id: id})
 
 	if err != nil {
-		message := s.modules.T(ctx, "employee_Name") + s.modules.T(ctx, "error_Data_NotFound")
+		message := s.modules.T(ctx, "{#employee_Name}{#error_Data_NotFound}")
 		if err != sql.ErrNoRows {
-			message = s.modules.T(ctx, "employee_Name") + s.modules.T(ctx, "Data")
+			message = s.modules.T(ctx, "{#employee_Name}{#Data}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
