@@ -4,16 +4,16 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
+	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 	"github.com/gogf/gf/v2/container/gmap"
 )
 
 type ModulesDao[TDaoCompay any, TDaoEmployee any, TDaoTeam any, TDaoTeamMember any] struct {
-	Company    co_dao.IDao[TDaoCompay]
-	Employee   co_dao.IDao[TDaoEmployee]
-	Team       co_dao.IDao[TDaoTeam]
-	TeamMember co_dao.IDao[TDaoTeamMember]
+	Company    dao_helper.IDao[TDaoCompay]
+	Employee   dao_helper.IDao[TDaoEmployee]
+	Team       dao_helper.IDao[TDaoTeam]
+	TeamMember dao_helper.IDao[TDaoTeamMember]
 }
 
 type Modules[C any, E any, T any, TM any] struct {

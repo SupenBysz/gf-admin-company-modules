@@ -7,13 +7,14 @@ package co_dao
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
+	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 )
 
 type CompanyEmployeeDao = internal.CompanyEmployeeDao
 
 var (
 	// CompanyEmployee is globally public accessible object for table pro_company_employee operations.
-	CompanyEmployee = func(module co_interface.IModules) IDao[internal.CompanyEmployeeColumns] {
-		return NewDao[internal.CompanyEmployeeColumns](module.GetConfig(), internal.NewCompanyEmployeeDao())
+	CompanyEmployee = func(module co_interface.IModules) dao_helper.IDao[internal.CompanyEmployeeColumns] {
+		return dao_helper.NewDao[internal.CompanyEmployeeColumns](module.GetConfig(), internal.NewCompanyEmployeeDao())
 	}
 )
