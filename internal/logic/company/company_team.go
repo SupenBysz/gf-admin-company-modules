@@ -158,7 +158,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 
 	err := co_dao.CompanyTeam(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 创建团队
-		_, affected, err := daoctl.InsertWithError(
+		affected, err := daoctl.InsertWithError(
 			co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data),
 		)
 		if affected == 0 || err != nil {
@@ -394,7 +394,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 		}
 
 		for _, employeeId := range newTeamMemberIds {
-			_, affected, err := daoctl.InsertWithError(
+			affected, err := daoctl.InsertWithError(
 				co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(
 					co_do.CompanyTeamMember{
 						Id:          idgen.NextId(),
