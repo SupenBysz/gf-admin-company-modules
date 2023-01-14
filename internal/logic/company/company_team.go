@@ -35,7 +35,7 @@ func NewTeam(modules co_interface.IModules) co_interface.ITeam {
 // GetTeamById 根据ID获取公司团队信息
 func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error) {
 	data, err := daoctl.GetByIdWithError[co_entity.CompanyTeam](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
 	)
 
 	if err != nil {
