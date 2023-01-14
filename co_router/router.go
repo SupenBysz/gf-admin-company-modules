@@ -58,8 +58,8 @@ func TeamGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Ro
 
 func MyGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := module.GetConfig().RoutePrefix + "/my"
-	group.POST(routePrefix+"/getProfile", co_controller.My(module).GetProfile)
-	group.POST(routePrefix+"/getCompany", co_controller.My(module).GetCompany)
-	group.POST(routePrefix+"/getTeams", co_controller.My(module).GetTeams)
+	group.POST(routePrefix+"/profile", co_controller.My(module).GetProfile)
+	group.POST(routePrefix+"/company", co_controller.My(module).GetCompany)
+	group.POST(routePrefix+"/teams", co_controller.My(module).GetTeams)
 	return group
 }
