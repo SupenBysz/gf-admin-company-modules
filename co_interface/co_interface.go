@@ -59,6 +59,11 @@ type (
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
 	}
+	IMy interface {
+		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
+		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
+		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
+	}
 )
 
 type IModules interface {
@@ -68,4 +73,5 @@ type IModules interface {
 	GetConfig() *co_model.Config
 	T(ctx context.Context, content string) string
 	Tf(ctx context.Context, format string, values ...interface{}) string
+	My() IMy
 }

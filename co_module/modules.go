@@ -12,6 +12,11 @@ type Modules struct {
 	company  co_interface.ICompany
 	team     co_interface.ITeam
 	employee co_interface.IEmployee
+	my       co_interface.IMy
+}
+
+func (m *Modules) My() co_interface.IMy {
+	return m.my
 }
 
 func (m *Modules) Company() co_interface.ICompany {
@@ -52,6 +57,7 @@ func NewModules[C any, E any, T any, TM any](
 	result.company = company.NewCompany(result)
 	result.employee = company.NewEmployee(result)
 	result.team = company.NewTeam(result)
+	result.my = company.NewMy(result)
 
 	if result != nil {
 		Company(result)
