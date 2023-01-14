@@ -19,7 +19,6 @@ var (
 			AllowEmptyNo:                   true,
 			IsCreateDefaultEmployeeAndRole: false,
 			HardDeleteWaitAt:               0,
-			CompanyName:                    "公司",
 			KeyIndex:                       "Company",
 			RoutePrefix:                    "/company",
 			StoragePath:                    "./resources/company",

@@ -23,6 +23,7 @@ type (
 		InjectHook()
 		JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error)
 		GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error)
+		GetCompanyByName(ctx context.Context, name string) (*co_entity.Company, error)
 		HasCompanyByName(ctx context.Context, name string, excludeId ...int64) bool
 		QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error)
 		CreateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
@@ -30,6 +31,7 @@ type (
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error)
+		GetEmployeeByName(ctx context.Context, name string) (*co_entity.CompanyEmployee, error)
 		HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeId ...int64) bool
 		HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeId ...int64) bool
 		GetEmployeeBySession(ctx context.Context) (*co_entity.CompanyEmployee, error)
@@ -43,6 +45,7 @@ type (
 	}
 	ITeam interface {
 		GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error)
+		GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error)
 		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeId ...int64) bool
 		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity.CompanyTeam, error)

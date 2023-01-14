@@ -61,7 +61,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 	)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 
 	return s.masker(data), nil
@@ -75,7 +75,7 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entit
 	)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 
 	return s.masker(data), nil
@@ -98,7 +98,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	data, err := daoctl.Query[*co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 
 	if data.Total > 0 {
@@ -122,7 +122,7 @@ func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*
 // UpdateCompany 更新公司信息
 func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	if info.Id <= 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 	return s.saveCompany(ctx, info)
 }
@@ -131,7 +131,7 @@ func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*
 func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	// 名称重名检测
 	if s.HasCompanyByName(ctx, info.Name, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+"名称已被占用，请修改后再试", co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "{#CompanyName} {#error_NameAlreadyExists}", co_dao.Company(s.modules).Table())
 	}
 
 	// 构建公司ID
@@ -195,7 +195,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				data,
 			)
 			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
 			}
 		} else {
 			data.UpdatedBy = sessionUser.Id
@@ -206,11 +206,11 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				data,
 			)
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
 			}
 		}
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
 		}
 		return nil
 	})

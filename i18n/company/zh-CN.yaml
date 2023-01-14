@@ -12,12 +12,13 @@ permission_Company_AuditLicense: "审核资质认证信息"
 permission_Company_UpdateLicense: "更新资质认证信息"
 
 ## 称呼
-employee_Name: "员工"
+EmployeeName: "员工"
+CompanyName: "公司"
+TeamName: "团队"
 teamOrGroup: "团队或小组"
 TeamOwnerEmployee: "团队管理人"
 TeamCaptainEmployee: "团队队长"
 Data: "信息"
-Team: "团队"
 TeamMember: "团队成员"
 
 ## 错误信息
@@ -31,6 +32,7 @@ error_Employee_User_Save_Failed: "保存员工用户信息失败"
 error_Employee_SetMobile_Failed: "新手机号保存失败"
 error_CheckLoginUser_Failed: "校验当前登录信息失败"
 error_NotHasServerPermission: "当前账号没有当前业务的操作权限"
+error_NameAlreadyExists: "名称已被占用，请修改后再试"
 
 ## 有关文件的错误信息
 error_File_FileVoid: "文件无效，请重新上传"
