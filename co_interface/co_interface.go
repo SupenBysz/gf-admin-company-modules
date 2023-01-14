@@ -56,6 +56,7 @@ type (
 		SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
+		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
 	}
 )
 

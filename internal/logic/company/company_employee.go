@@ -304,9 +304,11 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 				}
 			}
 
-			// 员工移出团队
-
-			// 员工移出小组
+			// 员工移出团队|小组
+			_, err := s.setEmployeeTeam(ctx, employee.Id)
+			if err != nil {
+				return err
+			}
 
 			// 删除员工
 			_, err = co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Id})
@@ -324,6 +326,50 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), co_dao.CompanyEmployee(s.modules).Table())
+	}
+	return true, nil
+}
+
+// setEmployeeTeam 员工移出小组 | 团队
+func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
+	// 直接删除属于员工的团队成员记录
+	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
+	if err != nil || isSuccess == false {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), co_dao.CompanyTeam().Table())
+	}
+
+	// 查找到员工是管理员或者队长的团队
+	teamList, err := s.modules.Team().QueryTeamList(ctx, &sys_model.SearchParams{
+		Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+			Field:     co_dao.CompanyTeam(s.modules).Columns().CaptainEmployeeId,
+			Where:     "=",
+			Value:     employeeId,
+			IsOrWhere: true,
+		}, sys_model.FilterInfo{
+			Field:     co_dao.CompanyTeam(s.modules).Columns().OwnerEmployeeId,
+			Where:     "=",
+			Value:     employeeId,
+			IsOrWhere: true,
+		}),
+	})
+
+	// 假如是队长或者组长，需要将团队表的队长或者组长设置为0
+	if len(teamList.Records) > 0 {
+		for _, item := range teamList.Records {
+			if item.CaptainEmployeeId == employeeId { // 队长或者组长
+				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Id, 0)
+				if err != nil || ret == false {
+					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), co_dao.CompanyEmployee().Table())
+				}
+			}
+
+			if item.OwnerEmployeeId == employeeId { // 团队负责人
+				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Id, 0)
+				if err != nil || ret == false {
+					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), co_dao.CompanyEmployee().Table())
+				}
+			}
+		}
 	}
 	return true, nil
 }

@@ -563,3 +563,10 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 
 	return affected == 1, err
 }
+
+// DeleteTeamMemberByEmployee 删除某个员工的所有团队成员记录
+func (s *sTeam) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error) {
+	affected, err := daoctl.DeleteWithError(co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
+
+	return affected > 0, err
+}
