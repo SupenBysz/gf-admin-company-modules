@@ -31,21 +31,21 @@ func (s *sMy) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	// 超级管理员直接返回用户信息
 	if session.Type == sys_enum.User.Type.SuperAdmin.Code() {
 		return &co_model.MyProfileRes{
-			SysUser: *user,
+			User: user,
 		}, nil
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
 	if err != nil && employee == nil {
 		return &co_model.MyProfileRes{
-			SysUser:         *user,
-			CompanyEmployee: nil,
+			User:     user,
+			Employee: nil,
 		}, nil
 	}
 
 	return &co_model.MyProfileRes{
-		SysUser:         *user,
-		CompanyEmployee: employee,
+		User:     user,
+		Employee: employee,
 	}, nil
 }
 
