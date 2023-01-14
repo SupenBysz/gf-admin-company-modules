@@ -233,7 +233,8 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 				data.Id = newUser.UserInfo.Id
 			}
 
-			_, affected, err := daoctl.InsertWithError(co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data))
+			affected, err := daoctl.InsertWithError(co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data))
+
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), co_dao.CompanyEmployee(s.modules).Table())
 			}
