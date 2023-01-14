@@ -426,6 +426,15 @@ func (s *sTeam) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64
 		return true, nil
 	}
 
+	// 需要删除团队负责人的情况
+	if team.Id != 0 && employeeId == 0 {
+		affected, err := daoctl.UpdateWithError(co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeam{Id: team.Id}).
+			Data(co_do.CompanyTeam{OwnerEmployeeId: 0}),
+		)
+		return affected == 1, err
+	}
+
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
 	if err != nil {
 		return false, err
@@ -460,6 +469,16 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 
 	if team.CaptainEmployeeId == employeeId {
 		return true, nil
+	}
+
+	// 需要删除团队队长或者组长的情况
+	if employeeId == 0 && team.Id != 0 {
+		affected, err := daoctl.UpdateWithError(
+			co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+				Data(co_do.CompanyTeam{CaptainEmployeeId: 0}).
+				Where(co_do.CompanyTeam{Id: team.Id}),
+		)
+		return affected == 1, err
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
