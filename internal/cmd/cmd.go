@@ -55,18 +55,12 @@ var (
 			}
 
 			{
-				// 注入Hook
-				// co_module.GetModule(co_consts.Global.Company.GetConfig().KeyIndex).Company().InjectHook()
-				co_consts.Global.Company.Company().InjectHook()
-				//	co_module.NewModules().Company().InjectHook()
-			}
-			{
 				// Permission 初始化
 				sys_service.SysPermission().ImportPermissionTree(ctx, co_consts.PermissionTree, nil)
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
-				// Company 初始化
-				// company.NewCompany(co_consts.Global.Conf)
+				// 注入Hook
+				co_consts.Global.Company.Company().InjectHook()
 			}
 
 			// 初始化路由
