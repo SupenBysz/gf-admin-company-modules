@@ -525,8 +525,8 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 
 	affected, err := daoctl.UpdateWithError(
 		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}).
-			Where(co_do.CompanyTeam{Id: team.Id}),
+			Where(co_do.CompanyTeam{Id: team.Id}).
+			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}),
 	)
 
 	return affected == 1, err
