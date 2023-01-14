@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
-
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -89,6 +88,15 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 	result, err := daoctl.Query[*co_entity.CompanyTeam](co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
 
 	return (*co_model.TeamListRes)(result), err
+}
+
+// QueryTeamMemberList 查询所有团队成员记录
+func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error) {
+	model := co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler)
+
+	result, err := daoctl.Query[*co_entity.CompanyTeamMember](model, search, false)
+
+	return (*co_model.TeamMemberListRes)(result), err
 }
 
 // CreateTeam 创建团队或小组|信息

@@ -48,6 +48,7 @@ type (
 		GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error)
 		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeId ...int64) bool
 		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
+		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity.CompanyTeam, error)
 		UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_entity.CompanyTeam, error)
 		GetTeamMemberList(ctx context.Context, id int64) (*co_model.EmployeeListRes, error)
