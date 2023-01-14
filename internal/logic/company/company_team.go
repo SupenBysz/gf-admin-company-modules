@@ -158,7 +158,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 
 	err := co_dao.CompanyTeam(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 创建团队
-		_, affected, err := daoctl.InsertWithError(
+		affected, err := daoctl.InsertWithError(
 			co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data),
 		)
 		if affected == 0 || err != nil {
@@ -394,7 +394,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 		}
 
 		for _, employeeId := range newTeamMemberIds {
-			_, affected, err := daoctl.InsertWithError(
+			affected, err := daoctl.InsertWithError(
 				co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(
 					co_do.CompanyTeamMember{
 						Id:          idgen.NextId(),
@@ -424,6 +424,15 @@ func (s *sTeam) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64
 
 	if team.OwnerEmployeeId == employeeId {
 		return true, nil
+	}
+
+	// 需要删除团队负责人的情况
+	if team.Id != 0 && employeeId == 0 {
+		affected, err := daoctl.UpdateWithError(co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeam{Id: team.Id}).
+			Data(co_do.CompanyTeam{OwnerEmployeeId: 0}),
+		)
+		return affected == 1, err
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
@@ -460,6 +469,16 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 
 	if team.CaptainEmployeeId == employeeId {
 		return true, nil
+	}
+
+	// 需要删除团队队长或者组长的情况
+	if employeeId == 0 && team.Id != 0 {
+		affected, err := daoctl.UpdateWithError(
+			co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+				Data(co_do.CompanyTeam{CaptainEmployeeId: 0}).
+				Where(co_do.CompanyTeam{Id: team.Id}),
+		)
+		return affected == 1, err
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
@@ -506,8 +525,8 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 
 	affected, err := daoctl.UpdateWithError(
 		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}).
-			Where(co_do.CompanyTeam{Id: team.Id}),
+			Where(co_do.CompanyTeam{Id: team.Id}).
+			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}),
 	)
 
 	return affected == 1, err
