@@ -19,7 +19,6 @@ func init() {
 		AllowEmptyNo:                   true,
 		IsCreateDefaultEmployeeAndRole: false,
 		HardDeleteWaitAt:               0,
-		CompanyName:                    "公司",
 		KeyIndex:                       "Company",
 		RoutePrefix:                    "/company",
 		StoragePath:                    "./resources/company",
@@ -50,7 +49,7 @@ func InitPermissionTree(conf *co_model.Config) {
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5947986066667973,
-				Name:       conf.I18n.T(context.TODO(), "permission.Company.Name"),
+				Name:       conf.I18n.T(context.TODO(), "CompanyName"),
 				Identifier: conf.Identifier.Company,
 				Type:       1,
 				IsShow:     1,
@@ -71,7 +70,7 @@ func InitPermissionTree(conf *co_model.Config) {
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5948221667408325,
-				Name:       conf.CompanyName + "员工",
+				Name:       conf.I18n.T(context.TODO(), "{#CompanyName}{#EmployeeName}"),
 				Identifier: conf.Identifier.Employee,
 				Type:       1,
 				IsShow:     1,
@@ -80,7 +79,7 @@ func InitPermissionTree(conf *co_model.Config) {
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5948221667408325,
-				Name:       conf.CompanyName + "团队",
+				Name:       conf.I18n.T(context.TODO(), "{#CompanyName}{#TeamName}"),
 				Identifier: conf.Identifier.Team,
 				Type:       1,
 				IsShow:     1,
