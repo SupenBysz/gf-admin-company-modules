@@ -11,6 +11,7 @@ func ModulesGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp
 	CompanyGroup(module, group)
 	EmployeeGroup(module, group)
 	TeamGroup(module, group)
+	MyGroup(module, group)
 	return group
 }
 
@@ -52,5 +53,13 @@ func TeamGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Ro
 	group.POST(routePrefix+"/setTeamOwner", co_controller.Team(module).SetTeamOwner)
 	group.POST(routePrefix+"/setTeamCaptain", co_controller.Team(module).SetTeamCaptain)
 	group.POST(routePrefix+"/deleteTeam", co_controller.Team(module).DeleteTeam)
+	return group
+}
+
+func MyGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	routePrefix := module.GetConfig().RoutePrefix + "/my"
+	group.POST(routePrefix+"/getProfile", co_controller.My(module).GetProfile)
+	group.POST(routePrefix+"/getCompany", co_controller.My(module).GetCompany)
+	group.POST(routePrefix+"/getTeams", co_controller.My(module).GetTeams)
 	return group
 }

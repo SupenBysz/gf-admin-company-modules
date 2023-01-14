@@ -28,6 +28,7 @@ type (
 		QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error)
 		CreateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
+		Masker(company *co_entity.Company) *co_entity.Company
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error)
@@ -42,6 +43,7 @@ type (
 		SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string) (bool, error)
 		SetEmployeeAvatar(ctx context.Context, imageId int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error)
+		Masker(employee *co_entity.CompanyEmployee) *co_entity.CompanyEmployee
 	}
 	ITeam interface {
 		GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error)
@@ -59,6 +61,11 @@ type (
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
 	}
+	IMy interface {
+		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
+		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
+		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
+	}
 )
 
 type IModules interface {
@@ -68,4 +75,5 @@ type IModules interface {
 	GetConfig() *co_model.Config
 	T(ctx context.Context, content string) string
 	Tf(ctx context.Context, format string, values ...interface{}) string
+	My() IMy
 }
