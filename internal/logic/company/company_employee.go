@@ -53,7 +53,7 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
-	return s.masker(data), nil
+	return s.Masker(data), nil
 }
 
 // GetEmployeeByName 根据Name获取员工信息
@@ -71,7 +71,7 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_ent
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
 
-	return s.masker(data), nil
+	return s.Masker(data), nil
 }
 
 // HasEmployeeByName 员工名称是否存在
@@ -137,7 +137,7 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 
 	items := make([]*co_entity.CompanyEmployee, 0)
 	for _, employeeInfo := range result.Records {
-		items = append(items, s.masker(employeeInfo))
+		items = append(items, s.Masker(employeeInfo))
 	}
 	result.Records = items
 
@@ -440,7 +440,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 }
 
 // Masker 员工信息脱敏
-func (s *sEmployee) masker(employee *co_entity.CompanyEmployee) *co_entity.CompanyEmployee {
+func (s *sEmployee) Masker(employee *co_entity.CompanyEmployee) *co_entity.CompanyEmployee {
 	if employee == nil {
 		return nil
 	}

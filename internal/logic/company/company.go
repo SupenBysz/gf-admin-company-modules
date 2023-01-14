@@ -64,7 +64,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 
-	return s.masker(data), nil
+	return s.Masker(data), nil
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
@@ -78,7 +78,7 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entit
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
 	}
 
-	return s.masker(data), nil
+	return s.Masker(data), nil
 }
 
 // HasCompanyByName 判断名称是否存在
@@ -105,7 +105,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 		items := make([]*co_entity.Company, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
-			items = append(items, s.masker(item))
+			items = append(items, s.Masker(item))
 		}
 		data.Records = items
 	}
@@ -223,7 +223,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 }
 
 // Masker 信息脱敏
-func (s *sCompany) masker(company *co_entity.Company) *co_entity.Company {
+func (s *sCompany) Masker(company *co_entity.Company) *co_entity.Company {
 	if company == nil {
 		return nil
 	}
