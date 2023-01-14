@@ -34,8 +34,9 @@ func NewTeam(modules co_interface.IModules) co_interface.ITeam {
 
 // GetTeamById 根据ID获取公司团队信息
 func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error) {
-	data := co_entity.CompanyTeam{}
-	err := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Scan(&data, co_do.CompanyTeam{Id: id})
+	data, err := daoctl.GetByIdWithError[co_entity.CompanyTeam](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+	)
 
 	if err != nil {
 		message := s.modules.T(ctx, "{#teamOrGroup}{#error_Data_NotFound}")
@@ -44,7 +45,7 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTe
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
-	return &data, nil
+	return data, nil
 }
 
 // HasTeamByName 团队名称是否存在
@@ -139,8 +140,10 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 
 	err := co_dao.CompanyTeam(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 创建团队
-		_, err := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
-		if err != nil {
+		_, affected, err := daoctl.InsertWithError(
+			co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data),
+		)
+		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), co_dao.CompanyTeam(s.modules).Table())
 		}
 		if info.CaptainEmployeeId > 0 {
@@ -172,12 +175,12 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 		Remark:    remark,
 		UpdatedAt: gtime.Now(),
 	}
-	result, _ := co_dao.CompanyTeam(s.modules).Ctx(ctx).
-		Hook(daoctl.CacheHookHandler).Data(data).
-		Where(co_do.CompanyTeam{Id: id}).
-		Update()
 
-	rowsAffected, err := result.RowsAffected()
+	rowsAffected, err := daoctl.UpdateWithError(
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).
+			Hook(daoctl.CacheHookHandler).Data(data).
+			Where(co_do.CompanyTeam{Id: id}),
+	)
 
 	if rowsAffected == 0 || err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), co_dao.CompanyTeam(s.modules).Table())
@@ -194,14 +197,15 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 	}
 
 	// 团队成员信息
-	var items []co_entity.CompanyTeamMember
-	err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
-		TeamId:      team.Id,
-		UnionMainId: team.UnionMainId,
-	}).Scan(&items)
+	items, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
+		co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
+			TeamId:      team.Id,
+			UnionMainId: team.UnionMainId,
+		}),
+	)
 
 	ids := make([]int64, 0)
-	for _, item := range items {
+	for _, item := range *items {
 		ids = append(ids, item.EmployeeId)
 	}
 
@@ -223,15 +227,15 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 // QueryTeamListByEmployee 根据员工查询团队
 func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
-	data := &[]*co_entity.CompanyTeamMember{}
 
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
 
-	err := co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-		Where(co_do.CompanyTeamMember{EmployeeId: employeeId, UnionMainId: unionMainId}).
-		Scan(data)
+	data, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
+		co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeamMember{EmployeeId: employeeId, UnionMainId: unionMainId}),
+	)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_NotFound"), co_dao.CompanyTeam(s.modules).Table())
@@ -262,13 +266,14 @@ func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, u
 func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	var teamMemberArr []*co_entity.CompanyTeamMember
 	// 获取团队所有旧成员
-	err := co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-		Where(co_do.CompanyTeamMember{
-			TeamId:      teamId,
-			UnionMainId: sessionUser.UnionMainId,
-		}).Scan(&teamMemberArr)
+	teamMemberArr, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
+		co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeamMember{
+				TeamId:      teamId,
+				UnionMainId: sessionUser.UnionMainId,
+			}),
+	)
 
 	// 待移除的团队成员
 	waitIds := make([]int64, 0)
@@ -276,7 +281,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 	existIds := make([]int64, 0)
 
 	// 遍历所有旧成员
-	for _, member := range teamMemberArr {
+	for _, member := range *teamMemberArr {
 		if len(employeeIds) == 0 {
 			existIds = append(existIds, member.EmployeeId)
 			continue
@@ -371,16 +376,18 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 		}
 
 		for _, employeeId := range newTeamMemberIds {
-			_, err = co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(
-				co_do.CompanyTeamMember{
-					Id:          idgen.NextId(),
-					TeamId:      team.Id,
-					EmployeeId:  employeeId,
-					UnionMainId: sessionUser.UnionMainId,
-					JoinAt:      gtime.Now(),
-				},
+			_, affected, err := daoctl.InsertWithError(
+				co_dao.CompanyTeamMember(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(
+					co_do.CompanyTeamMember{
+						Id:          idgen.NextId(),
+						TeamId:      team.Id,
+						EmployeeId:  employeeId,
+						UnionMainId: sessionUser.UnionMainId,
+						JoinAt:      gtime.Now(),
+					},
+				),
 			)
-			if err != nil {
+			if affected == 0 || err != nil {
 				return err
 			}
 		}
@@ -417,14 +424,13 @@ func (s *sTeam) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64
 		}
 	}
 
-	result, _ := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-		Data(co_do.CompanyTeam{OwnerEmployeeId: employee.Id}).
-		Where(co_do.CompanyTeam{Id: team.Id}).
-		Update()
+	affected, err := daoctl.UpdateWithError(
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Data(co_do.CompanyTeam{OwnerEmployeeId: employee.Id}).
+			Where(co_do.CompanyTeam{Id: team.Id}),
+	)
 
-	rowsAffected, err := result.RowsAffected()
-
-	return rowsAffected == 1, err
+	return affected == 1, err
 }
 
 // SetTeamCaptain 设置团队队长或小组组长
@@ -480,14 +486,13 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_TeamCaptainEmployee_MustInTeam"), co_dao.CompanyTeam(s.modules).Table())
 	}
 
-	result, _ := co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
-		Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}).
-		Where(co_do.CompanyTeam{Id: team.Id}).
-		Update()
+	affected, err := daoctl.UpdateWithError(
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}).
+			Where(co_do.CompanyTeam{Id: team.Id}),
+	)
 
-	rowsAffected, err := result.RowsAffected()
-
-	return rowsAffected == 1, err
+	return affected == 1, err
 }
 
 // DeleteTeam 删除团队
@@ -514,9 +519,10 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NeedRemoveTeamMember"), co_dao.CompanyTeam(s.modules).Table())
 	}
 
-	result, _ := co_dao.CompanyTeam(s.modules).Ctx(ctx).Unscoped().Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeam{Id: team.Id}).Delete()
+	affected, err := daoctl.DeleteWithError(
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).Unscoped().Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeam{Id: team.Id}),
+	)
 
-	rowsAffected, err := result.RowsAffected()
-
-	return rowsAffected == 1, err
+	return affected == 1, err
 }

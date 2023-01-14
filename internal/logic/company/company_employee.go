@@ -22,7 +22,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
-	"github.com/SupenBysz/gf-admin-community/utility/kconv"
 	"github.com/SupenBysz/gf-admin-community/utility/masker"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
@@ -43,8 +42,9 @@ func NewEmployee(modules co_interface.IModules) co_interface.IEmployee {
 
 // GetEmployeeById 根据ID获取员工信息
 func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error) {
-	data := co_entity.CompanyEmployee{}
-	err := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Scan(&data, co_do.CompanyEmployee{Id: id})
+	data, err := daoctl.GetByIdWithError[co_entity.CompanyEmployee](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+	)
 
 	if err != nil {
 		message := s.modules.T(ctx, "{#employee_Name}{#error_Data_NotFound}")
@@ -53,7 +53,7 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
-	return s.masker(&data), nil
+	return s.masker(data), nil
 }
 
 // HasEmployeeByName 员工名称是否存在
@@ -209,24 +209,24 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 					gconv.Int64(data.Id),
 				)
 				if err != nil {
-					return err
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_User_Save_Failed"), co_dao.CompanyEmployee(s.modules).Table())
 				}
 
 				data.Id = newUser.UserInfo.Id
 			}
 
-			_, err := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
-			if err != nil {
-				return err
+			_, affected, err := daoctl.InsertWithError(co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data))
+			if affected == 0 || err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), co_dao.CompanyEmployee(s.modules).Table())
 			}
 		} else {
 			// 更新员工信息
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 
-			_, err := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}).Update()
+			_, err := daoctl.UpdateWithError(co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
 			if err != nil {
-				return err
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), co_dao.CompanyEmployee(s.modules).Table())
 			}
 		}
 
@@ -241,7 +241,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		return nil
 	})
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), co_dao.CompanyEmployee(s.modules).Table())
+		return nil, err
 	}
 
 	return s.GetEmployeeById(ctx, gconv.Int64(data.Id))
@@ -355,7 +355,6 @@ func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool,
 func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	data := co_entity.CompanyEmployee{}
 	model := co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler)
 
 	if sessionUser.IsAdmin == false {
@@ -366,13 +365,13 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 		}
 	}
 
-	err := model.Where(co_do.CompanyEmployee{Id: id}).Scan(&data)
+	data, err := daoctl.ScanWithError[co_entity.CompanyEmployee](model.Where(co_do.CompanyEmployee{Id: id}))
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "employee_Name")+"详情信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
-	return kconv.StructWithError(data, &co_entity.CompanyEmployee{})
+	return data, err
 }
 
 // Masker 员工信息脱敏

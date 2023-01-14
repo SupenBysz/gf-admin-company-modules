@@ -56,7 +56,23 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error) {
-	data, err := daoctl.GetByIdWithError[co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
+	data, err := daoctl.GetByIdWithError[co_entity.Company](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+	)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
+	}
+
+	return s.masker(data), nil
+}
+
+// GetCompanyByName 根据Name获取获取公司信息
+func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entity.Company, error) {
+	data, err := daoctl.ScanWithError[co_entity.Company](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.Company{Name: name}),
+	)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_NotFound"), co_dao.Company(s.modules).Table())
@@ -174,15 +190,27 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				data.UserId = employee.Id
 			}
 
-			_, err = co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
-
+			_, affected, err := daoctl.InsertWithError(
+				co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler),
+				data,
+			)
+			if affected == 0 || err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+			}
 		} else {
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
-			_, err = co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.Company{Id: info.Id}).Update(data)
+			_, err = daoctl.UpdateWithError(
+				co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+					Where(co_do.Company{Id: info.Id}),
+				data,
+			)
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+			}
 		}
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.GetConfig().CompanyName+s.modules.T(ctx, "error_Data_Save_Failed"), co_dao.Company(s.modules).Table())
 		}
 		return nil
 	})
