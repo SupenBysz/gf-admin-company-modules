@@ -190,7 +190,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				data.UserId = employee.Id
 			}
 
-			_, affected, err := daoctl.InsertWithError(
+			affected, err := daoctl.InsertWithError(
 				co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler),
 				data,
 			)
