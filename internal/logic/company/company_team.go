@@ -50,7 +50,7 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTe
 // GetTeamByName 根据Name获取员工信息
 func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error) {
 	data, err := daoctl.ScanWithError[co_entity.CompanyTeam](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		co_dao.CompanyTeam(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.CompanyTeam{Name: name}),
 	)
 

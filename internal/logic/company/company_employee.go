@@ -43,7 +43,7 @@ func NewEmployee(modules co_interface.IModules) co_interface.IEmployee {
 // GetEmployeeById 根据ID获取员工信息
 func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error) {
 	data, err := daoctl.GetByIdWithError[co_entity.CompanyEmployee](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
 	)
 
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 // GetEmployeeByName 根据Name获取员工信息
 func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_entity.CompanyEmployee, error) {
 	data, err := daoctl.ScanWithError[co_entity.CompanyEmployee](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.CompanyEmployee{Name: name}),
 	)
 
