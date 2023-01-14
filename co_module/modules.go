@@ -5,7 +5,6 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
-	"github.com/gogf/gf/v2/container/gmap"
 )
 
 type Modules struct {
@@ -40,25 +39,32 @@ func (m *Modules) Tf(ctx context.Context, format string, values ...interface{}) 
 	return m.GetConfig().I18n.TranslateFormat(ctx, format, values...)
 }
 
-var (
-	modulesMap = gmap.NewStrAnyMap()
-)
-
-func NewModules(conf *co_model.Config) *Modules {
+func NewModules[C any, E any, T any, TM any](
+	conf *co_model.Config,
+	Company func(module ...co_interface.IModules) C,
+	Employee func(module ...co_interface.IModules) E,
+	Team func(module ...co_interface.IModules) T,
+	TeamMember func(module ...co_interface.IModules) TM,
+) *Modules {
 	result := &Modules{
 		conf: conf,
 	}
 	result.company = company.NewCompany(result)
 	result.employee = company.NewEmployee(result)
 	result.team = company.NewTeam(result)
-	modulesMap.Set(conf.KeyIndex, result)
-	return result
-}
 
-func GetModule(moduleKey string) *Modules {
-	v, ok := modulesMap.Get(moduleKey).(*Modules)
-	if ok {
-		return v
+	if result != nil {
+		Company(result)
 	}
-	return nil
+	if result != nil {
+		Employee(result)
+	}
+	if result != nil {
+		Team(result)
+	}
+	if result != nil {
+		TeamMember(result)
+	}
+
+	return result
 }
