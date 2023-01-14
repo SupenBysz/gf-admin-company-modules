@@ -47,12 +47,30 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_entity.C
 	)
 
 	if err != nil {
-		message := s.modules.T(ctx, "{#employee_Name}{#error_Data_NotFound}")
+		message := s.modules.T(ctx, "{#EmployeeName}{#error_Data_NotFound}")
 		if err != sql.ErrNoRows {
-			message = s.modules.T(ctx, "{#employee_Name}{#Data}")
+			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
 	}
+	return s.masker(data), nil
+}
+
+// GetEmployeeByName 根据Name获取员工信息
+func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_entity.CompanyEmployee, error) {
+	data, err := daoctl.ScanWithError[co_entity.CompanyEmployee](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyEmployee{Name: name}),
+	)
+
+	if err != nil {
+		message := s.modules.T(ctx, "{#EmployeeName}{#error_Data_NotFound}")
+		if err != sql.ErrNoRows {
+			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
+		}
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
+	}
+
 	return s.masker(data), nil
 }
 
@@ -114,7 +132,7 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 	result, err := daoctl.Query[*co_entity.CompanyEmployee](co_dao.CompanyEmployee(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "employee_Name")+"信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	items := make([]*co_entity.CompanyEmployee, 0)
@@ -146,26 +164,26 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	}
 
 	if info.UnionMainId == 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "employee_Name")+"所属主体不能为空，请选择后提交", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"所属主体不能为空，请选择后提交", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "employee_Name")+"所属主体校验失败，请确认后提交", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"所属主体校验失败，请确认后提交", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	// 校验员工名称是否已存在
 	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "employee_Name")+"名称已存在，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"名称已存在，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	// 校验工号是否允许为空
 	if info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "employee_Name")+"工号不能为空，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号不能为空，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	// 校验工号是否已存在
 	if true == s.HasEmployeeByNo(ctx, info.No, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "employee_Name")+"工号已存在，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号已存在，请修改后提交", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
@@ -368,7 +386,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 	data, err := daoctl.ScanWithError[co_entity.CompanyEmployee](model.Where(co_do.CompanyEmployee{Id: id}))
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "employee_Name")+"详情信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", co_dao.CompanyEmployee(s.modules).Table())
 	}
 
 	return data, err

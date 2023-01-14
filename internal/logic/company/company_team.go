@@ -43,8 +43,26 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTe
 		if err != sql.ErrNoRows {
 			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
 		}
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyEmployee(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyTeam(s.modules).Table())
 	}
+	return data, nil
+}
+
+// GetTeamByName 根据Name获取员工信息
+func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error) {
+	data, err := daoctl.ScanWithError[co_entity.CompanyTeam](
+		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeam{Name: name}),
+	)
+
+	if err != nil {
+		message := s.modules.T(ctx, "{#teamOrGroup}{#error_Data_NotFound}")
+		if err != sql.ErrNoRows {
+			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
+		}
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, co_dao.CompanyTeam(s.modules).Table())
+	}
+
 	return data, nil
 }
 
