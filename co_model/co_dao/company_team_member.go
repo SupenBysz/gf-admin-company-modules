@@ -19,12 +19,26 @@ type companyTeamMemberDao struct {
 }
 
 var (
+	_companyTeamMemberDao *companyTeamMemberDao
 	// CompanyTeamMember 表 pro_company_team_member 操作的全局公共可访问对象。
-	CompanyTeamMember = func(module co_interface.IModules) *companyTeamMemberDao {
-		return &companyTeamMemberDao{
-			internalCompanyTeamMemberDao: &dao_helper.CustomDao[internal.CompanyTeamMemberColumns]{
-				IDao: internal.NewCompanyTeamMemberDao(),
-			},
+	CompanyTeamMember = func(module ...co_interface.IModules) *companyTeamMemberDao {
+		if _companyTeamMemberDao != nil {
+			return _companyTeamMemberDao
 		}
+		if len(module) == 0 {
+			_companyTeamMemberDao = &companyTeamMemberDao{
+				&dao_helper.CustomDao[internal.CompanyTeamMemberColumns]{},
+			}
+			return _companyTeamMemberDao
+		}
+		_companyTeamMemberDao = &companyTeamMemberDao{
+			internalCompanyTeamMemberDao: dao_helper.NewDao[internal.CompanyTeamMemberColumns](
+				module[0].GetConfig(),
+				&dao_helper.CustomDao[internal.CompanyTeamMemberColumns]{
+					IDao: internal.NewCompanyTeamMemberDao(),
+				},
+			),
+		}
+		return _companyTeamMemberDao
 	}
 )

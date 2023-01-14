@@ -2,6 +2,7 @@ package boot
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
@@ -14,21 +15,27 @@ import (
 )
 
 func init() {
-	company := co_module.NewModules(&co_model.Config{
-		I18n:                           nil,
-		AllowEmptyNo:                   true,
-		IsCreateDefaultEmployeeAndRole: false,
-		HardDeleteWaitAt:               0,
-		KeyIndex:                       "Company",
-		RoutePrefix:                    "/company",
-		StoragePath:                    "./resources/company",
-		UserType:                       sys_enum.User.Type.SuperAdmin,
-		Identifier: co_model.Identifier{
-			Company:  "company",
-			Employee: "employee",
-			Team:     "team",
+	company := co_module.NewModules(
+		&co_model.Config{
+			I18n:                           nil,
+			AllowEmptyNo:                   true,
+			IsCreateDefaultEmployeeAndRole: false,
+			HardDeleteWaitAt:               0,
+			KeyIndex:                       "Company",
+			RoutePrefix:                    "/company",
+			StoragePath:                    "./resources/company",
+			UserType:                       sys_enum.User.Type.SuperAdmin,
+			Identifier: co_model.Identifier{
+				Company:  "company",
+				Employee: "employee",
+				Team:     "team",
+			},
 		},
-	})
+		co_dao.Company,
+		co_dao.CompanyEmployee,
+		co_dao.CompanyTeam,
+		co_dao.CompanyTeamMember,
+	)
 	company.GetConfig().I18n = InitI18n(company.GetConfig().I18n)
 	co_consts.Global.Company = company
 	InitPermissionTree(company.GetConfig())
