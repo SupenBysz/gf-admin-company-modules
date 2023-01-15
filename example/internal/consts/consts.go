@@ -31,10 +31,12 @@ var (
 					Team:     "team",
 				},
 			},
-			co_dao.Company,
-			co_dao.CompanyEmployee,
-			co_dao.CompanyTeam,
-			co_dao.CompanyTeamMember,
+			&co_dao.XDao{
+				Company:    co_dao.NewCompany(&co_dao.Company{}),
+				Employee:   co_dao.NewCompanyEmployee(&co_dao.CompanyEmployee{}),
+				Team:       co_dao.NewCompanyTeam(&co_dao.CompanyTeam{}),
+				TeamMember: co_dao.NewCompanyTeamMember(&co_dao.CompanyTeamMember{}),
+			},
 		),
 	}
 )

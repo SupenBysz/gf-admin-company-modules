@@ -10,35 +10,12 @@ import (
 	"{TplImportPrefix}/internal"
 )
 
-type internal{TplTableNameCamelCase}Dao = *dao_helper.CustomDao[internal.{TplTableNameCamelCase}Columns]
+type {TplTableNameCamelCase} = internal.{TplTableNameCamelCase}Dao
 
-// {TplTableNameCamelCase}Dao 是 {TplTableName} 表的数据访问对象。
-// 您可以在其上定义自定义方法，以根据需要扩展其功能。
-type {TplTableNameCamelLowerCase}Dao struct {
-	internal{TplTableNameCamelCase}Dao
-}
-
-var (
-	_{TplTableNameCamelLowerCase}Dao *{TplTableNameCamelLowerCase}Dao
-	// {TplTableNameCamelCase} 表 {TplTableName} 操作的全局公共可访问对象。
-	{TplTableNameCamelCase} = func(module ...co_interface.IModules) *{TplTableNameCamelLowerCase}Dao {
-	    if _{TplTableNameCamelLowerCase}Dao != nil {
-            return _{TplTableNameCamelLowerCase}Dao
-        }
-        if len(module) == 0 {
-            _{TplTableNameCamelLowerCase}Dao = &{TplTableNameCamelLowerCase}Dao{
-                &dao_helper.CustomDao[internal.{TplTableNameCamelCase}Columns]{},
-            }
-            return _{TplTableNameCamelLowerCase}Dao
-        }
-        _{TplTableNameCamelLowerCase}Dao = &{TplTableNameCamelLowerCase}Dao{
-            internal{TplTableNameCamelCase}Dao: dao_helper.NewDao[internal.{TplTableNameCamelCase}Columns](
-                module[0].GetConfig(),
-                &dao_helper.CustomDao[internal.{TplTableNameCamelCase}Columns]{
-                    IDao: internal.New{TplTableNameCamelCase}Dao(),
-                },
-            ),
-        }
-        return _{TplTableNameCamelLowerCase}Dao
+func New{TplTableNameCamelCase}[T co_interface.IDao](dao T) T {
+	var result interface{} = internal.New{TplTableNameCamelCase}Dao(dao)
+	if v, ok := result.(T); ok {
+		return v
 	}
-)
+	return dao
+}

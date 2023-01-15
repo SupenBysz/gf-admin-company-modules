@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
@@ -15,6 +16,7 @@ type Modules struct {
 	employee co_interface.IEmployee
 	my       co_interface.IMy
 	i18n     *gi18n.Manager
+	xDao     *co_dao.XDao
 }
 
 func (m *Modules) My() co_interface.IMy {
@@ -60,33 +62,19 @@ func (m *Modules) SetI18n(i18n *gi18n.Manager) error {
 	return nil
 }
 
-func NewModules[C any, E any, T any, TM any](
+func NewModules(
 	conf *co_model.Config,
-	Company func(module ...co_interface.IModules) C,
-	Employee func(module ...co_interface.IModules) E,
-	Team func(module ...co_interface.IModules) T,
-	TeamMember func(module ...co_interface.IModules) TM,
+	xDao *co_dao.XDao,
 ) *Modules {
-	result := &Modules{
+	module := &Modules{
 		conf: conf,
-	}
-	result.company = company.NewCompany(result)
-	result.employee = company.NewEmployee(result)
-	result.team = company.NewTeam(result)
-	result.my = company.NewMy(result)
-
-	if result != nil {
-		Company(result)
-	}
-	if result != nil {
-		Employee(result)
-	}
-	if result != nil {
-		Team(result)
-	}
-	if result != nil {
-		TeamMember(result)
+		xDao: xDao,
 	}
 
-	return result
+	module.company = company.NewCompany(module, module.xDao)
+	module.employee = company.NewEmployee(module, module.xDao)
+	module.team = company.NewTeam(module, module.xDao)
+	module.my = company.NewMy(module, module.xDao)
+
+	return module
 }

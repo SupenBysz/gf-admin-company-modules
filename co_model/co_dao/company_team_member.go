@@ -7,38 +7,16 @@ package co_dao
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
-	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 )
 
-type internalCompanyTeamMemberDao = *dao_helper.CustomDao[internal.CompanyTeamMemberColumns]
+type CompanyTeamMember = internal.CompanyTeamMemberDao
 
-// CompanyTeamMemberDao 是 pro_company_team_member 表的数据访问对象。
-// 您可以在其上定义自定义方法，以根据需要扩展其功能。
-type companyTeamMemberDao struct {
-	internalCompanyTeamMemberDao
-}
+func NewCompanyTeamMember[T co_interface.IDao](dao T) T {
+	var result interface{} = internal.NewCompanyTeamMemberDao(dao)
 
-var (
-	_companyTeamMemberDao *companyTeamMemberDao
-	// CompanyTeamMember 表 pro_company_team_member 操作的全局公共可访问对象。
-	CompanyTeamMember = func(module ...co_interface.IModules) *companyTeamMemberDao {
-		if _companyTeamMemberDao != nil {
-			return _companyTeamMemberDao
-		}
-		if len(module) == 0 {
-			_companyTeamMemberDao = &companyTeamMemberDao{
-				&dao_helper.CustomDao[internal.CompanyTeamMemberColumns]{},
-			}
-			return _companyTeamMemberDao
-		}
-		_companyTeamMemberDao = &companyTeamMemberDao{
-			internalCompanyTeamMemberDao: dao_helper.NewDao[internal.CompanyTeamMemberColumns](
-				module[0].GetConfig(),
-				&dao_helper.CustomDao[internal.CompanyTeamMemberColumns]{
-					IDao: internal.NewCompanyTeamMemberDao(),
-				},
-			),
-		}
-		return _companyTeamMemberDao
+	if v, ok := result.(T); ok {
+		return v
 	}
-)
+
+	return dao
+}

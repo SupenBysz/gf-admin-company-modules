@@ -10,10 +10,9 @@ import (
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
 
-type IDao[T any] interface {
+type IDao interface {
 	DB() gdb.DB
 	Table() string
-	Columns() T
 	Group() string
 	Ctx(ctx context.Context) *gdb.Model
 	Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error)

@@ -3,6 +3,7 @@ package company
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -15,18 +16,19 @@ import (
 	"github.com/SupenBysz/gf-admin-community/utility/masker"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
 type sCompany struct {
 	modules co_interface.IModules
+	dao     *co_dao.XDao
 }
 
-func NewCompany(modules co_interface.IModules) co_interface.ICompany {
+func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ICompany {
 	return &sCompany{
 		modules: modules,
+		dao:     xDao,
 	}
 }
 
@@ -43,9 +45,9 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 		return claims, err
 	}
 
-	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	company, err := s.GetCompanyById(ctx, employee.UnionMainId)
 	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", co_dao.Company(s.modules).Table())
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", s.dao.Company.Table())
 	}
 
 	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
@@ -57,11 +59,11 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error) {
 	data, err := daoctl.GetByIdWithError[co_entity.Company](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
 	)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
 	return s.masker(data), nil
@@ -70,12 +72,12 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 // GetCompanyByName 根据Name获取获取公司信息
 func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entity.Company, error) {
 	data, err := daoctl.ScanWithError[co_entity.Company](
-		co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.Company{Name: name}),
 	)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
 	return s.masker(data), nil
@@ -83,10 +85,10 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entit
 
 // HasCompanyByName 判断名称是否存在
 func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeId ...int64) bool {
-	model := co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler)
+	model := s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler)
 
 	if len(excludeId) > 0 {
-		model = model.WhereNotIn(co_dao.Company(s.modules).Columns().Id, excludeId)
+		model = model.WhereNotIn(s.dao.Company.Columns().Id, excludeId)
 	}
 
 	count, _ := model.Where(co_do.Company{Name: name}).Count()
@@ -95,10 +97,10 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeId 
 
 // QueryCompanyList 查询公司列表
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
-	data, err := daoctl.Query[*co_entity.Company](co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
+	data, err := daoctl.Query[*co_entity.Company](s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
 	if data.Total > 0 {
@@ -122,7 +124,7 @@ func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*
 // UpdateCompany 更新公司信息
 func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	if info.Id <= 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 	return s.saveCompany(ctx, info)
 }
@@ -131,7 +133,7 @@ func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*
 func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	// 名称重名检测
 	if s.HasCompanyByName(ctx, info.Name, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "{#CompanyName} {#error_NameAlreadyExists}", co_dao.Company(s.modules).Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "{#CompanyName} {#error_NameAlreadyExists}", s.dao.Company.Table())
 	}
 
 	// 构建公司ID
@@ -149,7 +151,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 启用事务
-	err := co_dao.Company(s.modules).Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
+	err := s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee *co_entity.CompanyEmployee
 		// 是否创建默认员工和角色
 		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {
@@ -191,26 +193,26 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			}
 
 			affected, err := daoctl.InsertWithError(
-				co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler),
+				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
 				data,
 			)
 			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 		} else {
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			_, err = daoctl.UpdateWithError(
-				co_dao.Company(s.modules).Ctx(ctx).Hook(daoctl.CacheHookHandler).
+				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 					Where(co_do.Company{Id: info.Id}),
 				data,
 			)
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 		}
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), co_dao.Company(s.modules).Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 		}
 		return nil
 	})

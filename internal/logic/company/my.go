@@ -7,15 +7,18 @@ import (
 	"github.com/SupenBysz/gf-admin-community/utility/kconv"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 )
 
 type sMy struct {
 	modules co_interface.IModules
+	dao     *co_dao.XDao
 }
 
-func NewMy(modules co_interface.IModules) co_interface.IMy {
+func NewMy(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.IMy {
 	return &sMy{
 		modules: modules,
+		dao:     xDao,
 	}
 }
 

@@ -7,38 +7,16 @@ package co_dao
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
-	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 )
 
-type internalCompanyEmployeeDao = *dao_helper.CustomDao[internal.CompanyEmployeeColumns]
+type CompanyEmployee = internal.CompanyEmployeeDao
 
-// CompanyEmployeeDao 是 pro_company_employee 表的数据访问对象。
-// 您可以在其上定义自定义方法，以根据需要扩展其功能。
-type companyEmployeeDao struct {
-	internalCompanyEmployeeDao
-}
+func NewCompanyEmployee[T co_interface.IDao](dao T) T {
+	var result interface{} = internal.NewCompanyEmployeeDao(dao)
 
-var (
-	_companyEmployeeDao *companyEmployeeDao
-	// CompanyEmployee 表 pro_company_employee 操作的全局公共可访问对象。
-	CompanyEmployee = func(module ...co_interface.IModules) *companyEmployeeDao {
-		if _companyEmployeeDao != nil {
-			return _companyEmployeeDao
-		}
-		if len(module) == 0 {
-			_companyEmployeeDao = &companyEmployeeDao{
-				internalCompanyEmployeeDao: &dao_helper.CustomDao[internal.CompanyEmployeeColumns]{},
-			}
-			return _companyEmployeeDao
-		}
-		_companyEmployeeDao = &companyEmployeeDao{
-			internalCompanyEmployeeDao: dao_helper.NewDao[internal.CompanyEmployeeColumns](
-				module[0].GetConfig(),
-				&dao_helper.CustomDao[internal.CompanyEmployeeColumns]{
-					IDao: internal.NewCompanyEmployeeDao(),
-				},
-			),
-		}
-		return _companyEmployeeDao
+	if v, ok := result.(T); ok {
+		return v
 	}
-)
+
+	return dao
+}
