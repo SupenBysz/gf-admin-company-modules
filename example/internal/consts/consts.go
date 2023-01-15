@@ -8,6 +8,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_module"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
@@ -39,10 +40,6 @@ var (
 			co_dao.CompanyEmployee,
 			co_dao.CompanyTeam,
 			co_dao.CompanyTeamMember,
-			func(conf *co_model.Config) {
-				// 模块初始化逻辑
-				PermissionTree = initPermission(conf)
-			},
 		),
 	}
 )
@@ -60,38 +57,78 @@ func initI18n(i18n *gi18n.Manager) *gi18n.Manager {
 	return i18n
 }
 
-func initPermission(conf *co_model.Config) []*permission.SysPermissionTree {
+func init() {
+	PermissionTree = initPermission(&Global.Company)
+}
+
+// 初始化权限树
+func initPermission(conf *co_interface.IModules) []*permission.SysPermissionTree {
 	result := []*permission.SysPermissionTree{
+		// 公司
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5947986066667973,
-				Name:       conf.I18n.T(context.TODO(), "CompanyName"),
-				Identifier: conf.Identifier.Company,
+				Name:       Global.Company.T(context.TODO(), "{#CompanyName}"),
+				Identifier: Global.Company.GetConfig().Identifier.Company,
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{},
+			Children: []*permission.SysPermissionTree{
+				co_enum.Company.PermissionType(Global.Company).Create,
+				co_enum.Company.PermissionType(Global.Company).ViewDetail,
+				co_enum.Company.PermissionType(Global.Company).List,
+				co_enum.Company.PermissionType(Global.Company).Update,
+				co_enum.Company.PermissionType(Global.Company).SetLogo,
+				co_enum.Company.PermissionType(Global.Company).SetState,
+				co_enum.Company.PermissionType(Global.Company).SetAdminUser,
+				co_enum.Company.PermissionType(Global.Company).ViewLicense,
+				co_enum.Company.PermissionType(Global.Company).AuditLicense,
+			},
 		},
+		// 员工
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5948221667408325,
-				Name:       conf.I18n.T(context.TODO(), "{#CompanyName}{#EmployeeName}"),
-				Identifier: conf.Identifier.Employee,
+				Name:       Global.Company.T(context.TODO(), "{#CompanyName}{#EmployeeName}"),
+				Identifier: Global.Company.GetConfig().Identifier.Employee,
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{},
+			Children: []*permission.SysPermissionTree{
+				co_enum.Employee.PermissionType(Global.Company).ViewDetail,
+				co_enum.Employee.PermissionType(Global.Company).MoreDetail,
+				co_enum.Employee.PermissionType(Global.Company).List,
+				co_enum.Employee.PermissionType(Global.Company).Create,
+				co_enum.Employee.PermissionType(Global.Company).Update,
+				co_enum.Employee.PermissionType(Global.Company).Delete,
+				co_enum.Employee.PermissionType(Global.Company).SetMobile,
+				co_enum.Employee.PermissionType(Global.Company).SetAvatar,
+				co_enum.Employee.PermissionType(Global.Company).SetState,
+				co_enum.Employee.PermissionType(Global.Company).ViewLicense,
+				co_enum.Employee.PermissionType(Global.Company).AuditLicense,
+				co_enum.Employee.PermissionType(Global.Company).UpdateLicense,
+			},
 		},
+		// 团队
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5948221667408325,
-				Name:       conf.I18n.T(context.TODO(), "{#CompanyName}{#TeamName}"),
-				Identifier: conf.Identifier.Team,
+				Name:       Global.Company.T(context.TODO(), "{#CompanyName}{#TeamName}"),
+				Identifier: Global.Company.GetConfig().Identifier.Team,
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{},
-		},
+			Children: []*permission.SysPermissionTree{
+				co_enum.Team.PermissionType(Global.Company).Create,
+				co_enum.Team.PermissionType(Global.Company).ViewDetail,
+				co_enum.Team.PermissionType(Global.Company).List,
+				co_enum.Team.PermissionType(Global.Company).Update,
+				co_enum.Team.PermissionType(Global.Company).Delete,
+				co_enum.Team.PermissionType(Global.Company).MemberDetail,
+				co_enum.Team.PermissionType(Global.Company).SetMember,
+				co_enum.Team.PermissionType(Global.Company).SetOwner,
+				co_enum.Team.PermissionType(Global.Company).SetCaptain,
+			}},
 	}
 	return result
 }
