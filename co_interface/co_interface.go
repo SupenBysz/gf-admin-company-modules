@@ -7,6 +7,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/i18n/gi18n"
 )
 
 type IDao[T any] interface {
@@ -71,7 +72,8 @@ type IModules interface {
 	Team() ITeam
 	Employee() IEmployee
 	GetConfig() *co_model.Config
+	My() IMy
+	SetI18n(i18n *gi18n.Manager) error
 	T(ctx context.Context, content string) string
 	Tf(ctx context.Context, format string, values ...interface{}) string
-	My() IMy
 }
