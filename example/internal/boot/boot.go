@@ -5,7 +5,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	sysController "github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-company-modules/co_module"
 	"github.com/SupenBysz/gf-admin-company-modules/co_router"
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/gogf/gf/v2/frame/g"
@@ -57,7 +56,7 @@ var (
 
 			{
 				// InitPermissionTree 初始化权限结构
-				co_module.InitPermissionTree(consts.Global.Company.GetConfig())
+				// co_module.InitPermissionTree(consts.Global.Company.GetConfig())
 				// ImportPermissionTree 导入权限结构
 				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
 				// CASBIN 初始化
