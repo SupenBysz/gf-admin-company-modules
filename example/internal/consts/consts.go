@@ -39,10 +39,6 @@ var (
 			co_dao.CompanyEmployee,
 			co_dao.CompanyTeam,
 			co_dao.CompanyTeamMember,
-			func(conf *co_model.Config) {
-				// 模块初始化逻辑
-				PermissionTree = initPermission(conf)
-			},
 		),
 	}
 )
@@ -60,7 +56,9 @@ func initI18n(i18n *gi18n.Manager) *gi18n.Manager {
 	return i18n
 }
 
-func initPermission(conf *co_model.Config) []*permission.SysPermissionTree {
+func init() {
+	PermissionTree = initPermission(&Global.Company)
+}
 	result := []*permission.SysPermissionTree{
 		{
 			SysPermission: &sys_entity.SysPermission{
