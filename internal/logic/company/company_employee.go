@@ -35,7 +35,7 @@ type sEmployee struct {
 	dao     *co_dao.XDao
 }
 
-func NewEmployee(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.IEmployee {
+func NewEmployee(modules co_interface.IModules, xDao *co_dao.XDao) *sEmployee {
 	return &sEmployee{
 		modules: modules,
 		dao:     xDao,
