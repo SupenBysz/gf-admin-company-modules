@@ -6,13 +6,11 @@ package co_dao
 
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
-	"github.com/SupenBysz/gf-admin-company-modules/utility/dao_helper"
 	"{TplImportPrefix}/internal"
 )
 
-type {TplTableNameCamelCase}Dao = internal.{TplTableNameCamelCase}Dao
+type {TplTableNameCamelCase} = internal.{TplTableNameCamelCase}Dao
 
-var (
-	// {TplTableNameCamelCase} is globally public accessible object for table {TplTableName} operations.
-	{TplTableNameCamelCase} = internal.New{TplTableNameCamelCase}Dao()
-)
+func New{TplTableNameCamelCase}[T co_interface.IDao](dao T) *{TplTableNameCamelCase} {
+	return internal.New{TplTableNameCamelCase}Dao(dao)
+}
