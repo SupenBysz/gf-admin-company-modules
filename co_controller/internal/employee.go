@@ -12,7 +12,6 @@ import (
 )
 
 type EmployeeController struct {
-	i_controller.IEmployee
 	modules co_interface.IModules
 }
 

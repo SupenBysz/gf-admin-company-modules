@@ -11,6 +11,6 @@ import (
 
 type CompanyTeamMember = internal.CompanyTeamMemberDao
 
-func NewCompanyTeamMember[T co_interface.IDao](dao T) *CompanyTeamMember {
-	return internal.NewCompanyTeamMemberDao(dao)
+func NewCompanyTeamMember(dao ...co_interface.IDao) *CompanyTeamMember {
+	return internal.NewCompanyTeamMemberDao(dao...)
 }

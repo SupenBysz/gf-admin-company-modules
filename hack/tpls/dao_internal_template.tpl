@@ -33,7 +33,7 @@ var {TplTableNameCamelLowerCase}Columns = {TplTableNameCamelCase}Columns{
 // New{TplTableNameCamelCase}Dao creates and returns a new DAO object for table data access.
 func New{TplTableNameCamelCase}Dao(proxy ...co_interface.IDao) *{TplTableNameCamelCase}Dao {
     var dao *{TplTableNameCamelCase}Dao
-    	if proxy != nil {
+    	if len(proxy) > 0 {
     	    dao = &{TplTableNameCamelCase}Dao{
                 group:   proxy[0].Group(),
                 table:   proxy[0].Table(),

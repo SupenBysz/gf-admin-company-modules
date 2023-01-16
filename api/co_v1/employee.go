@@ -7,50 +7,50 @@ import (
 
 type GetEmployeeByIdReq struct {
 	g.Meta `method:"post" summary:"根据ID获取员工|信息" tags:"员工"`
-	*co_company_api.GetEmployeeByIdReq
+	co_company_api.GetEmployeeByIdReq
 }
 
 type HasEmployeeByNameReq struct {
 	g.Meta `method:"post" summary:"判断名称是否存在" tags:"员工"`
-	*co_company_api.HasEmployeeByNameReq
+	co_company_api.HasEmployeeByNameReq
 }
 
 type HasEmployeeByNoReq struct {
 	g.Meta `method:"post" summary:"判断工号是否存在" tags:"员工"`
-	*co_company_api.HasEmployeeByNoReq
+	co_company_api.HasEmployeeByNoReq
 }
 
 type QueryEmployeeListReq struct {
 	g.Meta `method:"post" summary:"查询员工|列表" tags:"员工"`
-	*co_company_api.QueryEmployeeListReq
+	co_company_api.QueryEmployeeListReq
 }
 
 type CreateEmployeeReq struct {
 	g.Meta `method:"post" summary:"创建员工|信息" tags:"员工"`
-	*co_company_api.CreateEmployeeReq
+	co_company_api.CreateEmployeeReq
 }
 
 type UpdateEmployeeReq struct {
 	g.Meta `method:"post" summary:"更新员工|信息" tags:"员工"`
-	*co_company_api.UpdateEmployeeReq
+	co_company_api.UpdateEmployeeReq
 }
 
 type DeleteEmployeeReq struct {
 	g.Meta `method:"post" summary:"删除员工|信息" tags:"员工"`
-	*co_company_api.DeleteEmployeeReq
+	co_company_api.DeleteEmployeeReq
 }
 
 type SetEmployeeMobileReq struct {
 	g.Meta `method:"post" summary:"设置员工手机号|信息" tags:"员工"`
-	*co_company_api.SetEmployeeMobileReq
+	co_company_api.SetEmployeeMobileReq
 }
 
 type SetEmployeeAvatarReq struct {
 	g.Meta `method:"post" summary:"设置头像|信息" tags:"员工"`
-	*co_company_api.SetEmployeeAvatarReq
+	co_company_api.SetEmployeeAvatarReq
 }
 
 type GetEmployeeDetailByIdReq struct {
 	g.Meta `method:"post" summary:"获取员工详情|信息" tags:"员工"`
-	*co_company_api.GetEmployeeDetailByIdReq
+	co_company_api.GetEmployeeDetailByIdReq
 }

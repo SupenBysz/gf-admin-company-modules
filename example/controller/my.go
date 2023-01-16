@@ -25,15 +25,15 @@ func (c *MyController) GetModules() co_interface.IModules {
 
 // GetProfile 获取当前员工及用户信息
 func (c *MyController) GetProfile(ctx context.Context, req *co_v1.GetProfileReq) (*co_model.MyProfileRes, error) {
-	return c.IMy.GetProfile(ctx, req.GetProfileReq)
+	return c.IMy.GetProfile(ctx, &req.GetProfileReq)
 }
 
 // GetCompany 获取当前公司信息
 func (c *MyController) GetCompany(ctx context.Context, req *co_v1.GetCompanyReq) (*co_model.MyCompanyRes, error) {
-	return c.IMy.GetCompany(ctx, req.GetCompanyReq)
+	return c.IMy.GetCompany(ctx, &req.GetCompanyReq)
 }
 
 // GetTeams 获取当前团队信息
 func (c *MyController) GetTeams(ctx context.Context, req *co_v1.GetTeamsReq) (co_model.MyTeamListRes, error) {
-	return c.IMy.GetTeams(ctx, req.GetTeamsReq)
+	return c.IMy.GetTeams(ctx, &req.GetTeamsReq)
 }

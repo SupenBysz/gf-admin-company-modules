@@ -43,7 +43,7 @@ var companyTeamMemberColumns = CompanyTeamMemberColumns{
 // NewCompanyTeamMemberDao creates and returns a new DAO object for table data access.
 func NewCompanyTeamMemberDao(proxy ...co_interface.IDao) *CompanyTeamMemberDao {
 	var dao *CompanyTeamMemberDao
-	if proxy != nil {
+	if len(proxy) > 0 {
 		dao = &CompanyTeamMemberDao{
 			group:   proxy[0].Group(),
 			table:   proxy[0].Table(),

@@ -7,25 +7,25 @@ import (
 
 type GetCompanyByIdReq struct {
 	g.Meta `method:"post" summary:"根据ID获取组织单位|信息" tags:"组织单位"`
-	*co_company_api.GetCompanyByIdReq
+	co_company_api.GetCompanyByIdReq
 }
 
 type HasCompanyByNameReq struct {
 	g.Meta `method:"post" summary:"判断名称是否存在" tags:"组织单位"`
-	*co_company_api.HasCompanyByNameReq
+	co_company_api.HasCompanyByNameReq
 }
 
 type QueryCompanyListReq struct {
 	g.Meta `method:"post" summary:"查询组织单位|列表" tags:"组织单位"`
-	*co_company_api.QueryCompanyListReq
+	co_company_api.QueryCompanyListReq
 }
 
 type CreateCompanyReq struct {
 	g.Meta `method:"post" summary:"创建组织单位|信息" tags:"组织单位"`
-	*co_company_api.CreateCompanyReq
+	co_company_api.CreateCompanyReq
 }
 
 type UpdateCompanyReq struct {
 	g.Meta `method:"post" summary:"更新组织单位|信息" tags:"组织单位"`
-	*co_company_api.UpdateCompanyReq
+	co_company_api.UpdateCompanyReq
 }

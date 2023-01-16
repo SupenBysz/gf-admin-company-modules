@@ -34,10 +34,10 @@ var (
 				},
 			},
 			&co_dao.XDao{
-				Company:    co_dao.NewCompany(&co_dao.Company{}),
-				Team:       co_dao.NewCompanyTeam(&co_dao.CompanyTeam{}),
-				Employee:   co_dao.NewCompanyEmployee(&co_dao.CompanyEmployee{}),
-				TeamMember: co_dao.NewCompanyTeamMember(&co_dao.CompanyTeamMember{}),
+				Company:    co_dao.NewCompany(),
+				Team:       co_dao.NewCompanyTeam(),
+				Employee:   co_dao.NewCompanyEmployee(),
+				TeamMember: co_dao.NewCompanyTeamMember(),
 			},
 		),
 	}

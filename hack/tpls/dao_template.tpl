@@ -11,6 +11,6 @@ import (
 
 type {TplTableNameCamelCase} = internal.{TplTableNameCamelCase}Dao
 
-func New{TplTableNameCamelCase}[T co_interface.IDao](dao T) *{TplTableNameCamelCase} {
-	return internal.New{TplTableNameCamelCase}Dao(dao)
+func New{TplTableNameCamelCase}(dao ...co_interface.IDao) *{TplTableNameCamelCase} {
+	return internal.New{TplTableNameCamelCase}Dao(dao...)
 }

@@ -25,50 +25,50 @@ func (c *EmployeeController) GetModules() co_interface.IModules {
 }
 
 func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
-	return c.IEmployee.GetEmployeeById(ctx, req.GetEmployeeByIdReq)
+	return c.IEmployee.GetEmployeeById(ctx, &req.GetEmployeeByIdReq)
 }
 
 // GetEmployeeDetailById 获取员工详情信息
 func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
-	return c.IEmployee.GetEmployeeDetailById(ctx, req.GetEmployeeDetailByIdReq)
+	return c.IEmployee.GetEmployeeDetailById(ctx, &req.GetEmployeeDetailByIdReq)
 }
 
 // HasEmployeeByName 员工名称是否存在
 func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.HasEmployeeByName(ctx, req.HasEmployeeByNameReq)
+	return c.IEmployee.HasEmployeeByName(ctx, &req.HasEmployeeByNameReq)
 }
 
 // HasEmployeeByNo 员工工号是否存在
 func (c *EmployeeController) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.HasEmployeeByNo(ctx, req.HasEmployeeByNoReq)
+	return c.IEmployee.HasEmployeeByNo(ctx, &req.HasEmployeeByNoReq)
 }
 
 // QueryEmployeeList 查询员工列表
 func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
-	return c.IEmployee.QueryEmployeeList(ctx, req.QueryEmployeeListReq)
+	return c.IEmployee.QueryEmployeeList(ctx, &req.QueryEmployeeListReq)
 }
 
 // CreateEmployee 创建员工信息
 func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
-	return c.IEmployee.CreateEmployee(ctx, req.CreateEmployeeReq)
+	return c.IEmployee.CreateEmployee(ctx, &req.CreateEmployeeReq)
 }
 
 // UpdateEmployee 更新员工信息
 func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
-	return c.IEmployee.UpdateEmployee(ctx, req.UpdateEmployeeReq)
+	return c.IEmployee.UpdateEmployee(ctx, &req.UpdateEmployeeReq)
 }
 
 // DeleteEmployee 删除员工信息
 func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_v1.DeleteEmployeeReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.DeleteEmployee(ctx, req.DeleteEmployeeReq)
+	return c.IEmployee.DeleteEmployee(ctx, &req.DeleteEmployeeReq)
 }
 
 // SetEmployeeMobile 设置员工手机号
 func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_v1.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.SetEmployeeMobile(ctx, req.SetEmployeeMobileReq)
+	return c.IEmployee.SetEmployeeMobile(ctx, &req.SetEmployeeMobileReq)
 }
 
 // SetEmployeeAvatar 设置员工头像
 func (c *EmployeeController) SetEmployeeAvatar(ctx context.Context, req *co_v1.SetEmployeeAvatarReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.SetEmployeeAvatar(ctx, req.SetEmployeeAvatarReq)
+	return c.IEmployee.SetEmployeeAvatar(ctx, &req.SetEmployeeAvatarReq)
 }

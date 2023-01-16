@@ -26,25 +26,25 @@ func (c *CompanyController) GetModules() co_interface.IModules {
 
 // GetCompanyById 通过ID获取公司信息
 func (c *CompanyController) GetCompanyById(ctx context.Context, req *co_v1.GetCompanyByIdReq) (*co_model.CompanyRes, error) {
-	return c.ICompany.GetCompanyById(ctx, req.GetCompanyByIdReq)
+	return c.ICompany.GetCompanyById(ctx, &req.GetCompanyByIdReq)
 }
 
 // HasCompanyByName 公司名称是否存在
 func (c *CompanyController) HasCompanyByName(ctx context.Context, req *co_v1.HasCompanyByNameReq) (api_v1.BoolRes, error) {
-	return c.ICompany.HasCompanyByName(ctx, req.HasCompanyByNameReq)
+	return c.ICompany.HasCompanyByName(ctx, &req.HasCompanyByNameReq)
 }
 
 // QueryCompanyList 查询公司列表
 func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_v1.QueryCompanyListReq) (*co_model.CompanyListRes, error) {
-	return c.ICompany.QueryCompanyList(ctx, req.QueryCompanyListReq)
+	return c.ICompany.QueryCompanyList(ctx, &req.QueryCompanyListReq)
 }
 
 // CreateCompany 创建公司信息
 func (c *CompanyController) CreateCompany(ctx context.Context, req *co_v1.CreateCompanyReq) (*co_model.CompanyRes, error) {
-	return c.ICompany.CreateCompany(ctx, req.CreateCompanyReq)
+	return c.ICompany.CreateCompany(ctx, &req.CreateCompanyReq)
 }
 
 // UpdateCompany 更新公司信息
 func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_v1.UpdateCompanyReq) (*co_model.CompanyRes, error) {
-	return c.ICompany.UpdateCompany(ctx, req.UpdateCompanyReq)
+	return c.ICompany.UpdateCompany(ctx, &req.UpdateCompanyReq)
 }
