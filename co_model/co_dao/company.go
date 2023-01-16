@@ -5,18 +5,12 @@
 package co_dao
 
 import (
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
 )
 
-type Company = internal.CompanyDao
+type CompanyDao = internal.CompanyDao
 
-func NewCompany[T co_interface.IDao](dao T) T {
-	var result interface{} = internal.NewCompanyDao(dao)
-
-	if v, ok := result.(T); ok {
-		return v
-	}
-
-	return dao
-}
+var (
+	// Company is globally public accessible object for table pro_company operations.
+	Company = internal.NewCompanyDao()
+)

@@ -15,11 +15,9 @@ import (
 
 // CompanyTeamMemberDao is the data access object for table pro_company_team_member.
 type CompanyTeamMemberDao struct {
-	table             string                   // table is the underlying table name of the DAO.
-	group             string                   // group is the database configuration group name of current DAO.
-	columns           CompanyTeamMemberColumns // columns contains all the column names of Table for convenient usage.
-	proxy             co_interface.IDao        // dao proxy
-	co_interface.IDao                          // interface inherit
+	table   string                   // table is the underlying table name of the DAO.
+	group   string                   // group is the database configuration group name of current DAO.
+	columns CompanyTeamMemberColumns // columns contains all the column names of Table for convenient usage.
 }
 
 // CompanyTeamMemberColumns defines and stores column names for table pro_company_team_member.
@@ -44,39 +42,35 @@ var companyTeamMemberColumns = CompanyTeamMemberColumns{
 
 // NewCompanyTeamMemberDao creates and returns a new DAO object for table data access.
 func NewCompanyTeamMemberDao(proxy ...co_interface.IDao) *CompanyTeamMemberDao {
-	var dao co_interface.IDao
+	var dao *CompanyTeamMemberDao
 	if proxy != nil {
-		dao = proxy[0]
+		dao = &CompanyTeamMemberDao{
+			group:   proxy[0].Group(),
+			table:   proxy[0].Table(),
+			columns: companyTeamMemberColumns,
+		}
+		return dao
 	}
+
 	return &CompanyTeamMemberDao{
 		group:   "default",
 		table:   "pro_company_team_member",
 		columns: companyTeamMemberColumns,
-		proxy:   dao,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
 func (dao *CompanyTeamMemberDao) DB() gdb.DB {
-	if dao.proxy != nil {
-		return dao.proxy.DB()
-	}
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
 func (dao *CompanyTeamMemberDao) Table() string {
-	if dao.proxy != nil {
-		return dao.proxy.Table()
-	}
 	return dao.table
 }
 
 // Group returns the configuration group name of database of current dao.
 func (dao *CompanyTeamMemberDao) Group() string {
-	if dao.proxy != nil {
-		return dao.proxy.Group()
-	}
 	return dao.group
 }
 
@@ -87,9 +81,6 @@ func (dao *CompanyTeamMemberDao) Columns() CompanyTeamMemberColumns {
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
 func (dao *CompanyTeamMemberDao) Ctx(ctx context.Context) *gdb.Model {
-	if dao.proxy != nil {
-		return dao.proxy.DB().Model(dao.table).Safe().Ctx(ctx)
-	}
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -100,8 +91,5 @@ func (dao *CompanyTeamMemberDao) Ctx(ctx context.Context) *gdb.Model {
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
 func (dao *CompanyTeamMemberDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
-	if dao.proxy != nil {
-		return dao.proxy.Transaction(ctx, f)
-	}
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

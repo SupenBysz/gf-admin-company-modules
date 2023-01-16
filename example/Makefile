@@ -25,9 +25,9 @@ cli.install:
 # Generate Go files for DAO/DO/Entity.
 .PHONY: dao
 dao: cli.install
-	@gf gen dao -p co_model -o co_do -e co_entity -d co_dao -t2 hack/tpls/dao_internal_template.tpl
+	@gf gen dao -p internal/model -o do -e entity -d dao -t2 hack/tpls/dao_internal_template.tpl
 
 # Generate Go files for Service.
 .PHONY: service
 service: cli.install
-	@gf gen service -d ./co_service
+	@gf gen service -d ./internal/service
