@@ -1,26 +1,32 @@
-package co_controller
+package internal
 
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
-	"github.com/SupenBysz/gf-admin-company-modules/api/co_v1"
+	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 )
 
-type cEmployee[T co_interface.IModules] struct {
-	modules T
+type EmployeeController struct {
+	i_controller.IEmployee
+	modules co_interface.IModules
 }
 
-var Employee = func(modules co_interface.IModules) *cEmployee[co_interface.IModules] {
-	return &cEmployee[co_interface.IModules]{
+var Employee = func(modules co_interface.IModules) i_controller.IEmployee {
+	return &EmployeeController{
 		modules: modules,
 	}
 }
 
-func (c *cEmployee[T]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController) GetModules() co_interface.IModules {
+	return c.modules
+}
+
+func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().GetEmployeeById(ctx, req.Id)
@@ -31,7 +37,7 @@ func (c *cEmployee[T]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmploy
 }
 
 // GetEmployeeDetailById 获取员工详情信息
-func (c *cEmployee[T]) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
+func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
@@ -42,7 +48,7 @@ func (c *cEmployee[T]) GetEmployeeDetailById(ctx context.Context, req *co_v1.Get
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (c *cEmployee[T]) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_company_api.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.UnionMainId, req.ExcludeId) == true, nil
@@ -51,7 +57,7 @@ func (c *cEmployee[T]) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmpl
 }
 
 // HasEmployeeByNo 员工工号是否存在
-func (c *cEmployee[T]) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController) HasEmployeeByNo(ctx context.Context, req *co_company_api.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Employee().HasEmployeeByNo(ctx, req.No, req.UnionMainId, req.ExcludeId) == true, nil
@@ -60,7 +66,7 @@ func (c *cEmployee[T]) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmploy
 }
 
 // QueryEmployeeList 查询员工列表
-func (c *cEmployee[T]) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
+func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_company_api.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeListRes, error) {
 			return c.modules.Employee().QueryEmployeeList(ctx, &req.SearchParams)
@@ -70,7 +76,7 @@ func (c *cEmployee[T]) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEm
 }
 
 // CreateEmployee 创建员工信息
-func (c *cEmployee[T]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company_api.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().CreateEmployee(ctx, &req.Employee)
@@ -81,7 +87,7 @@ func (c *cEmployee[T]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmpl
 }
 
 // UpdateEmployee 更新员工信息
-func (c *cEmployee[T]) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_company_api.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().UpdateEmployee(ctx, &req.Employee)
@@ -92,7 +98,7 @@ func (c *cEmployee[T]) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmpl
 }
 
 // DeleteEmployee 删除员工信息
-func (c *cEmployee[T]) DeleteEmployee(ctx context.Context, req *co_v1.DeleteEmployeeReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_company_api.DeleteEmployeeReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.Employee().DeleteEmployee(ctx, req.Id)
@@ -103,7 +109,7 @@ func (c *cEmployee[T]) DeleteEmployee(ctx context.Context, req *co_v1.DeleteEmpl
 }
 
 // SetEmployeeMobile 设置员工手机号
-func (c *cEmployee[T]) SetEmployeeMobile(ctx context.Context, req *co_v1.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_company_api.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha)
@@ -114,7 +120,7 @@ func (c *cEmployee[T]) SetEmployeeMobile(ctx context.Context, req *co_v1.SetEmpl
 }
 
 // SetEmployeeAvatar 设置员工头像
-func (c *cEmployee[T]) SetEmployeeAvatar(ctx context.Context, req *co_v1.SetEmployeeAvatarReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController) SetEmployeeAvatar(ctx context.Context, req *co_company_api.SetEmployeeAvatarReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.Employee().SetEmployeeAvatar(ctx, req.ImageId)
