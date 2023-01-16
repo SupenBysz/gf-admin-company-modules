@@ -10,8 +10,8 @@ import (
 )
 
 func init() {
-	consts.Global.Company.SetI18n(nil)
-	consts.PermissionTree = initPermission(consts.Global.Company)
+	consts.Global.Modules.SetI18n(nil)
+	consts.PermissionTree = initPermission(consts.Global.Modules)
 }
 
 // 初始化权限树

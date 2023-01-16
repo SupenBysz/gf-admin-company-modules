@@ -7,16 +7,18 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_module"
+	"github.com/SupenBysz/gf-admin-company-modules/example/controller"
 )
 
 type global struct {
-	Company co_interface.IModules
+	Modules    co_interface.IModules
+	Controller *controller.ModuleController
 }
 
 var (
 	PermissionTree []*permission.SysPermissionTree
 	Global         = global{
-		Company: co_module.NewModules(
+		Modules: co_module.NewModules(
 			&co_model.Config{
 				AllowEmptyNo:                   true,
 				IsCreateDefaultEmployeeAndRole: false,
@@ -33,10 +35,19 @@ var (
 			},
 			&co_dao.XDao{
 				Company:    co_dao.NewCompany(&co_dao.Company{}),
-				Employee:   co_dao.NewCompanyEmployee(&co_dao.CompanyEmployee{}),
 				Team:       co_dao.NewCompanyTeam(&co_dao.CompanyTeam{}),
+				Employee:   co_dao.NewCompanyEmployee(&co_dao.CompanyEmployee{}),
 				TeamMember: co_dao.NewCompanyTeamMember(&co_dao.CompanyTeamMember{}),
 			},
 		),
 	}
 )
+
+func init() {
+	Global.Controller = &controller.ModuleController{
+		Company:  controller.Company(Global.Modules),
+		Employee: controller.Employee(Global.Modules),
+		Team:     controller.Team(Global.Modules),
+		My:       controller.My(Global.Modules),
+	}
+}
