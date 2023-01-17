@@ -33,7 +33,7 @@ var (
 					Team:     "team",
 				},
 			},
-			&co_dao.XDao{
+			&co_dao.XDao{ // 以下为业务层实例化dao模型，如果不是使用默认模型时需要将自定义dao模型作为参数传进去
 				Company:    co_dao.NewCompany(),
 				Team:       co_dao.NewCompanyTeam(),
 				Employee:   co_dao.NewCompanyEmployee(),
@@ -42,12 +42,3 @@ var (
 		),
 	}
 )
-
-func init() {
-	Global.Controller = &controller.ModuleController{
-		Company:  controller.Company(Global.Modules),
-		Employee: controller.Employee(Global.Modules),
-		Team:     controller.Team(Global.Modules),
-		My:       controller.My(Global.Modules),
-	}
-}
