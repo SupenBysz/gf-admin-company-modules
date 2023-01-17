@@ -40,9 +40,9 @@ var (
 			SetLogo:       permission.NewInIdentifier("SetLogo", "设置LOGO", ""),
 			SetState:      permission.NewInIdentifier("SetState", "设置状态", ""),
 			SetAdminUser:  permission.NewInIdentifier("SetAdminUser", "设置管理员", ""),
-			ViewLicense:   permission.NewInIdentifier("ViewLicense", "查看资质认证信息", ""),
-			AuditLicense:  permission.NewInIdentifier("AuditLicense", "审核资质认证信息", ""),
-			UpdateLicense: permission.NewInIdentifier("UpdateLicense", "更新资质认证信息", ""),
+			ViewLicense:   permission.NewInIdentifier("ViewLicense", "查看认证信息", "查看公司认证信息"),
+			AuditLicense:  permission.NewInIdentifier("AuditLicense", "审核认证信息", "审核公司认证信息"),
+			UpdateLicense: permission.NewInIdentifier("UpdateLicense", "更新认证信息", "更新公司认证信息"),
 		})
 
 		for k, v := range gconv.Map(result) {
