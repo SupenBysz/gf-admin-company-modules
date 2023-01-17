@@ -57,8 +57,6 @@ var (
 			}
 
 			{
-				// InitPermissionTree 初始化权限结构
-				//internal.InitPermissionTree(consts.Global.Company.GetConfig())
 				// ImportPermissionTree 导入权限结构
 				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
 				// CASBIN 初始化
