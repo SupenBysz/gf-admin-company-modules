@@ -7,12 +7,10 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_module"
-	"github.com/SupenBysz/gf-admin-company-modules/example/controller"
 )
 
 type global struct {
-	Modules    co_interface.IModules
-	Controller *controller.ModuleController
+	Modules co_interface.IModules
 }
 
 var (
