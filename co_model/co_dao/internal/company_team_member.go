@@ -13,14 +13,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// CompanyTeamMemberDao is the data access object for table pro_company_team_member.
+// CompanyTeamMemberDao is the data access object for table co_company_team_member.
 type CompanyTeamMemberDao struct {
 	table   string                   // table is the underlying table name of the DAO.
 	group   string                   // group is the database configuration group name of current DAO.
 	columns CompanyTeamMemberColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// CompanyTeamMemberColumns defines and stores column names for table pro_company_team_member.
+// CompanyTeamMemberColumns defines and stores column names for table co_company_team_member.
 type CompanyTeamMemberColumns struct {
 	Id           string // ID
 	TeamId       string // 团队ID
@@ -30,7 +30,7 @@ type CompanyTeamMemberColumns struct {
 	JoinAt       string // 加入时间
 }
 
-// companyTeamMemberColumns holds the columns for table pro_company_team_member.
+// companyTeamMemberColumns holds the columns for table co_company_team_member.
 var companyTeamMemberColumns = CompanyTeamMemberColumns{
 	Id:           "id",
 	TeamId:       "team_id",
@@ -54,7 +54,7 @@ func NewCompanyTeamMemberDao(proxy ...co_interface.IDao) *CompanyTeamMemberDao {
 
 	return &CompanyTeamMemberDao{
 		group:   "default",
-		table:   "pro_company_team_member",
+		table:   "co_company_team_member",
 		columns: companyTeamMemberColumns,
 	}
 }

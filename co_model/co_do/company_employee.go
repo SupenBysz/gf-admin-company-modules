@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// CompanyEmployee is the golang structure of table pro_company_employee for DAO operations like Where/Data.
+// CompanyEmployee is the golang structure of table co_company_employee for DAO operations like Where/Data.
 type CompanyEmployee struct {
-	g.Meta       `orm:"table:pro_company_employee, do:true"`
+	g.Meta       `orm:"table:co_company_employee, do:true"`
 	Id           interface{} // ID，保持与USERID一致
 	No           interface{} // 工号
 	Avatar       interface{} // 头像

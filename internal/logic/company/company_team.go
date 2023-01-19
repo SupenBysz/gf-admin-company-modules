@@ -68,14 +68,22 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_entity.Comp
 }
 
 // HasTeamByName 团队名称是否存在
-func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeId ...int64) bool {
+func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
 	model := s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeam{
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
 
-	if len(excludeId) > 0 {
-		model = model.WhereNotIn(s.dao.Team.Columns().Id, excludeId)
+	if len(excludeIds) > 0 {
+		var ids []int64
+		for _, id := range excludeIds {
+			if id > 0 {
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			model = model.WhereNotIn(s.dao.Team.Columns().Id, ids)
+		}
 	}
 
 	count, _ := model.Count()

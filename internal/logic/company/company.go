@@ -84,11 +84,19 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entit
 }
 
 // HasCompanyByName 判断名称是否存在
-func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeId ...int64) bool {
+func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool {
 	model := s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler)
 
-	if len(excludeId) > 0 {
-		model = model.WhereNotIn(s.dao.Company.Columns().Id, excludeId)
+	if len(excludeIds) > 0 {
+		var ids []int64
+		for _, id := range excludeIds {
+			if id > 0 {
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			model = model.WhereNotIn(s.dao.Company.Columns().Id, ids)
+		}
 	}
 
 	count, _ := model.Where(co_do.Company{Name: name}).Count()

@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// CompanyTeamMember is the golang structure of table pro_company_team_member for DAO operations like Where/Data.
+// CompanyTeamMember is the golang structure of table co_company_team_member for DAO operations like Where/Data.
 type CompanyTeamMember struct {
-	g.Meta       `orm:"table:pro_company_team_member, do:true"`
+	g.Meta       `orm:"table:co_company_team_member, do:true"`
 	Id           interface{} // ID
 	TeamId       interface{} // 团队ID
 	EmployeeId   interface{} // 成员ID
