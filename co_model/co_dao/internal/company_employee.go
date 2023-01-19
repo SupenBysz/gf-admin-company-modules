@@ -13,14 +13,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// CompanyEmployeeDao is the data access object for table pro_company_employee.
+// CompanyEmployeeDao is the data access object for table co_company_employee.
 type CompanyEmployeeDao struct {
 	table   string                 // table is the underlying table name of the DAO.
 	group   string                 // group is the database configuration group name of current DAO.
 	columns CompanyEmployeeColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// CompanyEmployeeColumns defines and stores column names for table pro_company_employee.
+// CompanyEmployeeColumns defines and stores column names for table co_company_employee.
 type CompanyEmployeeColumns struct {
 	Id           string // ID，保持与USERID一致
 	No           string // 工号
@@ -39,7 +39,7 @@ type CompanyEmployeeColumns struct {
 	DeletedAt    string //
 }
 
-// companyEmployeeColumns holds the columns for table pro_company_employee.
+// companyEmployeeColumns holds the columns for table co_company_employee.
 var companyEmployeeColumns = CompanyEmployeeColumns{
 	Id:           "id",
 	No:           "no",
@@ -72,7 +72,7 @@ func NewCompanyEmployeeDao(proxy ...co_interface.IDao) *CompanyEmployeeDao {
 
 	return &CompanyEmployeeDao{
 		group:   "default",
-		table:   "pro_company_employee",
+		table:   "co_company_employee",
 		columns: companyEmployeeColumns,
 	}
 }

@@ -13,14 +13,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// CompanyTeamDao is the data access object for table pro_company_team.
+// CompanyTeamDao is the data access object for table co_company_team.
 type CompanyTeamDao struct {
 	table   string             // table is the underlying table name of the DAO.
 	group   string             // group is the database configuration group name of current DAO.
 	columns CompanyTeamColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// CompanyTeamColumns defines and stores column names for table pro_company_team.
+// CompanyTeamColumns defines and stores column names for table co_company_team.
 type CompanyTeamColumns struct {
 	Id                string //
 	Name              string // 团队名称，公司维度下唯一
@@ -34,7 +34,7 @@ type CompanyTeamColumns struct {
 	DeletedAt         string //
 }
 
-// companyTeamColumns holds the columns for table pro_company_team.
+// companyTeamColumns holds the columns for table co_company_team.
 var companyTeamColumns = CompanyTeamColumns{
 	Id:                "id",
 	Name:              "name",
@@ -62,7 +62,7 @@ func NewCompanyTeamDao(proxy ...co_interface.IDao) *CompanyTeamDao {
 
 	return &CompanyTeamDao{
 		group:   "default",
-		table:   "pro_company_team",
+		table:   "co_company_team",
 		columns: companyTeamColumns,
 	}
 }

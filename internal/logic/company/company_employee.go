@@ -77,14 +77,22 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_ent
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeId ...int64) bool {
+func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
 	model := s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyEmployee{
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
 
-	if len(excludeId) > 0 {
-		model = model.WhereNotIn(s.dao.Employee.Columns().Id, excludeId)
+	if len(excludeIds) > 0 {
+		var ids []int64
+		for _, id := range excludeIds {
+			if id > 0 {
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			model = model.WhereNotIn(s.dao.Employee.Columns().Id, ids)
+		}
 	}
 
 	count, _ := model.Count()
@@ -92,7 +100,7 @@ func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMai
 }
 
 // HasEmployeeByNo 员工工号是否存在
-func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeId ...int64) bool { // 如果工号为空则直接返回
+func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool { // 如果工号为空则直接返回
 	// 工号为空，且允许工号为空则不做校验
 	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
 		return false
@@ -103,8 +111,16 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 		UnionMainId: unionMainId,
 	})
 
-	if len(excludeId) > 0 {
-		model = model.WhereNotIn(s.dao.Employee.Columns().Id, excludeId)
+	if len(excludeIds) > 0 {
+		var ids []int64
+		for _, id := range excludeIds {
+			if id > 0 {
+				ids = append(ids, id)
+			}
+		}
+		if len(ids) > 0 {
+			model = model.WhereNotIn(s.dao.Employee.Columns().Id, ids)
+		}
 	}
 
 	count, _ := model.Count()
