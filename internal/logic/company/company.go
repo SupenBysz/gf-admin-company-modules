@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/gogf/gf/v2/text/gstr"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -183,6 +184,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				Name:        info.ContactName,
 				Mobile:      info.ContactMobile,
 				UnionMainId: UnionMainId,
+				State:       co_enum.Employee.State.Normal.Code(),
 				HiredAt:     gtime.Now(),
 			})
 			if err != nil {
