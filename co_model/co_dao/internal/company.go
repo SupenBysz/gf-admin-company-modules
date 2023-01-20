@@ -27,7 +27,7 @@ type CompanyColumns struct {
 	ContactName   string // 商务联系人
 	ContactMobile string // 商务联系电话
 	UserId        string // 管理员ID
-	Logo          string // LOGO
+	ParentId      string // 父级ID
 	State         string // 状态：0未启用，1正常
 	Remark        string // 备注
 	CreatedBy     string // 创建者
@@ -45,7 +45,7 @@ var companyColumns = CompanyColumns{
 	ContactName:   "contact_name",
 	ContactMobile: "contact_mobile",
 	UserId:        "user_id",
-	Logo:          "logo",
+	ParentId:      "parent_id",
 	State:         "state",
 	Remark:        "remark",
 	CreatedBy:     "created_by",
