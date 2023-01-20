@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/text/gstr"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -46,13 +45,18 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 		return claims, err
 	}
 
-	company, err := s.GetCompanyById(ctx, employee.UnionMainId)
+	// 这里还没登录成功不能使用 GetCompanyById，因为里面包含获取当前登录用户的 session 存在矛盾
+	company, err := daoctl.GetByIdWithError[co_entity.Company](
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
+		employee.UnionMainId,
+	)
 	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, gerror.New("主体id获取失败"), "主体id获取失败", s.dao.Company.Table())
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
 	}
 
 	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
 	claims.UnionMainId = company.Id
+	claims.ParentId = company.ParentId
 
 	return claims, nil
 }
@@ -62,7 +66,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.GetByIdWithError[co_entity.Company](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		id,
 	)
 
@@ -112,7 +116,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_entity.Company](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		filter,
 		false,
 	)
@@ -203,13 +207,10 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 		if info.Id == 0 {
 			data.Id = UnionMainId
-			data.UserId = 0
-			data.ParentId = 0
+			data.UserId = employee.Id
+			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
-			if employee != nil {
-				data.UserId = employee.Id
-			}
 
 			affected, err := daoctl.InsertWithError(
 				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
@@ -249,8 +250,12 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_entity.Company, error) {
+	// 获取登录用户
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_entity.Company](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
 	)
 
 	if err != nil {
