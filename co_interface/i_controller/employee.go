@@ -38,4 +38,7 @@ type IEmployee interface {
 
 	// SetEmployeeAvatar 设置员工头像
 	SetEmployeeAvatar(ctx context.Context, req *co_company_api.SetEmployeeAvatarReq) (api_v1.BoolRes, error)
+
+	// GetEmployeeListByRoleId 根据角色ID获取所有所属员工列表
+	GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error)
 }

@@ -72,3 +72,7 @@ func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_v1.S
 func (c *EmployeeController) SetEmployeeAvatar(ctx context.Context, req *co_v1.SetEmployeeAvatarReq) (api_v1.BoolRes, error) {
 	return c.IEmployee.SetEmployeeAvatar(ctx, &req.SetEmployeeAvatarReq)
 }
+
+func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_v1.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
+	return c.IEmployee.GetEmployeeListByRoleId(ctx, &req.GetEmployeeListByRoleIdReq)
+}

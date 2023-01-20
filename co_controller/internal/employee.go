@@ -128,3 +128,13 @@ func (c *EmployeeController) SetEmployeeAvatar(ctx context.Context, req *co_comp
 		co_enum.Employee.PermissionType(c.modules).SetAvatar,
 	)
 }
+
+// GetEmployeeListByRoleId 根据角色ID获取所有所属员工
+func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.EmployeeListRes, error) {
+			return c.modules.Employee().GetEmployeeListByRoleId(ctx, req.RoleId)
+		},
+		co_enum.Employee.PermissionType(c.modules).ViewDetail,
+	)
+}

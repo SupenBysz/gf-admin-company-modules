@@ -43,6 +43,7 @@ type (
 		SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string) (bool, error)
 		SetEmployeeAvatar(ctx context.Context, imageId int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error)
+		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*co_model.EmployeeListRes, error)
 	}
 	ITeam interface {
 		GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error)

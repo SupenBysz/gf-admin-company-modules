@@ -41,6 +41,7 @@ func EmployeeGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ght
 	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
 	group.POST(routePrefix+"/setEmployeeMobile", controller.SetEmployeeMobile)
 	group.POST(routePrefix+"/setEmployeeAvatar", controller.SetEmployeeAvatar)
+	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
 	return group
 }
 

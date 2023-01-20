@@ -49,3 +49,7 @@ type SetEmployeeAvatarReq struct {
 type GetEmployeeDetailByIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
 }
+
+type GetEmployeeListByRoleIdReq struct {
+	RoleId int64 `json:"id" v:"required#ID校验失败" dc:"角色ID"`
+}

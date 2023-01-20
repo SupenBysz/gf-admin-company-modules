@@ -457,6 +457,40 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 	return data, err
 }
 
+// GetEmployeeListByRoleId 根据角色ID获取所有所属员工
+func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*co_model.EmployeeListRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	userIds, err := sys_service.SysRole().GetRoleUserIds(ctx, roleId, sessionUser.UnionMainId)
+	if err != nil {
+		return &co_model.EmployeeListRes{
+			PaginationRes: sys_model.PaginationRes{
+				Pagination: sys_model.Pagination{
+					PageNum:  1,
+					PageSize: 20,
+				},
+				PageTotal: 0,
+				Total:     0,
+			},
+		}, nil
+	}
+
+	result, err := daoctl.Query[*co_entity.CompanyEmployee](
+		s.dao.Employee.Ctx(ctx),
+		&sys_model.SearchParams{
+			Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+				Field: s.dao.Employee.Columns().Id,
+				Where: "in",
+				Value: userIds,
+			}),
+			OrderBy:    nil,
+			Pagination: sys_model.Pagination{},
+		},
+		true,
+	)
+	return (*co_model.EmployeeListRes)(result), err
+}
+
 // Masker 员工信息脱敏
 func (s *sEmployee) masker(employee *co_entity.CompanyEmployee) *co_entity.CompanyEmployee {
 	if employee == nil {

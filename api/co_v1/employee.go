@@ -54,3 +54,8 @@ type GetEmployeeDetailByIdReq struct {
 	g.Meta `method:"post" summary:"获取员工详情|信息" tags:"员工"`
 	co_company_api.GetEmployeeDetailByIdReq
 }
+
+type GetEmployeeListByRoleIdReq struct {
+	g.Meta `method:"post" summary:"根据角色ID获取所有所属员工|列表" tags:"员工"`
+	co_company_api.GetEmployeeListByRoleIdReq
+}
