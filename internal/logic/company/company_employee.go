@@ -177,15 +177,13 @@ func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee)
 func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	if sessionUser.Type > 0 && info.UnionMainId == 0 {
+	// 除匿名用户外，其它用户在有权限的情况下均可以创建或更新员工信息，001 代表默认管理员工号
+	// info.Id == 0 仅单纯新建员工时需要初始化用户归属为当前操作员所在 UnionMainId
+	if sessionUser.Type > 0 && info.Id == 0 && info.No != "001" {
 		info.UnionMainId = sessionUser.UnionMainId
 	}
 
-	if info.UnionMainId == 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"所属主体不能为空，请选择后提交", s.dao.Employee.Table())
-	}
-
-	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId {
+	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId && info.No != "001" {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"所属主体校验失败，请确认后提交", s.dao.Employee.Table())
 	}
 
