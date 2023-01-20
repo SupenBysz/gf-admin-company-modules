@@ -59,8 +59,11 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.GetByIdWithError[co_entity.Company](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+		id,
 	)
 
 	if err != nil {
@@ -106,7 +109,13 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 
 // QueryCompanyList 查询公司列表
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
-	data, err := daoctl.Query[*co_entity.Company](s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), filter, false)
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	data, err := daoctl.Query[*co_entity.Company](
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+		filter,
+		false,
+	)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
@@ -145,6 +154,9 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "{#CompanyName} {#error_NameAlreadyExists}", s.dao.Company.Table())
 	}
 
+	// 获取登录用户
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	// 构建公司ID
 	UnionMainId := idgen.NextId()
 
@@ -155,9 +167,6 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		ContactMobile: info.ContactMobile,
 		Remark:        info.Remark,
 	}
-
-	// 获取登录用户
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 启用事务
 	err := s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
@@ -195,6 +204,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		if info.Id == 0 {
 			data.Id = UnionMainId
 			data.UserId = 0
+			data.ParentId = 0
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			if employee != nil {
