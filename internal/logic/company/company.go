@@ -5,6 +5,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/text/gstr"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -208,6 +209,10 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 		} else {
+			if gstr.Contains(info.ContactMobile, "***") || info.ContactMobile == "" {
+				data.ContactMobile = nil
+			}
+
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			_, err = daoctl.UpdateWithError(
