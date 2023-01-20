@@ -28,6 +28,7 @@ type (
 		QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error)
 		CreateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
+		GetCompanyDetail(ctx context.Context, id int64) (*co_entity.Company, error)
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_entity.CompanyEmployee, error)

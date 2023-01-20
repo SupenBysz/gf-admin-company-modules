@@ -48,3 +48,8 @@ func (c *CompanyController) CreateCompany(ctx context.Context, req *co_v1.Create
 func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_v1.UpdateCompanyReq) (*co_model.CompanyRes, error) {
 	return c.ICompany.UpdateCompany(ctx, &req.UpdateCompanyReq)
 }
+
+// GetCompanyDetail 查看更多信息含完整手机号
+func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_v1.GetCompanyDetailReq) (*co_model.CompanyRes, error) {
+	return c.ICompany.GetCompanyDetail(ctx, &req.GetCompanyDetailReq)
+}

@@ -24,6 +24,7 @@ func CompanyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghtt
 	group.POST(routePrefix+"/hasCompanyByName", controller.HasCompanyByName)
 	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
 	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
+	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
 	return group
 }
 

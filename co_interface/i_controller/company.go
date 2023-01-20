@@ -19,4 +19,6 @@ type ICompany interface {
 	CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (*co_model.CompanyRes, error)
 	// UpdateCompany 更新公司信息
 	UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (*co_model.CompanyRes, error)
+	// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
+	GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (*co_model.CompanyRes, error)
 }

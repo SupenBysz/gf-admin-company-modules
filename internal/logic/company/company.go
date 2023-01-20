@@ -232,6 +232,18 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	return s.GetCompanyById(ctx, data.Id.(int64))
 }
 
+// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
+func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_entity.Company, error) {
+	data, err := daoctl.GetByIdWithError[co_entity.Company](
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+	)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
+	}
+	return data, nil
+}
+
 // Masker 信息脱敏
 func (s *sCompany) masker(company *co_entity.Company) *co_entity.Company {
 	if company == nil {

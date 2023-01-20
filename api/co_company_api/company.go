@@ -24,3 +24,7 @@ type CreateCompanyReq struct {
 type UpdateCompanyReq struct {
 	co_model.Company
 }
+
+type GetCompanyDetailReq struct {
+	Id int64 `json:"id" v:"required#ID校验失败" dc:"服务商ID"`
+}

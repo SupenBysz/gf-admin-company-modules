@@ -77,3 +77,14 @@ func (c *CompanyController[T]) UpdateCompany(ctx context.Context, req *co_compan
 		co_enum.Company.PermissionType(c.modules).Update,
 	)
 }
+
+// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
+func (c *CompanyController[T]) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (*co_model.CompanyRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.CompanyRes, error) {
+			ret, err := c.modules.Company().GetCompanyDetail(ctx, req.Id)
+			return (*co_model.CompanyRes)(ret), err
+		},
+		co_enum.Company.PermissionType(c.modules).ViewMobile,
+	)
+}

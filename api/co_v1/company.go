@@ -29,3 +29,8 @@ type UpdateCompanyReq struct {
 	g.Meta `method:"post" summary:"更新组织单位|信息" tags:"组织单位"`
 	co_company_api.UpdateCompanyReq
 }
+
+type GetCompanyDetailReq struct {
+	g.Meta `method:"post" summary:"查看更多信息含完整手机号|信息" tags:"组织单位"`
+	co_company_api.GetCompanyDetailReq
+}
