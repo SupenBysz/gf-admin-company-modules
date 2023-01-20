@@ -1,13 +1,14 @@
 package main
 
 import (
-	_ "github.com/SupenBysz/gf-admin-company-modules/internal/boot"
-	"github.com/SupenBysz/gf-admin-company-modules/internal/cmd"
+	_ "github.com/SupenBysz/gf-admin-community"
+	"github.com/SupenBysz/gf-admin-company-modules/example/internal/boot"
 	"github.com/gogf/gf/v2/os/gctx"
 
-	_ "github.com/SupenBysz/gf-admin-community"
+	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
+	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic"
 )
 
 func main() {
-	cmd.Main.Run(gctx.New())
+	boot.Main.Run(gctx.New())
 }

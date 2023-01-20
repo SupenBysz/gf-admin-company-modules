@@ -7,18 +7,20 @@ package internal
 import (
 	"context"
 
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// CompanyTeamDao is the data access object for table pro_company_team.
+// CompanyTeamDao is the data access object for table co_company_team.
 type CompanyTeamDao struct {
 	table   string             // table is the underlying table name of the DAO.
 	group   string             // group is the database configuration group name of current DAO.
 	columns CompanyTeamColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// CompanyTeamColumns defines and stores column names for table pro_company_team.
+// CompanyTeamColumns defines and stores column names for table co_company_team.
 type CompanyTeamColumns struct {
 	Id                string //
 	Name              string // 团队名称，公司维度下唯一
@@ -32,7 +34,7 @@ type CompanyTeamColumns struct {
 	DeletedAt         string //
 }
 
-// companyTeamColumns holds the columns for table pro_company_team.
+// companyTeamColumns holds the columns for table co_company_team.
 var companyTeamColumns = CompanyTeamColumns{
 	Id:                "id",
 	Name:              "name",
@@ -47,10 +49,20 @@ var companyTeamColumns = CompanyTeamColumns{
 }
 
 // NewCompanyTeamDao creates and returns a new DAO object for table data access.
-func NewCompanyTeamDao() *CompanyTeamDao {
+func NewCompanyTeamDao(proxy ...co_interface.IDao) *CompanyTeamDao {
+	var dao *CompanyTeamDao
+	if len(proxy) > 0 {
+		dao = &CompanyTeamDao{
+			group:   proxy[0].Group(),
+			table:   proxy[0].Table(),
+			columns: companyTeamColumns,
+		}
+		return dao
+	}
+
 	return &CompanyTeamDao{
 		group:   "default",
-		table:   "pro_company_team",
+		table:   "co_company_team",
 		columns: companyTeamColumns,
 	}
 }
@@ -65,14 +77,14 @@ func (dao *CompanyTeamDao) Table() string {
 	return dao.table
 }
 
-// Columns returns all column names of current dao.
-func (dao *CompanyTeamDao) Columns() CompanyTeamColumns {
-	return dao.columns
-}
-
 // Group returns the configuration group name of database of current dao.
 func (dao *CompanyTeamDao) Group() string {
 	return dao.group
+}
+
+// Columns returns all column names of current dao.
+func (dao *CompanyTeamDao) Columns() CompanyTeamColumns {
+	return dao.columns
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.

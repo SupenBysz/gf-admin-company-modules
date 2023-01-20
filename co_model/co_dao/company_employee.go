@@ -9,11 +9,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
 )
 
-type CompanyEmployeeDao = internal.CompanyEmployeeDao
+type CompanyEmployee = internal.CompanyEmployeeDao
 
-var (
-	// CompanyEmployee is globally public accessible object for table pro_company_employee operations.
-	CompanyEmployee = func(module co_interface.IModules) IDao[internal.CompanyEmployeeColumns] {
-		return NewDao[internal.CompanyEmployeeColumns](module.GetConfig(), internal.NewCompanyEmployeeDao())
-	}
-)
+func NewCompanyEmployee(dao ...co_interface.IDao) *CompanyEmployee {
+	return internal.NewCompanyEmployeeDao(dao...)
+}

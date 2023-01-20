@@ -1,17 +1,19 @@
-package cmd
+package boot
 
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_controller"
+	sysController "github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
-	"github.com/SupenBysz/gf-admin-company-modules/co_router"
+	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
+	"github.com/SupenBysz/gf-admin-company-modules/example/router"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/util/gmode"
+
+	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 )
 
 var (
@@ -55,12 +57,12 @@ var (
 			}
 
 			{
-				// Permission 初始化
-				sys_service.SysPermission().ImportPermissionTree(ctx, co_consts.PermissionTree, nil)
+				// ImportPermissionTree 导入权限结构
+				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
-				// Company 初始化
-				// company.NewCompany(co_consts.Global.Conf)
+				// 注入Hook
+				consts.Global.Modules.Company().InjectHook()
 			}
 
 			// 初始化路由
@@ -98,7 +100,7 @@ var (
 					)
 
 					// 注册公司模块路由 （包含：公司、团队、员工）
-					co_router.ModulesGroup(co_consts.Global.Company, group)
+					router.ModulesGroup(consts.Global.Modules, group)
 				})
 			})
 			s.Run()

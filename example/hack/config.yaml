@@ -1,0 +1,21 @@
+
+# CLI tool, only in development environment.
+# https://goframe.org/pages/viewpage.action?pageId=3673173
+gfcli:
+  # 工具编译配置
+  build:
+    name:     "gf-admin-pro"
+    arch:     "amd64"
+    system:   "linux,darwin,windows"
+    mod:      ""
+    cgo:      0
+
+  # dao生成
+  gen:
+    dao:
+      - link: "pgsql:user=dbUsername password=dbPassword host=127.0.0.1 port=5432 dbname=gf-admin sslmode=disable"
+        tables: "pro_audit, pro_fd_account, pro_fd_account_bill, pro_fd_bank_card, pro_fd_currency, pro_fd_invoice, pro_fd_invoice_detail, pro_facilitator, pro_facilitator_employee, pro_facilitator_team, pro_license, pro_operator, pro_operator_employee, pro_operator_team"
+        removePrefix: "pro_"
+        descriptionTag:  true
+        noModelComment:  true
+        withTime: false

@@ -7,50 +7,66 @@ import (
 	"github.com/gogf/gf/v2/text/gstr"
 )
 
-func ModulesGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	CompanyGroup(module, group)
-	EmployeeGroup(module, group)
-	TeamGroup(module, group)
+func ModulesGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	CompanyGroup(modules, group)
+	EmployeeGroup(modules, group)
+	TeamGroup(modules, group)
+	MyGroup(modules, group)
 	return group
 }
 
-func CompanyGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	routePrefix := module.GetConfig().RoutePrefix + "/" + gstr.LcFirst(module.GetConfig().Identifier.Company)
-	group.POST(routePrefix+"/createCompany", co_controller.Company(module).CreateCompany)
-	group.POST(routePrefix+"/updateCompany", co_controller.Company(module).UpdateCompany)
-	group.POST(routePrefix+"/hasCompanyByName", co_controller.Company(module).HasCompanyByName)
-	group.POST(routePrefix+"/getCompanyById", co_controller.Company(module).GetCompanyById)
-	group.POST(routePrefix+"/queryCompanyList", co_controller.Company(module).QueryCompanyList)
+func CompanyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
+	controller := co_controller.Company(modules)
+
+	group.POST(routePrefix+"/createCompany", controller.CreateCompany)
+	group.POST(routePrefix+"/updateCompany", controller.UpdateCompany)
+	group.POST(routePrefix+"/hasCompanyByName", controller.HasCompanyByName)
+	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
+	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
+	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
 	return group
 }
 
-func EmployeeGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	routePrefix := module.GetConfig().RoutePrefix + "/" + gstr.LcFirst(module.GetConfig().Identifier.Employee)
-	group.POST(routePrefix+"/getEmployeeById", co_controller.Employee(module).GetEmployeeById)
-	group.POST(routePrefix+"/getEmployeeDetailById", co_controller.Employee(module).GetEmployeeDetailById)
-	group.POST(routePrefix+"/hasEmployeeByName", co_controller.Employee(module).HasEmployeeByName)
-	group.POST(routePrefix+"/hasEmployeeByNo", co_controller.Employee(module).HasEmployeeByNo)
-	group.POST(routePrefix+"/queryEmployeeList", co_controller.Employee(module).QueryEmployeeList)
-	group.POST(routePrefix+"/createEmployee", co_controller.Employee(module).CreateEmployee)
-	group.POST(routePrefix+"/updateEmployee", co_controller.Employee(module).UpdateEmployee)
-	group.POST(routePrefix+"/deleteEmployee", co_controller.Employee(module).DeleteEmployee)
-	group.POST(routePrefix+"/setEmployeeMobile", co_controller.Employee(module).SetEmployeeMobile)
-	group.POST(routePrefix+"/setEmployeeAvatar", co_controller.Employee(module).SetEmployeeAvatar)
+func EmployeeGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Employee)
+	controller := co_controller.Employee(modules)
+	group.POST(routePrefix+"/getEmployeeById", controller.GetEmployeeById)
+	group.POST(routePrefix+"/getEmployeeDetailById", controller.GetEmployeeDetailById)
+	group.POST(routePrefix+"/hasEmployeeByName", controller.HasEmployeeByName)
+	group.POST(routePrefix+"/hasEmployeeByNo", controller.HasEmployeeByNo)
+	group.POST(routePrefix+"/queryEmployeeList", controller.QueryEmployeeList)
+	group.POST(routePrefix+"/createEmployee", controller.CreateEmployee)
+	group.POST(routePrefix+"/updateEmployee", controller.UpdateEmployee)
+	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
+	group.POST(routePrefix+"/setEmployeeMobile", controller.SetEmployeeMobile)
+	group.POST(routePrefix+"/setEmployeeAvatar", controller.SetEmployeeAvatar)
+	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
 	return group
 }
 
-func TeamGroup(module co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	routePrefix := module.GetConfig().RoutePrefix + "/" + gstr.LcFirst(module.GetConfig().Identifier.Team)
-	group.POST(routePrefix+"/getTeamById", co_controller.Team(module).GetTeamById)
-	group.POST(routePrefix+"/hasTeamByName", co_controller.Team(module).HasTeamByName)
-	group.POST(routePrefix+"/queryTeamList", co_controller.Team(module).QueryTeamList)
-	group.POST(routePrefix+"/createTeam", co_controller.Team(module).CreateTeam)
-	group.POST(routePrefix+"/updateTeam", co_controller.Team(module).UpdateTeam)
-	group.POST(routePrefix+"/getTeamMemberList", co_controller.Team(module).GetTeamMemberList)
-	group.POST(routePrefix+"/queryTeamListByEmployee", co_controller.Team(module).QueryTeamListByEmployee)
-	group.POST(routePrefix+"/setTeamMember", co_controller.Team(module).SetTeamMember)
-	group.POST(routePrefix+"/setTeamOwner", co_controller.Team(module).SetTeamOwner)
-	group.POST(routePrefix+"/setTeamCaptain", co_controller.Team(module).SetTeamCaptain)
-	group.POST(routePrefix+"/deleteTeam", co_controller.Team(module).DeleteTeam)
+func TeamGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Team)
+	controller := co_controller.Team(modules)
+	group.POST(routePrefix+"/getTeamById", controller.GetTeamById)
+	group.POST(routePrefix+"/hasTeamByName", controller.HasTeamByName)
+	group.POST(routePrefix+"/queryTeamList", controller.QueryTeamList)
+	group.POST(routePrefix+"/createTeam", controller.CreateTeam)
+	group.POST(routePrefix+"/updateTeam", controller.UpdateTeam)
+	group.POST(routePrefix+"/getTeamMemberList", controller.GetTeamMemberList)
+	group.POST(routePrefix+"/queryTeamListByEmployee", controller.QueryTeamListByEmployee)
+	group.POST(routePrefix+"/setTeamMember", controller.SetTeamMember)
+	group.POST(routePrefix+"/setTeamOwner", controller.SetTeamOwner)
+	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
+	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)
+	return group
+}
+
+func MyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	controller := co_controller.My(modules)
+	routePrefix := modules.GetConfig().RoutePrefix + "/my"
+	group.POST(routePrefix+"/getProfile", controller.GetProfile)
+	group.POST(routePrefix+"/getCompany", controller.GetCompany)
+	group.POST(routePrefix+"/getTeams", controller.GetTeams)
 	return group
 }

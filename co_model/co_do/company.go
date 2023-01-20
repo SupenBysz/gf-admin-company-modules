@@ -9,15 +9,15 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// Company is the golang structure of table pro_company for DAO operations like Where/Data.
+// Company is the golang structure of table co_company for DAO operations like Where/Data.
 type Company struct {
-	g.Meta        `orm:"table:pro_company, do:true"`
+	g.Meta        `orm:"table:co_company, do:true"`
 	Id            interface{} // ID
 	Name          interface{} // 名称
 	ContactName   interface{} // 商务联系人
 	ContactMobile interface{} // 商务联系电话
 	UserId        interface{} // 管理员ID
-	Logo          interface{} // LOGO
+	ParentId      interface{} // 父级ID
 	State         interface{} // 状态：0未启用，1正常
 	Remark        interface{} // 备注
 	CreatedBy     interface{} // 创建者

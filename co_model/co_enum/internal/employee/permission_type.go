@@ -42,9 +42,9 @@ var (
 			SetMobile:     permission.NewInIdentifier("SetMobile", "设置手机号", "修改员工手机号"),
 			SetAvatar:     permission.NewInIdentifier("SetAvatar", "设置头像", "设置员工头像"),
 			SetState:      permission.NewInIdentifier("SetState", "设置状态", "设置员工任职状态"),
-			ViewLicense:   permission.NewInIdentifier("ViewLicense", "查看资质认证信息", "查看员工认证信息"),
-			AuditLicense:  permission.NewInIdentifier("AuditLicense", "审核资质认证信息", "审核员工认证信息"),
-			UpdateLicense: permission.NewInIdentifier("UpdateLicense", "更新资质认证信息", "更新员工认证信息"),
+			ViewLicense:   permission.NewInIdentifier("ViewLicense", "查看认证信息", "查看员工认证信息"),
+			AuditLicense:  permission.NewInIdentifier("AuditLicense", "审核认证信息", "审核员工认证信息"),
+			UpdateLicense: permission.NewInIdentifier("UpdateLicense", "更新认证信息", "更新员工认证信息"),
 		})
 
 		for k, v := range gconv.Map(result) {
