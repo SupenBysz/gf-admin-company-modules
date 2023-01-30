@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/example/controller"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gstr"
 )
@@ -17,7 +17,7 @@ func ModulesGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghtt
 
 func CompanyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
-	controller := co_controller.Company(modules)
+	controller := controller.Company(modules)
 
 	group.POST(routePrefix+"/createCompany", controller.CreateCompany)
 	group.POST(routePrefix+"/updateCompany", controller.UpdateCompany)
@@ -30,7 +30,7 @@ func CompanyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghtt
 
 func EmployeeGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Employee)
-	controller := co_controller.Employee(modules)
+	controller := controller.Employee(modules)
 	group.POST(routePrefix+"/getEmployeeById", controller.GetEmployeeById)
 	group.POST(routePrefix+"/getEmployeeDetailById", controller.GetEmployeeDetailById)
 	group.POST(routePrefix+"/hasEmployeeByName", controller.HasEmployeeByName)
@@ -47,7 +47,7 @@ func EmployeeGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ght
 
 func TeamGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Team)
-	controller := co_controller.Team(modules)
+	controller := controller.Team(modules)
 	group.POST(routePrefix+"/getTeamById", controller.GetTeamById)
 	group.POST(routePrefix+"/hasTeamByName", controller.HasTeamByName)
 	group.POST(routePrefix+"/queryTeamList", controller.QueryTeamList)
@@ -63,7 +63,7 @@ func TeamGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.R
 }
 
 func MyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	controller := co_controller.My(modules)
+	controller := controller.My(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/my"
 	group.POST(routePrefix+"/getProfile", controller.GetProfile)
 	group.POST(routePrefix+"/getCompany", controller.GetCompany)
