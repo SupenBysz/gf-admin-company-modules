@@ -8,6 +8,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/gogf/gf/v2/frame/g"
 	"math"
 	"strconv"
 	"time"
@@ -146,8 +147,11 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_entity.Compan
 func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
 	search = funs.FilterUnionMain(ctx, search, s.dao.Employee.Columns().UnionMainId)
 
+	r := g.RequestFromCtx(ctx)
+	isExport := r.GetParam("isExport", false).Bool()
+
 	// 查询符合过滤条件的员工信息
-	result, err := daoctl.Query[*co_entity.CompanyEmployee](s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
+	result, err := daoctl.Query[*co_entity.CompanyEmployee](s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, isExport)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"信息查询失败", s.dao.Employee.Table())
