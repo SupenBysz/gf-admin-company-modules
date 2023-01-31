@@ -12,6 +12,7 @@ func ModulesGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghtt
 	EmployeeGroup(modules, group)
 	TeamGroup(modules, group)
 	MyGroup(modules, group)
+	FinancialGroup(modules, group)
 	return group
 }
 
@@ -68,5 +69,25 @@ func MyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Rou
 	group.POST(routePrefix+"/getProfile", controller.GetProfile)
 	group.POST(routePrefix+"/getCompany", controller.GetCompany)
 	group.POST(routePrefix+"/getTeams", controller.GetTeams)
+	return group
+}
+
+func FinancialGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
+	// routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
+
+	controller := controller.Financial(modules)
+	routePrefix := modules.GetConfig().RoutePrefix + "/financial"
+	group.POST(routePrefix+"/registerBankCard", controller.BankCardRegister)
+	group.POST(routePrefix+"/deleteBankCard", controller.DeleteBankCard)
+	group.POST(routePrefix+"/queryBankCardList", controller.QueryBankCardList)
+	group.POST(routePrefix+"/getAccountBalance", controller.GetAccountBalance)
+	group.POST(routePrefix+"/invoiceRegister", controller.InvoiceRegister)
+	group.POST(routePrefix+"/queryInvoice", controller.QueryInvoice)
+	group.POST(routePrefix+"/deleteInvoiceById", controller.DeletesFdInvoiceById)
+	group.POST(routePrefix+"/invoiceDetailRegister", controller.InvoiceDetailRegister)
+	group.POST(routePrefix+"/queryInvoiceDetailList", controller.QueryInvoiceDetailList)
+	group.POST(routePrefix+"/makeInvoiceDetail", controller.MakeInvoiceDetailReq)
+	group.POST(routePrefix+"/auditInvoiceDetail", controller.AuditInvoiceDetail)
+
 	return group
 }

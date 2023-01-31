@@ -8,18 +8,27 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/boot"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
+	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/financial"
+
 	"github.com/gogf/gf/v2/i18n/gi18n"
+
 	"github.com/gogf/gf/v2/text/gstr"
 )
 
 type Modules struct {
-	conf     *co_model.Config
-	company  co_interface.ICompany
-	team     co_interface.ITeam
-	employee co_interface.IEmployee
-	my       co_interface.IMy
-	i18n     *gi18n.Manager
-	xDao     *co_dao.XDao
+	conf          *co_model.Config
+	company       co_interface.ICompany
+	team          co_interface.ITeam
+	employee      co_interface.IEmployee
+	my            co_interface.IMy
+	account       co_interface.IFdAccount
+	accountBill   co_interface.IFdAccountBill
+	bankCard      co_interface.IFdBankCard
+	currency      co_interface.IFdCurrency
+	invoice       co_interface.IFdInvoice
+	invoiceDetail co_interface.IFdInvoiceDetail
+	i18n          *gi18n.Manager
+	xDao          *co_dao.XDao
 }
 
 func (m *Modules) My() co_interface.IMy {
@@ -36,6 +45,30 @@ func (m *Modules) Team() co_interface.ITeam {
 
 func (m *Modules) Employee() co_interface.IEmployee {
 	return m.employee
+}
+
+func (m *Modules) Account() co_interface.IFdAccount {
+	return m.account
+}
+
+func (m *Modules) AccountBill() co_interface.IFdAccountBill {
+	return m.accountBill
+}
+
+func (m *Modules) BankCard() co_interface.IFdBankCard {
+	return m.bankCard
+}
+
+func (m *Modules) Currency() co_interface.IFdCurrency {
+	return m.currency
+}
+
+func (m *Modules) Invoice() co_interface.IFdInvoice {
+	return m.invoice
+}
+
+func (m *Modules) InvoiceDetail() co_interface.IFdInvoiceDetail {
+	return m.invoiceDetail
 }
 
 func (m *Modules) GetConfig() *co_model.Config {
@@ -81,6 +114,12 @@ func NewModules(
 	module.employee = company.NewEmployee(module, module.xDao)
 	module.team = company.NewTeam(module, module.xDao)
 	module.my = company.NewMy(module, module.xDao)
+	module.account = financial.NewFdAccount(module, module.xDao)
+	module.accountBill = financial.NewFdAccountBill(module, module.xDao)
+	module.bankCard = financial.NewFdBankCard(module, module.xDao)
+	module.currency = financial.NewFdCurrency(module, module.xDao)
+	module.invoice = financial.NewFdInvoice(module, module.xDao)
+	module.invoiceDetail = financial.NewFdInvoiceDetail(module, module.xDao)
 
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(module)...)
