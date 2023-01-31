@@ -163,13 +163,15 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 }
 
 // CreateEmployee 创建员工信息
-func (s *sEmployee) CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) { //
+func (s *sEmployee) CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	info.Id = 0
+	info.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	return s.saveEmployee(ctx, info)
 }
 
 // UpdateEmployee 更新员工信息
-func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) { //
+func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee) (*co_entity.CompanyEmployee, error) {
 	return s.saveEmployee(ctx, info)
 }
 
@@ -181,10 +183,6 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	// info.Id == 0 仅单纯新建员工时需要初始化用户归属为当前操作员所在 UnionMainId
 	if sessionUser.Type > 0 && info.Id == 0 && info.No != "001" {
 		info.UnionMainId = sessionUser.UnionMainId
-	}
-
-	if sessionUser.Type > 0 && sessionUser.UnionMainId != info.UnionMainId && info.No != "001" {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"所属主体校验失败，请确认后提交", s.dao.Employee.Table())
 	}
 
 	// 校验员工名称是否已存在
@@ -258,6 +256,8 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			// 更新员工信息
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
+			// unionMainId不能修改，强制为nil
+			data.UnionMainId = nil
 
 			_, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
 			if err != nil {
