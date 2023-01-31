@@ -350,7 +350,7 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
 	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
-	if err != nil || isSuccess == false {
+	if err != nil && isSuccess == false {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
 	}
 
