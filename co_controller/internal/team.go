@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -36,9 +37,11 @@ func (c *TeamController[T]) GetTeamById(ctx context.Context, req *co_company_api
 	)
 }
 func (c *TeamController[T]) HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error) {
+	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Team().HasTeamByName(ctx, req.Name, req.UnionMainId, req.ExcludeId) == true, nil
+			return c.modules.Team().HasTeamByName(ctx, req.Name, unionMainId, req.ExcludeId) == true, nil
 		},
 	)
 }
