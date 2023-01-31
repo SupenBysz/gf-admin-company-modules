@@ -156,7 +156,7 @@ func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*
 func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
 	// 名称重名检测
 	if s.HasCompanyByName(ctx, info.Name, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "{#CompanyName} {#error_NameAlreadyExists}", s.dao.Company.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 	}
 
 	// 获取登录用户
