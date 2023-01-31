@@ -459,7 +459,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*co_model.EmployeeListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	userIds, err := sys_service.SysRole().GetRoleUserIds(ctx, roleId, sessionUser.UnionMainId)
+	userIds, err := sys_service.SysRole().GetRoleMemberIds(ctx, roleId, sessionUser.UnionMainId)
 	if err != nil {
 		return &co_model.EmployeeListRes{
 			PaginationRes: sys_model.PaginationRes{
