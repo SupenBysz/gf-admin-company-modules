@@ -73,10 +73,9 @@ func MyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Rou
 }
 
 func FinancialGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	// routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
-
 	controller := co_controller.Financial(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/financial"
+
 	group.POST(routePrefix+"/registerBankCard", controller.BankCardRegister)
 	group.POST(routePrefix+"/deleteBankCard", controller.DeleteBankCard)
 	group.POST(routePrefix+"/queryBankCardList", controller.QueryBankCardList)
