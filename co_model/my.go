@@ -1,7 +1,7 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
@@ -15,6 +15,6 @@ type MyTeamRes struct {
 type MyTeamListRes []MyTeamRes
 
 type MyProfileRes struct {
-	User     *sys_entity.SysUser        `json:"user" description:"员工信息"`
+	User     *sys_model.SysUser         `json:"user" description:"员工信息"`
 	Employee *co_entity.CompanyEmployee `json:"employee" description:"员工信息"`
 }
