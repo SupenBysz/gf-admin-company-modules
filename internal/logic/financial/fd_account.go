@@ -13,7 +13,6 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -42,16 +41,16 @@ func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountR
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
 	if user == nil || err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "财务账号关联用户id错误"), "", sys_dao.SysUser.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
 	}
 
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)
 	if err != nil || currency == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "货币代码错误", s.dao.FdCurrency.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
 	}
 	if currency.IsLegalTender != 1 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "请选择合法货币", s.dao.FdCurrency.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
 
 	}
 	// 生产随机id
@@ -62,7 +61,7 @@ func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountR
 	// 插入财务账号
 	_, err = s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(data)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号添加失败", s.dao.FdAccount.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Account_Save_Failed"), s.dao.FdAccount.Table())
 	}
 
 	return s.GetAccountById(ctx, gconv.Int64(data.Id))
@@ -71,12 +70,12 @@ func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountR
 // GetAccountById 根据ID获取财务账号
 func (s *sFdAccount) GetAccountById(ctx context.Context, id int64) (*co_entity.FdAccount, error) {
 	if id == 0 {
-		return nil, gerror.New("财务账号id不能为空")
+		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
 	}
 	result, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "根据id获取财务账号失败", s.dao.FdAccount.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountById_Failed"), s.dao.FdAccount.Table())
 	}
 
 	return result, nil
@@ -86,7 +85,7 @@ func (s *sFdAccount) GetAccountById(ctx context.Context, id int64) (*co_entity.F
 func (s *sFdAccount) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 	if account == nil || err != nil {
-		return false, gerror.New("财务账号不存在")
+		return false, gerror.New(s.modules.T(ctx, "{#Account} {#error_Data_NotFound}"))
 	}
 
 	_, err = s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{IsEnabled: isEnabled})
@@ -130,7 +129,7 @@ func (s *sFdAccount) QueryAccountListByUserId(ctx context.Context, userId int64)
 	err := s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdAccount{UnionUserId: userId}).Scan(&accountList)
 
 	if err != nil || len(accountList) <= 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "该账户没有财务账号", s.dao.FdAccount.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
 	}
 
 	return &accountList, nil
@@ -169,7 +168,7 @@ func (s *sFdAccount) UpdateAccountBalance(ctx context.Context, accountId int64, 
 // GetAccountByUnionUserIdAndCurrencyCode 根据用户union_user_id和货币代码currency_code获取财务账号
 func (s *sFdAccount) GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (*co_entity.FdAccount, error) {
 	if unionUserId == 0 {
-		return nil, gerror.New("财务账号用户id不能为空")
+		return nil, gerror.New(s.modules.T(ctx, "error_Account_UnionUserId_NotNull"))
 	}
 
 	result := co_entity.FdAccount{}

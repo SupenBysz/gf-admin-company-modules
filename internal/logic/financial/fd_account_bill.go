@@ -13,7 +13,6 @@ import (
 
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -71,12 +70,12 @@ func (s *sFdAccountBill) CreateAccountBill(ctx context.Context, info co_model.Ac
 	now := *gtime.Now()
 
 	if !now.After(info.TradeAt) { // 系统时间是否在交易时间之后
-		return false, gerror.New("非法操作！")
+		return false, gerror.New(s.modules.T(ctx, "error_Legal_Operation"))
 	}
 
 	// 交易金额是否为负数
 	if info.Amount < 0 {
-		return false, gerror.New("交易金额不能是负数")
+		return false, gerror.New(s.modules.T(ctx, "error_AccountAmount_NonNegative"))
 	}
 
 	var success bool
@@ -90,7 +89,7 @@ func (s *sFdAccountBill) CreateAccountBill(ctx context.Context, info co_model.Ac
 	}
 
 	if success == false {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败"), "", s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
 	return success == true, err
@@ -111,7 +110,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
 	if err != nil || toUser == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败,交易接收者不存在"), "", s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_Transaction_ToUser_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	// 先通过财务账号id查询账号出来
@@ -119,7 +118,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 	// 判断需要收款的用户是否存在
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败,交易接收账户查询失败"), "", s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	bill := co_model.AccountBillInfo{}
@@ -140,7 +139,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 		result, err := s.dao.FdAccountBill.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(bill)
 
 		if result == nil || err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "财务账单创建失败"), "", s.dao.FdAccountBill.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill} {#error_Create_Failed}"), s.dao.FdAccountBill.Table())
 		}
 
 		// 2.修改财务账号的余额
@@ -148,7 +147,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Id, info.Amount, version, info.InOutType)
 
 		if affected == 0 || err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "更新账户余额失败"), "", s.dao.FdAccountBill.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 		}
 
 		s.hookArr.Iterator(func(_ int, v interface{}) bool {
@@ -164,7 +163,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败"), err.Error(), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
@@ -185,7 +184,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败,交易接收账户查询失败"), "", s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	bill := co_model.AccountBillInfo{}
@@ -209,7 +208,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 			result, err := s.dao.FdAccountBill.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(bill)
 
 			if result == nil || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "财务账单创建失败"), "", s.dao.FdAccountBill.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 			}
 
 			// 2.修改财务账号的余额
@@ -217,7 +216,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Id, info.Amount, version, info.InOutType)
 
 			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "更新账户余额失败"), "", s.dao.FdAccountBill.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 			}
 
 			s.hookArr.Iterator(func(_ int, v interface{}) bool {
@@ -233,14 +232,14 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 			})
 
 		} else {
-			return gerror.New("交易发起者的账户余额不足")
+			return gerror.New(s.modules.T(ctx, "error_Transaction_FromUser_InsufficientBalance"))
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, gerror.NewCode(gcode.CodeBusinessValidationFailed, "交易失败"), err.Error(), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
@@ -259,7 +258,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 // GetAccountBillByAccountId  根据财务账号id获取账单
 func (s *sFdAccountBill) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *sys_model.Pagination) (*co_model.AccountBillListRes, error) {
 	if accountId == 0 {
-		return nil, gerror.New("财务账号不能为0！")
+		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}
 
 	if pagination == nil {
@@ -283,7 +282,7 @@ func (s *sFdAccountBill) GetAccountBillByAccountId(ctx context.Context, accountI
 	}, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "账单查询失败", s.dao.FdAccountBill.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill} {#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())
 	}
 
 	return (*co_model.AccountBillListRes)(result), nil

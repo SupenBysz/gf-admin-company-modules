@@ -66,9 +66,9 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_ent
 	)
 
 	if err != nil {
-		message := s.modules.T(ctx, "{#EmployeeName}{#error_Data_NotFound}")
+		message := s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}")
 		if err != sql.ErrNoRows {
-			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
+			message = s.modules.T(ctx, "{#EmployeeName} {#Data}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}

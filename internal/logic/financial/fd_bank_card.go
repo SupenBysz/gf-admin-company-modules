@@ -40,14 +40,14 @@ func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCard
 	// 判断userid是否存在
 	userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
 	if err != nil || userInfo == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "用户信息查询失败,用户id错误", sys_dao.SysUser.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#User} {#error_Data_Get_Failed}"), sys_dao.SysUser.Table())
 	}
 
 	// 判断银行卡是否重复
 	bankCard, err := s.GetBankCardByCardNumber(ctx, info.CardNumber)
 
 	if bankCard != nil || err == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡号已存在", s.dao.FdBankCard.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_AlreadyExist}"), s.dao.FdBankCard.Table())
 	}
 
 	bankCardInfo := co_do.FdBankCard{}
@@ -61,7 +61,7 @@ func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCard
 	_, err = s.dao.FdBankCard.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(bankCardInfo).Insert()
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡号添加失败", s.dao.FdBankCard.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_Add_Failed}"), s.dao.FdBankCard.Table())
 	}
 
 	return s.GetBankCardById(ctx, gconv.Int64(bankCardInfo.Id))
@@ -70,12 +70,12 @@ func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCard
 // GetBankCardById 根据银行卡id获取银行卡信息
 func (s *sFdBankCard) GetBankCardById(ctx context.Context, id int64) (*co_entity.FdBankCard, error) {
 	if id == 0 {
-		return nil, gerror.New("银行卡id不能为空")
+		return nil, gerror.New(s.modules.T(ctx, "{#BankCard} {#error_Id_NotNull}"))
 	}
 	result, err := daoctl.GetByIdWithError[co_entity.FdBankCard](s.dao.FdBankCard.Ctx(ctx), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "根据银行卡id获取银行卡信息失败", s.dao.FdBankCard.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetBankCardById_Failed"), s.dao.FdBankCard.Table())
 	}
 
 	return result, nil
@@ -84,14 +84,15 @@ func (s *sFdBankCard) GetBankCardById(ctx context.Context, id int64) (*co_entity
 // GetBankCardByCardNumber 根据银行卡号获取银行卡
 func (s *sFdBankCard) GetBankCardByCardNumber(ctx context.Context, cardNumber string) (*co_entity.FdBankCard, error) {
 	if cardNumber == "" {
-		return nil, gerror.New("银行卡号码不能为空")
+		return nil, gerror.New(s.modules.T(ctx, "error_BankCardNumber_NonNull"))
 	}
 
 	bankCard := co_entity.FdBankCard{}
 
 	err := s.dao.FdBankCard.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdBankCard{CardNumber: cardNumber}).Scan(&bankCard)
 	if err != nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_Data_Get_Failed}"), s.dao.FdBankCard.Table())
+
 	}
 
 	return &bankCard, nil
@@ -101,14 +102,14 @@ func (s *sFdBankCard) GetBankCardByCardNumber(ctx context.Context, cardNumber st
 func (s *sFdBankCard) UpdateBankCardState(ctx context.Context, bankCardId int64, state int) (bool, error) {
 	bankCard, err := s.GetBankCardById(ctx, bankCardId)
 	if err != nil || bankCard == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡不存在", s.dao.FdBankCard.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_NonExist}"), s.dao.FdBankCard.Table())
 	}
 
 	// 修改状态
 	result, err := s.dao.FdBankCard.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdBankCard{Id: bankCardId}).Update(co_do.FdBankCard{State: state})
 
 	if err != nil || result == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡状态修改失败", s.dao.FdBankCard.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_State_Update_Failed}"), s.dao.FdBankCard.Table())
 	}
 
 	return true, nil
@@ -121,7 +122,7 @@ func (s *sFdBankCard) DeleteBankCardById(ctx context.Context, bankCardId int64) 
 
 	bankCard, err := s.GetBankCardById(ctx, bankCardId)
 	if err != nil || bankCard == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡不存在", s.dao.FdBankCard.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_NonExist}"), s.dao.FdBankCard.Table())
 	}
 
 	err = s.dao.FdBankCard.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -146,7 +147,7 @@ func (s *sFdBankCard) DeleteBankCardById(ctx context.Context, bankCardId int64) 
 	})
 
 	if err != nil || result == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "银行卡删除失败", s.dao.FdBankCard.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard} {#error_Delete_Failed}"), s.dao.FdBankCard.Table())
 	}
 
 	return true, nil
@@ -155,7 +156,7 @@ func (s *sFdBankCard) DeleteBankCardById(ctx context.Context, bankCardId int64) 
 // QueryBankCardListByUserId 根据用户id查询银行卡列表
 func (s *sFdBankCard) QueryBankCardListByUserId(ctx context.Context, userId int64) (*co_model.BankCardListRes, error) {
 	if userId == 0 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "用户id不能为空", sys_dao.SysUser.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#User} {#error_Id_NotNull}"), sys_dao.SysUser.Table())
 	}
 
 	result, err := daoctl.Query[co_entity.FdBankCard](s.dao.FdBankCard.Ctx(ctx).Hook(daoctl.CacheHookHandler), &sys_model.SearchParams{
@@ -171,7 +172,7 @@ func (s *sFdBankCard) QueryBankCardListByUserId(ctx context.Context, userId int6
 	}, false)
 
 	if err != nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_QueryBankCardList_Failed"), s.dao.FdBankCard.Table())
 	}
 
 	return (*co_model.BankCardListRes)(result), nil

@@ -53,7 +53,7 @@ func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_mode
 	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
 
 	if err != nil || result == nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail} {#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	return s.GetInvoiceDetailById(ctx, data.Id)
@@ -62,13 +62,13 @@ func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_mode
 // GetInvoiceDetailById 根据id获取发票详情
 func (s *sFdInvoiceDetail) GetInvoiceDetailById(ctx context.Context, id int64) (*co_entity.FdInvoiceDetail, error) {
 	if id == 0 {
-		return nil, gerror.New("发票详情id不能为空")
+		return nil, gerror.New(s.modules.T(ctx, "{#InvoiceDetail} {#error_Id_NotNull}"))
 	}
 
 	result, err := daoctl.GetByIdWithError[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "根据id获取发票详情失败", s.dao.FdInvoiceDetail.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetInvoiceDetailById_Failed"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	invoiceDetail := co_entity.FdInvoiceDetail{}
@@ -81,12 +81,12 @@ func (s *sFdInvoiceDetail) GetInvoiceDetailById(ctx context.Context, id int64) (
 func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailId int64, makeInvoiceDetail co_model.FdMakeInvoiceDetail) (res bool, err error) {
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
 	if err != nil || invoiceDetailInfo == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "发票详情ID参数错误", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 校验状态是否为待开票
 	if invoiceDetailInfo.State != co_enum.Invoice.State.WaitForInvoice.Code() {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "开票失败，状态类型不匹配", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed} {#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 判断是纸质发票还是电子发票 然后添加审核过后的数据
@@ -114,11 +114,11 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 		}).Update()
 
 	} else {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "开票失败，发票类型不匹配", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed} {#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "发票详情数据修改失败", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetail_Update_Failed"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	return true, nil
@@ -128,21 +128,21 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error) {
 	// 审核行仅允许 co_enum_invoice.State.WaitForInvoice 和 co_enum_invoice.State.Failure 待开票、开票失败
 	if auditInfo.State != co_enum.Invoice.State.WaitForInvoice.Code() && auditInfo.State != co_enum.Invoice.State.Failure.Code() {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "审核行为类型错误", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetail_AuditState_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	if auditInfo.State == co_enum.Invoice.State.Failure.Code() && auditInfo.ReplyMsg == "" {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "审核不通过时必须说明原因", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_AuditReplay_MustHasMsg"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
 	if err != nil || invoiceDetailInfo == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "发票详情ID参数错误", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 代表已审过的
 	if invoiceDetailInfo.State > co_enum.Invoice.State.WaitAudit.Code() {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "禁止单次申请重复审核业务", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetail_RepeatSubmit"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 添加审核过后的数据
@@ -156,7 +156,7 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 	}).Update()
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "发票详情数据修改失败", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetail_Update_Failed"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	return true, nil
@@ -184,7 +184,7 @@ func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (b
 	// 判断是否存在该发票
 	invoice, err := s.GetInvoiceDetailById(ctx, id)
 	if err != nil || invoice == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "发票详情id错误", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	err = s.dao.FdInvoiceDetail.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -207,7 +207,7 @@ func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (b
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "发票删除失败", s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetail_Delete_Failed"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	return err == nil, err
