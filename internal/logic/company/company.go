@@ -52,7 +52,7 @@ func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomC
 		employee.UnionMainId,
 	)
 	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName}{#error_Data_Get_Failed}"), s.dao.Company.Table())
 	}
 
 	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
