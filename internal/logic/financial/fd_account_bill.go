@@ -110,7 +110,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
 	if err != nil || toUser == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_Transaction_ToUser_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_Transaction_ToUser_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	// 先通过财务账号id查询账号出来
@@ -118,7 +118,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 	// 判断需要收款的用户是否存在
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	bill := co_model.AccountBillInfo{}
@@ -139,7 +139,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 		result, err := s.dao.FdAccountBill.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(bill)
 
 		if result == nil || err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill} {#error_Create_Failed}"), s.dao.FdAccountBill.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Create_Failed}"), s.dao.FdAccountBill.Table())
 		}
 
 		// 2.修改财务账号的余额
@@ -184,7 +184,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed} {#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
 	}
 
 	bill := co_model.AccountBillInfo{}
@@ -282,7 +282,7 @@ func (s *sFdAccountBill) GetAccountBillByAccountId(ctx context.Context, accountI
 	}, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill} {#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())
 	}
 
 	return (*co_model.AccountBillListRes)(result), nil

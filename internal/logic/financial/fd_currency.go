@@ -34,7 +34,7 @@ func (s *sFdCurrency) GetCurrencyByCurrencyCode(ctx context.Context, currencyCod
 	err := s.dao.FdCurrency.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(result)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency} {#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency}{#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
 	}
 
 	return result, nil
@@ -50,7 +50,7 @@ func (s *sFdCurrency) GetCurrencyByCnName(ctx context.Context, cnName string) (*
 
 	err := s.dao.FdCurrency.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdCurrency{CnName: cnName}).Scan(result)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency} {#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency}{#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
 	}
 
 	return result, nil

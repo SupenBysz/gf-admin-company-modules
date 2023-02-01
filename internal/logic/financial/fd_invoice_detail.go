@@ -53,7 +53,7 @@ func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_mode
 	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Insert()
 
 	if err != nil || result == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail} {#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail}{#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	return s.GetInvoiceDetailById(ctx, data.Id)
@@ -62,7 +62,7 @@ func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_mode
 // GetInvoiceDetailById 根据id获取发票详情
 func (s *sFdInvoiceDetail) GetInvoiceDetailById(ctx context.Context, id int64) (*co_entity.FdInvoiceDetail, error) {
 	if id == 0 {
-		return nil, gerror.New(s.modules.T(ctx, "{#InvoiceDetail} {#error_Id_NotNull}"))
+		return nil, gerror.New(s.modules.T(ctx, "{#InvoiceDetail}{#error_Id_NotNull}"))
 	}
 
 	result, err := daoctl.GetByIdWithError[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
@@ -86,7 +86,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 
 	// 校验状态是否为待开票
 	if invoiceDetailInfo.State != co_enum.Invoice.State.WaitForInvoice.Code() {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed} {#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed}{#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 判断是纸质发票还是电子发票 然后添加审核过后的数据
@@ -114,7 +114,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 		}).Update()
 
 	} else {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed} {#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed}{#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	if err != nil {
