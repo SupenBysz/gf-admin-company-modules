@@ -10,16 +10,16 @@ type BankCardRegisterReq struct {
 }
 
 type DeleteBankCardReq struct {
-	BankCardId int64
+	BankCardId int64 `json:"bankCardId" dc:"银行卡ID"`
 }
 
 type QueryBankCardListReq struct {
-	UserId int64
+	UserId int64 `json:"userId" dc:"用户ID"`
 	sys_model.SearchParams
 }
 
 type GetAccountBalanceReq struct {
-	AccountId int64
+	AccountId int64 `json:"accountId" dc:"财务账号id"`
 }
 
 type CreateInvoiceReq struct {
@@ -27,12 +27,12 @@ type CreateInvoiceReq struct {
 }
 
 type QueryInvoiceReq struct {
-	UserId int64
+	UserId int64 `json:"userId"  dc:"用户ID"`
 	sys_model.SearchParams
 }
 
 type DeleteInvoiceByIdReq struct {
-	InvoiceId int64
+	InvoiceId int64 `json:"invoiceId" dc:"发票抬头ID"`
 }
 
 type CreateInvoiceDetailReq struct {
@@ -40,8 +40,8 @@ type CreateInvoiceDetailReq struct {
 }
 
 type QueryInvoiceDetailListReq struct {
-	UnionMainId int64
-	UserId      int64
+	UnionMainId int64 `json:"unionMainId" dc:"主体ID"`
+	UserId      int64 `json:"userId" dc:"用户ID"`
 	sys_model.SearchParams
 }
 
