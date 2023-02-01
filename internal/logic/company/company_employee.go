@@ -150,7 +150,7 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 	result, err := daoctl.Query[*co_entity.CompanyEmployee](s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"信息查询失败", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
 	items := make([]*co_entity.CompanyEmployee, 0)
@@ -187,17 +187,17 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 
 	// 校验员工名称是否已存在
 	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"名称已存在，请修改后提交", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否允许为空
 	if info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号不能为空，请修改后提交", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否已存在
 	if true == s.HasEmployeeByNo(ctx, info.No, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号已存在，请修改后提交", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
@@ -207,7 +207,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		var avatarFile *sys_model.FileInfo
 		if info.Avatar != "" {
 			// 校验员工头像并保存
-			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), "头像"+s.modules.T(ctx, "error_File_FileVoid"))
+			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
@@ -270,7 +270,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			avatarFile, err := sys_service.File().SaveFile(ctx, avatarFile.Src, avatarFile)
 			_, err = sys_dao.SysFile.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(avatarFile)
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
 			}
 		}
 		return nil
@@ -286,7 +286,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
 	employee, err := s.GetEmployeeById(ctx, id)
 	if err != nil {
-		return false, err
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -416,7 +416,7 @@ func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool,
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 校验员工头像并保存
-	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, "头像"+s.modules.T(ctx, "error_File_FileVoid"))
+	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
@@ -427,7 +427,7 @@ func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool,
 	_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"), s.dao.Employee.Table())
 	}
 	return true, nil
 }
@@ -449,7 +449,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_en
 	data, err := daoctl.ScanWithError[co_entity.CompanyEmployee](model.Where(co_do.CompanyEmployee{Id: id}))
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
 	}
 
 	return data, err
