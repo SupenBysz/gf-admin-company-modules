@@ -27,19 +27,21 @@ type sCompany struct {
 }
 
 func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ICompany {
-	return &sCompany{
+	result := &sCompany{
 		modules: modules,
 		dao:     xDao,
 	}
+	result.injectHook()
+	return result
 }
 
 // InjectHook 注入Audit的Hook
-func (s *sCompany) InjectHook() {
-	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.JwtHookFunc)
+func (s *sCompany) injectHook() {
+	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
 }
 
 // JwtHookFunc Jwt钩子函数
-func (s *sCompany) JwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
+func (s *sCompany) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
 	// 获取到当前user的主体id
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, claims.Id)
 	if employee == nil {
