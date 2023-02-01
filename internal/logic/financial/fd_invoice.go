@@ -110,7 +110,7 @@ func (s *sFdInvoice) DeletesFdInvoiceById(ctx context.Context, invoiceId int64) 
 
 	invoice, err := s.GetInvoiceById(ctx, invoiceId)
 	if err != nil || invoice == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Invoice} {#error_NonExist}"), s.dao.FdInvoice.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Invoice}{#error_NonExist}"), s.dao.FdInvoice.Table())
 	}
 
 	err = s.dao.FdInvoice.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -124,7 +124,7 @@ func (s *sFdInvoice) DeletesFdInvoiceById(ctx context.Context, invoiceId int64) 
 	})
 
 	if err != nil || result == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Inovice} {#error_Delete_Failed}"), s.dao.FdInvoice.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Inovice}{#error_Delete_Failed}"), s.dao.FdInvoice.Table())
 	}
 
 	return true, nil
@@ -139,7 +139,7 @@ func (s *sFdInvoice) GetFdInvoiceByTaxId(ctx context.Context, taxId string) (*co
 
 	err := s.dao.FdInvoice.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdInvoice{TaxId: taxId}).Scan(&result)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Invoice} {#error_Data_Get_Failed}"), s.dao.FdInvoice.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Invoice}{#error_Data_Get_Failed}"), s.dao.FdInvoice.Table())
 	}
 
 	return &result, nil

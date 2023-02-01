@@ -85,7 +85,7 @@ func (s *sFdAccount) GetAccountById(ctx context.Context, id int64) (*co_entity.F
 func (s *sFdAccount) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler), id)
 	if account == nil || err != nil {
-		return false, gerror.New(s.modules.T(ctx, "{#Account} {#error_Data_NotFound}"))
+		return false, gerror.New(s.modules.T(ctx, "{#Account}{#error_Data_NotFound}"))
 	}
 
 	_, err = s.dao.FdAccount.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{IsEnabled: isEnabled})
