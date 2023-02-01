@@ -77,6 +77,13 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 				co_enum.Team.PermissionType(module).SetCaptain,
 			},
 		},
+	}
+	return result
+}
+
+// InitFinancialPermission 初始化财务服务权限树
+func InitFinancialPermission() []*permission.SysPermissionTree {
+	result := []*permission.SysPermissionTree{
 		// 财务服务权限树
 		{
 			SysPermission: &sys_entity.SysPermission{

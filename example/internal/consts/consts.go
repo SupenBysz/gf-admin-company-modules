@@ -45,4 +45,6 @@ var (
 			},
 		),
 	}
+	// FinancialPermissionTree 财务服务权限树 (可选)
+	FinancialPermissionTree []*permission.SysPermissionTree
 )

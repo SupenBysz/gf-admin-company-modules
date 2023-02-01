@@ -59,6 +59,10 @@ var (
 			{
 				// ImportPermissionTree 导入权限结构
 				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
+
+				// 导入财务服务权限结构 (可选)
+				// sys_service.SysPermission().ImportPermissionTree(ctx, consts.FinancialPermissionTree, nil)
+
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
 				// 注入Hook
@@ -102,7 +106,7 @@ var (
 					// 注册公司模块路由 （包含：公司、团队、员工）
 					router.ModulesGroup(consts.Global.Modules, group)
 
-					// 注册财务模块路由
+					// 注册财务模块路由 (可选)
 					// router.FinancialGroup(consts.Global.Modules, group)
 				})
 			})
