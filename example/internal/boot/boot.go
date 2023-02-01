@@ -101,6 +101,9 @@ var (
 
 					// 注册公司模块路由 （包含：公司、团队、员工）
 					router.ModulesGroup(consts.Global.Modules, group)
+
+					// 注册财务模块路由
+					// router.FinancialGroup(consts.Global.Modules, group)
 				})
 			})
 			s.Run()

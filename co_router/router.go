@@ -12,7 +12,7 @@ func ModulesGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghtt
 	EmployeeGroup(modules, group)
 	TeamGroup(modules, group)
 	MyGroup(modules, group)
-	FinancialGroup(modules, group)
+	// FinancialGroup(modules, group)
 	return group
 }
 
