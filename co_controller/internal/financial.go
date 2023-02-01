@@ -49,22 +49,18 @@ func (c *FinancialController) GetAccountBalance(ctx context.Context, req *co_com
 }
 
 // InvoiceRegister 添加发票抬头
-func (c *FinancialController) InvoiceRegister(ctx context.Context, req *co_company_api.CreateInvoiceReq) (*co_model.FdInvoiceInfoRes, error) {
-	// 权限判断
-	//if has, err := sys_service.SysPermission().CheckPermission(ctx, co_enum.Financial.PermissionType.CreateInvoice); has != true {
-	//	return nil, err
-	//}
-	//
-	//invoice, err := pro_service.ProFdInvoice().CreateInvoice(ctx, req.FdInvoiceRegister)
-	//
-	//return (*co_model.FdInvoiceInfoRes)(invoice), err
+func (c *FinancialController[T]) InvoiceRegister(ctx context.Context, req *co_company_api.CreateInvoiceReq) (*co_model.FdInvoiceInfoRes, error) {
+	// 给userID和UnionMainId赋值
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	req.UserId = user.Id
+	req.UnionMainId = user.UnionMainId
 
 	return funs.CheckPermission(ctx,
 		func() (*co_model.FdInvoiceInfoRes, error) {
 			ret, err := c.modules.Invoice().CreateInvoice(ctx, req.FdInvoiceRegister)
 			return (*co_model.FdInvoiceInfoRes)(ret), err
 		},
-		co_enum.Financial.PermissionType.GetAccountBalance,
+		co_enum.Financial.PermissionType.CreateInvoice,
 	)
 }
 
@@ -108,7 +104,11 @@ func (c *FinancialController) DeletesFdInvoiceById(ctx context.Context, req *co_
 }
 
 // InvoiceDetailRegister 申请开发票
-func (c *FinancialController) InvoiceDetailRegister(ctx context.Context, req *co_company_api.CreateInvoiceDetailReq) (*co_model.FdInvoiceDetailInfoRes, error) {
+func (c *FinancialController[T]) InvoiceDetailRegister(ctx context.Context, req *co_company_api.CreateInvoiceDetailReq) (*co_model.FdInvoiceDetailInfoRes, error) {
+	// userID和unionMainId赋值
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	req.UserId, req.UnionMainId = user.Id, user.UnionMainId
+
 	ret, err := c.modules.InvoiceDetail().CreateInvoiceDetail(ctx, req.FdInvoiceDetailRegister)
 
 	return (*co_model.FdInvoiceDetailInfoRes)(ret), err
