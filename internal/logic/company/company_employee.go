@@ -36,10 +36,34 @@ type sEmployee struct {
 }
 
 func NewEmployee(modules co_interface.IModules, xDao *co_dao.XDao) *sEmployee {
-	return &sEmployee{
+	result := &sEmployee{
 		modules: modules,
 		dao:     xDao,
 	}
+
+	// 注入钩子函数
+	result.injectHook()
+	return result
+}
+
+// InjectHook 注入Audit的Hook
+func (s *sEmployee) injectHook() {
+	sys_service.SysAuth().InstallHook(sys_enum.Auth.ActionType.Login, s.modules.GetConfig().UserType, s.authHookFunc)
+}
+
+// AuthHookFunc 用户登录钩子函数
+func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
+	employee, _ := s.modules.Employee().GetEmployeeById(ctx, user.Id)
+	if employee != nil {
+		user.Detail.Realname = employee.Name
+	}
+
+	company, _ := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	if company != nil {
+		user.Detail.UnionMainName = company.Name
+	}
+
+	return nil
 }
 
 // GetEmployeeById 根据ID获取员工信息
@@ -244,7 +268,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_User_Save_Failed"), s.dao.Employee.Table())
 				}
 
-				data.Id = newUser.UserInfo.Id
+				data.Id = newUser.Id
 			}
 
 			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data))
