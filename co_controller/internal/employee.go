@@ -29,8 +29,7 @@ func (c *EmployeeController) GetModules() co_interface.IModules {
 func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().GetEmployeeById(ctx, req.Id)
-			return (*co_model.EmployeeRes)(ret), err
+			return c.modules.Employee().GetEmployeeById(ctx, req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).ViewDetail,
 	)
@@ -40,8 +39,7 @@ func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_compan
 func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
-			return (*co_model.EmployeeRes)(ret), err
+			return c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).MoreDetail,
 	)

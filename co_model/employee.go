@@ -2,6 +2,7 @@ package co_model
 
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/os/gtime"
 )
@@ -17,6 +18,9 @@ type Employee struct {
 	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期" description:"入职日期"`
 }
 
-type EmployeeRes co_entity.CompanyEmployee
+type EmployeeRes struct {
+	co_entity.CompanyEmployee
+	Detail sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
+}
 
-type EmployeeListRes sys_model.CollectRes[*co_entity.CompanyEmployee]
+type EmployeeListRes sys_model.CollectRes[*EmployeeRes]
