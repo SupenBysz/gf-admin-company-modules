@@ -27,41 +27,10 @@ type sCompany struct {
 }
 
 func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ICompany {
-	result := &sCompany{
+	return &sCompany{
 		modules: modules,
 		dao:     xDao,
 	}
-	result.injectHook()
-	return result
-}
-
-// InjectHook 注入Audit的Hook
-func (s *sCompany) injectHook() {
-	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
-}
-
-// JwtHookFunc Jwt钩子函数
-func (s *sCompany) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
-	// 获取到当前user的主体id
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, claims.Id)
-	if employee == nil {
-		return claims, err
-	}
-
-	// 这里还没登录成功不能使用 GetCompanyById，因为里面包含获取当前登录用户的 session 存在矛盾
-	company, err := daoctl.GetByIdWithError[co_entity.Company](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
-		employee.UnionMainId,
-	)
-	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
-	}
-
-	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
-	claims.UnionMainId = company.Id
-	claims.ParentId = company.ParentId
-
-	return claims, nil
 }
 
 // GetCompanyById 根据ID获取获取公司信息

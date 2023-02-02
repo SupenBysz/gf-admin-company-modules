@@ -48,10 +48,12 @@ func NewEmployee(modules co_interface.IModules, xDao *co_dao.XDao) *sEmployee {
 
 // InjectHook 注入Audit的Hook
 func (s *sEmployee) injectHook() {
+	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
 	sys_service.SysAuth().InstallHook(sys_enum.Auth.ActionType.Login, s.modules.GetConfig().UserType, s.authHookFunc)
+	sys_service.SysUser().InstallHook(sys_enum.User.Event.BeforeCreate, s.userHookFunc)
 }
 
-// AuthHookFunc 用户登录钩子函数
+// AuthHookFunc 用户登录Hook函数
 func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
 	employee, _ := s.modules.Employee().GetEmployeeById(ctx, user.Id)
 	if employee != nil {
@@ -64,6 +66,47 @@ func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType,
 	}
 
 	return nil
+}
+
+// userHookFunc 新增用户Hook函数
+func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
+	employee, err := s.GetEmployeeById(ctx, info.Id)
+	if err != nil {
+		return info, nil
+	}
+	info.Detail.Realname = employee.Name
+
+	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	if err != nil {
+		return info, nil
+	}
+	info.Detail.UnionMainName = company.Name
+
+	return info, nil
+}
+
+// JwtHookFunc Jwt钩子函数
+func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
+	// 获取到当前user的主体id
+	employee, err := s.GetEmployeeById(ctx, claims.Id)
+	if employee == nil {
+		return claims, err
+	}
+
+	// 这里还没登录成功不能使用 s.modules.Company().GetCompanyById，因为里面包含获取当前登录用户的 session 存在矛盾
+	company, err := daoctl.GetByIdWithError[co_entity.Company](
+		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
+		employee.UnionMainId,
+	)
+	if company == nil || err != nil {
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
+	}
+
+	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
+	claims.UnionMainId = company.Id
+	claims.ParentId = company.ParentId
+
+	return claims, nil
 }
 
 // GetEmployeeById 根据ID获取员工信息
