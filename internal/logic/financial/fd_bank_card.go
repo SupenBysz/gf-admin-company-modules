@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -35,7 +34,7 @@ func NewFdBankCard(modules co_interface.IModules, xDao *co_dao.XDao) co_interfac
 }
 
 // CreateBankCard 添加银行卡账号
-func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_entity.SysUser) (*co_entity.FdBankCard, error) {
+func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (*co_entity.FdBankCard, error) {
 
 	// 判断userid是否存在
 	userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)

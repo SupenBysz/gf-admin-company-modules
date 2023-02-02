@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -67,7 +66,7 @@ type (
 	}
 
 	IFdBankCard interface {
-		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_entity.SysUser) (*co_entity.FdBankCard, error)
+		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (*co_entity.FdBankCard, error)
 		GetBankCardById(ctx context.Context, id int64) (*co_entity.FdBankCard, error)
 		GetBankCardByCardNumber(ctx context.Context, cardNumber string) (*co_entity.FdBankCard, error)
 		UpdateBankCardState(ctx context.Context, bankCardId int64, state int) (bool, error)

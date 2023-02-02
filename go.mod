@@ -43,3 +43,5 @@ require (
 	golang.org/x/text v0.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// replace github.com/SupenBysz/gf-admin-community v0.2.100 => /Users/supen/Documents/CodeSpace/kysionProject/gf-admin-community
