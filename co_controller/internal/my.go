@@ -73,7 +73,7 @@ func (c *MyController) SetAvatar(ctx context.Context, req *co_company_api.SetAva
 func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha)
+			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha, req.Password)
 			return ret == true, err
 		},
 		co_enum.Employee.PermissionType(c.modules).SetMobile,

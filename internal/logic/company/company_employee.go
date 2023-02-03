@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/utility/en_crypto"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -458,7 +459,7 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 }
 
 // SetEmployeeMobile 设置手机号
-func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string) (bool, error) {
+func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
 	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
 	if err != nil {
 		return false, err
@@ -466,12 +467,33 @@ func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, capt
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	// 如果原手机号码和新号码一致，直接返回true
+	userInfo, err := sys_service.SysUser().GetUserDetail(ctx, sessionUser.Id)
+	if err != nil {
+		return false, err
+	}
+
+	if newMobile == gconv.Int64(userInfo.Mobile) {
+		return true, nil
+	}
+
+	pwdHash, err := en_crypto.PwdHash(password, gconv.String(sessionUser.Id))
+
+	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, pwdHash)
+	if checkPassword != true {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
+	}
+
 	_, err = s.dao.Employee.Ctx(ctx).
 		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
 		Where(co_do.CompanyEmployee{Id: sessionUser.Id}).
 		Update()
 
-	if err != nil {
+	affected, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).
+		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
+		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))
+
+	if err != nil || affected == 0 {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
 	}
 
