@@ -40,10 +40,6 @@ type SetEmployeeMobileReq struct {
 	Captcha string `json:"captcha" v:"required#请输入手机验证码"`
 }
 
-type SetEmployeeAvatarReq struct {
-	ImageId int64 `json:"imageId" dc:"头像ID"`
-}
-
 type GetEmployeeDetailByIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
 }
