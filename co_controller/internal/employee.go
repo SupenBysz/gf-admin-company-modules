@@ -110,17 +110,6 @@ func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_company
 	)
 }
 
-// SetEmployeeMobile 设置员工手机号
-func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_company_api.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha)
-			return ret == true, err
-		},
-		co_enum.Employee.PermissionType(c.modules).SetMobile,
-	)
-}
-
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
 func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
 	return funs.CheckPermission(ctx,

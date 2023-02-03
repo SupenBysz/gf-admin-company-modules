@@ -33,9 +33,6 @@ type IEmployee interface {
 	// DeleteEmployee 删除员工信息
 	DeleteEmployee(ctx context.Context, req *co_company_api.DeleteEmployeeReq) (api_v1.BoolRes, error)
 
-	// SetEmployeeMobile 设置员工手机号
-	SetEmployeeMobile(ctx context.Context, req *co_company_api.SetEmployeeMobileReq) (api_v1.BoolRes, error)
-
 	// GetEmployeeListByRoleId 根据角色ID获取所有所属员工列表
 	GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error)
 }

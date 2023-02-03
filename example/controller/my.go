@@ -43,3 +43,8 @@ func (c *MyController) GetTeams(ctx context.Context, req *co_v1.GetTeamsReq) (co
 func (c *MyController) SetAvatar(ctx context.Context, req *co_v1.SetAvatarReq) (api_v1.BoolRes, error) {
 	return c.IMy.SetAvatar(ctx, &req.SetAvatarReq)
 }
+
+// SetMobile 设置手机号
+func (c *MyController) SetMobile(ctx context.Context, req *co_v1.SetMobileReq) (api_v1.BoolRes, error) {
+	return c.IMy.SetMobile(ctx, &req.SetMobileReq)
+}

@@ -63,11 +63,6 @@ func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_v1.Dele
 	return c.IEmployee.DeleteEmployee(ctx, &req.DeleteEmployeeReq)
 }
 
-// SetEmployeeMobile 设置员工手机号
-func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_v1.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
-	return c.IEmployee.SetEmployeeMobile(ctx, &req.SetEmployeeMobileReq)
-}
-
 func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_v1.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
 	return c.IEmployee.GetEmployeeListByRoleId(ctx, &req.GetEmployeeListByRoleIdReq)
 }

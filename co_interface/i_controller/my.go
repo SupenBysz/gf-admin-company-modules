@@ -20,4 +20,7 @@ type IMy interface {
 
 	// SetAvatar 设置头像
 	SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error)
+
+	// SetMobile 设置手机号
+	SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error)
 }

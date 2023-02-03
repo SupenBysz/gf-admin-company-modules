@@ -59,7 +59,7 @@ type (
 		CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error)
 		UpdateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error)
 		DeleteEmployee(ctx context.Context, id int64) (bool, error)
-		SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string) (bool, error)
+		SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error)
 		SetEmployeeAvatar(ctx context.Context, imageId int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (*co_model.EmployeeRes, error)
 		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*co_model.EmployeeListRes, error)
