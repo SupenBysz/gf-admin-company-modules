@@ -24,3 +24,8 @@ type SetAvatarReq struct {
 	g.Meta `method:"post" summary:"设置头像|信息" tags:"我的"`
 	co_company_api.SetAvatarReq
 }
+
+type SetMobileReq struct {
+	g.Meta `method:"post" summary:"设置手机号|信息" tags:"我的"`
+	co_company_api.SetMobileReq
+}

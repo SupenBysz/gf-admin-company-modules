@@ -40,11 +40,6 @@ type DeleteEmployeeReq struct {
 	co_company_api.DeleteEmployeeReq
 }
 
-type SetEmployeeMobileReq struct {
-	g.Meta `method:"post" summary:"设置员工手机号|信息" tags:"员工"`
-	co_company_api.SetEmployeeMobileReq
-}
-
 type GetEmployeeDetailByIdReq struct {
 	g.Meta `method:"post" summary:"获取员工详情|信息" tags:"员工"`
 	co_company_api.GetEmployeeDetailByIdReq

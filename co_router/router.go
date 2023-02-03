@@ -39,7 +39,6 @@ func EmployeeGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ght
 	group.POST(routePrefix+"/createEmployee", controller.CreateEmployee)
 	group.POST(routePrefix+"/updateEmployee", controller.UpdateEmployee)
 	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
-	group.POST(routePrefix+"/setEmployeeMobile", controller.SetEmployeeMobile)
 	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
 	return group
 }
@@ -68,5 +67,6 @@ func MyGroup(modules co_interface.IModules, group *ghttp.RouterGroup) *ghttp.Rou
 	group.POST(routePrefix+"/getCompany", controller.GetCompany)
 	group.POST(routePrefix+"/getTeams", controller.GetTeams)
 	group.POST(routePrefix+"/setAvatar", controller.SetAvatar)
+	group.POST(routePrefix+"/setMobile", controller.SetMobile)
 	return group
 }
