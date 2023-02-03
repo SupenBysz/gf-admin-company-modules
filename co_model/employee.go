@@ -4,6 +4,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
@@ -18,8 +19,16 @@ type Employee struct {
 	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期" description:"入职日期"`
 }
 
+type EmployeeUser struct {
+	g.Meta   `orm:"table:sys_user"`
+	Id       int64  `json:"id"           description:"ID，保持与USERID一致"`
+	Username string `json:"username"  description:"账号"`
+	State    int    `json:"state"     description:"状态：0未激活、1正常、-1封号、-2异常、-3已注销"`
+}
+
 type EmployeeRes struct {
 	co_entity.CompanyEmployee
+	User   EmployeeUser             `orm:"with:id" json:"user"`
 	Detail sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
 }
 
