@@ -15,6 +15,6 @@ type MyTeamRes struct {
 type MyTeamListRes []MyTeamRes
 
 type MyProfileRes struct {
-	User     *sys_model.SysUser         `json:"user" description:"员工信息"`
-	Employee *co_entity.CompanyEmployee `json:"employee" description:"员工信息"`
+	User     *sys_model.SysUser `json:"user" description:"员工信息"`
+	Employee *EmployeeRes       `json:"employee" description:"员工信息"`
 }

@@ -29,8 +29,7 @@ func (c *EmployeeController) GetModules() co_interface.IModules {
 func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().GetEmployeeById(ctx, req.Id)
-			return (*co_model.EmployeeRes)(ret), err
+			return c.modules.Employee().GetEmployeeById(ctx, req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).ViewDetail,
 	)
@@ -40,8 +39,7 @@ func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_compan
 func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
-			return (*co_model.EmployeeRes)(ret), err
+			return c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).MoreDetail,
 	)
@@ -109,28 +107,6 @@ func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_company
 			return ret == true, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Delete,
-	)
-}
-
-// SetEmployeeMobile 设置员工手机号
-func (c *EmployeeController) SetEmployeeMobile(ctx context.Context, req *co_company_api.SetEmployeeMobileReq) (api_v1.BoolRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha)
-			return ret == true, err
-		},
-		co_enum.Employee.PermissionType(c.modules).SetMobile,
-	)
-}
-
-// SetEmployeeAvatar 设置员工头像
-func (c *EmployeeController) SetEmployeeAvatar(ctx context.Context, req *co_company_api.SetEmployeeAvatarReq) (api_v1.BoolRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Employee().SetEmployeeAvatar(ctx, req.ImageId)
-			return ret == true, err
-		},
-		co_enum.Employee.PermissionType(c.modules).SetAvatar,
 	)
 }
 
