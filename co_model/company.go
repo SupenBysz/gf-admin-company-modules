@@ -13,6 +13,9 @@ type Company struct {
 	Remark        string `json:"remark"         description:"备注"`
 }
 
-type CompanyRes co_entity.Company
+type CompanyRes struct {
+	co_entity.Company
+	AdminUser *EmployeeRes `json:"adminUser"`
+}
 
-type CompanyListRes sys_model.CollectRes[*co_entity.Company]
+type CompanyListRes sys_model.CollectRes[*CompanyRes]

@@ -101,7 +101,7 @@ func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err err
 		var teamInfo co_model.MyTeamRes
 
 		// 团队
-		teamInfo.CompanyTeam = *team
+		teamInfo.TeamRes = *team
 
 		// 团队成员列表
 		memberList, err := s.modules.Team().GetTeamMemberList(ctx, team.Id)
