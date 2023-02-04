@@ -228,7 +228,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_model.TeamRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	if s.HasTeamByName(ctx, name, sessionUser.UnionMainId) == true {
+	if s.HasTeamByName(ctx, name, sessionUser.UnionMainId, id) == true {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -248,7 +248,7 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
 	}
 
-	result, err := s.GetTeamById(ctx, data.Id.(int64))
+	result, err := s.GetTeamById(ctx, id)
 	return s.loadUnionData(ctx, result), err
 }
 
