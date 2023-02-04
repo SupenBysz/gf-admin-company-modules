@@ -3,6 +3,7 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -14,8 +15,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
-
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -34,8 +33,8 @@ func NewTeam(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ITea
 }
 
 // GetTeamById 根据ID获取公司团队信息
-func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error) {
-	data, err := daoctl.GetByIdWithError[co_entity.CompanyTeam](
+func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error) {
+	data, err := daoctl.GetByIdWithError[co_model.TeamRes](
 		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
 	)
 
@@ -46,12 +45,13 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTe
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
-	return data, nil
+
+	return s.loadUnionData(ctx, data), nil
 }
 
-// GetTeamByName 根据Name获取员工信息
-func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error) {
-	data, err := daoctl.ScanWithError[co_entity.CompanyTeam](
+// GetTeamByName 根据Name获取团队信息
+func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error) {
+	data, err := daoctl.ScanWithError[co_model.TeamRes](
 		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.CompanyTeam{Name: name}),
 	)
@@ -64,7 +64,7 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_entity.Comp
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	return data, nil
+	return s.loadUnionData(ctx, data), nil
 }
 
 // HasTeamByName 团队名称是否存在
@@ -95,22 +95,47 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 	// 跨主体查询条件过滤
 	search = funs.FilterUnionMain(ctx, search, s.dao.Team.Columns().UnionMainId)
 
-	result, err := daoctl.Query[*co_entity.CompanyTeam](s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
+	data, err := daoctl.Query[*co_model.TeamRes](s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
 
-	return (*co_model.TeamListRes)(result), err
+	items := make([]*co_model.TeamRes, 0)
+	for _, item := range data.Records {
+		items = append(items, s.loadUnionData(ctx, item))
+	}
+	data.Records = items
+
+	return (*co_model.TeamListRes)(data), err
 }
 
 // QueryTeamMemberList 查询所有团队成员记录
 func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error) {
 	model := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler)
 
-	result, err := daoctl.Query[*co_entity.CompanyTeamMember](model, search, false)
+	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)
 
-	return (*co_model.TeamMemberListRes)(result), err
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	var UnionMain *co_model.CompanyRes
+	if sessionUser.UnionMainId > 0 {
+		UnionMain, _ = s.modules.Company().GetCompanyById(ctx, sessionUser.UnionMainId)
+	}
+
+	items := make([]*co_model.TeamMemberRes, 0)
+	for _, item := range data.Records {
+		item.Employee, _ = s.modules.Employee().GetEmployeeById(ctx, item.EmployeeId)
+		item.InviteUser, _ = s.modules.Employee().GetEmployeeById(ctx, item.InviteUserId)
+		if item.UnionMainId == sessionUser.UnionMainId {
+			item.UnionMain = UnionMain
+		} else if item.UnionMainId > 0 {
+			UnionMain, _ = s.modules.Company().GetCompanyById(ctx, item.UnionMainId)
+		}
+	}
+	data.Records = items
+
+	return (*co_model.TeamMemberListRes)(data), err
 }
 
 // CreateTeam 创建团队或小组|信息
-func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity.CompanyTeam, error) {
+func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.TeamRes, error) {
 	if info.ParentId > 0 {
 		team, _ := s.GetTeamById(ctx, info.ParentId)
 		if team == nil {
@@ -195,11 +220,12 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity
 		return nil, err
 	}
 
-	return s.GetTeamById(ctx, data.Id.(int64))
+	result, err := s.GetTeamById(ctx, data.Id.(int64))
+	return s.loadUnionData(ctx, result), err
 }
 
 // UpdateTeam 更新团队或小组|信息
-func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_entity.CompanyTeam, error) {
+func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_model.TeamRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if s.HasTeamByName(ctx, name, sessionUser.UnionMainId) == true {
@@ -222,7 +248,8 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
 	}
 
-	return s.GetTeamById(ctx, id)
+	result, err := s.GetTeamById(ctx, data.Id.(int64))
+	return s.loadUnionData(ctx, result), err
 }
 
 // GetTeamMemberList 获取团队成员|列表
@@ -587,4 +614,21 @@ func (s *sTeam) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64
 	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
 
 	return affected > 0, err
+}
+
+// loadUnionData 加载关联详情
+func (s *sTeam) loadUnionData(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
+	if data.OwnerEmployeeId > 0 {
+		data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+	}
+	if data.CaptainEmployeeId > 0 {
+		data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+	}
+	if data.UnionMainId != sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId {
+		data.Company, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
+	}
+	if data.ParentId > 0 {
+		data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
+	}
+	return data
 }
