@@ -625,7 +625,7 @@ func (s *sTeam) loadUnionData(ctx context.Context, data *co_model.TeamRes) *co_m
 		data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
 	}
 	if data.UnionMainId != sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId {
-		data.Company, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
+		data.UnionMain, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
 	}
 	if data.ParentId > 0 {
 		data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)

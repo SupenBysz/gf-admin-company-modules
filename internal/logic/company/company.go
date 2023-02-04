@@ -248,5 +248,8 @@ func (s *sCompany) masker(company *co_model.CompanyRes) *co_model.CompanyRes {
 	}
 
 	company.ContactMobile = masker.MaskString(company.ContactMobile, masker.MaskPhone)
+
+	company.AdminUser, _ = s.modules.Employee().GetEmployeeById(context.Background(), company.UserId)
+
 	return company
 }

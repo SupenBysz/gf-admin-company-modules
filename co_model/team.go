@@ -16,10 +16,10 @@ type Team struct {
 
 type TeamRes struct {
 	co_entity.CompanyTeam
-	Owner   *EmployeeRes `json:"owner" dc:"团队所有者/业务总监/业务经理/团队队长"`
-	Captain *EmployeeRes `json:"captain" dc:"团队队长编号/小组组长"`
-	Company *CompanyRes  `json:"company" dc:"所属主体单位"`
-	Parent  *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
+	Owner     *EmployeeRes `json:"owner" dc:"团队所有者/业务总监/业务经理/团队队长"`
+	Captain   *EmployeeRes `json:"captain" dc:"团队队长编号/小组组长"`
+	UnionMain *CompanyRes  `json:"unionMain" dc:"关联主体"`
+	Parent    *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
 }
 
 type TeamMemberRes struct {
