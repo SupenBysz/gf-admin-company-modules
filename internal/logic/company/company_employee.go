@@ -235,6 +235,7 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 			}
 
 			if len(excludeIds) > 0 {
+				// 过滤掉重复的id
 				excludeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(excludeIds)).Unique().Slice())
 				model = model.WhereIn(s.dao.Employee.Columns().Id, excludeIds)
 			}
@@ -635,8 +636,8 @@ func (s *sEmployee) loadMoreData(ctx context.Context, employee *co_model.Employe
 
 		memberIds := make([]int64, 0)
 
-		for _, item := range teamMemberItems {
-			memberIds = append(memberIds, item.Id)
+		for _, memberItem := range teamMemberItems {
+			memberIds = append(memberIds, memberItem.TeamId)
 		}
 
 		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
