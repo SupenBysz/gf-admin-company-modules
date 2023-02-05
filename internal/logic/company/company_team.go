@@ -351,7 +351,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 	// 遍历所有旧成员
 	for _, member := range *teamMemberArr {
 		if len(employeeIds) == 0 {
-			existIds = append(existIds, member.EmployeeId)
+			waitIds = append(existIds, member.EmployeeId)
 			continue
 		}
 		// 遍历待加入团队的员工
@@ -381,12 +381,15 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	// 如果新团队成员为空，则直接移除所有团队成员
 	if len(newTeamMemberIds) <= 0 {
-		_, err = s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId}).
-			WhereNotIn(s.dao.TeamMember.Columns().EmployeeId, existIds).
-			Delete()
-		if err != nil {
-			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Team.Table())
+		model := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId})
+
+		if len(existIds) > 0 {
+			model = model.WhereNotIn(s.dao.TeamMember.Columns().EmployeeId, existIds)
+		}
+
+		if _, err = model.Delete(); err != nil {
+			return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Team.Table())
 		}
 		return true, nil
 	}
