@@ -9,6 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/gogf/gf/v2/frame/g"
 	"math"
 	"strconv"
 	"time"
@@ -541,7 +542,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
 	}
 
-	return data, err
+	return s.loadMoreData(ctx, data), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
@@ -585,7 +586,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 	return (*co_model.EmployeeListRes)(result), err
 }
 
-// Masker 员工信息脱敏
+// Masker 员工信息脱敏，并加载附加数据
 func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes {
 	if employee == nil {
 		return nil
@@ -593,5 +594,26 @@ func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes
 	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
 	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
 	employee.Detail.LastLoginIp = masker.MaskString(employee.Detail.LastLoginIp, masker.MaskIPv4)
+	return s.loadMoreData(context.Background(), employee)
+}
+
+// loadMoreData 加载更多附加数据
+func (s *sEmployee) loadMoreData(ctx context.Context, employee *co_model.EmployeeRes) *co_model.EmployeeRes {
+	// 加载附加数据
+	g.Try(ctx, func(ctx context.Context) {
+		teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+
+		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeamMember{EmployeeId: employee.Id}).Scan(&teamMemberItems)
+
+		memberIds := make([]int64, 0)
+
+		for _, item := range teamMemberItems {
+			memberIds = append(memberIds, item.Id)
+		}
+
+		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&employee.TeamList)
+	})
 	return employee
 }
