@@ -121,13 +121,18 @@ func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.Searc
 
 	items := make([]*co_model.TeamMemberRes, 0)
 	for _, item := range data.Records {
-		item.Employee, _ = s.modules.Employee().GetEmployeeById(ctx, item.EmployeeId)
-		item.InviteUser, _ = s.modules.Employee().GetEmployeeById(ctx, item.InviteUserId)
+		if item.EmployeeId > 0 {
+			item.Employee, _ = s.modules.Employee().GetEmployeeById(ctx, item.EmployeeId)
+		}
+		if item.InviteUserId > 0 {
+			item.InviteUser, _ = s.modules.Employee().GetEmployeeById(ctx, item.InviteUserId)
+		}
 		if item.UnionMainId == sessionUser.UnionMainId {
 			item.UnionMain = UnionMain
 		} else if item.UnionMainId > 0 {
 			UnionMain, _ = s.modules.Company().GetCompanyById(ctx, item.UnionMainId)
 		}
+		items = append(items, item)
 	}
 	data.Records = items
 
