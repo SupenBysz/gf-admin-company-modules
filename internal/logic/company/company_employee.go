@@ -9,6 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"math"
 	"strconv"
@@ -215,8 +216,34 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.Employe
 func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
 	search = funs.FilterUnionMain(ctx, search, s.dao.Employee.Columns().UnionMainId)
 
+	model := s.dao.Employee.Ctx(ctx).
+		Hook(daoctl.CacheHookHandler)
+
+	excludeIds := make([]int64, 0)
+
+	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
+	{
+		teamSearch := funs.SearchFilterEx(search, "teamId", "employeeId", "inviteUserId", "unionMainId")
+
+		if len(teamSearch.Filter) > 0 {
+			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
+
+			if len(items.Records) > 0 {
+				for _, item := range items.Records {
+					excludeIds = append(excludeIds, item.EmployeeId)
+				}
+			}
+
+			if len(excludeIds) > 0 {
+				excludeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(excludeIds)).Unique().Slice())
+				model = model.WhereIn(s.dao.Employee.Columns().Id, excludeIds)
+			}
+		}
+	}
+
 	// 查询符合过滤条件的员工信息
-	result, err := daoctl.Query[*co_model.EmployeeRes](s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
+	result, err := daoctl.Query[*co_model.EmployeeRes](model.
+		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"信息查询失败", s.dao.Employee.Table())
