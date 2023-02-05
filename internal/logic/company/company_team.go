@@ -377,12 +377,9 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 	// 如果新团队成员为空，则直接移除所有团队成员
 	if len(newTeamMemberIds) <= 0 {
 		_, err = s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(
-				co_do.CompanyTeamMember{
-					TeamId:      teamId,
-					UnionMainId: sessionUser.UnionMainId,
-				},
-			).Delete()
+			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId}).
+			WhereNotIn(s.dao.TeamMember.Columns().EmployeeId, existIds).
+			Delete()
 		if err != nil {
 			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Team.Table())
 		}
