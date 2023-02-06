@@ -31,7 +31,7 @@ func (c *TeamController[T]) GetTeamById(ctx context.Context, req *co_company_api
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
 			ret, err := c.modules.Team().GetTeamById(ctx, req.Id)
-			return (*co_model.TeamRes)(ret), err
+			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).ViewDetail,
 	)
@@ -59,7 +59,7 @@ func (c *TeamController[T]) CreateTeam(ctx context.Context, req *co_company_api.
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
 			ret, err := c.modules.Team().CreateTeam(ctx, &req.Team)
-			return (*co_model.TeamRes)(ret), err
+			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).Create,
 	)
@@ -69,7 +69,7 @@ func (c *TeamController[T]) UpdateTeam(ctx context.Context, req *co_company_api.
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
 			ret, err := c.modules.Team().UpdateTeam(ctx, req.Id, req.Name, req.Remark)
-			return (*co_model.TeamRes)(ret), err
+			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).Update,
 	)
