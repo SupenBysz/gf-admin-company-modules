@@ -13,6 +13,21 @@ type Team struct {
 	ParentId          int64  `json:"parentId" description:"团队或小组父级ID"`
 	Remark            string `json:"remark"            description:"备注"`
 }
-type TeamRes co_entity.CompanyTeam
-type TeamListRes sys_model.CollectRes[*co_entity.CompanyTeam]
-type TeamMemberListRes sys_model.CollectRes[*co_entity.CompanyTeamMember]
+
+type TeamRes struct {
+	co_entity.CompanyTeam
+	Owner     *EmployeeRes `json:"owner" dc:"团队所有者/业务总监/业务经理/团队队长"`
+	Captain   *EmployeeRes `json:"captain" dc:"团队队长编号/小组组长"`
+	UnionMain *CompanyRes  `json:"unionMain" dc:"关联主体"`
+	Parent    *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
+}
+
+type TeamMemberRes struct {
+	co_entity.CompanyTeamMember
+	Employee   *EmployeeRes `json:"employee"   description:"成员"`
+	InviteUser *EmployeeRes `json:"inviteUser" description:"邀约人"`
+	UnionMain  *CompanyRes  `json:"unionMain"  description:"关联主体"`
+}
+
+type TeamListRes sys_model.CollectRes[*TeamRes]
+type TeamMemberListRes sys_model.CollectRes[*TeamMemberRes]

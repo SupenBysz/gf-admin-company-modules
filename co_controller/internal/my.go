@@ -2,10 +2,13 @@ package internal
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 )
 
 type MyController struct {
@@ -53,4 +56,26 @@ func (c *MyController) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsR
 	}
 
 	return result, nil
+}
+
+// SetAvatar 设置员工头像
+func (c *MyController) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Employee().SetEmployeeAvatar(ctx, req.ImageId)
+			return ret == true, err
+		},
+		co_enum.Employee.PermissionType(c.modules).SetAvatar,
+	)
+}
+
+// SetMobile 设置手机号
+func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Employee().SetEmployeeMobile(ctx, req.Mobile, req.Captcha, req.Password)
+			return ret == true, err
+		},
+		co_enum.Employee.PermissionType(c.modules).SetMobile,
+	)
 }

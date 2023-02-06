@@ -61,8 +61,6 @@ var (
 				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
-				// 注入Hook
-				consts.Global.Modules.Company().InjectHook()
 			}
 
 			// 初始化路由

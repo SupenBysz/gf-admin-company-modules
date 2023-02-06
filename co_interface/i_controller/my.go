@@ -2,6 +2,7 @@ package i_controller
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 )
@@ -16,4 +17,10 @@ type IMy interface {
 
 	// GetTeams 获取当前团队信息
 	GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error)
+
+	// SetAvatar 设置头像
+	SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error)
+
+	// SetMobile 设置手机号
+	SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error)
 }
