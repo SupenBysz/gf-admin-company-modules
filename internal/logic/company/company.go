@@ -18,7 +18,6 @@ import (
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
 type sCompany struct {
@@ -34,9 +33,9 @@ func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.I
 }
 
 // GetCompanyById 根据ID获取获取公司信息
-func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error) {
+func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-	data, err := daoctl.GetByIdWithError[co_entity.Company](
+	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		id,
@@ -50,8 +49,8 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_entity.Com
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
-func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_entity.Company, error) {
-	data, err := daoctl.ScanWithError[co_entity.Company](
+func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model.CompanyRes, error) {
+	data, err := daoctl.ScanWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.Company{Name: name}),
 	)
@@ -86,7 +85,7 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 // QueryCompanyList 查询公司列表
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-	data, err := daoctl.Query[*co_entity.Company](
+	data, err := daoctl.Query[*co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		filter,
@@ -98,7 +97,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	}
 
 	if data.Total > 0 {
-		items := make([]*co_entity.Company, 0)
+		items := make([]*co_model.CompanyRes, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
 			items = append(items, s.masker(item))
@@ -110,13 +109,13 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 }
 
 // CreateCompany 创建公司信息
-func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
+func (s *sCompany) CreateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error) {
 	info.Id = 0
 	return s.saveCompany(ctx, info)
 }
 
 // UpdateCompany 更新公司信息
-func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
+func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error) {
 	if info.Id <= 0 {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
@@ -124,7 +123,7 @@ func (s *sCompany) UpdateCompany(ctx context.Context, info *co_model.Company) (*
 }
 
 // SaveCompany 保存公司信息
-func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error) {
+func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error) {
 	// 名称重名检测
 	if s.HasCompanyByName(ctx, info.Name, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
@@ -222,11 +221,11 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 }
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
-func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_entity.Company, error) {
+func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
 	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	data, err := daoctl.GetByIdWithError[co_entity.Company](
+	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
 	)
@@ -234,15 +233,23 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_entity.C
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
+
+	if data.UserId > 0 {
+		data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
+	}
+
 	return data, nil
 }
 
 // Masker 信息脱敏
-func (s *sCompany) masker(company *co_entity.Company) *co_entity.Company {
+func (s *sCompany) masker(company *co_model.CompanyRes) *co_model.CompanyRes {
 	if company == nil {
 		return nil
 	}
 
 	company.ContactMobile = masker.MaskString(company.ContactMobile, masker.MaskPhone)
+
+	company.AdminUser, _ = s.modules.Employee().GetEmployeeById(context.Background(), company.UserId)
+
 	return company
 }

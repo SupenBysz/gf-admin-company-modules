@@ -24,12 +24,14 @@ type EmployeeUser struct {
 	Id       int64  `json:"id"           description:"ID，保持与USERID一致"`
 	Username string `json:"username"  description:"账号"`
 	State    int    `json:"state"     description:"状态：0未激活、1正常、-1封号、-2异常、-3已注销"`
+	Type     int    `json:"type"      description:"用户类型，0匿名，1用户，2微商，4商户、8广告主、16服务商、32运营中心"`
 }
 
 type EmployeeRes struct {
 	co_entity.CompanyEmployee
-	User   EmployeeUser             `orm:"with:id" json:"user"`
-	Detail sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
+	User     EmployeeUser             `orm:"with:id" json:"user"`
+	Detail   sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
+	TeamList []Team                   `json:"teamList"`
 }
 
 type EmployeeListRes sys_model.CollectRes[*EmployeeRes]

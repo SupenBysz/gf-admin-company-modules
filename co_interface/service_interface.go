@@ -20,34 +20,13 @@ type IDao interface {
 
 type (
 	ICompany interface {
-		GetCompanyById(ctx context.Context, id int64) (*co_entity.Company, error)
-		GetCompanyByName(ctx context.Context, name string) (*co_entity.Company, error)
+		GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error)
+		GetCompanyByName(ctx context.Context, name string) (*co_model.CompanyRes, error)
 		HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool
 		QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error)
-		CreateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
-		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_entity.Company, error)
-		GetCompanyDetail(ctx context.Context, id int64) (*co_entity.Company, error)
-	}
-	ITeam interface {
-		GetTeamById(ctx context.Context, id int64) (*co_entity.CompanyTeam, error)
-		GetTeamByName(ctx context.Context, name string) (*co_entity.CompanyTeam, error)
-		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
-		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
-		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
-		CreateTeam(ctx context.Context, info *co_model.Team) (*co_entity.CompanyTeam, error)
-		UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_entity.CompanyTeam, error)
-		GetTeamMemberList(ctx context.Context, id int64) (*co_model.EmployeeListRes, error)
-		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error)
-		SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error)
-		SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
-		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
-		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
-		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
-	}
-	IMy interface {
-		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
-		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
-		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
+		CreateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
+		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
+		GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error)
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error)
@@ -108,6 +87,27 @@ type (
 		ClearAllHook()
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
 		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *sys_model.Pagination) (*co_model.AccountBillListRes, error)
+	}
+	ITeam interface {
+		GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error)
+		GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error)
+		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
+		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
+		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
+		CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.TeamRes, error)
+		UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_model.TeamRes, error)
+		GetTeamMemberList(ctx context.Context, id int64) (*co_model.EmployeeListRes, error)
+		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error)
+		SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error)
+		SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
+		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
+		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
+		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
+	}
+	IMy interface {
+		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
+		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
+		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 	}
 )
 

@@ -9,6 +9,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"math"
 	"strconv"
 	"time"
@@ -214,8 +216,35 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.Employe
 func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
 	search = funs.FilterUnionMain(ctx, search, s.dao.Employee.Columns().UnionMainId)
 
+	model := s.dao.Employee.Ctx(ctx).
+		Hook(daoctl.CacheHookHandler)
+
+	excludeIds := make([]int64, 0)
+
+	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
+	{
+		teamSearch := funs.SearchFilterEx(search, "teamId", "employeeId", "inviteUserId", "unionMainId")
+
+		if len(teamSearch.Filter) > 0 {
+			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
+
+			if len(items.Records) > 0 {
+				for _, item := range items.Records {
+					excludeIds = append(excludeIds, item.EmployeeId)
+				}
+			}
+
+			if len(excludeIds) > 0 {
+				// 过滤掉重复的id
+				excludeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(excludeIds)).Unique().Slice())
+				model = model.WhereIn(s.dao.Employee.Columns().Id, excludeIds)
+			}
+		}
+	}
+
 	// 查询符合过滤条件的员工信息
-	result, err := daoctl.Query[*co_model.EmployeeRes](s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
+	result, err := daoctl.Query[*co_model.EmployeeRes](model.
+		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
@@ -541,7 +570,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
 	}
 
-	return data, err
+	return s.loadMoreData(ctx, data), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
@@ -585,7 +614,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 	return (*co_model.EmployeeListRes)(result), err
 }
 
-// Masker 员工信息脱敏
+// Masker 员工信息脱敏，并加载附加数据
 func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes {
 	if employee == nil {
 		return nil
@@ -593,5 +622,26 @@ func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes
 	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
 	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
 	employee.Detail.LastLoginIp = masker.MaskString(employee.Detail.LastLoginIp, masker.MaskIPv4)
+	return s.loadMoreData(context.Background(), employee)
+}
+
+// loadMoreData 加载更多附加数据
+func (s *sEmployee) loadMoreData(ctx context.Context, employee *co_model.EmployeeRes) *co_model.EmployeeRes {
+	// 加载附加数据
+	g.Try(ctx, func(ctx context.Context) {
+		teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+
+		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			Where(co_do.CompanyTeamMember{EmployeeId: employee.Id}).Scan(&teamMemberItems)
+
+		memberIds := make([]int64, 0)
+
+		for _, memberItem := range teamMemberItems {
+			memberIds = append(memberIds, memberItem.TeamId)
+		}
+
+		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&employee.TeamList)
+	})
 	return employee
 }

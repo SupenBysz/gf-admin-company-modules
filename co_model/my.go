@@ -8,7 +8,7 @@ import (
 type MyCompanyRes co_entity.Company
 
 type MyTeamRes struct {
-	co_entity.CompanyTeam
+	TeamRes
 	EmployeeListRes `json:"memberItems" description:"团队或小组成员"`
 }
 
