@@ -93,7 +93,7 @@ func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err err
 	// 团队列表
 	teamList, err := s.modules.Team().QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
 	if err != nil {
-		return nil, err
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamList}{#error_Data_Get_Failed}"), s.dao.Team.Table())
 	}
 
 	// 团队成员列表

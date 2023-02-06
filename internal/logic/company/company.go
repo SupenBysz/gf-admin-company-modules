@@ -178,8 +178,14 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 		}
 
 		if info.Id == 0 {
+			if employee != nil {
+				// 如果需要创建默认的用户和角色的时候才会有employee，所以进行非空判断，不然会有空指针错误
+				data.UserId = employee.Id
+			} else {
+				data.UserId = 0
+			}
+
 			data.Id = UnionMainId
-			data.UserId = employee.Id
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()

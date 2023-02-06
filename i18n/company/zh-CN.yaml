@@ -22,6 +22,8 @@ TeamCaptainEmployee: "团队队长"
 Data: "信息"
 TeamMember: "团队成员"
 Avatar: "头像"
+TeamList: "团队列表"
+
 
 ## 错误信息
 error_Data_Save_Failed: "保存信息失败"

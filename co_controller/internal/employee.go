@@ -47,11 +47,9 @@ func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_
 
 // HasEmployeeByName 员工名称是否存在
 func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_company_api.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
-
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, unionMainId, req.ExcludeId) == true, nil
+			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.ExcludeId) == true, nil
 		},
 	)
 }
@@ -79,10 +77,12 @@ func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_comp
 
 // CreateEmployee 创建员工信息
 func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company_api.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
+	req.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().CreateEmployee(ctx, &req.Employee)
-			return (*co_model.EmployeeRes)(ret), err
+			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Create,
 	)
@@ -93,7 +93,7 @@ func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_company
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().UpdateEmployee(ctx, &req.Employee)
-			return (*co_model.EmployeeRes)(ret), err
+			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Update,
 	)

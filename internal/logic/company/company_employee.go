@@ -147,7 +147,9 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_mod
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, excludeIds ...int64) bool {
+	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	model := s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyEmployee{
 		Name:        name,
 		UnionMainId: unionMainId,
@@ -262,7 +264,6 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 // CreateEmployee 创建员工信息
 func (s *sEmployee) CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error) {
 	info.Id = 0
-	info.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 
 	return s.saveEmployee(ctx, info)
 }
