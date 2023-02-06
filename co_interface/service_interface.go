@@ -30,7 +30,7 @@ type (
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error)
 		GetEmployeeByName(ctx context.Context, name string) (*co_model.EmployeeRes, error)
-		HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
+		HasEmployeeByName(ctx context.Context, name string, excludeIds ...int64) bool
 		HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool
 		GetEmployeeBySession(ctx context.Context) (*co_model.EmployeeRes, error)
 		QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error)

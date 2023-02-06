@@ -47,11 +47,9 @@ func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_
 
 // HasEmployeeByName 员工名称是否存在
 func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_company_api.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
-
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, unionMainId, req.ExcludeId) == true, nil
+			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.ExcludeId) == true, nil
 		},
 	)
 }
