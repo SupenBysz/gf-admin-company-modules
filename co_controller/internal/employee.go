@@ -95,7 +95,7 @@ func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_company
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().UpdateEmployee(ctx, &req.Employee)
-			return (*co_model.EmployeeRes)(ret), err
+			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Update,
 	)
