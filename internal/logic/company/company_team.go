@@ -68,7 +68,9 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamR
 }
 
 // HasTeamByName 团队名称是否存在
-func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+func (s *sTeam) HasTeamByName(ctx context.Context, name string, excludeIds ...int64) bool {
+	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	model := s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeam{
 		Name:        name,
 		UnionMainId: unionMainId,
@@ -154,7 +156,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断团队名称是否存在
-	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId) == true {
+	if s.HasTeamByName(ctx, info.Name) == true {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -231,9 +233,8 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 
 // UpdateTeam 更新团队或小组|信息
 func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_model.TeamRes, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	if s.HasTeamByName(ctx, name, sessionUser.UnionMainId, id) == true {
+	if s.HasTeamByName(ctx, name, id) == true {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 

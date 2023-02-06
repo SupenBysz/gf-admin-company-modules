@@ -45,7 +45,7 @@ type (
 	ITeam interface {
 		GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error)
 		GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error)
-		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
+		HasTeamByName(ctx context.Context, name string, excludeIds ...int64) bool
 		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
 		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.TeamRes, error)
