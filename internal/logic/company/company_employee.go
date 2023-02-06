@@ -262,7 +262,6 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 // CreateEmployee 创建员工信息
 func (s *sEmployee) CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error) {
 	info.Id = 0
-	info.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 
 	return s.saveEmployee(ctx, info)
 }

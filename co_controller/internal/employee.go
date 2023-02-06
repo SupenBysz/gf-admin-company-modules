@@ -79,10 +79,12 @@ func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_comp
 
 // CreateEmployee 创建员工信息
 func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company_api.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
+	req.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
 			ret, err := c.modules.Employee().CreateEmployee(ctx, &req.Employee)
-			return (*co_model.EmployeeRes)(ret), err
+			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Create,
 	)
