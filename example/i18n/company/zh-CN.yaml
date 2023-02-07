@@ -19,6 +19,8 @@ teamOrGroup: "团队或小组"
 TeamOwnerEmployee: "团队管理人"
 TeamCaptainEmployee: "团队队长"
 Data: "信息"
+Avatar: "头像"
+
 TeamMember: "团队成员"
 TeamList: "团队列表"
 
