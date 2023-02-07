@@ -322,6 +322,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			data.UnionMainId = info.UnionMainId
+			data.HiredAt = gtime.Now()
 
 			{
 				// 创建登录信息
