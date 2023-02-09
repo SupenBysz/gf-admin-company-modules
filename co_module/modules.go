@@ -65,6 +65,10 @@ func (m *Modules) SetI18n(i18n *gi18n.Manager) error {
 	return nil
 }
 
+func (m *Modules) Dao() *co_dao.XDao {
+	return m.xDao
+}
+
 func NewModules(
 	conf *co_model.Config,
 	xDao *co_dao.XDao,
@@ -77,10 +81,10 @@ func NewModules(
 	// 初始化默认多语言对象
 	module.SetI18n(nil)
 
-	module.company = company.NewCompany(module, module.xDao)
-	module.employee = company.NewEmployee(module, module.xDao)
-	module.team = company.NewTeam(module, module.xDao)
-	module.my = company.NewMy(module, module.xDao)
+	module.company = company.NewCompany(module)
+	module.employee = company.NewEmployee(module)
+	module.team = company.NewTeam(module)
+	module.my = company.NewMy(module)
 
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(module)...)

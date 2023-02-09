@@ -26,10 +26,10 @@ type sCompany struct {
 	dao     *co_dao.XDao
 }
 
-func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ICompany {
+func NewCompany(modules co_interface.IModules) co_interface.ICompany {
 	return &sCompany{
 		modules: modules,
-		dao:     xDao,
+		dao:     modules.Dao(),
 	}
 }
 
@@ -37,7 +37,7 @@ func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.I
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		id,
 	)
@@ -52,7 +52,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.Comp
 // GetCompanyByName 根据Name获取获取公司信息
 func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model.CompanyRes, error) {
 	data, err := daoctl.ScanWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{Name: name}),
 	)
 
@@ -65,7 +65,7 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model
 
 // HasCompanyByName 判断名称是否存在
 func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	model := s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler)
+	model := s.dao.Company.Ctx(ctx)
 
 	if len(excludeIds) > 0 {
 		var ids []int64
@@ -87,7 +87,7 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}),
 		filter,
 		false,
@@ -192,7 +192,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			data.CreatedAt = gtime.Now()
 
 			affected, err := daoctl.InsertWithError(
-				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
+				s.dao.Company.Ctx(ctx),
 				data,
 			)
 			if affected == 0 || err != nil {
@@ -206,7 +206,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			_, err = daoctl.UpdateWithError(
-				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+				s.dao.Company.Ctx(ctx).
 					Where(co_do.Company{Id: info.Id}),
 				data,
 			)
@@ -233,7 +233,7 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
 	)
 
