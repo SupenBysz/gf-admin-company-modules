@@ -7,7 +7,8 @@ package internal
 import (
 	"context"
 
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
+	"github.com/SupenBysz/gf-admin-community/utility/daoctl/dao_interface"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -31,9 +32,9 @@ var {TplTableNameCamelLowerCase}Columns = {TplTableNameCamelCase}Columns{
 }
 
 // New{TplTableNameCamelCase}Dao creates and returns a new DAO object for table data access.
-func New{TplTableNameCamelCase}Dao(proxy ...co_interface.IDao) *{TplTableNameCamelCase}Dao {
+func New{TplTableNameCamelCase}Dao(proxy ...dao_interface.IDao) *{TplTableNameCamelCase}Dao {
     var dao *{TplTableNameCamelCase}Dao
-    	if proxy != nil {
+    	if len(proxy) > 0 {
     	    dao = &{TplTableNameCamelCase}Dao{
                 group:   proxy[0].Group(),
                 table:   proxy[0].Table(),
@@ -70,8 +71,25 @@ func (dao *{TplTableNameCamelCase}Dao) Columns() {TplTableNameCamelCase}Columns 
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *{TplTableNameCamelCase}Dao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+func (dao *{TplTableNameCamelCase}Dao) Ctx(ctx context.Context, cacheOption ...*gdb.CacheOption) *gdb.Model {
+    model := dao.DB().Model(dao.Table()).Safe().Ctx(ctx)
+
+	daoConfig := dao_interface.DaoConfig{
+		Dao:         dao,
+		Model: 		 model,
+	}
+
+	if len(cacheOption) == 0 {
+		daoConfig.CacheOption = daoctl.MakeDaoCache(dao.Table())
+	} else {
+		if cacheOption[0] != nil {
+			daoConfig.CacheOption =cacheOption[0]
+		}
+	}
+
+	model = daoctl.RegisterDaoHook(model)
+
+	return model
 }
 
 // Transaction wraps the transaction logic using function f.
