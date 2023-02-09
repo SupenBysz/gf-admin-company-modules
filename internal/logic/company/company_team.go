@@ -46,7 +46,7 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, e
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	return s.loadUnionData(ctx, data), nil
+	return s.makeMore(ctx, data), nil
 }
 
 // GetTeamByName 根据Name获取团队信息
@@ -64,7 +64,7 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamR
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	return s.loadUnionData(ctx, data), nil
+	return s.makeMore(ctx, data), nil
 }
 
 // HasTeamByName 团队名称是否存在
@@ -101,7 +101,7 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 
 	items := make([]*co_model.TeamRes, 0)
 	for _, item := range data.Records {
-		items = append(items, s.loadUnionData(ctx, item))
+		items = append(items, s.makeMore(ctx, item))
 	}
 	data.Records = items
 
@@ -228,7 +228,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	}
 
 	result, err := s.GetTeamById(ctx, data.Id.(int64))
-	return s.loadUnionData(ctx, result), err
+	return s.makeMore(ctx, result), err
 }
 
 // UpdateTeam 更新团队或小组|信息
@@ -255,7 +255,7 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 	}
 
 	result, err := s.GetTeamById(ctx, id)
-	return s.loadUnionData(ctx, result), err
+	return s.makeMore(ctx, result), err
 }
 
 // GetTeamMemberList 获取团队成员|列表
@@ -622,19 +622,43 @@ func (s *sTeam) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64
 	return affected > 0, err
 }
 
-// loadUnionData 加载关联详情
-func (s *sTeam) loadUnionData(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
+// makeMore 按需加载附加数据
+func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
 	if data.OwnerEmployeeId > 0 {
-		data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().OwnerEmployeeId,
+			func() *co_model.EmployeeRes {
+				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+				return data.Owner
+			},
+		)
 	}
 	if data.CaptainEmployeeId > 0 {
-		data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().CaptainEmployeeId,
+			func() *co_model.EmployeeRes {
+				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+				return data.Owner
+			},
+		)
 	}
 	if data.UnionMainId != sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId {
-		data.UnionMain, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().UnionMainId,
+			func() *co_model.EmployeeRes {
+				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.UnionMainId)
+				return data.Owner
+			},
+		)
 	}
 	if data.ParentId > 0 {
-		data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().ParentId,
+			func() *co_model.TeamRes {
+				data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
+				return data.Parent
+			},
+		)
 	}
 	return data
 }

@@ -2,6 +2,7 @@ package company
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -45,7 +46,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.Comp
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
@@ -59,7 +60,7 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // HasCompanyByName 判断名称是否存在
@@ -100,7 +101,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 		items := make([]*co_model.CompanyRes, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
-			items = append(items, s.masker(item))
+			items = append(items, s.masker(s.makeMore(ctx, item)))
 		}
 		data.Records = items
 	}
@@ -240,11 +241,19 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	if data.UserId > 0 {
-		data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
-	}
+	return s.makeMore(ctx, data), nil
+}
 
-	return data, nil
+// makeMore 按需加载附加数据
+func (s *sCompany) makeMore(ctx context.Context, data *co_model.CompanyRes) *co_model.CompanyRes {
+	funs.AttrMake[co_model.CompanyRes](ctx,
+		s.dao.Company.Columns().UserId,
+		func() *co_model.EmployeeRes {
+			data.AdminUser, _ = s.modules.Employee().GetEmployeeById(context.Background(), data.UserId)
+			return data.AdminUser
+		},
+	)
+	return data
 }
 
 // Masker 信息脱敏
@@ -254,8 +263,6 @@ func (s *sCompany) masker(company *co_model.CompanyRes) *co_model.CompanyRes {
 	}
 
 	company.ContactMobile = masker.MaskString(company.ContactMobile, masker.MaskPhone)
-
-	company.AdminUser, _ = s.modules.Employee().GetEmployeeById(context.Background(), company.UserId)
 
 	return company
 }

@@ -125,7 +125,7 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.Em
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // GetEmployeeByName 根据Name获取员工信息
@@ -143,7 +143,7 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_mod
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // HasEmployeeByName 员工名称是否存在
@@ -253,8 +253,8 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 	}
 
 	items := make([]*co_model.EmployeeRes, 0)
-	for _, employeeInfo := range result.Records {
-		items = append(items, s.masker(employeeInfo))
+	for _, record := range result.Records {
+		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
@@ -571,7 +571,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
 	}
 
-	return s.loadMoreData(ctx, data), err
+	return s.masker(s.makeMore(ctx, data)), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
@@ -608,7 +608,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 
 	items := make([]*co_model.EmployeeRes, 0)
 	for _, record := range result.Records {
-		items = append(items, s.masker(record))
+		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
@@ -623,26 +623,31 @@ func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes
 	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
 	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
 	employee.Detail.LastLoginIp = masker.MaskString(employee.Detail.LastLoginIp, masker.MaskIPv4)
-	return s.loadMoreData(context.Background(), employee)
+	return employee
 }
 
-// loadMoreData 加载更多附加数据
-func (s *sEmployee) loadMoreData(ctx context.Context, employee *co_model.EmployeeRes) *co_model.EmployeeRes {
-	// 加载附加数据
-	g.Try(ctx, func(ctx context.Context) {
-		teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+// makeMore 按需加载附加数据
+func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *co_model.EmployeeRes {
+	funs.AttrMake[co_model.CompanyRes](ctx,
+		s.dao.Employee.Columns().UnionMainId,
+		func() []co_model.Team {
+			g.Try(ctx, func(ctx context.Context) {
+				teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
 
-		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.CompanyTeamMember{EmployeeId: employee.Id}).Scan(&teamMemberItems)
+				s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+					Where(co_do.CompanyTeamMember{EmployeeId: data.Id}).Scan(&teamMemberItems)
 
-		memberIds := make([]int64, 0)
+				memberIds := make([]int64, 0)
 
-		for _, memberItem := range teamMemberItems {
-			memberIds = append(memberIds, memberItem.TeamId)
-		}
+				for _, memberItem := range teamMemberItems {
+					memberIds = append(memberIds, memberItem.TeamId)
+				}
 
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&employee.TeamList)
-	})
-	return employee
+				s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+					WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&data.TeamList)
+			})
+			return data.TeamList
+		},
+	)
+	return data
 }
