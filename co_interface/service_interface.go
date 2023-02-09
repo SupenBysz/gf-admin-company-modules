@@ -5,17 +5,9 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
-
-type IDao interface {
-	DB() gdb.DB
-	Table() string
-	Group() string
-	Ctx(ctx context.Context) *gdb.Model
-	Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error)
-}
 
 type (
 	ICompany interface {
@@ -74,4 +66,5 @@ type IModules interface {
 	SetI18n(i18n *gi18n.Manager) error
 	T(ctx context.Context, content string) string
 	Tf(ctx context.Context, format string, values ...interface{}) string
+	Dao() *co_dao.XDao
 }

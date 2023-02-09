@@ -2,14 +2,13 @@ package co_controller
 
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller/internal"
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 )
 
 type (
-	CompanyController  internal.CompanyController[co_interface.IModules]
+	CompanyController  internal.CompanyController
 	EmployeeController internal.EmployeeController
-	TeamController     internal.TeamController[co_interface.IModules]
+	TeamController     internal.TeamController
 	MyController       internal.MyController
 )
 
