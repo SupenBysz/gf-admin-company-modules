@@ -15,10 +15,10 @@ type sMy struct {
 	dao     *co_dao.XDao
 }
 
-func NewMy(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.IMy {
+func NewMy(modules co_interface.IModules) co_interface.IMy {
 	return &sMy{
 		modules: modules,
-		dao:     xDao,
+		dao:     modules.Dao(),
 	}
 }
 
