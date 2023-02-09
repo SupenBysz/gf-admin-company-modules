@@ -9,16 +9,19 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 )
 
 type EmployeeController struct {
 	modules co_interface.IModules
+	dao     *co_dao.XDao
 }
 
 var Employee = func(modules co_interface.IModules) i_controller.IEmployee {
 	return &EmployeeController{
 		modules: modules,
+		dao:     modules.Dao(),
 	}
 }
 
@@ -29,7 +32,7 @@ func (c *EmployeeController) GetModules() co_interface.IModules {
 func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			return c.modules.Employee().GetEmployeeById(ctx, req.Id)
+			return c.modules.Employee().GetEmployeeById(c.makeMore(ctx), req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).ViewDetail,
 	)
@@ -39,7 +42,7 @@ func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_compan
 func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			return c.modules.Employee().GetEmployeeDetailById(ctx, req.Id)
+			return c.modules.Employee().GetEmployeeDetailById(c.makeMore(ctx), req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).MoreDetail,
 	)
@@ -69,7 +72,7 @@ func (c *EmployeeController) HasEmployeeByNo(ctx context.Context, req *co_compan
 func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_company_api.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeListRes, error) {
-			return c.modules.Employee().QueryEmployeeList(ctx, &req.SearchParams)
+			return c.modules.Employee().QueryEmployeeList(c.makeMore(ctx), &req.SearchParams)
 		},
 		co_enum.Employee.PermissionType(c.modules).List,
 	)
@@ -81,7 +84,7 @@ func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company
 
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().CreateEmployee(ctx, &req.Employee)
+			ret, err := c.modules.Employee().CreateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Create,
@@ -92,7 +95,7 @@ func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company
 func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_company_api.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeRes, error) {
-			ret, err := c.modules.Employee().UpdateEmployee(ctx, &req.Employee)
+			ret, err := c.modules.Employee().UpdateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
 		co_enum.Employee.PermissionType(c.modules).Update,
@@ -114,8 +117,12 @@ func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_company
 func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeListRes, error) {
-			return c.modules.Employee().GetEmployeeListByRoleId(ctx, req.Id)
+			return c.modules.Employee().GetEmployeeListByRoleId(c.makeMore(ctx), req.Id)
 		},
 		co_enum.Employee.PermissionType(c.modules).ViewDetail,
 	)
+}
+
+func (c *EmployeeController) makeMore(ctx context.Context) context.Context {
+	return funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
 }
