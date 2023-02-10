@@ -93,5 +93,5 @@ func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_compan
 }
 
 func (c *CompanyController) makeMore(ctx context.Context) context.Context {
-	return funs.AttrBuilder[co_model.CompanyRes, co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
+	return funs.AttrBuilder[co_model.CompanyRes, *co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
 }
