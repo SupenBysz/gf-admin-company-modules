@@ -249,8 +249,7 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 func (s *sCompany) makeMore(ctx context.Context, data *co_model.CompanyRes) *co_model.CompanyRes {
 	if data.UserId > 0 {
 		// 附加数据 employee
-		funs.AttrMake[co_model.CompanyRes](ctx,
-			s.dao.Company.Columns().UserId,
+		funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
 			func() *co_model.EmployeeRes {
 				data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
 
@@ -261,7 +260,6 @@ func (s *sCompany) makeMore(ctx context.Context, data *co_model.CompanyRes) *co_
 				return data.AdminUser
 			},
 		)
-
 	}
 	return data
 }
