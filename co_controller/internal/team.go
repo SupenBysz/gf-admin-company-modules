@@ -3,6 +3,9 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -133,5 +136,7 @@ func (c *TeamController) makeMore(ctx context.Context) context.Context {
 	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
 	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
 	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+
+	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	return ctx
 }
