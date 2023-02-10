@@ -642,7 +642,7 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 			},
 		)
 	}
-	if data.UnionMainId != sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId {
+	if data.UnionMainId > 0 {
 		funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().UnionMainId,
 			func() *co_model.CompanyRes {
