@@ -3,6 +3,9 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
@@ -124,5 +127,10 @@ func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *c
 }
 
 func (c *EmployeeController) makeMore(ctx context.Context) context.Context {
-	return funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
+	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
+	ctx = funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
+
+	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
+	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	return ctx
 }
