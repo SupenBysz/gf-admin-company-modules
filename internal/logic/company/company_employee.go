@@ -115,7 +115,7 @@ func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustom
 // GetEmployeeById 根据ID获取员工信息
 func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
 	data, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), id,
+		s.dao.Employee.Ctx(ctx), id,
 	)
 
 	if err != nil {
@@ -131,8 +131,7 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.Em
 // GetEmployeeByName 根据Name获取员工信息
 func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_model.EmployeeRes, error) {
 	data, err := daoctl.ScanWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User).
-			Where(co_do.CompanyEmployee{Name: name}),
+		s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
 	)
 
 	if err != nil {
@@ -554,7 +553,7 @@ func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool,
 func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	model := s.dao.Employee.Ctx(ctx).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User)
+	model := s.dao.Employee.Ctx(ctx)
 
 	if sessionUser.IsAdmin == false {
 		// 判断用户是否有权限
@@ -592,7 +591,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 	}
 
 	result, err := daoctl.Query[*co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User),
+		s.dao.Employee.Ctx(ctx),
 		&sys_model.SearchParams{
 			Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
