@@ -64,7 +64,7 @@ database:
     debug: true
 
 # redis配置
-redis:
+#redis:
   # 单实例配置示例1
-  default:
-    address: 127.0.0.1:6379
+  #  default:
+  #    address: 127.0.0.1:6379
