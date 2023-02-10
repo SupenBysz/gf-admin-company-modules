@@ -32,13 +32,13 @@ func (c *TeamController) GetModules() co_interface.IModules {
 func (c *TeamController) GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (*co_model.TeamRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
-			c.makeMore(ctx)
-			ret, err := c.modules.Team().GetTeamById(ctx, req.Id)
+			ret, err := c.modules.Team().GetTeamById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).ViewDetail,
 	)
 }
+
 func (c *TeamController) HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -50,8 +50,7 @@ func (c *TeamController) HasTeamByName(ctx context.Context, req *co_company_api.
 func (c *TeamController) QueryTeamList(ctx context.Context, req *co_company_api.QueryTeamListReq) (*co_model.TeamListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamListRes, error) {
-			c.makeMore(ctx)
-			return c.modules.Team().QueryTeamList(ctx, &req.SearchParams)
+			return c.modules.Team().QueryTeamList(c.makeMore(ctx), &req.SearchParams)
 		},
 		co_enum.Team.PermissionType(c.modules).List,
 	)
@@ -60,8 +59,7 @@ func (c *TeamController) QueryTeamList(ctx context.Context, req *co_company_api.
 func (c *TeamController) CreateTeam(ctx context.Context, req *co_company_api.CreateTeamReq) (*co_model.TeamRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
-			c.makeMore(ctx)
-			ret, err := c.modules.Team().CreateTeam(ctx, &req.Team)
+			ret, err := c.modules.Team().CreateTeam(c.makeMore(ctx), &req.Team)
 			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).Create,
@@ -71,8 +69,7 @@ func (c *TeamController) CreateTeam(ctx context.Context, req *co_company_api.Cre
 func (c *TeamController) UpdateTeam(ctx context.Context, req *co_company_api.UpdateTeamReq) (*co_model.TeamRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamRes, error) {
-			c.makeMore(ctx)
-			ret, err := c.modules.Team().UpdateTeam(ctx, req.Id, req.Name, req.Remark)
+			ret, err := c.modules.Team().UpdateTeam(c.makeMore(ctx), req.Id, req.Name, req.Remark)
 			return ret, err
 		},
 		co_enum.Team.PermissionType(c.modules).Update,
@@ -91,8 +88,7 @@ func (c *TeamController) DeleteTeam(ctx context.Context, req *co_company_api.Del
 func (c *TeamController) GetTeamMemberList(ctx context.Context, req *co_company_api.GetTeamMemberListReq) (*co_model.EmployeeListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.EmployeeListRes, error) {
-			funs.AttrBuilder[co_model.EmployeeRes, co_model.Company](ctx, c.dao.Employee.Columns().UnionMainId)
-			return c.modules.Team().GetTeamMemberList(ctx, req.Id)
+			return c.modules.Team().GetTeamMemberList(c.makeMore(ctx), req.Id)
 		},
 		co_enum.Team.PermissionType(c.modules).MemberDetail,
 	)
@@ -101,8 +97,8 @@ func (c *TeamController) GetTeamMemberList(ctx context.Context, req *co_company_
 func (c *TeamController) QueryTeamListByEmployee(ctx context.Context, req *co_company_api.QueryTeamListByEmployeeReq) (*co_model.TeamListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamListRes, error) {
-			c.makeMore(ctx)
-			return c.modules.Team().QueryTeamListByEmployee(ctx, req.EmployeeId, req.UnionMainId)
+
+			return c.modules.Team().QueryTeamListByEmployee(c.makeMore(ctx), req.EmployeeId, req.UnionMainId)
 		},
 		co_enum.Team.PermissionType(c.modules).List,
 	)
@@ -133,8 +129,9 @@ func (c *TeamController) SetTeamCaptain(ctx context.Context, req *co_company_api
 	)
 }
 
-func (c *TeamController) makeMore(ctx context.Context) {
-	funs.AttrBuilder[co_model.TeamRes, co_model.CompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
-	funs.AttrBuilder[co_model.TeamRes, co_model.EmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
-	funs.AttrBuilder[co_model.TeamRes, co_model.EmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+func (c *TeamController) makeMore(ctx context.Context) context.Context {
+	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
+	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
+	ctx = funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+	return ctx
 }
