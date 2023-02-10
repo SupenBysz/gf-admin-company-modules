@@ -33,8 +33,7 @@ func (c *CompanyController) GetModules() co_interface.IModules {
 func (c *CompanyController) GetCompanyById(ctx context.Context, req *co_company_api.GetCompanyByIdReq) (*co_model.CompanyRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.CompanyRes, error) {
-			ctx = c.makeMore(ctx)
-			ret, err := c.modules.Company().GetCompanyById(ctx, req.Id)
+			ret, err := c.modules.Company().GetCompanyById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
 		co_enum.Company.PermissionType(c.modules).ViewDetail,
@@ -54,8 +53,7 @@ func (c *CompanyController) HasCompanyByName(ctx context.Context, req *co_compan
 func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_company_api.QueryCompanyListReq) (*co_model.CompanyListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.CompanyListRes, error) {
-			ctx = c.makeMore(ctx)
-			return c.modules.Company().QueryCompanyList(ctx, &req.SearchParams)
+			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams)
 		},
 		co_enum.Company.PermissionType(c.modules).List,
 	)
@@ -65,8 +63,7 @@ func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_compan
 func (c *CompanyController) CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (*co_model.CompanyRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.CompanyRes, error) {
-			ctx = c.makeMore(ctx)
-			ret, err := c.modules.Company().CreateCompany(ctx, &req.Company)
+			ret, err := c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
 			return ret, err
 		},
 		co_enum.Company.PermissionType(c.modules).Create,
@@ -77,8 +74,7 @@ func (c *CompanyController) CreateCompany(ctx context.Context, req *co_company_a
 func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (*co_model.CompanyRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.CompanyRes, error) {
-			ctx = c.makeMore(ctx)
-			ret, err := c.modules.Company().UpdateCompany(ctx, &req.Company)
+			ret, err := c.modules.Company().UpdateCompany(c.makeMore(ctx), &req.Company)
 			return ret, err
 		},
 		co_enum.Company.PermissionType(c.modules).Update,
@@ -89,8 +85,7 @@ func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_company_a
 func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (*co_model.CompanyRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.CompanyRes, error) {
-			ctx = c.makeMore(ctx)
-			ret, err := c.modules.Company().GetCompanyDetail(ctx, req.Id)
+			ret, err := c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
 		co_enum.Company.PermissionType(c.modules).ViewMobile,
