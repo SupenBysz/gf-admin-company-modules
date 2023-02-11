@@ -3,6 +3,9 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -26,9 +29,9 @@ func (c *MyController) GetModules() co_interface.IModules {
 	return c.modules
 }
 
-// GetProfile 获取当前员工及用户信息
+// GetProfile 获取当前员工及用户信息 (附加数据：user、user_detail、employee、teamList)
 func (c *MyController) GetProfile(ctx context.Context, _ *co_company_api.GetProfileReq) (*co_model.MyProfileRes, error) {
-	result, err := c.modules.My().GetProfile(ctx)
+	result, err := c.modules.My().GetProfile(c.makeMore(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +50,10 @@ func (c *MyController) GetCompany(ctx context.Context, _ *co_company_api.GetComp
 
 }
 
-// GetTeams 获取当前团队信息
+// GetTeams 获取当前团队信息  (附加数据：user、user_detail、employee、teamList)
 func (c *MyController) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error) {
 
-	result, err := c.modules.My().GetTeams(ctx)
+	result, err := c.modules.My().GetTeams(c.makeMore(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -78,4 +81,16 @@ func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMob
 		},
 		co_enum.Employee.PermissionType(c.modules).SetMobile,
 	)
+}
+
+func (c *MyController) makeMore(ctx context.Context) context.Context {
+	// team相关附加信息
+	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.modules.Dao().Employee.Columns().UnionMainId)
+
+	// 加上员工的附加信息订阅，
+	ctx = funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Employee.Columns().Id)
+
+	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
+	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	return ctx
 }
