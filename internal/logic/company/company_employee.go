@@ -626,25 +626,32 @@ func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes
 
 // makeMore 按需加载附加数据
 func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *co_model.EmployeeRes {
+	if data == nil {
+		return nil
+	}
+
 	// team附加数据
 	if data.UnionMainId > 0 {
 		funs.AttrMake[co_model.EmployeeRes](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []co_model.Team {
 				g.Try(ctx, func(ctx context.Context) {
+					// 获取到该员工的所有团队成员信息记录
 					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
-
 					s.dao.TeamMember.Ctx(ctx).
 						Where(co_do.CompanyTeamMember{EmployeeId: data.CompanyEmployee.Id}).Scan(&teamMemberItems)
-
-					memberIds := make([]int64, 0)
-
-					for _, memberItem := range teamMemberItems {
-						memberIds = append(memberIds, memberItem.TeamId)
+					if len(teamMemberItems) == 0 {
+						data.TeamList = nil
+						return
 					}
 
+					// 记录该员工所在所有团队
+					teamIds := make([]int64, 0)
+					for _, memberItem := range teamMemberItems {
+						teamIds = append(teamIds, memberItem.TeamId)
+					}
 					s.dao.Team.Ctx(ctx).
-						WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&data.TeamList)
+						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&data.TeamList)
 				})
 				return data.TeamList
 			},
@@ -656,11 +663,16 @@ func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *c
 		funs.AttrMake[co_model.EmployeeRes](ctx,
 			s.dao.Employee.Columns().Id,
 			func() *co_model.EmployeeRes {
+				if data.CompanyEmployee.Id == 0 {
+					return nil
+				}
+
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CompanyEmployee.Id)
-
-				gconv.Struct(user.SysUser, &data.User)
-				gconv.Struct(user.Detail, &data.Detail)
-
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.User)
+					gconv.Struct(user.Detail, &data.Detail)
+				}
+				
 				return data
 			},
 		)

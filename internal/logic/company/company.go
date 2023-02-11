@@ -6,11 +6,10 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
-	"github.com/gogf/gf/v2/text/gstr"
-	"github.com/gogf/gf/v2/util/gconv"
-
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/yitter/idgenerator-go/idgen"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -247,20 +246,30 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 
 // makeMore 按需加载附加数据
 func (s *sCompany) makeMore(ctx context.Context, data *co_model.CompanyRes) *co_model.CompanyRes {
+	if data == nil {
+		return nil
+	}
+
 	if data.UserId > 0 {
 		// 附加数据 employee
 		funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
 			func() *co_model.EmployeeRes {
 				data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
+				if data.AdminUser == nil {
+					return nil
+				}
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.UserId)
-				gconv.Struct(user.SysUser, &data.AdminUser.User)
-				gconv.Struct(user.Detail, &data.AdminUser.Detail)
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.AdminUser.User)
+					gconv.Struct(user.Detail, &data.AdminUser.Detail)
+				}
 
 				return data.AdminUser
 			},
 		)
 	}
+
 	return data
 }
 

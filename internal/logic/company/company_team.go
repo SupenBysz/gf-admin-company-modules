@@ -624,14 +624,25 @@ func (s *sTeam) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64
 
 // makeMore 按需加载附加数据
 func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
+	if data == nil {
+		return nil
+	}
+
 	if data.OwnerEmployeeId > 0 {
 		funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().OwnerEmployeeId,
 			func() *co_model.EmployeeRes {
+				if data.OwnerEmployeeId == 0 {
+					return nil
+				}
+
 				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.OwnerEmployeeId)
-				gconv.Struct(user.SysUser, &data.Owner.User)
-				gconv.Struct(user.Detail, &data.Owner.Detail)
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.Owner.User)
+					gconv.Struct(user.Detail, &data.Owner.Detail)
+				}
+
 				return data.Owner
 			},
 		)
@@ -640,10 +651,17 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 		funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().CaptainEmployeeId,
 			func() *co_model.EmployeeRes {
+				if data.CaptainEmployeeId == 0 {
+					return nil
+				}
+
 				data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CaptainEmployeeId)
-				gconv.Struct(user.SysUser, &data.Captain.User)
-				gconv.Struct(user.Detail, &data.Captain.Detail)
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.Captain.User)
+					gconv.Struct(user.Detail, &data.Captain.Detail)
+				}
+
 				return data.Captain
 			},
 		)
@@ -652,6 +670,10 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 		funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().UnionMainId,
 			func() *co_model.CompanyRes {
+				if data.UnionMainId == 0 {
+					return nil
+				}
+
 				data.UnionMain, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
 				return data.UnionMain
 			},
@@ -661,6 +683,10 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 		funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().ParentId,
 			func() *co_model.TeamRes {
+				if data.ParentId == 0 {
+					return nil
+				}
+
 				data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
 				return data.Parent
 			},
