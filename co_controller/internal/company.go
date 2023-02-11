@@ -3,6 +3,9 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -93,5 +96,8 @@ func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_compan
 }
 
 func (c *CompanyController) makeMore(ctx context.Context) context.Context {
-	return funs.AttrBuilder[co_model.CompanyRes, *co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
+	ctx = funs.AttrBuilder[co_model.CompanyRes, *co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
+
+	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	return ctx
 }

@@ -629,6 +629,9 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 			s.dao.Team.Columns().OwnerEmployeeId,
 			func() *co_model.EmployeeRes {
 				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.OwnerEmployeeId)
+				gconv.Struct(user.SysUser, &data.Owner.User)
+				gconv.Struct(user.Detail, &data.Owner.Detail)
 				return data.Owner
 			},
 		)
@@ -638,6 +641,9 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 			s.dao.Team.Columns().CaptainEmployeeId,
 			func() *co_model.EmployeeRes {
 				data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CaptainEmployeeId)
+				gconv.Struct(user.SysUser, &data.Captain.User)
+				gconv.Struct(user.Detail, &data.Captain.Detail)
 				return data.Captain
 			},
 		)
