@@ -261,13 +261,13 @@ func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.Sear
 				continue
 			}
 			company, err := s.modules.Company().GetCompanyById(ctx, unionMainId)
-			if err != nil || (company != nil && company.ParentId != unionMainId) {
+			if err != nil || (company != nil && company.ParentId != unionMainId && company.Id != unionMainId) {
 				field.Value = sessionUser.UnionMainId
 				filter = append(filter, field)
+				continue
 			}
-		} else {
-			filter = append(filter, field)
 		}
+		filter = append(filter, field)
 	}
 	search.Filter = filter
 
