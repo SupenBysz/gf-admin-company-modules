@@ -18,6 +18,7 @@ type (
 		CreateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
 		GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error)
+		FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error)
@@ -35,7 +36,7 @@ type (
 	ITeam interface {
 		GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error)
 		GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error)
-		HasTeamByName(ctx context.Context, name string, excludeIds ...int64) bool
+		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
 		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
 		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.TeamRes, error)
