@@ -88,7 +88,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}),
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
 		filter,
 		false,
 	)
@@ -147,38 +147,38 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	// 启用事务
 	err := s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee *co_model.EmployeeRes
-		// 是否创建默认员工和角色
-		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {
-			// 构建员工信息
-			employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
-				No:          "001",
-				Name:        info.ContactName,
-				Mobile:      info.ContactMobile,
-				UnionMainId: UnionMainId,
-				State:       co_enum.Employee.State.Normal.Code(),
-				HiredAt:     gtime.Now(),
-			})
-			if err != nil {
-				return err
-			}
-
-			// 构建角色信息
-			roleData := sys_model.SysRole{
-				Name:        "管理员",
-				UnionMainId: UnionMainId,
-				IsSystem:    true,
-			}
-			roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
-			if err != nil {
-				return err
-			}
-			_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
-			if err != nil {
-				return err
-			}
-		}
-
 		if info.Id == 0 {
+			// 是否创建默认员工和角色
+			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
+				// 构建员工信息
+				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+					No:          "001",
+					Name:        info.ContactName,
+					Mobile:      info.ContactMobile,
+					UnionMainId: UnionMainId,
+					State:       co_enum.Employee.State.Normal.Code(),
+					HiredAt:     gtime.Now(),
+				})
+				if err != nil {
+					return err
+				}
+
+				// 构建角色信息
+				roleData := sys_model.SysRole{
+					Name:        "管理员",
+					UnionMainId: UnionMainId,
+					IsSystem:    true,
+				}
+				roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
+				if err != nil {
+					return err
+				}
+				_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
+				if err != nil {
+					return err
+				}
+			}
+
 			if employee != nil {
 				// 如果需要创建默认的用户和角色的时候才会有employee，所以进行非空判断，不然会有空指针错误
 				data.UserId = employee.Id
