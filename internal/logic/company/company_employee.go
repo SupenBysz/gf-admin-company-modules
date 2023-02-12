@@ -182,7 +182,7 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 		UnionMainId: unionMainId,
 	})
 
-	if len(excludeIds) > 0 {
+	if len(excludeIds) > 0 && excludeIds[0] > 0 {
 		var ids []int64
 		for _, id := range excludeIds {
 			if id > 0 {
@@ -282,7 +282,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
+	if true == s.HasEmployeeByName(ctx, info.Name, info.UnionMainId, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"名称已存在，请修改后提交", s.dao.Employee.Table())
 	}
 
@@ -292,7 +292,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	}
 
 	// 校验工号是否已存在
-	if true == s.HasEmployeeByNo(ctx, info.No, sessionUser.UnionMainId, info.Id) {
+	if true == s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号已存在，请修改后提交", s.dao.Employee.Table())
 	}
 
@@ -672,7 +672,7 @@ func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *c
 					gconv.Struct(user.SysUser, &data.User)
 					gconv.Struct(user.Detail, &data.Detail)
 				}
-				
+
 				return data
 			},
 		)
