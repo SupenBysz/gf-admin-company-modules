@@ -513,7 +513,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
 	}
 
-	return s.masker(s.makeMore(ctx, data)), err
+	return s.makeMore(ctx, data), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
