@@ -38,7 +38,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.Comp
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}),
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
 		id,
 	)
 
@@ -234,7 +234,7 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}), id,
 	)
 
 	if err != nil {
