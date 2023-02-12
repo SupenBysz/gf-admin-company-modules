@@ -229,7 +229,7 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 
 	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
 	{
-		teamSearch := funs.SearchFilterEx(search, "teamId", "employeeId", "inviteUserId", "unionMainId")
+		teamSearch := funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
 			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
@@ -360,6 +360,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			data.UpdatedAt = gtime.Now()
 			// unionMainId不能修改，强制为nil
 			data.UnionMainId = nil
+			data.Mobile = nil
 
 			_, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
 			if err != nil {
