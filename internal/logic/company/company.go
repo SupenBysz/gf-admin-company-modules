@@ -38,7 +38,7 @@ func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.Comp
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}),
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
 		id,
 	)
 
@@ -229,12 +229,9 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
-	// 获取登录用户
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
+		s.dao.Company.Ctx(ctx),
+		id,
 	)
 
 	if err != nil {
