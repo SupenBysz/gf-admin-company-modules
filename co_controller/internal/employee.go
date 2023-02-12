@@ -55,7 +55,7 @@ func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_
 func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_company_api.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.ExcludeId) == true, nil
+			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.UnionNameId, req.ExcludeId) == true, nil
 		},
 	)
 }

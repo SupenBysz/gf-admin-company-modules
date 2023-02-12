@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
-	"github.com/SupenBysz/gf-admin-community/utility/en_crypto"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -146,8 +145,10 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_mod
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+	if unionMainId <= 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	}
 
 	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
 		Name:        name,
@@ -175,6 +176,10 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 	// 工号为空，且允许工号为空则不做校验
 	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
 		return false
+	}
+
+	if unionMainId <= 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
 
 	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
@@ -215,7 +220,8 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.Employe
 
 // QueryEmployeeList 获取员工列表
 func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
-	search = funs.FilterUnionMain(ctx, search, s.dao.Employee.Columns().UnionMainId)
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
 	model := s.dao.Employee.Ctx(ctx)
 
@@ -282,7 +288,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, info.UnionMainId, info.Id) {
+	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"名称已存在，请修改后提交", s.dao.Employee.Table())
 	}
 
@@ -482,69 +488,6 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 				}
 			}
 		}
-	}
-	return true, nil
-}
-
-// SetEmployeeMobile 设置手机号
-func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
-	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
-	if err != nil {
-		return false, err
-	}
-
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
-	// 如果原手机号码和新号码一致，直接返回true
-	userInfo, err := sys_service.SysUser().GetUserDetail(ctx, sessionUser.Id)
-	if err != nil {
-		return false, err
-	}
-
-	if newMobile == gconv.Int64(userInfo.Mobile) {
-		return true, nil
-	}
-
-	pwdHash, err := en_crypto.PwdHash(password, gconv.String(sessionUser.Id))
-
-	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, pwdHash)
-	if checkPassword != true {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
-	}
-
-	_, err = s.dao.Employee.Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
-		Where(co_do.CompanyEmployee{Id: sessionUser.Id}).
-		Update()
-
-	affected, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
-		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))
-
-	if err != nil || affected == 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
-	}
-
-	return true, nil
-}
-
-// SetEmployeeAvatar 设置员工头像
-func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
-	// 校验员工头像并保存
-	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, "头像"+s.modules.T(ctx, "error_File_FileVoid"))
-
-	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
-	}
-
-	storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
-
-	_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
-
-	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
 	}
 	return true, nil
 }

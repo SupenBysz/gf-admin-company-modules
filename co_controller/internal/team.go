@@ -45,7 +45,7 @@ func (c *TeamController) GetTeamById(ctx context.Context, req *co_company_api.Ge
 func (c *TeamController) HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Team().HasTeamByName(ctx, req.Name, req.ExcludeId) == true, nil
+			return c.modules.Team().HasTeamByName(ctx, req.Name, req.UnionNameId, req.ExcludeId) == true, nil
 		},
 	)
 }

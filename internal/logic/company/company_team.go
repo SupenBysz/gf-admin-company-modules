@@ -68,8 +68,10 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamR
 }
 
 // HasTeamByName 团队名称是否存在
-func (s *sTeam) HasTeamByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+	if unionMainId == 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	}
 
 	model := s.dao.Team.Ctx(ctx).Where(co_do.CompanyTeam{
 		Name:        name,
@@ -94,8 +96,8 @@ func (s *sTeam) HasTeamByName(ctx context.Context, name string, excludeIds ...in
 
 // QueryTeamList 查询团队
 func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error) {
-	// 跨主体查询条件过滤
-	search = funs.FilterUnionMain(ctx, search, s.dao.Team.Columns().UnionMainId)
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
 	data, err := daoctl.Query[*co_model.TeamRes](s.dao.Team.Ctx(ctx), search, false)
 
@@ -110,6 +112,9 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 
 // QueryTeamMemberList 查询所有团队成员记录
 func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error) {
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
+
 	model := s.dao.TeamMember.Ctx(ctx)
 
 	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)
@@ -156,7 +161,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断团队名称是否存在
-	if s.HasTeamByName(ctx, info.Name) == true {
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId) == true {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 

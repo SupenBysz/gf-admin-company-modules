@@ -2,6 +2,7 @@ package company
 
 import (
 	"context"
+	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -36,13 +37,18 @@ func NewCompany(modules co_interface.IModules) co_interface.ICompany {
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+		s.dao.Company.Ctx(ctx),
 		id,
 	)
 
 	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
+		}
+	}
+	if err == sql.ErrNoRows || data != nil && data.Id != sessionUser.UnionMainId && data.ParentId != sessionUser.UnionMainId {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -239,6 +245,33 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 	}
 
 	return s.makeMore(ctx, data), nil
+}
+
+func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	filter := make([]sys_model.FilterInfo, 0)
+	// 遍历所有过滤条件：
+	for _, field := range search.Filter {
+		// 过滤所有自定义主体ID条件
+		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") {
+			unionMainId := gconv.Int64(field.Value)
+			if unionMainId == sessionUser.UnionMainId || unionMainId <= 0 {
+				filter = append(filter, field)
+				continue
+			}
+			company, err := s.modules.Company().GetCompanyById(ctx, unionMainId)
+			if err != nil || (company != nil && company.ParentId != unionMainId) {
+				field.Value = sessionUser.UnionMainId
+				filter = append(filter, field)
+			}
+		} else {
+			filter = append(filter, field)
+		}
+	}
+	search.Filter = filter
+
+	return search
 }
 
 // makeMore 按需加载附加数据

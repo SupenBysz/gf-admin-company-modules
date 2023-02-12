@@ -10,8 +10,9 @@ type GetEmployeeByIdReq struct {
 }
 
 type HasEmployeeByNameReq struct {
-	Name      string `json:"name" v:"required#名称不能为空" dc:"名称"`
-	ExcludeId int64  `json:"excludeId" dc:"要排除的员工ID"`
+	Name        string `json:"name" v:"required#名称不能为空" dc:"名称"`
+	UnionNameId int64  `json:"unionNameId" dc:"关联主体ID"`
+	ExcludeId   int64  `json:"excludeId" dc:"要排除的员工ID"`
 }
 
 type HasEmployeeByNoReq struct {
