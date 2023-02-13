@@ -522,6 +522,15 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
 	}
 
+	// 跨主体禁止查看员工信息，
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		// 下级公司也不可查看上级公司员工详细信息
+		if data.UnionMainId == sessionUser.ParentId {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		}
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	}
+
 	return s.makeMore(ctx, data), err
 }
 
