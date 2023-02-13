@@ -6,22 +6,25 @@ import (
 )
 
 type (
-	CompanyController  internal.CompanyController
-	EmployeeController internal.EmployeeController
-	TeamController     internal.TeamController
-	MyController       internal.MyController
+	CompanyController   internal.CompanyController
+	EmployeeController  internal.EmployeeController
+	TeamController      internal.TeamController
+	MyController        internal.MyController
+	FinancialController internal.FinancialController
 )
 
 type CoController struct {
-	Company  i_controller.ICompany
-	Employee i_controller.IEmployee
-	Team     i_controller.ITeam
-	My       i_controller.IMy
+	Company   i_controller.ICompany
+	Employee  i_controller.IEmployee
+	Team      i_controller.ITeam
+	My        i_controller.IMy
+	Financial i_controller.IFinancial
 }
 
 var (
-	Company  = internal.Company
-	Employee = internal.Employee
-	Team     = internal.Team
-	My       = internal.My
+	Company   = internal.Company
+	Employee  = internal.Employee
+	Team      = internal.Team
+	My        = internal.My
+	Financial = internal.Financial
 )
