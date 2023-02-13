@@ -187,7 +187,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 		if info.ParentId == 0 {
 			for _, team := range data.Records {
 				if team.ParentId == 0 {
-					return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+"不能是其它团队的队员", s.dao.Team.Table())
+					return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamCaptainEmployee}{#error_Team_NotInOtherTeam}"), s.dao.Team.Table())
 				}
 			}
 		}
@@ -223,7 +223,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 			// 创建团队队长
 			_, err = s.dao.TeamMember.Ctx(ctx).Data(captain).Insert()
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed")+"无法保存"+s.modules.T(ctx, "TeamCaptainEmployee")+"信息", s.dao.Team.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Team_Save_Failed}{#error_Team_TeamCaptainEmployee_NotSave}"), s.dao.Team.Table())
 			}
 		}
 		return nil
