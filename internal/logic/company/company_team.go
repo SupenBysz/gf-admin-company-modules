@@ -34,6 +34,8 @@ func NewTeam(modules co_interface.IModules) co_interface.ITeam {
 
 // GetTeamById 根据ID获取公司团队信息
 func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.TeamRes](
 		s.dao.Team.Ctx(ctx), id,
 	)
@@ -44,6 +46,11 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, e
 			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
+	}
+
+	// 需要进行跨主体判断
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
 	}
 
 	return s.makeMore(ctx, data), nil
@@ -301,6 +308,7 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 // QueryTeamListByEmployee 根据员工查询团队
 func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
@@ -313,6 +321,11 @@ func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, u
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_NotFound"), s.dao.Team.Table())
+	}
+
+	// 跨主体判断
+	if err == sql.ErrNoRows || data != nil && unionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamMember} {#error_Data_NotFound}"), s.dao.TeamMember.Table())
 	}
 
 	var teamIds []int64
@@ -643,7 +656,7 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 
 				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.OwnerEmployeeId)
-				if user != nil {
+				if user != nil && data.Owner != nil {
 					gconv.Struct(user.SysUser, &data.Owner.User)
 					gconv.Struct(user.Detail, &data.Owner.Detail)
 				}
@@ -662,7 +675,7 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 
 				data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CaptainEmployeeId)
-				if user != nil {
+				if user != nil && data.Captain != nil {
 					gconv.Struct(user.SysUser, &data.Captain.User)
 					gconv.Struct(user.Detail, &data.Captain.Detail)
 				}
