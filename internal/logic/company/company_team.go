@@ -308,6 +308,7 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 // QueryTeamListByEmployee 根据员工查询团队
 func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
@@ -320,6 +321,11 @@ func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, u
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_NotFound"), s.dao.Team.Table())
+	}
+
+	// 跨主体判断
+	if err == sql.ErrNoRows || data != nil && unionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamMember} {#error_Data_NotFound}"), s.dao.TeamMember.Table())
 	}
 
 	var teamIds []int64
