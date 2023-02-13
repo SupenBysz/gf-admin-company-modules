@@ -235,12 +235,20 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx),
 		id,
 	)
 
 	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
+		}
+	}
+
+	if err == sql.ErrNoRows || data != nil && data.Id != sessionUser.UnionMainId && data.ParentId != sessionUser.UnionMainId {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
