@@ -255,10 +255,21 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 	return s.makeMore(ctx, data), nil
 }
 
+// FilterUnionMainId 跨主体查询条件过滤
 func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	filter := make([]sys_model.FilterInfo, 0)
+
+	if search == nil || len(search.Filter) == 0 {
+		search.Filter = append(search.Filter, sys_model.FilterInfo{
+			Field:     "unionMainId",
+			Where:     "=",
+			IsOrWhere: false,
+			Value:     sessionUser.UnionMainId,
+		})
+	}
+
 	// 遍历所有过滤条件：
 	for _, field := range search.Filter {
 		// 过滤所有自定义主体ID条件
@@ -277,6 +288,7 @@ func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.Sear
 		}
 		filter = append(filter, field)
 	}
+
 	search.Filter = filter
 
 	return search
