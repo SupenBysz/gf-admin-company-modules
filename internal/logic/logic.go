@@ -6,4 +6,5 @@ package logic
 
 import (
 	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
+	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/financial"
 )
