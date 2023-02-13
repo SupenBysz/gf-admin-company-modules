@@ -93,8 +93,9 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_model.CompanyRes](
+		// 查询自己公司 + 下级公司
 		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
+			Where(co_do.Company{Id: sessionUser.UnionMainId}).WhereOrIn(s.dao.Company.Columns().ParentId, sessionUser.UnionMainId),
 		filter,
 		false,
 	)
