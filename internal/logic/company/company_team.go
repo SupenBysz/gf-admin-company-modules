@@ -34,6 +34,8 @@ func NewTeam(modules co_interface.IModules) co_interface.ITeam {
 
 // GetTeamById 根据ID获取公司团队信息
 func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.TeamRes](
 		s.dao.Team.Ctx(ctx), id,
 	)
@@ -44,6 +46,11 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, e
 			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
+	}
+
+	// 需要进行跨主体判断
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
 	}
 
 	return s.makeMore(ctx, data), nil
