@@ -643,7 +643,7 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 
 				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.OwnerEmployeeId)
-				if user != nil {
+				if user != nil && data.Owner != nil {
 					gconv.Struct(user.SysUser, &data.Owner.User)
 					gconv.Struct(user.Detail, &data.Owner.Detail)
 				}
@@ -662,7 +662,7 @@ func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.
 
 				data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CaptainEmployeeId)
-				if user != nil {
+				if user != nil && data.Captain != nil {
 					gconv.Struct(user.SysUser, &data.Captain.User)
 					gconv.Struct(user.Detail, &data.Captain.Detail)
 				}
