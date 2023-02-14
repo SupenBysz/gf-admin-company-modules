@@ -55,6 +55,8 @@ func (s *sFdBankCard) CreateBankCard(ctx context.Context, info co_model.BankCard
 
 	// 当前用户创建的就是自己的银行卡账号
 	bankCardInfo.UserId = user.Id
+	// 默认状态正常
+	bankCardInfo.State = 1
 
 	// 添加银行卡
 	_, err = s.dao.FdBankCard.Ctx(ctx).Data(bankCardInfo).Insert()
