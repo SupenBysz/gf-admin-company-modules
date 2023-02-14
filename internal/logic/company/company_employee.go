@@ -113,8 +113,11 @@ func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustom
 
 // GetEmployeeById 根据ID获取员工信息
 func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx), id,
+		s.dao.Employee.Ctx(ctx),
+		id,
 	)
 
 	if err != nil {
@@ -124,6 +127,12 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.Em
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
+
+	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId && data.UnionMainId != sessionUser.ParentId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	}
+
 	return s.masker(s.makeMore(ctx, data)), nil
 }
 
@@ -511,6 +520,15 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
+	}
+
+	// 跨主体禁止查看员工信息，
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		// 下级公司也不可查看上级公司员工详细信息
+		if data.UnionMainId == sessionUser.ParentId {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		}
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
 	return s.makeMore(ctx, data), err
