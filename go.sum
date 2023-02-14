@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1:1G1pk05UrOh0NlF1oeaaix1x8XzrfjIDK47TY0Zehcw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/SupenBysz/gf-admin-community v0.2.116 h1:TFzvjkYFcxMtUgcdHUTqwa3iWSHf+hqD44oSQ0ob4Ls=
-github.com/SupenBysz/gf-admin-community v0.2.116/go.mod h1:sSz8W6UrOg0yKzmPyDZbKbT3+zfgsAN3lWAHlqOtqQ0=
+github.com/SupenBysz/gf-admin-community v0.2.117 h1:LU1ajNRZBvvcNvqjmWnxTLCvXLhmcAM2vaqBnUEKWjo=
+github.com/SupenBysz/gf-admin-community v0.2.117/go.mod h1:sSz8W6UrOg0yKzmPyDZbKbT3+zfgsAN3lWAHlqOtqQ0=
 github.com/casbin/casbin/v2 v2.60.0 h1:ZmC0/t4wolfEsDpDxTEsu2z6dfbMNpc11F52ceLs2Eo=
 github.com/casbin/casbin/v2 v2.60.0/go.mod h1:vByNa/Fchek0KZUgG5wEsl7iFsiviAYKRtgrQfcJqHg=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
