@@ -262,12 +262,23 @@ func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.Sear
 	filter := make([]sys_model.FilterInfo, 0)
 
 	if search == nil || len(search.Filter) == 0 {
-		search.Filter = append(search.Filter, sys_model.FilterInfo{
-			Field:     "unionMainId",
-			Where:     "=",
-			IsOrWhere: false,
-			Value:     sessionUser.UnionMainId,
-		})
+		if search == nil {
+			search = &sys_model.SearchParams{
+				Pagination: sys_model.Pagination{
+					PageNum:  1,
+					PageSize: 20,
+				},
+			}
+		}
+
+		if len(search.Filter) == 0 {
+			search.Filter = append(search.Filter, sys_model.FilterInfo{
+				Field:     "unionMainId",
+				Where:     "=",
+				IsOrWhere: false,
+				Value:     sessionUser.UnionMainId,
+			})
+		}
 	}
 
 	// 遍历所有过滤条件：
