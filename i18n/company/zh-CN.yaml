@@ -12,6 +12,7 @@ permission_Company_AuditLicense: "审核资质认证信息"
 permission_Company_UpdateLicense: "更新资质认证信息"
 
 ## 称呼
+User: "用户"
 EmployeeName: "员工"
 CompanyName: "公司"
 TeamName: "团队"
@@ -36,6 +37,15 @@ error_NameAlreadyExists: "名称已被占用，请修改后再试"
 error_NoAlreadyExists: "工号已经存在，请修改后再试"
 error_NoNotNull: "工号不能为空，请修改后提交"
 error_SuperAdminNotServer: "超级管理员不支持调用该参数"
+error_Legal_Operation: "非法操作！"
+error_State_Update_Failed: "状态修改失败"
+error_Id_NotNull: "id不能为空"
+error_Add_Failed: "添加失败"
+error_Delete_Failed: "删除失败"
+error_Create_Failed: "创建失败"
+error_AlreadyExist: "已存在"
+error_NonExist: "不存在"
+
 
 ## 有关文件的错误信息
 error_File_FileVoid: "文件无效，请重新上传"
