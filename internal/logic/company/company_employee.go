@@ -57,7 +57,10 @@ func (s *sEmployee) injectHook() {
 
 // AuthHookFunc 用户登录Hook函数
 func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
-	employee, _ := s.modules.Employee().GetEmployeeById(ctx, user.Id)
+	employee, _ := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		user.Id,
+	)
 	if employee != nil {
 		user.Detail.Realname = employee.Name
 	}
@@ -72,7 +75,10 @@ func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType,
 
 // userHookFunc 新增用户Hook函数
 func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
-	employee, err := s.GetEmployeeById(ctx, info.Id)
+	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		info.Id,
+	)
 	if err != nil {
 		return info, nil
 	}
@@ -89,8 +95,11 @@ func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info
 
 // JwtHookFunc Jwt钩子函数
 func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
-	// 获取到当前user的主体id
-	employee, err := s.GetEmployeeById(ctx, claims.Id)
+	// 获取到当前user的主体id，由于JWT钩子函数大多是登录成功前调用，所以这里不能使用 s.GetEmployeeById 方法调用获取员工数据
+	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		claims.Id,
+	)
 	if employee == nil {
 		return claims, err
 	}
