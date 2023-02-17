@@ -8,4 +8,7 @@ import (
 func init() {
 	consts.Global.Modules.SetI18n(nil)
 	consts.PermissionTree = boot.InitPermission(consts.Global.Modules)
+
+	// 导入财务服务权限树
+	consts.FinancialPermissionTree = boot.InitFinancialPermission()
 }

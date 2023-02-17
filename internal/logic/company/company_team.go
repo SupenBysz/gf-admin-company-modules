@@ -25,17 +25,19 @@ type sTeam struct {
 	dao     *co_dao.XDao
 }
 
-func NewTeam(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ITeam {
+func NewTeam(modules co_interface.IModules) co_interface.ITeam {
 	return &sTeam{
 		modules: modules,
-		dao:     xDao,
+		dao:     modules.Dao(),
 	}
 }
 
 // GetTeamById 根据ID获取公司团队信息
 func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.TeamRes](
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler), id,
+		s.dao.Team.Ctx(ctx), id,
 	)
 
 	if err != nil {
@@ -46,13 +48,18 @@ func (s *sTeam) GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, e
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	return s.loadUnionData(ctx, data), nil
+	// 需要进行跨主体判断
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
+	}
+
+	return s.makeMore(ctx, data), nil
 }
 
 // GetTeamByName 根据Name获取团队信息
 func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error) {
 	data, err := daoctl.ScanWithError[co_model.TeamRes](
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Team.Ctx(ctx).
 			Where(co_do.CompanyTeam{Name: name}),
 	)
 
@@ -64,14 +71,16 @@ func (s *sTeam) GetTeamByName(ctx context.Context, name string) (*co_model.TeamR
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	return s.loadUnionData(ctx, data), nil
+	return s.makeMore(ctx, data), nil
 }
 
 // HasTeamByName 团队名称是否存在
-func (s *sTeam) HasTeamByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+	if unionMainId == 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	}
 
-	model := s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeam{
+	model := s.dao.Team.Ctx(ctx).Where(co_do.CompanyTeam{
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
@@ -94,14 +103,14 @@ func (s *sTeam) HasTeamByName(ctx context.Context, name string, excludeIds ...in
 
 // QueryTeamList 查询团队
 func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error) {
-	// 跨主体查询条件过滤
-	search = funs.FilterUnionMain(ctx, search, s.dao.Team.Columns().UnionMainId)
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	data, err := daoctl.Query[*co_model.TeamRes](s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler), search, false)
+	data, err := daoctl.Query[*co_model.TeamRes](s.dao.Team.Ctx(ctx), search, false)
 
 	items := make([]*co_model.TeamRes, 0)
 	for _, item := range data.Records {
-		items = append(items, s.loadUnionData(ctx, item))
+		items = append(items, s.makeMore(ctx, item))
 	}
 	data.Records = items
 
@@ -110,7 +119,10 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 
 // QueryTeamMemberList 查询所有团队成员记录
 func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error) {
-	model := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler)
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
+
+	model := s.dao.TeamMember.Ctx(ctx)
 
 	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)
 
@@ -156,7 +168,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断团队名称是否存在
-	if s.HasTeamByName(ctx, info.Name) == true {
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId) == true {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -182,7 +194,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 		if info.ParentId == 0 {
 			for _, team := range data.Records {
 				if team.ParentId == 0 {
-					return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "TeamCaptainEmployee")+"不能是其它团队的队员", s.dao.Team.Table())
+					return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamCaptainEmployee}{#error_Team_NotInOtherTeam}"), s.dao.Team.Table())
 				}
 			}
 		}
@@ -209,16 +221,16 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	err := s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 创建团队
 		affected, err := daoctl.InsertWithError(
-			s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data),
+			s.dao.Team.Ctx(ctx).Data(data),
 		)
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
 		}
 		if info.CaptainEmployeeId > 0 {
 			// 创建团队队长
-			_, err = s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(captain).Insert()
+			_, err = s.dao.TeamMember.Ctx(ctx).Data(captain).Insert()
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed")+"无法保存"+s.modules.T(ctx, "TeamCaptainEmployee")+"信息", s.dao.Team.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Team_Save_Failed}{#error_Team_TeamCaptainEmployee_NotSave}"), s.dao.Team.Table())
 			}
 		}
 		return nil
@@ -228,7 +240,7 @@ func (s *sTeam) CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.
 	}
 
 	result, err := s.GetTeamById(ctx, data.Id.(int64))
-	return s.loadUnionData(ctx, result), err
+	return s.makeMore(ctx, result), err
 }
 
 // UpdateTeam 更新团队或小组|信息
@@ -246,7 +258,7 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 
 	rowsAffected, err := daoctl.UpdateWithError(
 		s.dao.Team.Ctx(ctx).
-			Hook(daoctl.CacheHookHandler).Data(data).
+			Data(data).
 			Where(co_do.CompanyTeam{Id: id}),
 	)
 
@@ -255,7 +267,7 @@ func (s *sTeam) UpdateTeam(ctx context.Context, id int64, name string, remark st
 	}
 
 	result, err := s.GetTeamById(ctx, id)
-	return s.loadUnionData(ctx, result), err
+	return s.makeMore(ctx, result), err
 }
 
 // GetTeamMemberList 获取团队成员|列表
@@ -267,7 +279,7 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 	// 团队成员信息
 	items, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
-		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{
+		s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{
 			TeamId:      team.Id,
 			UnionMainId: team.UnionMainId,
 		}),
@@ -296,18 +308,24 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 
 // QueryTeamListByEmployee 根据员工查询团队
 func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*co_model.TeamListRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
 
 	data, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
-		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.TeamMember.Ctx(ctx).
 			Where(co_do.CompanyTeamMember{EmployeeId: employeeId, UnionMainId: unionMainId}),
 	)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_NotFound"), s.dao.Team.Table())
+	}
+
+	// 跨主体判断
+	if err == sql.ErrNoRows || data != nil && unionMainId != sessionUser.UnionMainId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamMember} {#error_Data_NotFound}"), s.dao.TeamMember.Table())
 	}
 
 	var teamIds []int64
@@ -337,7 +355,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	// 获取团队所有旧成员
 	teamMemberArr, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
-		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.TeamMember.Ctx(ctx).
 			Where(co_do.CompanyTeamMember{
 				TeamId:      teamId,
 				UnionMainId: sessionUser.UnionMainId,
@@ -382,7 +400,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	// 如果新团队成员为空，则直接移除所有团队成员
 	if len(newTeamMemberIds) <= 0 {
-		model := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		model := s.dao.TeamMember.Ctx(ctx).
 			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId})
 
 		if len(existIds) > 0 {
@@ -426,7 +444,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	//
 	if team.ParentId == 0 {
-		count, _ := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		count, _ := s.dao.TeamMember.Ctx(ctx).
 			WhereIn(s.dao.TeamMember.Columns().EmployeeId, newTeamMemberIds).
 			Where(s.dao.TeamMember.Columns().UnionMainId, sessionUser.UnionMainId).Count()
 		if count > 0 {
@@ -436,7 +454,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 	err = s.dao.TeamMember.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 清理团队成员
-		_, err = s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		_, err = s.dao.TeamMember.Ctx(ctx).
 			WhereIn(s.dao.TeamMember.Columns().Id, existIds).
 			Delete()
 
@@ -446,7 +464,7 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 
 		for _, employeeId := range newTeamMemberIds {
 			affected, err := daoctl.InsertWithError(
-				s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(
+				s.dao.TeamMember.Ctx(ctx).Data(
 					co_do.CompanyTeamMember{
 						Id:          idgen.NextId(),
 						TeamId:      team.Id,
@@ -479,7 +497,7 @@ func (s *sTeam) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64
 
 	// 需要删除团队负责人的情况
 	if team.Id != 0 && employeeId == 0 {
-		affected, err := daoctl.UpdateWithError(s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		affected, err := daoctl.UpdateWithError(s.dao.Team.Ctx(ctx).
 			Where(co_do.CompanyTeam{Id: team.Id}).
 			Data(co_do.CompanyTeam{OwnerEmployeeId: 0}),
 		)
@@ -503,7 +521,7 @@ func (s *sTeam) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64
 	}
 
 	affected, err := daoctl.UpdateWithError(
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Team.Ctx(ctx).
 			Data(co_do.CompanyTeam{OwnerEmployeeId: employee.Id}).
 			Where(co_do.CompanyTeam{Id: team.Id}),
 	)
@@ -525,7 +543,7 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 	// 需要删除团队队长或者组长的情况
 	if employeeId == 0 && team.Id != 0 {
 		affected, err := daoctl.UpdateWithError(
-			s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			s.dao.Team.Ctx(ctx).
 				Data(co_do.CompanyTeam{CaptainEmployeeId: 0}).
 				Where(co_do.CompanyTeam{Id: team.Id}),
 		)
@@ -575,7 +593,7 @@ func (s *sTeam) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int
 	}
 
 	affected, err := daoctl.UpdateWithError(
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Team.Ctx(ctx).
 			Where(co_do.CompanyTeam{Id: team.Id}).
 			Data(co_do.CompanyTeam{CaptainEmployeeId: employee.Id}),
 	)
@@ -593,7 +611,7 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 查询团队成员数量
-	count, err := s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+	count, err := s.dao.TeamMember.Ctx(ctx).
 		Where(co_do.CompanyTeamMember{
 			TeamId:      team.Id,
 			UnionMainId: sessionUser.UnionMainId,
@@ -608,7 +626,7 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 	}
 
 	affected, err := daoctl.DeleteWithError(
-		s.dao.Team.Ctx(ctx).Unscoped().Hook(daoctl.CacheHookHandler).
+		s.dao.Team.Ctx(ctx).Unscoped().
 			Where(co_do.CompanyTeam{Id: team.Id}),
 	)
 
@@ -617,24 +635,80 @@ func (s *sTeam) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, e
 
 // DeleteTeamMemberByEmployee 删除某个员工的所有团队成员记录
 func (s *sTeam) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error) {
-	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
+	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
 
 	return affected > 0, err
 }
 
-// loadUnionData 加载关联详情
-func (s *sTeam) loadUnionData(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
+// makeMore 按需加载附加数据
+func (s *sTeam) makeMore(ctx context.Context, data *co_model.TeamRes) *co_model.TeamRes {
+	if data == nil {
+		return nil
+	}
+
 	if data.OwnerEmployeeId > 0 {
-		data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().OwnerEmployeeId,
+			func() *co_model.EmployeeRes {
+				if data.OwnerEmployeeId == 0 {
+					return nil
+				}
+
+				data.Owner, _ = s.modules.Employee().GetEmployeeById(ctx, data.OwnerEmployeeId)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.OwnerEmployeeId)
+				if user != nil && data.Owner != nil {
+					gconv.Struct(user.SysUser, &data.Owner.User)
+					gconv.Struct(user.Detail, &data.Owner.Detail)
+				}
+
+				return data.Owner
+			},
+		)
 	}
 	if data.CaptainEmployeeId > 0 {
-		data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().CaptainEmployeeId,
+			func() *co_model.EmployeeRes {
+				if data.CaptainEmployeeId == 0 {
+					return nil
+				}
+
+				data.Captain, _ = s.modules.Employee().GetEmployeeById(ctx, data.CaptainEmployeeId)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CaptainEmployeeId)
+				if user != nil && data.Captain != nil {
+					gconv.Struct(user.SysUser, &data.Captain.User)
+					gconv.Struct(user.Detail, &data.Captain.Detail)
+				}
+
+				return data.Captain
+			},
+		)
 	}
-	if data.UnionMainId != sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId {
-		data.UnionMain, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
+	if data.UnionMainId > 0 {
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().UnionMainId,
+			func() *co_model.CompanyRes {
+				if data.UnionMainId == 0 {
+					return nil
+				}
+
+				data.UnionMain, _ = s.modules.Company().GetCompanyById(ctx, data.UnionMainId)
+				return data.UnionMain
+			},
+		)
 	}
 	if data.ParentId > 0 {
-		data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
+		funs.AttrMake[co_model.TeamRes](ctx,
+			s.dao.Team.Columns().ParentId,
+			func() *co_model.TeamRes {
+				if data.ParentId == 0 {
+					return nil
+				}
+
+				data.Parent, _ = s.modules.Team().GetTeamById(ctx, data.ParentId)
+				return data.Parent
+			},
+		)
 	}
 	return data
 }

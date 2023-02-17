@@ -79,3 +79,48 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 	}
 	return result
 }
+
+// InitFinancialPermission 初始化财务服务权限树
+func InitFinancialPermission() []*permission.SysPermissionTree {
+	result := []*permission.SysPermissionTree{
+		// 财务服务权限树
+		{
+			SysPermission: &sys_entity.SysPermission{
+				Id:         5953153121845349,
+				Name:       "财务服务",
+				Identifier: "Financial",
+				Type:       1,
+				IsShow:     1,
+			},
+			Children: []*permission.SysPermissionTree{
+				// 查看发票详情，查看发票详情信息
+				co_enum.Financial.PermissionType.ViewInvoiceDetail,
+				// 查看发票抬头信息，查看发票抬头信息
+				co_enum.Financial.PermissionType.ViewInvoice,
+				// 查看提现账号，查看提现账号信息
+				co_enum.Financial.PermissionType.ViewBankCardDetail,
+				// 提现账号列表，查看所有提现账号
+				co_enum.Financial.PermissionType.BankCardList,
+				// 发票抬头列表，查看所有发票抬头
+				co_enum.Financial.PermissionType.InvoiceList,
+				// 发票详情列表，查看所有发票详情
+				co_enum.Financial.PermissionType.InvoiceDetailList,
+				// 审核发票，审核发票申请
+				co_enum.Financial.PermissionType.AuditInvoiceDetail,
+				// 开发票，添加发票详情记录
+				co_enum.Financial.PermissionType.MakeInvoiceDetail,
+				// 添加发票抬头，添加发票抬头信息
+				co_enum.Financial.PermissionType.CreateInvoice,
+				//申请提现账号，添加提现账号信息
+				co_enum.Financial.PermissionType.CreateBankCard,
+				// 删除发票抬头，删除发票抬头信息
+				co_enum.Financial.PermissionType.DeleteInvoice,
+				//  删除提现账号，删除提现账号信息
+				co_enum.Financial.PermissionType.DeleteBankCard,
+				// 查看余额，查看账号余额
+				co_enum.Financial.PermissionType.GetAccountBalance,
+			},
+		},
+	}
+	return result
+}

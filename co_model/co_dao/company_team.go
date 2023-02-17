@@ -5,12 +5,12 @@
 package co_dao
 
 import (
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-community/utility/daoctl/dao_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao/internal"
 )
 
-type CompanyTeam = internal.CompanyTeamDao
+type CompanyTeam = dao_interface.TIDao[internal.CompanyTeamColumns]
 
-func NewCompanyTeam(dao ...co_interface.IDao) *CompanyTeam {
-	return internal.NewCompanyTeamDao(dao...)
+func NewCompanyTeam(dao ...dao_interface.IDao) CompanyTeam {
+	return (CompanyTeam)(internal.NewCompanyTeamDao(dao...))
 }

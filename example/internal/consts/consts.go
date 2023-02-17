@@ -15,7 +15,11 @@ type global struct {
 
 var (
 	PermissionTree []*permission.SysPermissionTree
-	Global         = global{
+
+	// FinancialPermissionTree 财务服务权限树 (可选)
+	FinancialPermissionTree []*permission.SysPermissionTree
+
+	Global = global{
 		Modules: co_module.NewModules(
 			&co_model.Config{
 				AllowEmptyNo:                   true,
@@ -36,6 +40,13 @@ var (
 				Team:       co_dao.NewCompanyTeam(),
 				Employee:   co_dao.NewCompanyEmployee(),
 				TeamMember: co_dao.NewCompanyTeamMember(),
+				// 应该在哪里实例化这些表
+				FdAccount:       co_dao.NewFdAccount(),
+				FdAccountBill:   co_dao.NewFdAccountBill(),
+				FdInvoice:       co_dao.NewFdInvoice(),
+				FdInvoiceDetail: co_dao.NewFdInvoiceDetail(),
+				FdCurrency:      co_dao.NewFdCurrency(),
+				FdBankCard:      co_dao.NewFdBankCard(),
 			},
 		),
 	}

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
-	"github.com/SupenBysz/gf-admin-community/utility/en_crypto"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -38,10 +37,10 @@ type sEmployee struct {
 	dao     *co_dao.XDao
 }
 
-func NewEmployee(modules co_interface.IModules, xDao *co_dao.XDao) *sEmployee {
+func NewEmployee(modules co_interface.IModules) *sEmployee {
 	result := &sEmployee{
 		modules: modules,
-		dao:     xDao,
+		dao:     modules.Dao(),
 	}
 
 	// 注入钩子函数
@@ -58,7 +57,10 @@ func (s *sEmployee) injectHook() {
 
 // AuthHookFunc 用户登录Hook函数
 func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
-	employee, _ := s.modules.Employee().GetEmployeeById(ctx, user.Id)
+	employee, _ := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		user.Id,
+	)
 	if employee != nil {
 		user.Detail.Realname = employee.Name
 	}
@@ -73,7 +75,10 @@ func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType,
 
 // userHookFunc 新增用户Hook函数
 func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
-	employee, err := s.GetEmployeeById(ctx, info.Id)
+	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		info.Id,
+	)
 	if err != nil {
 		return info, nil
 	}
@@ -90,15 +95,18 @@ func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info
 
 // JwtHookFunc Jwt钩子函数
 func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
-	// 获取到当前user的主体id
-	employee, err := s.GetEmployeeById(ctx, claims.Id)
+	// 获取到当前user的主体id，由于JWT钩子函数大多是登录成功前调用，所以这里不能使用 s.GetEmployeeById 方法调用获取员工数据
+	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+		s.dao.Employee.Ctx(ctx),
+		claims.Id,
+	)
 	if employee == nil {
 		return claims, err
 	}
 
 	// 这里还没登录成功不能使用 s.modules.Company().GetCompanyById，因为里面包含获取当前登录用户的 session 存在矛盾
 	company, err := daoctl.GetByIdWithError[co_entity.Company](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
+		s.dao.Company.Ctx(ctx),
 		employee.UnionMainId,
 	)
 	if company == nil || err != nil {
@@ -114,8 +122,11 @@ func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustom
 
 // GetEmployeeById 根据ID获取员工信息
 func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), id,
+		s.dao.Employee.Ctx(ctx),
+		id,
 	)
 
 	if err != nil {
@@ -125,14 +136,19 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.Em
 		}
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
-	return s.masker(data), nil
+
+	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId && data.UnionMainId != sessionUser.ParentId {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	}
+
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // GetEmployeeByName 根据Name获取员工信息
 func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_model.EmployeeRes, error) {
 	data, err := daoctl.ScanWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User).
-			Where(co_do.CompanyEmployee{Name: name}),
+		s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
 	)
 
 	if err != nil {
@@ -143,14 +159,16 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_mod
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	unionMainId := sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+	if unionMainId <= 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	}
 
-	model := s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyEmployee{
+	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
@@ -178,12 +196,16 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 		return false
 	}
 
-	model := s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Where(co_do.CompanyEmployee{
+	if unionMainId <= 0 {
+		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	}
+
+	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
 		No:          no,
 		UnionMainId: unionMainId,
 	})
 
-	if len(excludeIds) > 0 {
+	if len(excludeIds) > 0 && excludeIds[0] > 0 {
 		var ids []int64
 		for _, id := range excludeIds {
 			if id > 0 {
@@ -216,16 +238,16 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.Employe
 
 // QueryEmployeeList 获取员工列表
 func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
-	search = funs.FilterUnionMain(ctx, search, s.dao.Employee.Columns().UnionMainId)
+	// 过滤UnionMainId字段查询条件
+	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	model := s.dao.Employee.Ctx(ctx).
-		Hook(daoctl.CacheHookHandler)
+	model := s.dao.Employee.Ctx(ctx)
 
 	excludeIds := make([]int64, 0)
 
 	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
 	{
-		teamSearch := funs.SearchFilterEx(search, "teamId", "employeeId", "inviteUserId", "unionMainId")
+		teamSearch := funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
 			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
@@ -252,12 +274,12 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.Sea
 		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"信息查询失败", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
 	items := make([]*co_model.EmployeeRes, 0)
-	for _, employeeInfo := range result.Records {
-		items = append(items, s.masker(employeeInfo))
+	for _, record := range result.Records {
+		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
@@ -287,18 +309,18 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"名称已存在，请修改后提交", s.dao.Employee.Table())
+	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否允许为空
 	if info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号不能为空，请修改后提交", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否已存在
-	if true == s.HasEmployeeByNo(ctx, info.No, sessionUser.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "EmployeeName")+"工号已存在，请修改后提交", s.dao.Employee.Table())
+	if true == s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
@@ -308,7 +330,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		var avatarFile *sys_model.FileInfo
 		if info.Avatar != "" {
 			// 校验员工头像并保存
-			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), "头像"+s.modules.T(ctx, "error_File_FileVoid"))
+			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
@@ -348,7 +370,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 				data.Id = newUser.Id
 			}
 
-			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data))
+			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(data))
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
@@ -359,8 +381,9 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 			data.UpdatedAt = gtime.Now()
 			// unionMainId不能修改，强制为nil
 			data.UnionMainId = nil
+			data.Mobile = nil
 
-			_, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
+			_, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
 			}
@@ -369,9 +392,9 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		// 保存文件
 		if avatarFile != nil {
 			avatarFile, err := sys_service.File().SaveFile(ctx, avatarFile.Src, avatarFile)
-			_, err = sys_dao.SysFile.Ctx(ctx).Hook(daoctl.CacheHookHandler).Insert(avatarFile)
+			_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
 			}
 		}
 		return nil
@@ -387,7 +410,7 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
 	employee, err := s.GetEmployeeById(ctx, id)
 	if err != nil {
-		return false, err
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -398,7 +421,7 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 				return err
 			}
 			// 设置员工状态为已注销
-			_, err = s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+			_, err = s.dao.Employee.Ctx(ctx).
 				Data(co_do.CompanyEmployee{State: co_enum.Employee.State.Canceled.Code()}).
 				Where(co_do.CompanyEmployee{Id: employee.Id}).
 				Update()
@@ -406,7 +429,7 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 				return err
 			}
 			// 软删除
-			_, err = s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Delete(co_do.CompanyEmployee{Id: employee.Id})
+			_, err = s.dao.Employee.Ctx(ctx).Delete(co_do.CompanyEmployee{Id: employee.Id})
 			if err != nil {
 				return err
 			}
@@ -428,7 +451,7 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 			}
 
 			// 删除员工
-			_, err = s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Id})
+			_, err = s.dao.Employee.Ctx(ctx).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Id})
 			if err != nil {
 				return err
 			}
@@ -491,74 +514,11 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 	return true, nil
 }
 
-// SetEmployeeMobile 设置手机号
-func (s *sEmployee) SetEmployeeMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
-	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
-	if err != nil {
-		return false, err
-	}
-
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
-	// 如果原手机号码和新号码一致，直接返回true
-	userInfo, err := sys_service.SysUser().GetUserDetail(ctx, sessionUser.Id)
-	if err != nil {
-		return false, err
-	}
-
-	if newMobile == gconv.Int64(userInfo.Mobile) {
-		return true, nil
-	}
-
-	pwdHash, err := en_crypto.PwdHash(password, gconv.String(sessionUser.Id))
-
-	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, pwdHash)
-	if checkPassword != true {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
-	}
-
-	_, err = s.dao.Employee.Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
-		Where(co_do.CompanyEmployee{Id: sessionUser.Id}).
-		Update()
-
-	affected, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
-		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))
-
-	if err != nil || affected == 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
-	}
-
-	return true, nil
-}
-
-// SetEmployeeAvatar 设置员工头像
-func (s *sEmployee) SetEmployeeAvatar(ctx context.Context, imageId int64) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
-	// 校验员工头像并保存
-	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, "头像"+s.modules.T(ctx, "error_File_FileVoid"))
-
-	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
-	}
-
-	storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
-
-	_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
-
-	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
-	}
-	return true, nil
-}
-
 // GetEmployeeDetailById 根据ID获取员工详细信息
 func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	model := s.dao.Employee.Ctx(ctx).Hook(daoctl.CacheHookHandler).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User)
+	model := s.dao.Employee.Ctx(ctx)
 
 	if sessionUser.IsAdmin == false {
 		// 判断用户是否有权限
@@ -571,10 +531,19 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 	data, err := daoctl.ScanWithError[co_model.EmployeeRes](model.Where(co_do.CompanyEmployee{Id: id}))
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "EmployeeName")+"详情信息查询失败", s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
 	}
 
-	return s.loadMoreData(ctx, data), err
+	// 跨主体禁止查看员工信息，
+	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+		// 下级公司也不可查看上级公司员工详细信息
+		if data.UnionMainId == sessionUser.ParentId {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		}
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	}
+
+	return s.makeMore(ctx, data), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
@@ -596,7 +565,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 	}
 
 	result, err := daoctl.Query[*co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx).With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User),
+		s.dao.Employee.Ctx(ctx),
 		&sys_model.SearchParams{
 			Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
@@ -611,7 +580,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 
 	items := make([]*co_model.EmployeeRes, 0)
 	for _, record := range result.Records {
-		items = append(items, s.masker(record))
+		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
@@ -626,26 +595,62 @@ func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes
 	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
 	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
 	employee.Detail.LastLoginIp = masker.MaskString(employee.Detail.LastLoginIp, masker.MaskIPv4)
-	return s.loadMoreData(context.Background(), employee)
+	return employee
 }
 
-// loadMoreData 加载更多附加数据
-func (s *sEmployee) loadMoreData(ctx context.Context, employee *co_model.EmployeeRes) *co_model.EmployeeRes {
-	// 加载附加数据
-	g.Try(ctx, func(ctx context.Context) {
-		teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+// makeMore 按需加载附加数据
+func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *co_model.EmployeeRes {
+	if data == nil {
+		return nil
+	}
 
-		s.dao.TeamMember.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.CompanyTeamMember{EmployeeId: employee.Id}).Scan(&teamMemberItems)
+	// team附加数据
+	if data.UnionMainId > 0 {
+		funs.AttrMake[co_model.EmployeeRes](ctx,
+			s.dao.Employee.Columns().UnionMainId,
+			func() []co_model.Team {
+				g.Try(ctx, func(ctx context.Context) {
+					// 获取到该员工的所有团队成员信息记录
+					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+					s.dao.TeamMember.Ctx(ctx).
+						Where(co_do.CompanyTeamMember{EmployeeId: data.CompanyEmployee.Id}).Scan(&teamMemberItems)
+					if len(teamMemberItems) == 0 {
+						data.TeamList = nil
+						return
+					}
 
-		memberIds := make([]int64, 0)
+					// 记录该员工所在所有团队
+					teamIds := make([]int64, 0)
+					for _, memberItem := range teamMemberItems {
+						teamIds = append(teamIds, memberItem.TeamId)
+					}
+					s.dao.Team.Ctx(ctx).
+						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&data.TeamList)
+				})
+				return data.TeamList
+			},
+		)
+	}
 
-		for _, memberItem := range teamMemberItems {
-			memberIds = append(memberIds, memberItem.TeamId)
-		}
+	// user相关附加数据
+	if data.CompanyEmployee.Id > 0 {
+		funs.AttrMake[co_model.EmployeeRes](ctx,
+			s.dao.Employee.Columns().Id,
+			func() *co_model.EmployeeRes {
+				if data.CompanyEmployee.Id == 0 {
+					return nil
+				}
 
-		s.dao.Team.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			WhereIn(s.dao.Team.Columns().Id, memberIds).Scan(&employee.TeamList)
-	})
-	return employee
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CompanyEmployee.Id)
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.User)
+					gconv.Struct(user.Detail, &data.Detail)
+				}
+
+				return data
+			},
+		)
+	}
+
+	return data
 }

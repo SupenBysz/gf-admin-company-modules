@@ -2,13 +2,15 @@ package company
 
 import (
 	"context"
+	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
-	"github.com/gogf/gf/v2/text/gstr"
-
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/yitter/idgenerator-go/idgen"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -25,33 +27,38 @@ type sCompany struct {
 	dao     *co_dao.XDao
 }
 
-func NewCompany(modules co_interface.IModules, xDao *co_dao.XDao) co_interface.ICompany {
+func NewCompany(modules co_interface.IModules) co_interface.ICompany {
 	return &sCompany{
 		modules: modules,
-		dao:     xDao,
+		dao:     modules.Dao(),
 	}
 }
 
 // GetCompanyById 根据ID获取获取公司信息
 func (s *sCompany) GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}),
+		s.dao.Company.Ctx(ctx),
 		id,
 	)
 
 	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
+		}
+	}
+	if err == sql.ErrNoRows || data != nil && data.Id != sessionUser.UnionMainId && data.ParentId != sessionUser.UnionMainId {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
 func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model.CompanyRes, error) {
 	data, err := daoctl.ScanWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{Name: name}),
 	)
 
@@ -59,12 +66,12 @@ func (s *sCompany) GetCompanyByName(ctx context.Context, name string) (*co_model
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(data), nil
+	return s.masker(s.makeMore(ctx, data)), nil
 }
 
 // HasCompanyByName 判断名称是否存在
 func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool {
-	model := s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler)
+	model := s.dao.Company.Ctx(ctx)
 
 	if len(excludeIds) > 0 {
 		var ids []int64
@@ -86,8 +93,8 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}),
+		s.dao.Company.Ctx(ctx).
+			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
 		filter,
 		false,
 	)
@@ -100,7 +107,7 @@ func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.Searc
 		items := make([]*co_model.CompanyRes, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
-			items = append(items, s.masker(item))
+			items = append(items, s.masker(s.makeMore(ctx, item)))
 		}
 		data.Records = items
 	}
@@ -146,38 +153,38 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 	// 启用事务
 	err := s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee *co_model.EmployeeRes
-		// 是否创建默认员工和角色
-		if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole && info.Id == 0 {
-			// 构建员工信息
-			employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
-				No:          "001",
-				Name:        info.ContactName,
-				Mobile:      info.ContactMobile,
-				UnionMainId: UnionMainId,
-				State:       co_enum.Employee.State.Normal.Code(),
-				HiredAt:     gtime.Now(),
-			})
-			if err != nil {
-				return err
-			}
-
-			// 构建角色信息
-			roleData := sys_model.SysRole{
-				Name:        "管理员",
-				UnionMainId: UnionMainId,
-				IsSystem:    true,
-			}
-			roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
-			if err != nil {
-				return err
-			}
-			_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
-			if err != nil {
-				return err
-			}
-		}
-
 		if info.Id == 0 {
+			// 是否创建默认员工和角色
+			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
+				// 构建员工信息
+				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+					No:          "001",
+					Name:        info.ContactName,
+					Mobile:      info.ContactMobile,
+					UnionMainId: UnionMainId,
+					State:       co_enum.Employee.State.Normal.Code(),
+					HiredAt:     gtime.Now(),
+				})
+				if err != nil {
+					return err
+				}
+
+				// 构建角色信息
+				roleData := sys_model.SysRole{
+					Name:        "管理员",
+					UnionMainId: UnionMainId,
+					IsSystem:    true,
+				}
+				roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
+				if err != nil {
+					return err
+				}
+				_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Id)
+				if err != nil {
+					return err
+				}
+			}
+
 			if employee != nil {
 				// 如果需要创建默认的用户和角色的时候才会有employee，所以进行非空判断，不然会有空指针错误
 				data.UserId = employee.Id
@@ -191,7 +198,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			data.CreatedAt = gtime.Now()
 
 			affected, err := daoctl.InsertWithError(
-				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler),
+				s.dao.Company.Ctx(ctx),
 				data,
 			)
 			if affected == 0 || err != nil {
@@ -205,7 +212,7 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			_, err = daoctl.UpdateWithError(
-				s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
+				s.dao.Company.Ctx(ctx).
 					Where(co_do.Company{Id: info.Id}),
 				data,
 			)
@@ -228,23 +235,103 @@ func (s *sCompany) saveCompany(ctx context.Context, info *co_model.Company) (*co
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error) {
-	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	data, err := daoctl.GetByIdWithError[co_model.CompanyRes](
-		s.dao.Company.Ctx(ctx).Hook(daoctl.CacheHookHandler).
-			Where(co_do.Company{ParentId: sessionUser.ParentId}), id,
+		s.dao.Company.Ctx(ctx),
+		id,
 	)
 
 	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
+		}
+	}
+
+	if err == sql.ErrNoRows || data != nil && data.Id != sessionUser.UnionMainId && data.ParentId != sessionUser.UnionMainId {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	if data.UserId > 0 {
-		data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
+	return s.makeMore(ctx, data), nil
+}
+
+// FilterUnionMainId 跨主体查询条件过滤
+func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	filter := make([]sys_model.FilterInfo, 0)
+
+	if search == nil || len(search.Filter) == 0 {
+		if search == nil {
+			search = &sys_model.SearchParams{
+				Pagination: sys_model.Pagination{
+					PageNum:  1,
+					PageSize: 20,
+				},
+			}
+		}
+
+		if len(search.Filter) == 0 {
+			search.Filter = append(search.Filter, sys_model.FilterInfo{
+				Field:     "unionMainId",
+				Where:     "=",
+				IsOrWhere: false,
+				Value:     sessionUser.UnionMainId,
+			})
+		}
 	}
 
-	return data, nil
+	// 遍历所有过滤条件：
+	for _, field := range search.Filter {
+		// 过滤所有自定义主体ID条件
+		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") {
+			unionMainId := gconv.Int64(field.Value)
+			if unionMainId == sessionUser.UnionMainId || unionMainId <= 0 {
+				filter = append(filter, field)
+				continue
+			}
+			company, err := s.modules.Company().GetCompanyById(ctx, unionMainId)
+			if err != nil || (company != nil && company.ParentId != unionMainId && company.Id != unionMainId) {
+				field.Value = sessionUser.UnionMainId
+				filter = append(filter, field)
+				continue
+			}
+		}
+		filter = append(filter, field)
+	}
+
+	search.Filter = filter
+
+	return search
+}
+
+// makeMore 按需加载附加数据
+func (s *sCompany) makeMore(ctx context.Context, data *co_model.CompanyRes) *co_model.CompanyRes {
+	if data == nil {
+		return nil
+	}
+
+	if data.UserId > 0 {
+		// 附加数据 employee
+		funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
+			func() *co_model.EmployeeRes {
+				data.AdminUser, _ = s.modules.Employee().GetEmployeeById(ctx, data.UserId)
+				if data.AdminUser == nil {
+					return nil
+				}
+
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.UserId)
+				if user != nil {
+					gconv.Struct(user.SysUser, &data.AdminUser.User)
+					gconv.Struct(user.Detail, &data.AdminUser.Detail)
+				}
+
+				return data.AdminUser
+			},
+		)
+	}
+
+	return data
 }
 
 // Masker 信息脱敏
@@ -254,8 +341,6 @@ func (s *sCompany) masker(company *co_model.CompanyRes) *co_model.CompanyRes {
 	}
 
 	company.ContactMobile = masker.MaskString(company.ContactMobile, masker.MaskPhone)
-
-	company.AdminUser, _ = s.modules.Employee().GetEmployeeById(context.Background(), company.UserId)
 
 	return company
 }

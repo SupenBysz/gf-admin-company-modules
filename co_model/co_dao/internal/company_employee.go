@@ -7,7 +7,8 @@ package internal
 import (
 	"context"
 
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
+	"github.com/SupenBysz/gf-admin-community/utility/daoctl/dao_interface"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -59,7 +60,7 @@ var companyEmployeeColumns = CompanyEmployeeColumns{
 }
 
 // NewCompanyEmployeeDao creates and returns a new DAO object for table data access.
-func NewCompanyEmployeeDao(proxy ...co_interface.IDao) *CompanyEmployeeDao {
+func NewCompanyEmployeeDao(proxy ...dao_interface.IDao) *CompanyEmployeeDao {
 	var dao *CompanyEmployeeDao
 	if len(proxy) > 0 {
 		dao = &CompanyEmployeeDao{
@@ -98,8 +99,32 @@ func (dao *CompanyEmployeeDao) Columns() CompanyEmployeeColumns {
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *CompanyEmployeeDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+func (dao *CompanyEmployeeDao) Ctx(ctx context.Context, cacheOption ...*gdb.CacheOption) *gdb.Model {
+	return dao.DaoConfig(ctx, cacheOption...).Model
+}
+
+func (dao *CompanyEmployeeDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.CacheOption) dao_interface.DaoConfig {
+	daoConfig := dao_interface.DaoConfig{
+		Dao:   dao,
+		DB:    dao.DB(),
+		Table: dao.table,
+		Group: dao.group,
+		Model: dao.DB().Model(dao.Table()).Safe().Ctx(ctx),
+	}
+
+	if len(cacheOption) == 0 {
+		daoConfig.CacheOption = daoctl.MakeDaoCache(dao.Table())
+		daoConfig.Model = daoConfig.Model.Cache(*daoConfig.CacheOption)
+	} else {
+		if cacheOption[0] != nil {
+			daoConfig.CacheOption = cacheOption[0]
+			daoConfig.Model = daoConfig.Model.Cache(*daoConfig.CacheOption)
+		}
+	}
+
+	daoConfig.Model = daoctl.RegisterDaoHook(daoConfig.Model)
+
+	return daoConfig
 }
 
 // Transaction wraps the transaction logic using function f.
