@@ -3,8 +3,8 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.2.117
-	github.com/gogf/gf/v2 v2.3.1
+	github.com/SupenBysz/gf-admin-community v0.2.118
+	github.com/gogf/gf/v2 v2.3.2
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
@@ -20,8 +20,8 @@ require (
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.3.1 // indirect
-	github.com/gogf/gf/contrib/nosql/redis/v2 v2.3.1 // indirect
+	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.3.2 // indirect
+	github.com/gogf/gf/contrib/nosql/redis/v2 v2.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.3 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
