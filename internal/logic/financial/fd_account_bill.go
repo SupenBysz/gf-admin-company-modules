@@ -9,7 +9,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/fd_enum"
 
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -19,7 +20,7 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 )
 
-type hookInfo sys_model.HookEventType[co_model.AccountBillHookFilter, co_model.AccountBillHookFunc]
+type hookInfo sys_model.HookEventType[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 
 // 财务账单
 type sFdAccountBill struct {
@@ -37,13 +38,13 @@ func NewFdAccountBill(modules co_interface.IModules) co_interface.IFdAccountBill
 }
 
 // InstallHook 安装Hook
-func (s *sFdAccountBill) InstallHook(filter co_model.AccountBillHookFilter, hookFunc co_model.AccountBillHookFunc) {
+func (s *sFdAccountBill) InstallHook(filter co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc) {
 	item := hookInfo{Key: filter, Value: hookFunc}
 	s.hookArr.Append(item)
 }
 
 // UnInstallHook 卸载Hook
-func (s *sFdAccountBill) UnInstallHook(filter co_model.AccountBillHookFilter) {
+func (s *sFdAccountBill) UnInstallHook(filter co_hook.AccountBillHookFilter) {
 	newFuncArr := garray.NewArray()
 	s.hookArr.Iterator(func(key int, value interface{}) bool {
 		item := value.(hookInfo)
@@ -152,7 +153,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 		s.hookArr.Iterator(func(_ int, v interface{}) bool {
 			hook := v.(hookInfo)
-			if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
+			if hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.In {
 				if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 					hook.Value(ctx, hook.Key, bill)
 				}
@@ -168,7 +169,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
 		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
+		if !hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.In {
 			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 				hook.Value(ctx, hook.Key, bill)
 			}
@@ -222,7 +223,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 			s.hookArr.Iterator(func(_ int, v interface{}) bool {
 				hook := v.(hookInfo)
 				// 判断收支类型
-				if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
+				if hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.Out {
 					// 判断交易类型
 					if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 						hook.Value(ctx, hook.Key, bill)
@@ -244,7 +245,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
 		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
+		if !hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.Out {
 			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 				hook.Value(ctx, hook.Key, bill)
 			}

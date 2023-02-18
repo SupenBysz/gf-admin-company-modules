@@ -1,4 +1,4 @@
-package co_enum_financial
+package financial
 
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -56,9 +56,9 @@ func (e *permissionType) ByForm(code int64) *sys_model.SysPermission {
 }
 
 //
-//type PermissionEnum = *permission.SysPermissionTree
+// type PermissionEnum = *permission.SysPermissionTree
 //
-//type permissionType[T co_interface.IModules] struct {
+// type permissionType[T co_interface.IModules] struct {
 //	modules T
 //	enumMap *kmap.HashMap[string, PermissionEnum]
 //
@@ -75,9 +75,9 @@ func (e *permissionType) ByForm(code int64) *sys_model.SysPermission {
 //	DeleteInvoice      PermissionEnum
 //	DeleteBankCard     PermissionEnum
 //	GetAccountBalance  PermissionEnum
-//}
+// }
 //
-//var (
+// var (
 //	permissionTypeMap = kmap.New[string, *permissionType[co_interface.IModules]]()
 //	PermissionType    = func(modules co_interface.IModules) *permissionType[co_interface.IModules] {
 //		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IModules]{
@@ -105,13 +105,13 @@ func (e *permissionType) ByForm(code int64) *sys_model.SysPermission {
 //		}
 //		return result
 //	}
-//)
+// )
 //
-//// ByCode 通过枚举值取枚举类型
-//func (e *permissionType[T]) ByCode(identifier string) *sys_entity.SysPermission {
+// // ByCode 通过枚举值取枚举类型
+// func (e *permissionType[T]) ByCode(identifier string) *sys_entity.SysPermission {
 //	v, has := e.enumMap.Search(identifier)
 //	if v != nil && has {
 //		return v.SysPermission
 //	}
 //	return nil
-//}
+// }

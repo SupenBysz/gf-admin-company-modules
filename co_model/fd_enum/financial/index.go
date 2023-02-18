@@ -1,4 +1,4 @@
-package co_enum_financial
+package financial
 
 type financial struct {
 	InOutType      inOutType

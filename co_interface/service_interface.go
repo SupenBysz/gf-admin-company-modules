@@ -7,6 +7,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
 
@@ -97,8 +98,8 @@ type (
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (*co_entity.FdAccount, error)
 	}
 	IFdAccountBill interface {
-		InstallHook(filter co_model.AccountBillHookFilter, hookFunc co_model.AccountBillHookFunc)
-		UnInstallHook(filter co_model.AccountBillHookFilter)
+		InstallHook(filter co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
+		UnInstallHook(filter co_hook.AccountBillHookFilter)
 		ClearAllHook()
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
 		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *sys_model.Pagination) (*co_model.AccountBillListRes, error)
