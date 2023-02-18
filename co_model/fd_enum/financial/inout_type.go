@@ -1,4 +1,4 @@
-package internal
+package financial
 
 import (
 	"github.com/SupenBysz/gf-admin-community/utility/enum"

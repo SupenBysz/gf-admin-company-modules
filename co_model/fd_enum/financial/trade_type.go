@@ -1,4 +1,4 @@
-package co_enum_financial
+package financial
 
 import (
 	"github.com/SupenBysz/gf-admin-community/utility/enum"
