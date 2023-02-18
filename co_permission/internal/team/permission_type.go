@@ -8,21 +8,21 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
-type PermissionEnum = *permission.SysPermissionTree
+type Permission = *permission.SysPermissionTree
 
 type permissionType[T co_interface.IModules] struct {
 	modules      T
-	enumMap      *kmap.HashMap[string, PermissionEnum]
-	ViewDetail   PermissionEnum
-	List         PermissionEnum
-	ViewMobile   PermissionEnum
-	Create       PermissionEnum
-	Update       PermissionEnum
-	Delete       PermissionEnum
-	MemberDetail PermissionEnum
-	SetMember    PermissionEnum
-	SetOwner     PermissionEnum
-	SetCaptain   PermissionEnum
+	enumMap      *kmap.HashMap[string, Permission]
+	ViewDetail   Permission
+	List         Permission
+	ViewMobile   Permission
+	Create       Permission
+	Update       Permission
+	Delete       Permission
+	MemberDetail Permission
+	SetMember    Permission
+	SetOwner     Permission
+	SetCaptain   Permission
 }
 
 var (
@@ -30,7 +30,7 @@ var (
 	PermissionType    = func(modules co_interface.IModules) *permissionType[co_interface.IModules] {
 		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IModules]{
 			modules:      modules,
-			enumMap:      kmap.New[string, PermissionEnum](),
+			enumMap:      kmap.New[string, Permission](),
 			ViewDetail:   permission.NewInIdentifier("ViewDetail", "详情", "查看团队详情"),
 			List:         permission.NewInIdentifier("List", "列表", "查看团队列表"),
 			Create:       permission.NewInIdentifier("Create", "新增", "新增团队信息"),
@@ -43,7 +43,7 @@ var (
 		})
 
 		for k, v := range gconv.Map(result) {
-			result.enumMap.Set(k, v.(PermissionEnum))
+			result.enumMap.Set(k, v.(Permission))
 		}
 		return result
 	}

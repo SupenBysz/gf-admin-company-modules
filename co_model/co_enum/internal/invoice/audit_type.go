@@ -1,4 +1,4 @@
-package co_enum_invoice
+package invoice
 
 import (
 	"github.com/SupenBysz/gf-admin-community/utility/enum"

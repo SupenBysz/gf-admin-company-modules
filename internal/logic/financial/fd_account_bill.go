@@ -9,8 +9,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/fd_enum"
 
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -153,7 +153,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 		s.hookArr.Iterator(func(_ int, v interface{}) bool {
 			hook := v.(hookInfo)
-			if hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.In {
+			if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
 				if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 					hook.Value(ctx, hook.Key, bill)
 				}
@@ -169,7 +169,7 @@ func (s *sFdAccountBill) income(ctx context.Context, info co_model.AccountBillRe
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
 		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.In {
+		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
 			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 				hook.Value(ctx, hook.Key, bill)
 			}
@@ -223,7 +223,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 			s.hookArr.Iterator(func(_ int, v interface{}) bool {
 				hook := v.(hookInfo)
 				// 判断收支类型
-				if hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.Out {
+				if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
 					// 判断交易类型
 					if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 						hook.Value(ctx, hook.Key, bill)
@@ -245,7 +245,7 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 
 	s.hookArr.Iterator(func(_ int, v interface{}) bool {
 		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == fd_enum.Financial.InOutType.Out {
+		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
 			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
 				hook.Value(ctx, hook.Key, bill)
 			}

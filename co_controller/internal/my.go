@@ -11,7 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 type MyController struct {
@@ -68,7 +68,7 @@ func (c *MyController) SetAvatar(ctx context.Context, req *co_company_api.SetAva
 			ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
 			return ret == true, err
 		},
-		co_enum.Employee.PermissionType(c.modules).SetAvatar,
+		co_permission.Employee.PermissionType(c.modules).SetAvatar,
 	)
 }
 
@@ -79,7 +79,7 @@ func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMob
 			ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
 			return ret == true, err
 		},
-		co_enum.Employee.PermissionType(c.modules).SetMobile,
+		co_permission.Employee.PermissionType(c.modules).SetMobile,
 	)
 }
 

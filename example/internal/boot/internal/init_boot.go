@@ -10,5 +10,5 @@ func init() {
 	consts.PermissionTree = boot.InitPermission(consts.Global.Modules)
 
 	// 导入财务服务权限树
-	consts.FinancialPermissionTree = boot.InitFinancialPermission()
+	consts.FinancialPermissionTree = boot.InitFinancialPermission(consts.Global.Modules)
 }

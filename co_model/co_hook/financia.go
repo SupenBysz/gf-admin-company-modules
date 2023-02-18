@@ -3,12 +3,12 @@ package co_hook
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/fd_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 )
 
 type AccountBillHookFilter struct {
-	InOutType     fd_enum.FinancialInOutType
-	TradeType     fd_enum.FinancialTradeType
+	InOutType     co_enum.FinancialInOutType
+	TradeType     co_enum.FinancialTradeType
 	InTransaction bool
 }
 
