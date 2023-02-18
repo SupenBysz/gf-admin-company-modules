@@ -9,22 +9,22 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 )
 
-type PermissionEnum = *permission.SysPermissionTree
+type Permission = *permission.SysPermissionTree
 
 type permissionType[T co_interface.IModules] struct {
 	modules       T
-	enumMap       *kmap.HashMap[string, PermissionEnum]
-	ViewDetail    PermissionEnum
-	ViewMobile    PermissionEnum
-	Create        PermissionEnum
-	Update        PermissionEnum
-	List          PermissionEnum
-	SetLogo       PermissionEnum
-	SetState      PermissionEnum
-	SetAdminUser  PermissionEnum
-	ViewLicense   PermissionEnum
-	AuditLicense  PermissionEnum
-	UpdateLicense PermissionEnum
+	enumMap       *kmap.HashMap[string, Permission]
+	ViewDetail    Permission
+	ViewMobile    Permission
+	Create        Permission
+	Update        Permission
+	List          Permission
+	SetLogo       Permission
+	SetState      Permission
+	SetAdminUser  Permission
+	ViewLicense   Permission
+	AuditLicense  Permission
+	UpdateLicense Permission
 }
 
 var (
@@ -32,7 +32,7 @@ var (
 	PermissionType    = func(modules co_interface.IModules) *permissionType[co_interface.IModules] {
 		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IModules]{
 			modules:       modules,
-			enumMap:       kmap.New[string, PermissionEnum](),
+			enumMap:       kmap.New[string, Permission](),
 			ViewDetail:    permission.NewInIdentifier("ViewDetail", "查看明细", ""),
 			Create:        permission.NewInIdentifier("Create", "新增", ""),
 			Update:        permission.NewInIdentifier("Update", "更新", ""),
@@ -46,7 +46,7 @@ var (
 		})
 
 		for k, v := range gconv.Map(result) {
-			result.enumMap.Set(k, v.(PermissionEnum))
+			result.enumMap.Set(k, v.(Permission))
 		}
 		return result
 	}

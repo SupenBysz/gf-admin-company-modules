@@ -12,7 +12,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 type TeamController struct {
@@ -38,7 +38,7 @@ func (c *TeamController) GetTeamById(ctx context.Context, req *co_company_api.Ge
 			ret, err := c.modules.Team().GetTeamById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
-		co_enum.Team.PermissionType(c.modules).ViewDetail,
+		co_permission.Team.PermissionType(c.modules).ViewDetail,
 	)
 }
 
@@ -55,7 +55,7 @@ func (c *TeamController) QueryTeamList(ctx context.Context, req *co_company_api.
 		func() (*co_model.TeamListRes, error) {
 			return c.modules.Team().QueryTeamList(c.makeMore(ctx), &req.SearchParams)
 		},
-		co_enum.Team.PermissionType(c.modules).List,
+		co_permission.Team.PermissionType(c.modules).List,
 	)
 }
 
@@ -65,7 +65,7 @@ func (c *TeamController) CreateTeam(ctx context.Context, req *co_company_api.Cre
 			ret, err := c.modules.Team().CreateTeam(c.makeMore(ctx), &req.Team)
 			return ret, err
 		},
-		co_enum.Team.PermissionType(c.modules).Create,
+		co_permission.Team.PermissionType(c.modules).Create,
 	)
 }
 
@@ -75,7 +75,7 @@ func (c *TeamController) UpdateTeam(ctx context.Context, req *co_company_api.Upd
 			ret, err := c.modules.Team().UpdateTeam(c.makeMore(ctx), req.Id, req.Name, req.Remark)
 			return ret, err
 		},
-		co_enum.Team.PermissionType(c.modules).Update,
+		co_permission.Team.PermissionType(c.modules).Update,
 	)
 }
 
@@ -84,7 +84,7 @@ func (c *TeamController) DeleteTeam(ctx context.Context, req *co_company_api.Del
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Team().DeleteTeam(ctx, req.Id)
 		},
-		co_enum.Team.PermissionType(c.modules).Delete,
+		co_permission.Team.PermissionType(c.modules).Delete,
 	)
 }
 
@@ -93,7 +93,7 @@ func (c *TeamController) GetTeamMemberList(ctx context.Context, req *co_company_
 		func() (*co_model.EmployeeListRes, error) {
 			return c.modules.Team().GetTeamMemberList(c.makeMore(ctx), req.Id)
 		},
-		co_enum.Team.PermissionType(c.modules).MemberDetail,
+		co_permission.Team.PermissionType(c.modules).MemberDetail,
 	)
 }
 
@@ -103,7 +103,7 @@ func (c *TeamController) QueryTeamListByEmployee(ctx context.Context, req *co_co
 
 			return c.modules.Team().QueryTeamListByEmployee(c.makeMore(ctx), req.EmployeeId, req.UnionMainId)
 		},
-		co_enum.Team.PermissionType(c.modules).List,
+		co_permission.Team.PermissionType(c.modules).List,
 	)
 }
 
@@ -112,7 +112,7 @@ func (c *TeamController) SetTeamMember(ctx context.Context, req *co_company_api.
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Team().SetTeamMember(ctx, req.Id, req.EmployeeIds)
 		},
-		co_enum.Team.PermissionType(c.modules).SetMember,
+		co_permission.Team.PermissionType(c.modules).SetMember,
 	)
 }
 func (c *TeamController) SetTeamOwner(ctx context.Context, req *co_company_api.SetTeamOwnerReq) (api_v1.BoolRes, error) {
@@ -120,7 +120,7 @@ func (c *TeamController) SetTeamOwner(ctx context.Context, req *co_company_api.S
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Team().SetTeamOwner(ctx, req.Id, req.EmployeeId)
 		},
-		co_enum.Team.PermissionType(c.modules).SetCaptain,
+		co_permission.Team.PermissionType(c.modules).SetCaptain,
 	)
 }
 func (c *TeamController) SetTeamCaptain(ctx context.Context, req *co_company_api.SetTeamCaptainReq) (api_v1.BoolRes, error) {
@@ -128,7 +128,7 @@ func (c *TeamController) SetTeamCaptain(ctx context.Context, req *co_company_api
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Team().SetTeamCaptain(ctx, req.Id, req.EmployeeId)
 		},
-		co_enum.Team.PermissionType(c.modules).SetCaptain,
+		co_permission.Team.PermissionType(c.modules).SetCaptain,
 	)
 }
 

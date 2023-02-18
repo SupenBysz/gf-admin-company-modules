@@ -13,7 +13,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 type EmployeeController struct {
@@ -37,7 +37,7 @@ func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_compan
 		func() (*co_model.EmployeeRes, error) {
 			return c.modules.Employee().GetEmployeeById(c.makeMore(ctx), req.Id)
 		},
-		co_enum.Employee.PermissionType(c.modules).ViewDetail,
+		co_permission.Employee.PermissionType(c.modules).ViewDetail,
 	)
 }
 
@@ -47,7 +47,7 @@ func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_
 		func() (*co_model.EmployeeRes, error) {
 			return c.modules.Employee().GetEmployeeDetailById(c.makeMore(ctx), req.Id)
 		},
-		co_enum.Employee.PermissionType(c.modules).MoreDetail,
+		co_permission.Employee.PermissionType(c.modules).MoreDetail,
 	)
 }
 
@@ -77,7 +77,7 @@ func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_comp
 		func() (*co_model.EmployeeListRes, error) {
 			return c.modules.Employee().QueryEmployeeList(c.makeMore(ctx), &req.SearchParams)
 		},
-		co_enum.Employee.PermissionType(c.modules).List,
+		co_permission.Employee.PermissionType(c.modules).List,
 	)
 }
 
@@ -90,7 +90,7 @@ func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_company
 			ret, err := c.modules.Employee().CreateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
-		co_enum.Employee.PermissionType(c.modules).Create,
+		co_permission.Employee.PermissionType(c.modules).Create,
 	)
 }
 
@@ -101,7 +101,7 @@ func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_company
 			ret, err := c.modules.Employee().UpdateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
-		co_enum.Employee.PermissionType(c.modules).Update,
+		co_permission.Employee.PermissionType(c.modules).Update,
 	)
 }
 
@@ -112,7 +112,7 @@ func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_company
 			ret, err := c.modules.Employee().DeleteEmployee(ctx, req.Id)
 			return ret == true, err
 		},
-		co_enum.Employee.PermissionType(c.modules).Delete,
+		co_permission.Employee.PermissionType(c.modules).Delete,
 	)
 }
 
@@ -122,7 +122,7 @@ func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *c
 		func() (*co_model.EmployeeListRes, error) {
 			return c.modules.Employee().GetEmployeeListByRoleId(c.makeMore(ctx), req.Id)
 		},
-		co_enum.Employee.PermissionType(c.modules).ViewDetail,
+		co_permission.Employee.PermissionType(c.modules).ViewDetail,
 	)
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/fd_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 // FinancialController 财务服务控制器
@@ -36,7 +36,7 @@ func (c *FinancialController) GetAccountBalance(ctx context.Context, req *co_com
 			}
 			return (api_v1.Int64Res)(ret.Balance), err
 		},
-		fd_enum.Financial.PermissionType.GetAccountBalance,
+		co_permission.Financial.PermissionType(c.modules).GetAccountBalance,
 	)
 }
 
@@ -52,7 +52,7 @@ func (c *FinancialController) InvoiceRegister(ctx context.Context, req *co_compa
 			ret, err := c.modules.Invoice().CreateInvoice(ctx, req.FdInvoiceRegister)
 			return (*co_model.FdInvoiceInfoRes)(ret), err
 		},
-		fd_enum.Financial.PermissionType.CreateInvoice,
+		co_permission.Financial.PermissionType(c.modules).CreateInvoice,
 	)
 }
 
@@ -63,7 +63,7 @@ func (c *FinancialController) QueryInvoice(ctx context.Context, req *co_company_
 		func() (*co_model.FdInvoiceListRes, error) {
 			return c.modules.Invoice().QueryInvoiceList(ctx, &req.SearchParams, req.UserId)
 		},
-		fd_enum.Financial.PermissionType.ViewInvoice,
+		co_permission.Financial.PermissionType(c.modules).ViewInvoice,
 	)
 
 }
@@ -75,7 +75,7 @@ func (c *FinancialController) DeletesFdInvoiceById(ctx context.Context, req *co_
 			ret, err := c.modules.Invoice().DeletesFdInvoiceById(ctx, req.InvoiceId)
 			return ret == true, err
 		},
-		fd_enum.Financial.PermissionType.DeleteInvoice,
+		co_permission.Financial.PermissionType(c.modules).DeleteInvoice,
 	)
 }
 
@@ -93,7 +93,7 @@ func (c *FinancialController) QueryInvoiceDetailList(ctx context.Context, req *c
 			ret, err := c.modules.InvoiceDetail().QueryInvoiceDetail(ctx, &req.SearchParams, req.UserId, req.UnionMainId)
 			return ret, err
 		},
-		fd_enum.Financial.PermissionType.ViewInvoiceDetail,
+		co_permission.Financial.PermissionType(c.modules).ViewInvoiceDetail,
 	)
 }
 
@@ -110,7 +110,7 @@ func (c *FinancialController) AuditInvoiceDetail(ctx context.Context, req *co_co
 			ret, err := c.modules.InvoiceDetail().AuditInvoiceDetail(ctx, req.InvoiceDetailId, req.AuditInfo)
 			return ret == true, err
 		},
-		fd_enum.Financial.PermissionType.AuditInvoiceDetail,
+		co_permission.Financial.PermissionType(c.modules).AuditInvoiceDetail,
 	)
 }
 
@@ -123,7 +123,7 @@ func (c *FinancialController) BankCardRegister(ctx context.Context, req *co_comp
 			ret, err := c.modules.BankCard().CreateBankCard(ctx, req.BankCardRegister, &user.SysUser)
 			return (*co_model.BankCardInfoRes)(ret), err
 		},
-		fd_enum.Financial.PermissionType.CreateBankCard,
+		co_permission.Financial.PermissionType(c.modules).CreateBankCard,
 	)
 }
 
@@ -134,7 +134,7 @@ func (c *FinancialController) DeleteBankCard(ctx context.Context, req *co_compan
 			ret, err := c.modules.BankCard().DeleteBankCardById(ctx, req.BankCardId)
 			return ret == true, err
 		},
-		fd_enum.Financial.PermissionType.DeleteBankCard,
+		co_permission.Financial.PermissionType(c.modules).DeleteBankCard,
 	)
 }
 
@@ -145,6 +145,6 @@ func (c *FinancialController) QueryBankCardList(ctx context.Context, req *co_com
 			ret, err := c.modules.BankCard().QueryBankCardListByUserId(ctx, req.UserId)
 			return ret, err
 		},
-		fd_enum.Financial.PermissionType.ViewBankCardDetail,
+		co_permission.Financial.PermissionType(c.modules).ViewBankCardDetail,
 	)
 }
