@@ -3,8 +3,9 @@ package boot
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	sysController "github.com/SupenBysz/gf-admin-community/sys_controller"
+	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/SupenBysz/gf-admin-company-modules/example/router"
 	"github.com/gogf/gf/v2/frame/g"
@@ -12,8 +13,6 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/util/gmode"
-
-	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 )
 
 var (
@@ -80,16 +79,16 @@ var (
 				// 匿名路由绑定
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					// 鉴权：登录，注册，找回密码等
-					group.Group("/sys_auth", func(group *ghttp.RouterGroup) { group.Bind(sysController.Auth) })
+					group.Group("/sys_auth", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.Auth) })
 					// 图型验证码、短信验证码、地区
 					group.Group("/common", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							// 图型验证码
-							sysController.Captcha,
+							sys_controller.Captcha,
 							// 短信验证码
-							sysController.SysSms,
+							sys_controller.SysSms,
 							// 地区
-							sysController.SysArea,
+							sys_controller.SysArea,
 						)
 					})
 				})

@@ -37,9 +37,9 @@ var (
 			enumMap:            kmap.New[string, Permission](),
 			ViewInvoiceDetail:  permission.New(5953153121845334, "ViewDetail", "查看发票详情", "查看发票详情信息"),
 			ViewInvoice:        permission.New(5953153121845335, "ViewInvoice", "查看发票抬头信息", "查看发票抬头信息"),
-			ViewBankCardDetail: permission.New(5953153121845336, "ViewBankCardDetail", "查看提现账号", "查看提现账号信息"),
+			ViewBankCardDetail: permission.New(5953153121845336, "ViewBankCardDetail", "查看银行卡", "查看银行卡信息"),
 
-			BankCardList:      permission.New(5953153121845337, "BankCardList", "提现账号列表", "查看所有提现账号"),
+			BankCardList:      permission.New(5953153121845337, "BankCardList", "银行卡列表", "查看所有银行卡"),
 			InvoiceList:       permission.New(5953153121845338, "InvoiceList", "发票抬头列表", "查看所有发票抬头"),
 			InvoiceDetailList: permission.New(5953153121845339, "InvoiceDetailList", "发票详情列表", "查看所有发票详情"),
 
@@ -47,10 +47,10 @@ var (
 			MakeInvoiceDetail:  permission.New(5953153121845341, "MakeInvoiceDetail", "开发票", "添加发票详情记录"),
 
 			CreateInvoice:  permission.New(5953153121845342, "CreateInvoice", "添加发票抬头", "添加发票抬头信息"),
-			CreateBankCard: permission.New(5953153121845343, "CreateBankCard", "申请提现账号", "添加提现账号信息"),
+			CreateBankCard: permission.New(5953153121845343, "CreateBankCard", "添加银行卡", "添加银行卡信息"),
 
 			DeleteInvoice:  permission.New(5953153121845344, "DeleteInvoice", "删除发票抬头", "删除发票抬头信息"),
-			DeleteBankCard: permission.New(5953153121845345, "DeleteBankCard", "删除提现账号", "删除提现账号信息"),
+			DeleteBankCard: permission.New(5953153121845345, "DeleteBankCard", "删除银行卡", "删除银行卡信息"),
 
 			GetAccountBalance: permission.New(5953153121845346, "GetAccountBalance", "查看余额", "查看账号余额"),
 		})
