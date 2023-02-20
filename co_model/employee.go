@@ -1,11 +1,11 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/kysion/base-library/base_model"
 )
 
 type Employee struct {
@@ -34,4 +34,4 @@ type EmployeeRes struct {
 	TeamList []Team                   `json:"teamList"`
 }
 
-type EmployeeListRes sys_model.CollectRes[*EmployeeRes]
+type EmployeeListRes base_model.CollectRes[*EmployeeRes]

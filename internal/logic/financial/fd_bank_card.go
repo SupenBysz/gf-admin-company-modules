@@ -6,12 +6,15 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
+
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -173,13 +176,13 @@ func (s *sFdBankCard) QueryBankCardListByUserId(ctx context.Context, userId int6
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#User}{#error_Id_NotNull}"), sys_dao.SysUser.Table())
 	}
 
-	result, err := daoctl.Query[co_entity.FdBankCard](s.dao.FdBankCard.Ctx(ctx), &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+	result, err := daoctl.Query[co_entity.FdBankCard](s.dao.FdBankCard.Ctx(ctx), &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field: s.dao.FdBankCard.Columns().UserId,
 			Where: "=",
 			Value: userId,
 		}),
-		Pagination: sys_model.Pagination{
+		Pagination: base_model.Pagination{
 			PageNum:  1,
 			PageSize: 20,
 		},

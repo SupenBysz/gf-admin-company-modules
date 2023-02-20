@@ -9,12 +9,12 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/yitter/idgenerator-go/idgen"
 
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -102,7 +102,7 @@ func (s *sTeam) HasTeamByName(ctx context.Context, name string, unionMainId int6
 }
 
 // QueryTeamList 查询团队
-func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error) {
+func (s *sTeam) QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*co_model.TeamListRes, error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -118,7 +118,7 @@ func (s *sTeam) QueryTeamList(ctx context.Context, search *sys_model.SearchParam
 }
 
 // QueryTeamMemberList 查询所有团队成员记录
-func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error) {
+func (s *sTeam) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*co_model.TeamMemberListRes, error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -290,14 +290,14 @@ func (s *sTeam) GetTeamMemberList(ctx context.Context, id int64) (*co_model.Empl
 		ids = append(ids, item.EmployeeId)
 	}
 
-	return s.modules.Employee().QueryEmployeeList(ctx, &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0),
-			sys_model.FilterInfo{
+	return s.modules.Employee().QueryEmployeeList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
 				Where: "in",
 				Value: ids,
 			},
-			sys_model.FilterInfo{
+			base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().UnionMainId,
 				Where: "=",
 				Value: team.UnionMainId,
@@ -333,14 +333,14 @@ func (s *sTeam) QueryTeamListByEmployee(ctx context.Context, employeeId int64, u
 		teamIds = append(teamIds, member.TeamId)
 	}
 
-	return s.QueryTeamList(ctx, &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0),
-			sys_model.FilterInfo{
+	return s.QueryTeamList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
 				Field: s.dao.Team.Columns().UnionMainId,
 				Where: "=",
 				Value: unionMainId,
 			},
-			sys_model.FilterInfo{
+			base_model.FilterInfo{
 				Field: s.dao.Team.Columns().Id,
 				Where: "in",
 				Value: teamIds,
@@ -414,20 +414,20 @@ func (s *sTeam) SetTeamMember(ctx context.Context, teamId int64, employeeIds []i
 	}
 
 	// 校验新团队成员是否存在
-	res, err := s.modules.Employee().QueryEmployeeList(ctx, &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0),
-			sys_model.FilterInfo{
+	res, err := s.modules.Employee().QueryEmployeeList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
 				Where: "in",
 				Value: newTeamMemberIds,
 			},
-			sys_model.FilterInfo{
+			base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().UnionMainId,
 				Where: "=",
 				Value: sessionUser.UnionMainId,
 			},
 		),
-		Pagination: sys_model.Pagination{
+		Pagination: base_model.Pagination{
 			PageNum:  1,
 			PageSize: 1000,
 		},

@@ -11,12 +11,13 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
-	"github.com/SupenBysz/gf-admin-community/utility/masker"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
@@ -90,7 +91,7 @@ func (s *sCompany) HasCompanyByName(ctx context.Context, name string, excludeIds
 }
 
 // QueryCompanyList 查询公司列表
-func (s *sCompany) QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error) {
+func (s *sCompany) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams) (*co_model.CompanyListRes, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	data, err := daoctl.Query[*co_model.CompanyRes](
 		s.dao.Company.Ctx(ctx).
@@ -256,15 +257,15 @@ func (s *sCompany) GetCompanyDetail(ctx context.Context, id int64) (*co_model.Co
 }
 
 // FilterUnionMainId 跨主体查询条件过滤
-func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams {
+func (s *sCompany) FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	filter := make([]sys_model.FilterInfo, 0)
+	filter := make([]base_model.FilterInfo, 0)
 
 	if search == nil || len(search.Filter) == 0 {
 		if search == nil {
-			search = &sys_model.SearchParams{
-				Pagination: sys_model.Pagination{
+			search = &base_model.SearchParams{
+				Pagination: base_model.Pagination{
 					PageNum:  1,
 					PageSize: 20,
 				},
@@ -272,7 +273,7 @@ func (s *sCompany) FilterUnionMainId(ctx context.Context, search *sys_model.Sear
 		}
 
 		if len(search.Filter) == 0 {
-			search.Filter = append(search.Filter, sys_model.FilterInfo{
+			search.Filter = append(search.Filter, base_model.FilterInfo{
 				Field:     "unionMainId",
 				Where:     "=",
 				IsOrWhere: false,

@@ -9,6 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/i18n/gi18n"
+	"github.com/kysion/base-library/base_model"
 )
 
 type (
@@ -16,11 +17,11 @@ type (
 		GetCompanyById(ctx context.Context, id int64) (*co_model.CompanyRes, error)
 		GetCompanyByName(ctx context.Context, name string) (*co_model.CompanyRes, error)
 		HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool
-		QueryCompanyList(ctx context.Context, filter *sys_model.SearchParams) (*co_model.CompanyListRes, error)
+		QueryCompanyList(ctx context.Context, filter *base_model.SearchParams) (*co_model.CompanyListRes, error)
 		CreateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (*co_model.CompanyRes, error)
 		GetCompanyDetail(ctx context.Context, id int64) (*co_model.CompanyRes, error)
-		FilterUnionMainId(ctx context.Context, search *sys_model.SearchParams) *sys_model.SearchParams
+		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
 	}
 	IEmployee interface {
 		GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error)
@@ -28,7 +29,7 @@ type (
 		HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
 		HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool
 		GetEmployeeBySession(ctx context.Context) (*co_model.EmployeeRes, error)
-		QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error)
+		QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*co_model.EmployeeListRes, error)
 		CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error)
 		UpdateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error)
 		DeleteEmployee(ctx context.Context, id int64) (bool, error)
@@ -39,8 +40,8 @@ type (
 		GetTeamById(ctx context.Context, id int64) (*co_model.TeamRes, error)
 		GetTeamByName(ctx context.Context, name string) (*co_model.TeamRes, error)
 		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
-		QueryTeamList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamListRes, error)
-		QueryTeamMemberList(ctx context.Context, search *sys_model.SearchParams) (*co_model.TeamMemberListRes, error)
+		QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*co_model.TeamListRes, error)
+		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*co_model.TeamMemberListRes, error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (*co_model.TeamRes, error)
 		UpdateTeam(ctx context.Context, id int64, name string, remark string) (*co_model.TeamRes, error)
 		GetTeamMemberList(ctx context.Context, id int64) (*co_model.EmployeeListRes, error)
@@ -74,7 +75,7 @@ type (
 	IFdInvoice interface {
 		CreateInvoice(ctx context.Context, info co_model.FdInvoiceRegister) (*co_entity.FdInvoice, error)
 		GetInvoiceById(ctx context.Context, id int64) (*co_entity.FdInvoice, error)
-		QueryInvoiceList(ctx context.Context, info *sys_model.SearchParams, userId int64) (*co_model.FdInvoiceListRes, error)
+		QueryInvoiceList(ctx context.Context, info *base_model.SearchParams, userId int64) (*co_model.FdInvoiceListRes, error)
 		DeletesFdInvoiceById(ctx context.Context, invoiceId int64) (bool, error)
 		GetFdInvoiceByTaxId(ctx context.Context, taxId string) (*co_entity.FdInvoice, error)
 	}
@@ -85,7 +86,7 @@ type (
 		AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error)
 		QueryInvoiceDetailListByInvoiceId(ctx context.Context, invoiceId int64) (*co_model.FdInvoiceDetailListRes, error)
 		DeleteInvoiceDetail(ctx context.Context, id int64) (bool, error)
-		QueryInvoiceDetail(ctx context.Context, info *sys_model.SearchParams, userId int64, unionMainId int64) (*co_model.FdInvoiceDetailListRes, error)
+		QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*co_model.FdInvoiceDetailListRes, error)
 	}
 	IFdAccount interface {
 		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (*co_entity.FdAccount, error)
@@ -102,7 +103,7 @@ type (
 		UnInstallHook(filter co_hook.AccountBillHookFilter)
 		ClearAllHook()
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *sys_model.Pagination) (*co_model.AccountBillListRes, error)
+		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*co_model.AccountBillListRes, error)
 	}
 )
 

@@ -1,9 +1,9 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/kysion/base-library/base_model"
 )
 
 type AccountBillRegister struct {
@@ -22,4 +22,4 @@ type AccountBillRegister struct {
 }
 
 type AccountBillInfo co_entity.FdAccountBill
-type AccountBillListRes sys_model.CollectRes[co_entity.FdAccountBill]
+type AccountBillListRes base_model.CollectRes[co_entity.FdAccountBill]

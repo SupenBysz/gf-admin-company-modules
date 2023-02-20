@@ -1,8 +1,8 @@
 package co_company_api
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/base_model"
 )
 
 type BankCardRegisterReq struct {
@@ -15,7 +15,7 @@ type DeleteBankCardReq struct {
 
 type QueryBankCardListReq struct {
 	UserId int64 `json:"userId" dc:"用户ID"`
-	sys_model.SearchParams
+	base_model.SearchParams
 }
 
 type GetAccountBalanceReq struct {
@@ -28,7 +28,7 @@ type CreateInvoiceReq struct {
 
 type QueryInvoiceReq struct {
 	UserId int64 `json:"userId"  dc:"用户ID"`
-	sys_model.SearchParams
+	base_model.SearchParams
 }
 
 type DeleteInvoiceByIdReq struct {
@@ -42,7 +42,7 @@ type CreateInvoiceDetailReq struct {
 type QueryInvoiceDetailListReq struct {
 	UnionMainId int64 `json:"unionMainId" dc:"主体ID"`
 	UserId      int64 `json:"userId" dc:"用户ID"`
-	sys_model.SearchParams
+	base_model.SearchParams
 }
 
 type MakeInvoiceDetailReq struct {

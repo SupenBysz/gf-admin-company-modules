@@ -3,9 +3,7 @@ package financial
 import (
 	"context"
 	"database/sql"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -16,6 +14,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/yitter/idgenerator-go/idgen"
 )
 
@@ -83,10 +83,10 @@ func (s *sFdInvoice) GetInvoiceById(ctx context.Context, id int64) (*co_entity.F
 }
 
 // QueryInvoiceList 获取发票抬头列表
-func (s *sFdInvoice) QueryInvoiceList(ctx context.Context, info *sys_model.SearchParams, userId int64) (*co_model.FdInvoiceListRes, error) {
-	newFields := make([]sys_model.FilterInfo, 0)
+func (s *sFdInvoice) QueryInvoiceList(ctx context.Context, info *base_model.SearchParams, userId int64) (*co_model.FdInvoiceListRes, error) {
+	newFields := make([]base_model.FilterInfo, 0)
 	// 筛选条件强制指定所属用户
-	newFields = append(newFields, sys_model.FilterInfo{
+	newFields = append(newFields, base_model.FilterInfo{
 		Field: s.dao.FdInvoice.Columns().UserId, // type
 		Where: "=",
 		Value: userId,

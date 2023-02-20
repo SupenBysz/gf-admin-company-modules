@@ -1,7 +1,9 @@
 package co_consts
 
-import "github.com/SupenBysz/gf-admin-community/utility/permission"
+import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+)
 
 var (
-	PermissionTree []*permission.SysPermissionTree
+	PermissionTree []*sys_model.SysPermissionTree
 )
