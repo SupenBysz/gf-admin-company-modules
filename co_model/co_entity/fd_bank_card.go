@@ -19,8 +19,11 @@ type FdBankCard struct {
 	BankOfAccount string      `json:"bankOfAccount" description:"开户行"`
 	State         int         `json:"state"         description:"状态：0禁用，1正常"`
 	Remark        string      `json:"remark"        description:"备注信息"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
 	UserId        int64       `json:"userId"        description:"用户id，表示属于谁"`
+	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
+	CreatedBy     int64       `json:"createdBy"     description:""`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
+	UpdatedBy     int64       `json:"updatedBy"     description:""`
+	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
+	DeletedBy     int64       `json:"deletedBy"     description:""`
 }

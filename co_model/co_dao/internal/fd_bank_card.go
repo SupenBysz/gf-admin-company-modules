@@ -32,10 +32,13 @@ type FdBankCardColumns struct {
 	BankOfAccount string // 开户行
 	State         string // 状态：0禁用，1正常
 	Remark        string // 备注信息
-	CreatedAt     string //
-	UpdatedAt     string //
-	DeletedAt     string //
 	UserId        string // 用户id，表示属于谁
+	CreatedAt     string //
+	CreatedBy     string //
+	UpdatedAt     string //
+	UpdatedBy     string //
+	DeletedAt     string //
+	DeletedBy     string //
 }
 
 // fdBankCardColumns holds the columns for table co_fd_bank_card.
@@ -49,10 +52,13 @@ var fdBankCardColumns = FdBankCardColumns{
 	BankOfAccount: "bank_of_account",
 	State:         "state",
 	Remark:        "remark",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
-	DeletedAt:     "deleted_at",
 	UserId:        "user_id",
+	CreatedAt:     "created_at",
+	CreatedBy:     "created_by",
+	UpdatedAt:     "updated_at",
+	UpdatedBy:     "updated_by",
+	DeletedAt:     "deleted_at",
+	DeletedBy:     "deleted_by",
 }
 
 // NewFdBankCardDao creates and returns a new DAO object for table data access.

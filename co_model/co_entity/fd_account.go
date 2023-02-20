@@ -19,8 +19,11 @@ type FdAccount struct {
 	LimitState         int         `json:"limitState"         description:"限制状态：0不限制，1限制支出、2限制收入"`
 	PrecisionOfBalance int         `json:"precisionOfBalance" description:"货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……"`
 	Balance            int64       `json:"balance"            description:"当前余额，必须要与账单最后一笔交易余额对应得上"`
-	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
-	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
-	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
 	Version            int         `json:"version"            description:"乐观锁所需数据版本字段"`
+	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
+	CreatedBy          int64       `json:"createdBy"          description:""`
+	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
+	UpdatedBy          int64       `json:"updatedBy"          description:""`
+	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
+	DeletedBy          int64       `json:"deletedBy"          description:""`
 }

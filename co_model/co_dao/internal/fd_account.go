@@ -32,10 +32,13 @@ type FdAccountColumns struct {
 	LimitState         string // 限制状态：0不限制，1限制支出、2限制收入
 	PrecisionOfBalance string // 货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……
 	Balance            string // 当前余额，必须要与账单最后一笔交易余额对应得上
-	CreatedAt          string //
-	UpdatedAt          string //
-	DeletedAt          string //
 	Version            string // 乐观锁所需数据版本字段
+	CreatedAt          string //
+	CreatedBy          string //
+	UpdatedAt          string //
+	UpdatedBy          string //
+	DeletedAt          string //
+	DeletedBy          string //
 }
 
 // fdAccountColumns holds the columns for table co_fd_account.
@@ -49,10 +52,13 @@ var fdAccountColumns = FdAccountColumns{
 	LimitState:         "limit_state",
 	PrecisionOfBalance: "precision_of_balance",
 	Balance:            "balance",
-	CreatedAt:          "created_at",
-	UpdatedAt:          "updated_at",
-	DeletedAt:          "deleted_at",
 	Version:            "version",
+	CreatedAt:          "created_at",
+	CreatedBy:          "created_by",
+	UpdatedAt:          "updated_at",
+	UpdatedBy:          "updated_by",
+	DeletedAt:          "deleted_at",
+	DeletedBy:          "deleted_by",
 }
 
 // NewFdAccountDao creates and returns a new DAO object for table data access.

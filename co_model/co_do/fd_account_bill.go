@@ -25,6 +25,7 @@ type FdAccountBill struct {
 	TradeAt       *gtime.Time // 交易时间
 	Remark        interface{} // 备注信息
 	TradeState    interface{} // 交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、
-	CreatedAt     *gtime.Time //
 	DeletedAt     *gtime.Time //
+	CreatedAt     *gtime.Time //
+	CreatedBy     interface{} //
 }

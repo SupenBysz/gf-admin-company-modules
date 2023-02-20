@@ -20,8 +20,11 @@ type FdInvoice struct {
 	AuditReplayMsg string      `json:"auditReplayMsg" description:"审核回复，仅审核不通过时才有值"`
 	AuditAt        *gtime.Time `json:"auditAt"        description:"审核时间"`
 	State          int         `json:"state"          description:"状态：0待审核、1已通过、-1不通过"`
-	CreatedAt      *gtime.Time `json:"createdAt"      description:""`
-	UpdatedAt      *gtime.Time `json:"updatedAt"      description:""`
-	DeletedAt      *gtime.Time `json:"deletedAt"      description:""`
 	UnionMainId    int64       `json:"unionMainId"    description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
+	CreatedAt      *gtime.Time `json:"createdAt"      description:""`
+	CreatedBy      int64       `json:"createdBy"      description:""`
+	UpdatedAt      *gtime.Time `json:"updatedAt"      description:""`
+	UpdatedBy      int64       `json:"updatedBy"      description:""`
+	DeletedAt      *gtime.Time `json:"deletedAt"      description:""`
+	DeletedBy      int64       `json:"deletedBy"      description:""`
 }
