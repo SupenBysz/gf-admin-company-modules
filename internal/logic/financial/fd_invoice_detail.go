@@ -35,6 +35,8 @@ func NewFdInvoiceDetail(modules co_interface.IModules) co_interface.IFdInvoiceDe
 
 // CreateInvoiceDetail 创建发票详情，相当于创建审核列表，审核是人工审核
 func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_model.FdInvoiceDetailRegister) (*co_entity.FdInvoiceDetail, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	// 检查指定参数是否为空
 	if err := g.Validator().Data(info).Run(ctx); err != nil {
 		return nil, err
@@ -49,6 +51,7 @@ func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_mode
 	data.Id = idgen.NextId()
 	// 设置审核状态为待审核
 	data.State = co_enum.Invoice.AuditType.WaitReview.Code()
+	data.CreatedBy = sessionUser.Id
 
 	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Data(data).Insert()
 
@@ -79,6 +82,8 @@ func (s *sFdInvoiceDetail) GetInvoiceDetailById(ctx context.Context, id int64) (
 
 // MakeInvoiceDetail 开票
 func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailId int64, makeInvoiceDetail co_model.FdMakeInvoiceDetail) (res bool, err error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
 	if err != nil || invoiceDetailInfo == nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
@@ -97,6 +102,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 			Email:      makeInvoiceDetail.Email,
 			State:      co_enum.Invoice.State.Success.Code(),
 			MakeAt:     gtime.Now(),
+			UpdatedBy:  sessionUser.Id,
 		}).Where(co_do.FdInvoiceDetail{
 			Id: invoiceDetailInfo.Id,
 		}).Update()
@@ -109,6 +115,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 			CourierNumber: makeInvoiceDetail.CourierNumber,
 			State:         co_enum.Invoice.State.Success.Code(),
 			MakeAt:        gtime.Now(),
+			UpdatedBy:     sessionUser.Id,
 		}).Where(co_do.FdInvoiceDetail{
 			Id: invoiceDetailInfo.Id,
 		}).Update()
@@ -126,6 +133,8 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 
 // AuditInvoiceDetail 审核发票
 func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	// 审核行仅允许 co_enum_invoice.State.WaitForInvoice 和 co_enum_invoice.State.Failure 待开票、开票失败
 	if auditInfo.State != co_enum.Invoice.State.WaitForInvoice.Code() && auditInfo.State != co_enum.Invoice.State.Failure.Code() {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetail_AuditState_Error"), s.dao.FdInvoiceDetail.Table())
@@ -151,6 +160,7 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 		AuditReplyMsg: auditInfo.ReplyMsg,
 		State:         auditInfo.State,
 		AuditAt:       gtime.Now(),
+		UpdatedBy:     sessionUser.Id,
 	}).Where(co_do.FdInvoiceDetail{
 		Id: invoiceDetailInfo.Id,
 	}).Update()
@@ -181,6 +191,8 @@ func (s *sFdInvoiceDetail) QueryInvoiceDetailListByInvoiceId(ctx context.Context
 
 // DeleteInvoiceDetail 标记删除发票详情
 func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (bool, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	// 判断是否存在该发票
 	invoice, err := s.GetInvoiceDetailById(ctx, id)
 	if err != nil || invoice == nil {
@@ -191,7 +203,12 @@ func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (b
 		// 状态修改为已撤消，
 		_, err = s.dao.FdInvoiceDetail.Ctx(ctx).
 			Where(co_do.FdInvoiceDetail{Id: id}).
-			Update(co_do.FdInvoiceDetail{State: co_enum.Invoice.State.Cancel.Code()})
+			Update(co_do.FdInvoiceDetail{
+				State:     co_enum.Invoice.State.Cancel.Code(),
+				UpdatedBy: sessionUser.Id,
+				DeletedBy: sessionUser.Id,
+				DeletedAt: gtime.Now(),
+			})
 		if err != nil {
 			return err
 		}

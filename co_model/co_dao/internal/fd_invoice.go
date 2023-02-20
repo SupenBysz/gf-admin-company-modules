@@ -33,10 +33,13 @@ type FdInvoiceColumns struct {
 	AuditReplayMsg string // 审核回复，仅审核不通过时才有值
 	AuditAt        string // 审核时间
 	State          string // 状态：0待审核、1已通过、-1不通过
-	CreatedAt      string //
-	UpdatedAt      string //
-	DeletedAt      string //
 	UnionMainId    string // 主体ID：运营商ID、服务商ID、商户ID、消费者ID
+	CreatedAt      string //
+	CreatedBy      string //
+	UpdatedAt      string //
+	UpdatedBy      string //
+	DeletedAt      string //
+	DeletedBy      string //
 }
 
 // fdInvoiceColumns holds the columns for table co_fd_invoice.
@@ -51,10 +54,13 @@ var fdInvoiceColumns = FdInvoiceColumns{
 	AuditReplayMsg: "audit_replay_msg",
 	AuditAt:        "audit_at",
 	State:          "state",
-	CreatedAt:      "created_at",
-	UpdatedAt:      "updated_at",
-	DeletedAt:      "deleted_at",
 	UnionMainId:    "union_main_id",
+	CreatedAt:      "created_at",
+	CreatedBy:      "created_by",
+	UpdatedAt:      "updated_at",
+	UpdatedBy:      "updated_by",
+	DeletedAt:      "deleted_at",
+	DeletedBy:      "deleted_by",
 }
 
 // NewFdInvoiceDao creates and returns a new DAO object for table data access.

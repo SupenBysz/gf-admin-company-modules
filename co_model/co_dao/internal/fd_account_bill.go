@@ -36,8 +36,9 @@ type FdAccountBillColumns struct {
 	TradeAt       string // 交易时间
 	Remark        string // 备注信息
 	TradeState    string // 交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、
-	CreatedAt     string //
 	DeletedAt     string //
+	CreatedAt     string //
+	CreatedBy     string //
 }
 
 // fdAccountBillColumns holds the columns for table co_fd_account_bill.
@@ -55,8 +56,9 @@ var fdAccountBillColumns = FdAccountBillColumns{
 	TradeAt:       "trade_at",
 	Remark:        "remark",
 	TradeState:    "trade_state",
-	CreatedAt:     "created_at",
 	DeletedAt:     "deleted_at",
+	CreatedAt:     "created_at",
+	CreatedBy:     "created_by",
 }
 
 // NewFdAccountBillDao creates and returns a new DAO object for table data access.

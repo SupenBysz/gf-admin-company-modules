@@ -23,6 +23,7 @@ type FdAccountBill struct {
 	TradeAt       *gtime.Time `json:"tradeAt"       description:"交易时间"`
 	Remark        string      `json:"remark"        description:"备注信息"`
 	TradeState    int         `json:"tradeState"    description:"交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
+	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
+	CreatedBy     int64       `json:"createdBy"     description:""`
 }

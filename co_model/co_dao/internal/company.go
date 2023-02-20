@@ -28,7 +28,6 @@ type CompanyColumns struct {
 	ContactName   string // 商务联系人
 	ContactMobile string // 商务联系电话
 	UserId        string // 管理员ID
-	ParentId      string // 父级ID
 	State         string // 状态：0未启用，1正常
 	Remark        string // 备注
 	CreatedBy     string // 创建者
@@ -37,6 +36,7 @@ type CompanyColumns struct {
 	UpdatedAt     string // 更新时间
 	DeletedBy     string // 删除者
 	DeletedAt     string // 删除时间
+	ParentId      string // 父级ID
 }
 
 // companyColumns holds the columns for table co_company.
@@ -46,7 +46,6 @@ var companyColumns = CompanyColumns{
 	ContactName:   "contact_name",
 	ContactMobile: "contact_mobile",
 	UserId:        "user_id",
-	ParentId:      "parent_id",
 	State:         "state",
 	Remark:        "remark",
 	CreatedBy:     "created_by",
@@ -55,6 +54,7 @@ var companyColumns = CompanyColumns{
 	UpdatedAt:     "updated_at",
 	DeletedBy:     "deleted_by",
 	DeletedAt:     "deleted_at",
+	ParentId:      "parent_id",
 }
 
 // NewCompanyDao creates and returns a new DAO object for table data access.

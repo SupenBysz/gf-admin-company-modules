@@ -10,6 +10,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/utility/daoctl"
 
 	"github.com/gogf/gf/v2/database/gdb"
@@ -33,6 +35,7 @@ func NewFdAccount(modules co_interface.IModules) co_interface.IFdAccount {
 
 // CreateAccount 创建财务账号
 func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (*co_entity.FdAccount, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	// 检查指定参数是否为空
 	if err := g.Validator().Data(info).Run(ctx); err != nil {
 		return nil, err
@@ -57,6 +60,8 @@ func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountR
 	data := co_do.FdAccount{}
 	gconv.Struct(info, &data)
 	data.Id = idgen.NextId()
+	data.CreatedBy = sessionUser.Id
+	data.CreatedAt = gtime.Now()
 
 	// 插入财务账号
 	_, err = s.dao.FdAccount.Ctx(ctx).Insert(data)
@@ -83,12 +88,17 @@ func (s *sFdAccount) GetAccountById(ctx context.Context, id int64) (*co_entity.F
 
 // UpdateAccountIsEnable 修改财务账号状态（是否启用：0禁用 1启用）
 func (s *sFdAccount) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
 	if account == nil || err != nil {
 		return false, gerror.New(s.modules.T(ctx, "{#Account}{#error_Data_NotFound}"))
 	}
 
-	_, err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{IsEnabled: isEnabled})
+	_, err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
+		IsEnabled: isEnabled,
+		UpdatedBy: sessionUser.Id,
+	})
 	if err != nil {
 		return false, err
 	}
@@ -110,7 +120,12 @@ func (s *sFdAccount) HasAccountByName(ctx context.Context, name string) (*co_ent
 
 // UpdateAccountLimitState 修改财务账号的限制状态 （0不限制，1限制支出、2限制收入）
 func (s *sFdAccount) UpdateAccountLimitState(ctx context.Context, id int64, limitState int64) (bool, error) {
-	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{LimitState: limitState})
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
+		LimitState: limitState,
+		UpdatedBy:  sessionUser.Id,
+	})
 	if err != nil {
 		return false, err
 	}
@@ -137,6 +152,8 @@ func (s *sFdAccount) QueryAccountListByUserId(ctx context.Context, userId int64)
 
 // UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
 func (s *sFdAccount) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	db := s.dao.FdAccount.Ctx(ctx)
 
 	data := co_do.FdAccount{
@@ -146,9 +163,12 @@ func (s *sFdAccount) UpdateAccountBalance(ctx context.Context, accountId int64, 
 	if inOutType == 1 { // 收入
 		// 余额 = 之前的余额 + 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "+" + gconv.String(amount))
+		data.UpdatedBy = sessionUser.Id
+
 	} else if inOutType == 2 { // 支出
 		// 余额 = 之前的余额 - 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "-" + gconv.String(amount))
+		data.UpdatedBy = sessionUser.Id
 	}
 
 	result, err := db.Data(data).Where(co_do.FdAccount{

@@ -21,8 +21,11 @@ type FdAccount struct {
 	LimitState         interface{} // 限制状态：0不限制，1限制支出、2限制收入
 	PrecisionOfBalance interface{} // 货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……
 	Balance            interface{} // 当前余额，必须要与账单最后一笔交易余额对应得上
-	CreatedAt          *gtime.Time //
-	UpdatedAt          *gtime.Time //
-	DeletedAt          *gtime.Time //
 	Version            interface{} // 乐观锁所需数据版本字段
+	CreatedAt          *gtime.Time //
+	CreatedBy          interface{} //
+	UpdatedAt          *gtime.Time //
+	UpdatedBy          interface{} //
+	DeletedAt          *gtime.Time //
+	DeletedBy          interface{} //
 }

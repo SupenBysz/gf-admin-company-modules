@@ -12,6 +12,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -34,6 +35,8 @@ func NewFdInvoice(modules co_interface.IModules) co_interface.IFdInvoice {
 
 // CreateInvoice 添加发票抬头
 func (s *sFdInvoice) CreateInvoice(ctx context.Context, info co_model.FdInvoiceRegister) (*co_entity.FdInvoice, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	// 一个公司只能有一个发票抬头
 	invoice, _ := s.GetFdInvoiceByTaxId(ctx, info.TaxId)
 	if invoice != nil {
@@ -52,8 +55,9 @@ func (s *sFdInvoice) CreateInvoice(ctx context.Context, info co_model.FdInvoiceR
 	gconv.Struct(info, &data)
 	data.Id = idgen.NextId()
 	data.AuditUserId = 0
-
 	data.State = co_enum.Invoice.AuditType.WaitReview.Code()
+
+	data.CreatedBy = sessionUser.Id
 
 	_, err := s.dao.FdInvoice.Ctx(ctx).Data(data).Insert()
 	if err != nil {
@@ -105,6 +109,8 @@ func (s *sFdInvoice) QueryInvoiceList(ctx context.Context, info *base_model.Sear
 
 // DeletesFdInvoiceById 删除发票抬头
 func (s *sFdInvoice) DeletesFdInvoiceById(ctx context.Context, invoiceId int64) (bool, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	var result sql.Result
 	var err error
 
@@ -114,6 +120,12 @@ func (s *sFdInvoice) DeletesFdInvoiceById(ctx context.Context, invoiceId int64) 
 	}
 
 	err = s.dao.FdInvoice.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 添加删除记录留痕
+		result, err = s.dao.FdInvoice.Ctx(ctx).Where(co_do.FdInvoice{Id: invoice.Id}).Update(co_do.FdInvoice{
+			DeletedBy: sessionUser.Id,
+			DeletedAt: gtime.Now(),
+		})
+
 		// 删除
 		result, err = s.dao.FdInvoice.Ctx(ctx).Where(co_do.FdInvoice{Id: invoice.Id}).Delete()
 
