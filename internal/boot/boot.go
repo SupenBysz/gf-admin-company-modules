@@ -87,36 +87,58 @@ func InitFinancialPermission(module co_interface.IModules) []*sys_model.SysPermi
 		{
 			SysPermission: &sys_entity.SysPermission{
 				Id:         5953153121845349,
-				Name:       "财务服务",
+				Name:       "财务",
 				Identifier: "Financial",
 				Type:       1,
 				IsShow:     1,
 			},
 			Children: []*sys_model.SysPermissionTree{
-				// 查看发票详情，查看发票详情信息
-				co_permission.Financial.PermissionType(module).ViewInvoiceDetail,
-				// 查看发票抬头信息，查看发票抬头信息
-				co_permission.Financial.PermissionType(module).ViewInvoice,
-				// 查看提现账号，查看提现账号信息
-				co_permission.Financial.PermissionType(module).ViewBankCardDetail,
-				// 提现账号列表，查看所有提现账号
-				co_permission.Financial.PermissionType(module).BankCardList,
-				// 发票抬头列表，查看所有发票抬头
-				co_permission.Financial.PermissionType(module).InvoiceList,
-				// 发票详情列表，查看所有发票详情
-				co_permission.Financial.PermissionType(module).InvoiceDetailList,
-				// 审核发票，审核发票申请
-				co_permission.Financial.PermissionType(module).AuditInvoiceDetail,
-				// 开发票，添加发票详情记录
-				co_permission.Financial.PermissionType(module).MakeInvoiceDetail,
-				// 添加发票抬头，添加发票抬头信息
-				co_permission.Financial.PermissionType(module).CreateInvoice,
-				// 申请提现账号，添加提现账号信息
-				co_permission.Financial.PermissionType(module).CreateBankCard,
-				// 删除发票抬头，删除发票抬头信息
-				co_permission.Financial.PermissionType(module).DeleteInvoice,
-				//  删除提现账号，删除提现账号信息
-				co_permission.Financial.PermissionType(module).DeleteBankCard,
+				{
+					SysPermission: &sys_entity.SysPermission{
+						Id:         6211883938021486,
+						Name:       "发票",
+						Identifier: "Invoice",
+						Type:       1,
+						IsShow:     1,
+					},
+					Children: []*sys_model.SysPermissionTree{
+						// 查看发票详情，查看发票详情信息
+						co_permission.Financial.PermissionType(module).ViewInvoiceDetail,
+						// 查看发票抬头信息，查看发票抬头信息
+						co_permission.Financial.PermissionType(module).ViewInvoice,
+						// 发票抬头列表，查看所有发票抬头
+						co_permission.Financial.PermissionType(module).InvoiceList,
+						// 发票详情列表，查看所有发票详情
+						co_permission.Financial.PermissionType(module).InvoiceDetailList,
+						// 审核发票，审核发票申请
+						co_permission.Financial.PermissionType(module).AuditInvoiceDetail,
+						// 开发票，添加发票详情记录
+						co_permission.Financial.PermissionType(module).MakeInvoiceDetail,
+						// 添加发票抬头，添加发票抬头信息
+						co_permission.Financial.PermissionType(module).CreateInvoice,
+						// 删除发票抬头，删除发票抬头信息
+						co_permission.Financial.PermissionType(module).DeleteInvoice,
+					},
+				},
+				{
+					SysPermission: &sys_entity.SysPermission{
+						Id:         6211883938021487,
+						Name:       "银行卡",
+						Identifier: "BankCard",
+						Type:       1,
+						IsShow:     1,
+					},
+					Children: []*sys_model.SysPermissionTree{
+						// 查看提现账号，查看银行卡账号信息
+						co_permission.Financial.PermissionType(module).ViewBankCardDetail,
+						// 提现账号列表，查看所有银行卡
+						co_permission.Financial.PermissionType(module).BankCardList,
+						// 申请提现账号，添加银行卡信息
+						co_permission.Financial.PermissionType(module).CreateBankCard,
+						//  删除提现账号，删除银行卡信息
+						co_permission.Financial.PermissionType(module).DeleteBankCard,
+					},
+				},
 				// 查看余额，查看账号余额
 				co_permission.Financial.PermissionType(module).GetAccountBalance,
 			},
