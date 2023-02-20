@@ -2,15 +2,15 @@ package boot
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
-	"github.com/SupenBysz/gf-admin-community/utility/permission"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 // InitPermission 初始化权限树
-func InitPermission(module co_interface.IModules) []*permission.SysPermissionTree {
-	result := []*permission.SysPermissionTree{
+func InitPermission(module co_interface.IModules) []*sys_model.SysPermissionTree {
+	result := []*sys_model.SysPermissionTree{
 		// 公司
 		{
 			SysPermission: &sys_entity.SysPermission{
@@ -20,7 +20,7 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{
+			Children: []*sys_model.SysPermissionTree{
 				co_permission.Company.PermissionType(module).Create,
 				co_permission.Company.PermissionType(module).ViewDetail,
 				co_permission.Company.PermissionType(module).List,
@@ -41,7 +41,7 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{
+			Children: []*sys_model.SysPermissionTree{
 				co_permission.Employee.PermissionType(module).ViewDetail,
 				co_permission.Employee.PermissionType(module).MoreDetail,
 				co_permission.Employee.PermissionType(module).List,
@@ -65,7 +65,7 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{
+			Children: []*sys_model.SysPermissionTree{
 				co_permission.Team.PermissionType(module).Create,
 				co_permission.Team.PermissionType(module).ViewDetail,
 				co_permission.Team.PermissionType(module).List,
@@ -81,8 +81,8 @@ func InitPermission(module co_interface.IModules) []*permission.SysPermissionTre
 }
 
 // InitFinancialPermission 初始化财务服务权限树
-func InitFinancialPermission(module co_interface.IModules) []*permission.SysPermissionTree {
-	result := []*permission.SysPermissionTree{
+func InitFinancialPermission(module co_interface.IModules) []*sys_model.SysPermissionTree {
+	result := []*sys_model.SysPermissionTree{
 		// 财务服务权限树
 		{
 			SysPermission: &sys_entity.SysPermission{
@@ -92,7 +92,7 @@ func InitFinancialPermission(module co_interface.IModules) []*permission.SysPerm
 				Type:       1,
 				IsShow:     1,
 			},
-			Children: []*permission.SysPermissionTree{
+			Children: []*sys_model.SysPermissionTree{
 				// 查看发票详情，查看发票详情信息
 				co_permission.Financial.PermissionType(module).ViewInvoiceDetail,
 				// 查看发票抬头信息，查看发票抬头信息

@@ -7,8 +7,8 @@ package internal
 import (
 	"context"
 
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl/dao_interface"
+	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -23,7 +23,7 @@ type CompanyTeamDao struct {
 
 // CompanyTeamColumns defines and stores column names for table co_company_team.
 type CompanyTeamColumns struct {
-	Id                string //
+	Id                string // ID
 	Name              string // 团队名称，公司维度下唯一
 	OwnerEmployeeId   string // 团队所有者/业务总监/业务经理/团队队长
 	CaptainEmployeeId string // 团队队长编号/小组组长

@@ -1,8 +1,8 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/kysion/base-library/base_model"
 )
 
 type Team struct {
@@ -29,5 +29,5 @@ type TeamMemberRes struct {
 	UnionMain  *CompanyRes  `json:"unionMain"  description:"关联主体"`
 }
 
-type TeamListRes sys_model.CollectRes[*TeamRes]
-type TeamMemberListRes sys_model.CollectRes[*TeamMemberRes]
+type TeamListRes base_model.CollectRes[*TeamRes]
+type TeamMemberListRes base_model.CollectRes[*TeamMemberRes]

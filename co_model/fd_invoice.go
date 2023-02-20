@@ -1,9 +1,9 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/kysion/base-library/base_model"
 )
 
 type FdInvoiceRegister struct {
@@ -21,4 +21,4 @@ type FdInvoiceRegister struct {
 
 type FdInvoiceInfoRes co_entity.FdInvoice
 
-type FdInvoiceListRes sys_model.CollectRes[co_entity.FdInvoice]
+type FdInvoiceListRes base_model.CollectRes[co_entity.FdInvoice]
