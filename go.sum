@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1:1G1pk05UrOh0NlF1oeaaix1x8XzrfjIDK47TY0Zehcw=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/SupenBysz/gf-admin-community v0.3.0 h1:O1G9zveJbs9BrvS3CR8t6FWaR1oxvBrR3MBUkpfnLzw=
-github.com/SupenBysz/gf-admin-community v0.3.0/go.mod h1:2P8xJbVWrChqxM2sE4DWkEECEaEcgKkbIwo94uFN1JM=
+github.com/SupenBysz/gf-admin-community v0.3.1 h1:uUz+b4cwOycBazVsIwFVqM6bdS6SpsnocwWhnAUl+2I=
+github.com/SupenBysz/gf-admin-community v0.3.1/go.mod h1:YXATm5RAL4Ee1T++44iPCkesgNC+jaiMGuVhfz8K2n0=
 github.com/casbin/casbin/v2 v2.60.0 h1:ZmC0/t4wolfEsDpDxTEsu2z6dfbMNpc11F52ceLs2Eo=
 github.com/casbin/casbin/v2 v2.60.0/go.mod h1:vByNa/Fchek0KZUgG5wEsl7iFsiviAYKRtgrQfcJqHg=
 github.com/cespare/xxhash/v2 v2.1.2 h1:YRXhKfTDauu4ajMg1TPgFO5jnlC2HCbmLXMcTG5cbYE=
@@ -78,8 +78,8 @@ github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpO
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/joho/godotenv v1.4.0 h1:3l4+N6zfMWnkbPEXKng2o2/MR5mSwTrBih4ZEkkz1lg=
 github.com/joho/godotenv v1.4.0/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
-github.com/kysion/base-library v0.0.3 h1:My8wPCcp2qOeDExPgLKdQ8z2KNPr9nqD7dkru784TIQ=
-github.com/kysion/base-library v0.0.3/go.mod h1:ysP/ule32mvLsTs1gjfyOXOd9n2lVTbTqu9Mu3nWpVs=
+github.com/kysion/base-library v0.0.4 h1:A+ukCbHXV24bXZGv4roHFWBsIClHyo7VSP3ddDfyrCY=
+github.com/kysion/base-library v0.0.4/go.mod h1:ysP/ule32mvLsTs1gjfyOXOd9n2lVTbTqu9Mu3nWpVs=
 github.com/lib/pq v1.10.4 h1:SO9z7FRPzA03QhHKJrH5BXA6HU1rS4V2nIVrrNC1iYk=
 github.com/lib/pq v1.10.4/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20230201065125-561cdd83b71d h1:+nfICio7TU/4Yxx4S1Zy/u9pIDN/XQnwrwDhGQD25XM=
