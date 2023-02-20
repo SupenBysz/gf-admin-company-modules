@@ -1,8 +1,8 @@
 package co_company_api
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/base_model"
 )
 
 type GetTeamByIdReq struct {
@@ -16,7 +16,7 @@ type HasTeamByNameReq struct {
 }
 
 type QueryTeamListReq struct {
-	sys_model.SearchParams
+	base_model.SearchParams
 }
 
 type CreateTeamReq struct {

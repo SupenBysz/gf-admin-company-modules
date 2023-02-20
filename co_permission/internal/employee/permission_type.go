@@ -1,14 +1,15 @@
 package employee
 
 import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
-	"github.com/SupenBysz/gf-admin-community/utility/kmap"
 	"github.com/SupenBysz/gf-admin-community/utility/permission"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/utility/kmap"
 )
 
-type Permission = *permission.SysPermissionTree
+type Permission = *sys_model.SysPermissionTree
 
 type permissionType[T co_interface.IModules] struct {
 	modules       T
