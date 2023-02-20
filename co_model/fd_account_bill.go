@@ -1,10 +1,9 @@
 package co_model
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
-	co_hook "github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/kysion/base-library/base_model"
 )
 
 type AccountBillRegister struct {
@@ -23,12 +22,4 @@ type AccountBillRegister struct {
 }
 
 type AccountBillInfo co_entity.FdAccountBill
-type AccountBillListRes sys_model.CollectRes[co_entity.FdAccountBill]
-
-type AccountBillHookFilter struct {
-	InOutType     co_hook.FinancialInOutType
-	TradeType     co_hook.FinancialTradeType
-	InTransaction bool
-}
-
-type AccountBillHookFunc sys_model.HookFunc[AccountBillHookFilter, AccountBillInfo]
+type AccountBillListRes base_model.CollectRes[co_entity.FdAccountBill]

@@ -12,7 +12,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
 type CompanyController struct {
@@ -39,7 +39,7 @@ func (c *CompanyController) GetCompanyById(ctx context.Context, req *co_company_
 			ret, err := c.modules.Company().GetCompanyById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
-		co_enum.Company.PermissionType(c.modules).ViewDetail,
+		co_permission.Company.PermissionType(c.modules).ViewDetail,
 	)
 }
 
@@ -58,7 +58,7 @@ func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_compan
 		func() (*co_model.CompanyListRes, error) {
 			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams)
 		},
-		co_enum.Company.PermissionType(c.modules).List,
+		co_permission.Company.PermissionType(c.modules).List,
 	)
 }
 
@@ -69,7 +69,7 @@ func (c *CompanyController) CreateCompany(ctx context.Context, req *co_company_a
 			ret, err := c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
 			return ret, err
 		},
-		co_enum.Company.PermissionType(c.modules).Create,
+		co_permission.Company.PermissionType(c.modules).Create,
 	)
 }
 
@@ -80,7 +80,7 @@ func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_company_a
 			ret, err := c.modules.Company().UpdateCompany(c.makeMore(ctx), &req.Company)
 			return ret, err
 		},
-		co_enum.Company.PermissionType(c.modules).Update,
+		co_permission.Company.PermissionType(c.modules).Update,
 	)
 }
 
@@ -91,7 +91,7 @@ func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_compan
 			ret, err := c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
-		co_enum.Company.PermissionType(c.modules).ViewMobile,
+		co_permission.Company.PermissionType(c.modules).ViewMobile,
 	)
 }
 

@@ -2,15 +2,15 @@ package financial
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -164,13 +164,13 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 
 // QueryInvoiceDetailListByInvoiceId 根据发票抬头，获取已开票的发票详情列表
 func (s *sFdInvoiceDetail) QueryInvoiceDetailListByInvoiceId(ctx context.Context, invoiceId int64) (*co_model.FdInvoiceDetailListRes, error) {
-	result, err := daoctl.Query[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx), &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+	result, err := daoctl.Query[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx), &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field: s.dao.FdInvoiceDetail.Columns().FdInvoiceId,
 			Where: "=",
 			Value: invoiceId,
 		}),
-		Pagination: sys_model.Pagination{
+		Pagination: base_model.Pagination{
 			PageNum:  1,
 			PageSize: -1,
 		},
@@ -214,11 +214,11 @@ func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (b
 }
 
 // QueryInvoiceDetail 根据限定的条件查询发票列表
-func (s *sFdInvoiceDetail) QueryInvoiceDetail(ctx context.Context, info *sys_model.SearchParams, userId int64, unionMainId int64) (*co_model.FdInvoiceDetailListRes, error) {
-	newFields := make([]sys_model.FilterInfo, 0)
+func (s *sFdInvoiceDetail) QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*co_model.FdInvoiceDetailListRes, error) {
+	newFields := make([]base_model.FilterInfo, 0)
 	// 筛选条件强制指定所属用户
 	if unionMainId != 0 {
-		newFields = append(newFields, sys_model.FilterInfo{
+		newFields = append(newFields, base_model.FilterInfo{
 			Field: s.dao.FdInvoiceDetail.Columns().UnionMainId, // type
 			Where: "=",
 			Value: unionMainId,
@@ -226,7 +226,7 @@ func (s *sFdInvoiceDetail) QueryInvoiceDetail(ctx context.Context, info *sys_mod
 	}
 
 	if userId != 0 {
-		newFields = append(newFields, sys_model.FilterInfo{
+		newFields = append(newFields, base_model.FilterInfo{
 			Field: s.dao.FdInvoiceDetail.Columns().UserId,
 			Where: "=",
 			Value: userId,

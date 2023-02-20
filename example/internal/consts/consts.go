@@ -1,8 +1,8 @@
 package consts
 
 import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
-	"github.com/SupenBysz/gf-admin-community/utility/permission"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -14,10 +14,10 @@ type global struct {
 }
 
 var (
-	PermissionTree []*permission.SysPermissionTree
+	PermissionTree []*sys_model.SysPermissionTree
 
 	// FinancialPermissionTree 财务服务权限树 (可选)
-	FinancialPermissionTree []*permission.SysPermissionTree
+	FinancialPermissionTree []*sys_model.SysPermissionTree
 
 	Global = global{
 		Modules: co_module.NewModules(

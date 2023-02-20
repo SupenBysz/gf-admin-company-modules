@@ -1,8 +1,6 @@
-package co_enum_financial
+package financial
 
-import (
-	"github.com/SupenBysz/gf-admin-community/utility/enum"
-)
+import "github.com/kysion/base-library/utility/enum"
 
 type TradeTypeEnum enum.IEnumCode[int]
 

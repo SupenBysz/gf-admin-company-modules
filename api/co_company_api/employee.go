@@ -1,8 +1,8 @@
 package co_company_api
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/base_model"
 )
 
 type GetEmployeeByIdReq struct {
@@ -21,7 +21,7 @@ type HasEmployeeByNoReq struct {
 }
 
 type QueryEmployeeListReq struct {
-	sys_model.SearchParams
+	base_model.SearchParams
 }
 
 type CreateEmployeeReq struct {

@@ -1,30 +1,31 @@
 package employee
 
 import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
-	"github.com/SupenBysz/gf-admin-community/utility/kmap"
 	"github.com/SupenBysz/gf-admin-community/utility/permission"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/utility/kmap"
 )
 
-type PermissionEnum = *permission.SysPermissionTree
+type Permission = *sys_model.SysPermissionTree
 
 type permissionType[T co_interface.IModules] struct {
 	modules       T
-	enumMap       *kmap.HashMap[string, PermissionEnum]
-	ViewDetail    PermissionEnum
-	MoreDetail    PermissionEnum
-	List          PermissionEnum
-	Create        PermissionEnum
-	Update        PermissionEnum
-	Delete        PermissionEnum
-	SetMobile     PermissionEnum
-	SetAvatar     PermissionEnum
-	SetState      PermissionEnum
-	ViewLicense   PermissionEnum
-	AuditLicense  PermissionEnum
-	UpdateLicense PermissionEnum
+	enumMap       *kmap.HashMap[string, Permission]
+	ViewDetail    Permission
+	MoreDetail    Permission
+	List          Permission
+	Create        Permission
+	Update        Permission
+	Delete        Permission
+	SetMobile     Permission
+	SetAvatar     Permission
+	SetState      Permission
+	ViewLicense   Permission
+	AuditLicense  Permission
+	UpdateLicense Permission
 }
 
 var (
@@ -32,7 +33,7 @@ var (
 	PermissionType    = func(modules co_interface.IModules) *permissionType[co_interface.IModules] {
 		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IModules]{
 			modules:       modules,
-			enumMap:       kmap.New[string, PermissionEnum](),
+			enumMap:       kmap.New[string, Permission](),
 			ViewDetail:    permission.NewInIdentifier("ViewDetail", "详情", "查看员工详情"),
 			MoreDetail:    permission.NewInIdentifier("MoreDetail", "更多详情", "查看员工更多详情含手机号等"),
 			List:          permission.NewInIdentifier("List", "列表", "查看员工列表"),
@@ -48,7 +49,7 @@ var (
 		})
 
 		for k, v := range gconv.Map(result) {
-			result.enumMap.Set(k, v.(PermissionEnum))
+			result.enumMap.Set(k, v.(Permission))
 		}
 		return result
 	}

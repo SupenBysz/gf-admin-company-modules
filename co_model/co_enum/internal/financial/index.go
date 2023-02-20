@@ -1,13 +1,11 @@
-package co_enum_financial
+package financial
 
 type financial struct {
-	InOutType      inOutType
-	TradeType      tradeType
-	PermissionType permissionType
+	InOutType inOutType
+	TradeType tradeType
 }
 
 var Financial = financial{
-	InOutType:      InOutType,
-	TradeType:      TradeType,
-	PermissionType: PermissionType,
+	InOutType: InOutType,
+	TradeType: TradeType,
 }

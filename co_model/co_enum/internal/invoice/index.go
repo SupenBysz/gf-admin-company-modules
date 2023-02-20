@@ -1,4 +1,4 @@
-package co_enum_invoice
+package invoice
 
 type invoice struct {
 	AuditType auditType

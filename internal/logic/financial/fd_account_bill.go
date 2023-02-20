@@ -4,12 +4,14 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
 
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -19,7 +21,7 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 )
 
-type hookInfo sys_model.HookEventType[co_model.AccountBillHookFilter, co_model.AccountBillHookFunc]
+type hookInfo sys_model.HookEventType[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 
 // 财务账单
 type sFdAccountBill struct {
@@ -37,13 +39,13 @@ func NewFdAccountBill(modules co_interface.IModules) co_interface.IFdAccountBill
 }
 
 // InstallHook 安装Hook
-func (s *sFdAccountBill) InstallHook(filter co_model.AccountBillHookFilter, hookFunc co_model.AccountBillHookFunc) {
+func (s *sFdAccountBill) InstallHook(filter co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc) {
 	item := hookInfo{Key: filter, Value: hookFunc}
 	s.hookArr.Append(item)
 }
 
 // UnInstallHook 卸载Hook
-func (s *sFdAccountBill) UnInstallHook(filter co_model.AccountBillHookFilter) {
+func (s *sFdAccountBill) UnInstallHook(filter co_hook.AccountBillHookFilter) {
 	newFuncArr := garray.NewArray()
 	s.hookArr.Iterator(func(key int, value interface{}) bool {
 		item := value.(hookInfo)
@@ -256,25 +258,25 @@ func (s *sFdAccountBill) spending(ctx context.Context, info co_model.AccountBill
 }
 
 // GetAccountBillByAccountId  根据财务账号id获取账单
-func (s *sFdAccountBill) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *sys_model.Pagination) (*co_model.AccountBillListRes, error) {
+func (s *sFdAccountBill) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*co_model.AccountBillListRes, error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}
 
 	if pagination == nil {
-		pagination = &sys_model.Pagination{
+		pagination = &base_model.Pagination{
 			PageNum:  1,
 			PageSize: 20,
 		}
 	}
 
-	result, err := daoctl.Query[co_entity.FdAccountBill](s.dao.FdAccountBill.Ctx(ctx), &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+	result, err := daoctl.Query[co_entity.FdAccountBill](s.dao.FdAccountBill.Ctx(ctx), &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field: s.dao.FdAccountBill.Columns().FdAccountId,
 			Where: "=",
 			Value: accountId,
 		}),
-		OrderBy: append(make([]sys_model.OrderBy, 0), sys_model.OrderBy{
+		OrderBy: append(make([]base_model.OrderBy, 0), base_model.OrderBy{
 			Field: s.dao.FdAccountBill.Columns().CreatedAt,
 			Sort:  "asc",
 		}),

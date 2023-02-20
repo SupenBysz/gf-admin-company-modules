@@ -8,8 +8,14 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
+	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/funs"
+	"github.com/kysion/base-library/utility/masker"
 	"math"
 	"strconv"
 	"time"
@@ -23,24 +29,25 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
-	"github.com/SupenBysz/gf-admin-community/utility/masker"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
+type hookInfo sys_model.HookEventType[co_hook.EmployeeHookFilter, co_hook.EmployeeHookFunc]
+
 type sEmployee struct {
 	modules co_interface.IModules
 	dao     *co_dao.XDao
+	hookArr *garray.Array
 }
 
 func NewEmployee(modules co_interface.IModules) *sEmployee {
 	result := &sEmployee{
 		modules: modules,
 		dao:     modules.Dao(),
+		hookArr: garray.NewArray(),
 	}
 
 	// 注入钩子函数
@@ -237,7 +244,7 @@ func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.Employe
 }
 
 // QueryEmployeeList 获取员工列表
-func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *sys_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
+func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -479,13 +486,13 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 	}
 
 	// 查找到员工是管理员或者队长的团队
-	teamList, err := s.modules.Team().QueryTeamList(ctx, &sys_model.SearchParams{
-		Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+	teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field:     s.dao.Team.Columns().CaptainEmployeeId,
 			Where:     "=",
 			Value:     employeeId,
 			IsOrWhere: true,
-		}, sys_model.FilterInfo{
+		}, base_model.FilterInfo{
 			Field:     s.dao.Team.Columns().OwnerEmployeeId,
 			Where:     "=",
 			Value:     employeeId,
@@ -522,7 +529,7 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 
 	if sessionUser.IsAdmin == false {
 		// 判断用户是否有权限
-		can, _ := sys_service.SysPermission().CheckPermission(ctx, co_enum.Employee.PermissionType(s.modules).MoreDetail)
+		can, _ := sys_service.SysPermission().CheckPermission(ctx, co_permission.Employee.PermissionType(s.modules).MoreDetail)
 		if can == false {
 			model = model.Where(sys_do.SysFile{UnionMainId: sessionUser.UnionMainId})
 		}
@@ -553,8 +560,8 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 	userIds, err := sys_service.SysRole().GetRoleMemberIds(ctx, roleId, sessionUser.UnionMainId)
 	if err != nil {
 		return &co_model.EmployeeListRes{
-			PaginationRes: sys_model.PaginationRes{
-				Pagination: sys_model.Pagination{
+			PaginationRes: base_model.PaginationRes{
+				Pagination: base_model.Pagination{
 					PageNum:  1,
 					PageSize: 20,
 				},
@@ -566,14 +573,14 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 
 	result, err := daoctl.Query[*co_model.EmployeeRes](
 		s.dao.Employee.Ctx(ctx),
-		&sys_model.SearchParams{
-			Filter: append(make([]sys_model.FilterInfo, 0), sys_model.FilterInfo{
+		&base_model.SearchParams{
+			Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
 				Where: "in",
 				Value: userIds,
 			}),
 			OrderBy:    nil,
-			Pagination: sys_model.Pagination{},
+			Pagination: base_model.Pagination{},
 		},
 		true,
 	)

@@ -10,7 +10,7 @@ import (
 
 // CompanyTeam is the golang structure for table company_team.
 type CompanyTeam struct {
-	Id                int64       `json:"id"                description:""`
+	Id                int64       `json:"id"                description:"ID"`
 	Name              string      `json:"name"              description:"团队名称，公司维度下唯一"`
 	OwnerEmployeeId   int64       `json:"ownerEmployeeId"   description:"团队所有者/业务总监/业务经理/团队队长"`
 	CaptainEmployeeId int64       `json:"captainEmployeeId" description:"团队队长编号/小组组长"`
