@@ -32,11 +32,6 @@ type UpdateTeamReq struct {
 type DeleteTeamReq struct {
 	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 }
-
-type GetTeamMemberListReq struct {
-	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
-}
-
 type QueryTeamListByEmployeeReq struct {
 	EmployeeId  int64 `json:"employeeId" v:"required#员工ID校验失败" dc:"员工ID"`
 	UnionMainId int64 `json:"unionMainId" dc:"关联主体，默认当前主体"`

@@ -10,6 +10,9 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/base_model"
+	"reflect"
 
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -21,40 +24,121 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 )
 
-type sFdAccount struct {
-	modules co_interface.IModules
-	dao     *co_dao.XDao
+type sFdAccount[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	TR co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
+	base_hook.ResponseFactoryHook[TR]
+	modules co_interface.IModules[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		TR,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]
+	dao *co_dao.XDao
 }
 
-func NewFdAccount(modules co_interface.IModules) co_interface.IFdAccount {
-	return &sFdAccount{
+func NewFdAccount[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	TR co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) co_interface.IFdAccount[TR] {
+	result := &sFdAccount[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		TR,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     modules.Dao(),
 	}
+
+	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
+
+	return result
+}
+
+// FactoryMakeResponseInstance 响应实例工厂方法
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) FactoryMakeResponseInstance() TR {
+	var ret co_model.IFdAccountRes
+	ret = &co_model.FdAccountRes{}
+	return ret.(TR)
 }
 
 // CreateAccount 创建财务账号
-func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (*co_entity.FdAccount, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	// 检查指定参数是否为空
 	if err := g.Validator().Data(info).Run(ctx); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
 	if user == nil || err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
 	}
 
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)
-	if err != nil || currency == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
+	if err != nil || reflect.ValueOf(currency).IsNil() {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
 	}
-	if currency.IsLegalTender != 1 {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
-
+	if currency.Data().IsLegalTender != 1 {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
 	}
 	// 生产随机id
 	data := co_do.FdAccount{}
@@ -66,28 +150,48 @@ func (s *sFdAccount) CreateAccount(ctx context.Context, info co_model.FdAccountR
 	// 插入财务账号
 	_, err = s.dao.FdAccount.Ctx(ctx).Insert(data)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Account_Save_Failed"), s.dao.FdAccount.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Account_Save_Failed"), s.dao.FdAccount.Table())
 	}
 
 	return s.GetAccountById(ctx, gconv.Int64(data.Id))
 }
 
 // GetAccountById 根据ID获取财务账号
-func (s *sFdAccount) GetAccountById(ctx context.Context, id int64) (*co_entity.FdAccount, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountById(ctx context.Context, id int64) (response TR, err error) {
 	if id == 0 {
-		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+		return response, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
 	}
-	result, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
+	data, err := daoctl.GetByIdWithError[TR](s.dao.FdAccount.Ctx(ctx), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountById_Failed"), s.dao.FdAccount.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountById_Failed"), s.dao.FdAccount.Table())
 	}
 
-	return result, nil
+	return *data, nil
 }
 
 // UpdateAccountIsEnable 修改财务账号状态（是否启用：0禁用 1启用）
-func (s *sFdAccount) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
@@ -107,19 +211,41 @@ func (s *sFdAccount) UpdateAccountIsEnable(ctx context.Context, id int64, isEnab
 }
 
 // HasAccountByName 根据账户名查询财务账户
-func (s *sFdAccount) HasAccountByName(ctx context.Context, name string) (*co_entity.FdAccount, error) {
-	data := &co_entity.FdAccount{}
-	err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Name: name}).Scan(data)
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) HasAccountByName(ctx context.Context, name string) (response TR, err error) {
+	response = s.FactoryMakeResponseInstance()
+
+	err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Name: name}).Scan(response.Data())
 
 	if err != nil {
-		return nil, err
+		var ret TR
+		return ret, err
 	}
 
-	return data, nil
+	return response, nil
 }
 
 // UpdateAccountLimitState 修改财务账号的限制状态 （0不限制，1限制支出、2限制收入）
-func (s *sFdAccount) UpdateAccountLimitState(ctx context.Context, id int64, limitState int64) (bool, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
@@ -134,24 +260,42 @@ func (s *sFdAccount) UpdateAccountLimitState(ctx context.Context, id int64, limi
 }
 
 // QueryAccountListByUserId 获取指定用户的所有财务账号
-func (s *sFdAccount) QueryAccountListByUserId(ctx context.Context, userId int64) (*co_model.AccountList, error) {
-	accountList := co_model.AccountList{}
-
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error) {
 	if userId == 0 {
 		return nil, gerror.New("用户id不能为空")
 	}
 
-	err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{UnionUserId: userId}).Scan(&accountList)
+	data, err := daoctl.Query[TR](s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{UnionUserId: userId}), nil, false)
 
-	if err != nil || len(accountList) <= 0 {
+	if err != nil || len(data.Records) <= 0 {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
 	}
 
-	return &accountList, nil
+	return data, nil
 }
 
 // UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
-func (s *sFdAccount) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	db := s.dao.FdAccount.Ctx(ctx)
@@ -186,18 +330,28 @@ func (s *sFdAccount) UpdateAccountBalance(ctx context.Context, accountId int64, 
 }
 
 // GetAccountByUnionUserIdAndCurrencyCode 根据用户union_user_id和货币代码currency_code获取财务账号
-func (s *sFdAccount) GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (*co_entity.FdAccount, error) {
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error) {
 	if unionUserId == 0 {
-		return nil, gerror.New(s.modules.T(ctx, "error_Account_UnionUserId_NotNull"))
+		return response, gerror.New(s.modules.T(ctx, "error_Account_UnionUserId_NotNull"))
 	}
 
-	result := co_entity.FdAccount{}
+	response = s.FactoryMakeResponseInstance()
 
 	// 查找指定用户名下指定货币类型的财务账号
-	err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
+	err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
 		UnionUserId:  unionUserId,
 		CurrencyCode: currencyCode,
-	}).Scan(&result)
+	}).Scan(response.Data())
 
-	return &result, err
+	return response, err
 }

@@ -43,3 +43,7 @@ type GetEmployeeDetailByIdReq struct {
 type GetEmployeeListByRoleIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"角色ID"`
 }
+
+type GetEmployeeListByTeamId struct {
+	TeamId int64 `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+}

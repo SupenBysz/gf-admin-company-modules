@@ -13,22 +13,83 @@ import (
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/en_crypto"
 	"github.com/kysion/base-library/utility/kconv"
+	"reflect"
 )
 
-type sMy struct {
-	modules co_interface.IModules
-	dao     *co_dao.XDao
+type sMy[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
+	modules co_interface.IModules[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]
+	dao *co_dao.XDao
 }
 
-func NewMy(modules co_interface.IModules) co_interface.IMy {
-	return &sMy{
+func NewMy[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) co_interface.IMy {
+	return &sMy[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     modules.Dao(),
 	}
 }
 
 // GetProfile 获取当前员工及用户信息
-func (s *sMy) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	user, err := sys_service.SysUser().GetSysUserById(ctx, session.Id)
@@ -44,7 +105,7 @@ func (s *sMy) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
-	if err != nil && employee == nil {
+	if err != nil || reflect.ValueOf(employee).IsNil() {
 		return &co_model.MyProfileRes{
 			User:     user,
 			Employee: nil,
@@ -53,12 +114,22 @@ func (s *sMy) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 
 	return &co_model.MyProfileRes{
 		User:     user,
-		Employee: employee,
+		Employee: employee.Data(),
 	}, nil
 }
 
 // GetCompany 获取当前公司信息
-func (s *sMy) GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error) {
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if session.Type == sys_enum.User.Type.SuperAdmin.Code() {
@@ -71,7 +142,7 @@ func (s *sMy) GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error) {
 	}
 
 	// 公司信息
-	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	company, err := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +153,17 @@ func (s *sMy) GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error) {
 }
 
 // GetTeams 获取当前员工团队信息
-func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error) {
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断身份类型（超级管理员不支持此操作）
@@ -96,7 +177,7 @@ func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err err
 	}
 
 	// 团队列表
-	teamList, err := s.modules.Team().QueryTeamListByEmployee(ctx, employee.Id, employee.UnionMainId)
+	teamList, err := s.modules.Team().QueryTeamListByEmployee(ctx, employee.Data().Id, employee.Data().UnionMainId)
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamList}{#error_Data_Get_Failed}"), s.dao.Team.Table())
 	}
@@ -106,15 +187,19 @@ func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err err
 		var teamInfo co_model.MyTeamRes
 
 		// 团队
-		teamInfo.TeamRes = *team
+		teamInfo.TeamRes = *team.Data()
 
 		// 团队成员列表
-		memberList, err := s.modules.Team().GetTeamMemberList(ctx, team.Id)
+		memberList, err := s.modules.Employee().GetEmployeeListByTeamId(ctx, team.Data().Id)
 		if err != nil {
 			return nil, err
 		}
 
-		teamInfo.EmployeeListRes = *memberList
+		teamInfo.MemberItems = []*co_model.EmployeeRes{}
+
+		for _, record := range memberList.Records {
+			teamInfo.MemberItems = append(teamInfo.MemberItems, record.Data())
+		}
 
 		// 赋值
 		res = append(res, teamInfo)
@@ -124,7 +209,17 @@ func (s *sMy) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err err
 }
 
 // SetMyMobile 设置我的手机号
-func (s *sMy) SetMyMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetMyMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
 	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
 	if err != nil {
 		return false, err
@@ -166,7 +261,17 @@ func (s *sMy) SetMyMobile(ctx context.Context, newMobile int64, captcha string, 
 }
 
 // SetMyAvatar 设置我的头像
-func (s *sMy) SetMyAvatar(ctx context.Context, imageId int64) (bool, error) {
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetMyAvatar(ctx context.Context, imageId int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 校验员工头像并保存

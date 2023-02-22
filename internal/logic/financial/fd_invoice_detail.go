@@ -7,8 +7,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
+	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 
@@ -21,76 +21,175 @@ import (
 )
 
 // 发票详情
-type sFdInvoiceDetail struct {
-	modules co_interface.IModules
-	dao     *co_dao.XDao
+type sFdInvoiceDetail[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	TR co_model.IFdInvoiceDetailRes,
+] struct {
+	base_hook.ResponseFactoryHook[TR]
+	modules co_interface.IModules[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		TR,
+	]
+	dao *co_dao.XDao
 }
 
-func NewFdInvoiceDetail(modules co_interface.IModules) co_interface.IFdInvoiceDetail {
-	return &sFdInvoiceDetail{
+func NewFdInvoiceDetail[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	TR co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) co_interface.IFdInvoiceDetail[TR] {
+	result := &sFdInvoiceDetail[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		TR,
+	]{
 		modules: modules,
 		dao:     modules.Dao(),
 	}
+
+	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
+
+	return result
+}
+
+// FactoryMakeResponseInstance 响应实例工厂方法
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) FactoryMakeResponseInstance() TR {
+	var ret co_model.IFdCurrencyRes
+	ret = &co_model.FdCurrencyRes{}
+	return ret.(TR)
 }
 
 // CreateInvoiceDetail 创建发票详情，相当于创建审核列表，审核是人工审核
-func (s *sFdInvoiceDetail) CreateInvoiceDetail(ctx context.Context, info co_model.FdInvoiceDetailRegister) (*co_entity.FdInvoiceDetail, error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) CreateInvoiceDetail(ctx context.Context, info co_model.FdInvoiceDetailRegister) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 检查指定参数是否为空
 	if err := g.Validator().Data(info).Run(ctx); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	// 获取发票详情
 
 	// 创建发票审核详情记录
-	data := co_entity.FdInvoiceDetail{}
+	data := s.FactoryMakeResponseInstance()
 	gconv.Struct(info, &data)
 
-	data.Id = idgen.NextId()
+	data.Data().Id = idgen.NextId()
 	// 设置审核状态为待审核
-	data.State = co_enum.Invoice.AuditType.WaitReview.Code()
-	data.CreatedBy = sessionUser.Id
+	data.Data().State = co_enum.Invoice.AuditType.WaitReview.Code()
+	data.Data().CreatedBy = sessionUser.Id
 
 	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Data(data).Insert()
 
 	if err != nil || result == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail}{#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail}{#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())
 	}
 
-	return s.GetInvoiceDetailById(ctx, data.Id)
+	return s.GetInvoiceDetailById(ctx, data.Data().Id)
 }
 
 // GetInvoiceDetailById 根据id获取发票详情
-func (s *sFdInvoiceDetail) GetInvoiceDetailById(ctx context.Context, id int64) (*co_entity.FdInvoiceDetail, error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) GetInvoiceDetailById(ctx context.Context, id int64) (response TR, err error) {
 	if id == 0 {
-		return nil, gerror.New(s.modules.T(ctx, "{#InvoiceDetail}{#error_Id_NotNull}"))
+		return response, gerror.New(s.modules.T(ctx, "{#InvoiceDetail}{#error_Id_NotNull}"))
 	}
 
-	result, err := daoctl.GetByIdWithError[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx), id)
+	result, err := daoctl.GetByIdWithError[TR](s.dao.FdInvoiceDetail.Ctx(ctx), id)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetInvoiceDetailById_Failed"), s.dao.FdInvoiceDetail.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetInvoiceDetailById_Failed"), s.dao.FdInvoiceDetail.Table())
 	}
 
-	invoiceDetail := co_entity.FdInvoiceDetail{}
-	gconv.Struct(result, &invoiceDetail)
-
-	return &invoiceDetail, nil
+	return *result, nil
 }
 
 // MakeInvoiceDetail 开票
-func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailId int64, makeInvoiceDetail co_model.FdMakeInvoiceDetail) (res bool, err error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) MakeInvoiceDetail(ctx context.Context, invoiceDetailId int64, makeInvoiceDetail co_model.FdMakeInvoiceDetail) (res bool, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
-	if err != nil || invoiceDetailInfo == nil {
+	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 校验状态是否为待开票
-	if invoiceDetailInfo.State != co_enum.Invoice.State.WaitForInvoice.Code() {
+	if invoiceDetailInfo.Data().State != co_enum.Invoice.State.WaitForInvoice.Code() {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_InvoiceDetail_Create_Failed}{#error_InvoiceState_Error}"), s.dao.FdInvoiceDetail.Table())
 	}
 
@@ -104,7 +203,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 			MakeAt:     gtime.Now(),
 			UpdatedBy:  sessionUser.Id,
 		}).Where(co_do.FdInvoiceDetail{
-			Id: invoiceDetailInfo.Id,
+			Id: invoiceDetailInfo.Data().Id,
 		}).Update()
 
 	} else if makeInvoiceDetail.Type == 2 { // 纸质发票
@@ -117,7 +216,7 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 			MakeAt:        gtime.Now(),
 			UpdatedBy:     sessionUser.Id,
 		}).Where(co_do.FdInvoiceDetail{
-			Id: invoiceDetailInfo.Id,
+			Id: invoiceDetailInfo.Data().Id,
 		}).Update()
 
 	} else {
@@ -132,7 +231,17 @@ func (s *sFdInvoiceDetail) MakeInvoiceDetail(ctx context.Context, invoiceDetailI
 }
 
 // AuditInvoiceDetail 审核发票
-func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 审核行仅允许 co_enum_invoice.State.WaitForInvoice 和 co_enum_invoice.State.Failure 待开票、开票失败
@@ -145,12 +254,12 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 	}
 
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
-	if err != nil || invoiceDetailInfo == nil {
+	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	// 代表已审过的
-	if invoiceDetailInfo.State > co_enum.Invoice.State.WaitAudit.Code() {
+	if invoiceDetailInfo.Data().State > co_enum.Invoice.State.WaitAudit.Code() {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_InvoiceDetail_RepeatSubmit"), s.dao.FdInvoiceDetail.Table())
 	}
 
@@ -162,7 +271,7 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 		AuditAt:       gtime.Now(),
 		UpdatedBy:     sessionUser.Id,
 	}).Where(co_do.FdInvoiceDetail{
-		Id: invoiceDetailInfo.Id,
+		Id: invoiceDetailInfo.Data().Id,
 	}).Update()
 
 	if err != nil {
@@ -173,8 +282,18 @@ func (s *sFdInvoiceDetail) AuditInvoiceDetail(ctx context.Context, invoiceDetail
 }
 
 // QueryInvoiceDetailListByInvoiceId 根据发票抬头，获取已开票的发票详情列表
-func (s *sFdInvoiceDetail) QueryInvoiceDetailListByInvoiceId(ctx context.Context, invoiceId int64) (*co_model.FdInvoiceDetailListRes, error) {
-	result, err := daoctl.Query[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx), &base_model.SearchParams{
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) QueryInvoiceDetailListByInvoiceId(ctx context.Context, invoiceId int64) (*base_model.CollectRes[TR], error) {
+	result, err := daoctl.Query[TR](s.dao.FdInvoiceDetail.Ctx(ctx), &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field: s.dao.FdInvoiceDetail.Columns().FdInvoiceId,
 			Where: "=",
@@ -186,16 +305,26 @@ func (s *sFdInvoiceDetail) QueryInvoiceDetailListByInvoiceId(ctx context.Context
 		},
 	}, false)
 
-	return (*co_model.FdInvoiceDetailListRes)(result), err
+	return result, err
 }
 
 // DeleteInvoiceDetail 标记删除发票详情
-func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (bool, error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) DeleteInvoiceDetail(ctx context.Context, id int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断是否存在该发票
-	invoice, err := s.GetInvoiceDetailById(ctx, id)
-	if err != nil || invoice == nil {
+	_, err := s.GetInvoiceDetailById(ctx, id)
+	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_InvoiceDetailId_Error"), s.dao.FdInvoiceDetail.Table())
 	}
 
@@ -231,7 +360,17 @@ func (s *sFdInvoiceDetail) DeleteInvoiceDetail(ctx context.Context, id int64) (b
 }
 
 // QueryInvoiceDetail 根据限定的条件查询发票列表
-func (s *sFdInvoiceDetail) QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*co_model.FdInvoiceDetailListRes, error) {
+func (s *sFdInvoiceDetail[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	TR,
+]) QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error) {
 	newFields := make([]base_model.FilterInfo, 0)
 	// 筛选条件强制指定所属用户
 	if unionMainId != 0 {
@@ -260,7 +399,7 @@ func (s *sFdInvoiceDetail) QueryInvoiceDetail(ctx context.Context, info *base_mo
 
 	info.Filter = newFields
 
-	result, err := daoctl.Query[co_entity.FdInvoiceDetail](s.dao.FdInvoiceDetail.Ctx(ctx), info, false)
+	result, err := daoctl.Query[TR](s.dao.FdInvoiceDetail.Ctx(ctx), info, false)
 
-	return (*co_model.FdInvoiceDetailListRes)(result), err
+	return result, err
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type team struct {
-	PermissionType func(modules co_interface.IModules) *permissionType[co_interface.IModules]
+	PermissionType func(modules co_interface.IConfig) *permissionType[co_interface.IConfig]
 }
 
 var Team = team{

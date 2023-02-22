@@ -48,5 +48,16 @@ type FdInvoiceAuditInfo struct {
 	ReplyMsg    string `json:"replyMsg" dc:"审核失败时必填的原因回复"`
 }
 
-type FdInvoiceDetailInfoRes co_entity.FdInvoiceDetail
-type FdInvoiceDetailListRes base_model.CollectRes[co_entity.FdInvoiceDetail]
+type FdInvoiceDetailRes struct {
+	co_entity.FdInvoiceDetail
+}
+
+type FdInvoiceDetailListRes base_model.CollectRes[FdInvoiceDetailRes]
+
+func (m *FdInvoiceDetailRes) Data() *FdInvoiceDetailRes {
+	return m
+}
+
+type IFdInvoiceDetailRes interface {
+	Data() *FdInvoiceDetailRes
+}

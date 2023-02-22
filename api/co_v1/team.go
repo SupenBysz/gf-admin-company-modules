@@ -35,11 +35,6 @@ type DeleteTeamReq struct {
 	co_company_api.DeleteTeamReq
 }
 
-type GetTeamMemberListReq struct {
-	g.Meta `method:"post" summary:"获取团队成员|列表" tags:"团队|小组"`
-	co_company_api.GetTeamMemberListReq
-}
-
 type QueryTeamListByEmployeeReq struct {
 	g.Meta `method:"post" summary:"根据员工查询团队|列表" tags:"团队|小组"`
 	co_company_api.QueryTeamListByEmployeeReq

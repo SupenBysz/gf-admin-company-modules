@@ -14,6 +14,14 @@ type FdAccountRegister struct {
 	Version            int    `json:"version"            description:"乐观锁所需数据版本字段"`
 }
 
-type AccountInfo co_entity.FdAccount
+type FdAccountRes struct {
+	co_entity.FdAccount
+}
 
-type AccountList []co_entity.FdAccount
+func (m *FdAccountRes) Data() *FdAccountRes {
+	return m
+}
+
+type IFdAccountRes interface {
+	Data() *FdAccountRes
+}

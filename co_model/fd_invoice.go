@@ -19,6 +19,16 @@ type FdInvoiceRegister struct {
 	UnionMainId    int64       `json:"unionMainId"    dc:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
 }
 
-type FdInvoiceInfoRes co_entity.FdInvoice
+type FdInvoiceRes struct {
+	co_entity.FdInvoice
+}
 
-type FdInvoiceListRes base_model.CollectRes[co_entity.FdInvoice]
+type FdInvoiceListRes base_model.CollectRes[FdInvoiceRes]
+
+func (m *FdInvoiceRes) Data() *FdInvoiceRes {
+	return m
+}
+
+type IFdInvoiceRes interface {
+	Data() *FdInvoiceRes
+}

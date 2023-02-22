@@ -14,23 +14,79 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 )
 
-type MyController struct {
+type MyController[
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
 	i_controller.IMy
-	modules co_interface.IModules
+	modules co_interface.IModules[
+		TIRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]
 }
 
-var My = func(modules co_interface.IModules) i_controller.IMy {
-	return &MyController{
+func My[
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) i_controller.IMy {
+	return &MyController[
+		TIRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 	}
 }
 
-func (c *MyController) GetModules() co_interface.IModules {
-	return c.modules
-}
-
 // GetProfile 获取当前员工及用户信息 (附加数据：user、user_detail、employee、teamList)
-func (c *MyController) GetProfile(ctx context.Context, _ *co_company_api.GetProfileReq) (*co_model.MyProfileRes, error) {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetProfile(ctx context.Context, _ *co_company_api.GetProfileReq) (*co_model.MyProfileRes, error) {
 	result, err := c.modules.My().GetProfile(c.makeMore(ctx))
 	if err != nil {
 		return nil, err
@@ -40,7 +96,17 @@ func (c *MyController) GetProfile(ctx context.Context, _ *co_company_api.GetProf
 }
 
 // GetCompany 获取当前公司信息
-func (c *MyController) GetCompany(ctx context.Context, _ *co_company_api.GetCompanyReq) (*co_model.MyCompanyRes, error) {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCompany(ctx context.Context, _ *co_company_api.GetCompanyReq) (*co_model.MyCompanyRes, error) {
 	result, err := c.modules.My().GetCompany(ctx)
 	if err != nil {
 		return nil, err
@@ -51,7 +117,17 @@ func (c *MyController) GetCompany(ctx context.Context, _ *co_company_api.GetComp
 }
 
 // GetTeams 获取当前团队信息  (附加数据：user、user_detail、employee、teamList)
-func (c *MyController) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error) {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error) {
 
 	result, err := c.modules.My().GetTeams(c.makeMore(ctx))
 	if err != nil {
@@ -62,7 +138,17 @@ func (c *MyController) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsR
 }
 
 // SetAvatar 设置员工头像
-func (c *MyController) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
@@ -73,7 +159,17 @@ func (c *MyController) SetAvatar(ctx context.Context, req *co_company_api.SetAva
 }
 
 // SetMobile 设置手机号
-func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
@@ -83,7 +179,17 @@ func (c *MyController) SetMobile(ctx context.Context, req *co_company_api.SetMob
 	)
 }
 
-func (c *MyController) makeMore(ctx context.Context) context.Context {
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) makeMore(ctx context.Context) context.Context {
 	// team相关附加信息
 	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.modules.Dao().Employee.Columns().UnionMainId)
 

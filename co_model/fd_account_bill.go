@@ -3,7 +3,6 @@ package co_model
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/kysion/base-library/base_model"
 )
 
 type AccountBillRegister struct {
@@ -21,5 +20,14 @@ type AccountBillRegister struct {
 	TradeState    int         `json:"tradeState"     v:"required|in:1,2,4,8,16#交易状态错误"  dc:"交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、"`
 }
 
-type AccountBillInfo co_entity.FdAccountBill
-type AccountBillListRes base_model.CollectRes[co_entity.FdAccountBill]
+type FdAccountBillRes struct {
+	co_entity.FdAccountBill
+}
+
+func (m *FdAccountBillRes) Data() *FdAccountBillRes {
+	return m
+}
+
+type IFdAccountBillRes interface {
+	Data() *FdAccountBillRes
+}

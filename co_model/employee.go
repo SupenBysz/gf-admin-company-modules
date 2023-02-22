@@ -35,3 +35,13 @@ type EmployeeRes struct {
 }
 
 type EmployeeListRes base_model.CollectRes[*EmployeeRes]
+
+func (m *EmployeeRes) Data() *EmployeeRes {
+	return m
+}
+
+type IEmployeeRes interface {
+	Data() *EmployeeRes
+}
+
+// type EmployeeListRes base_model.CollectRes[*EmployeeRes]
