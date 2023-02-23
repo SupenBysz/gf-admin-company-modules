@@ -5,7 +5,7 @@
 package co_dao
 
 import (
-	"github.com/SupenBysz/gf-admin-community/utility/daoctl/dao_interface"
+	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 	"{TplImportPrefix}/internal"
 )
 
