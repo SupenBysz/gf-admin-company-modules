@@ -100,8 +100,8 @@ func (s *sFdInvoiceDetail[
 	ITFdInvoiceRes,
 	TR,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IFdCurrencyRes
-	ret = &co_model.FdCurrencyRes{}
+	var ret co_model.IFdInvoiceDetailRes
+	ret = &co_model.FdInvoiceDetailRes{}
 	return ret.(TR)
 }
 
