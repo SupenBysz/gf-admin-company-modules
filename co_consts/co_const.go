@@ -6,4 +6,6 @@ import (
 
 var (
 	PermissionTree []*sys_model.SysPermissionTree
+
+	FinancialPermissionTree []*sys_model.SysPermissionTree
 )
