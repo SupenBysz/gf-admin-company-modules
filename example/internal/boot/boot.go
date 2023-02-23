@@ -5,6 +5,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/SupenBysz/gf-admin-company-modules/example/router"
 	"github.com/gogf/gf/v2/frame/g"
@@ -12,8 +13,6 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/util/gmode"
-
-	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 )
 
 var (
