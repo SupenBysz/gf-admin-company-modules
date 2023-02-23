@@ -319,7 +319,7 @@ func NewModules[
 
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)
-	co_consts.FinancialPermissionTree = append(co_consts.FinancialPermissionTree, boot.InitFinancialPermission(module)...)
+	co_consts.FinancialPermissionTree = append(co_consts.FinancialPermissionTree, boot.InitFinancialPermission(response)...)
 
 	return module
 }
