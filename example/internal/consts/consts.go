@@ -48,7 +48,7 @@ var (
 				KeyIndex:                       "Company",
 				RoutePrefix:                    "/company",
 				StoragePath:                    "./resources/company",
-				UserType:                       sys_enum.User.Type.SuperAdmin,
+				UserType:                       sys_enum.User.Type.SuperAdmin, // 业务层用户类型需自定义
 				Identifier: co_model.Identifier{
 					Company:  "company",
 					Employee: "employee",

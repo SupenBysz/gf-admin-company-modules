@@ -454,7 +454,7 @@ func (s *sCompany[
 
 		if len(search.Filter) == 0 {
 			search.Filter = append(search.Filter, base_model.FilterInfo{
-				Field:     "unionMainId",
+				Field:     "union_main_id",
 				Where:     "=",
 				IsOrWhere: false,
 				Value:     sessionUser.UnionMainId,

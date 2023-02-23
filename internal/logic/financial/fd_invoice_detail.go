@@ -399,6 +399,19 @@ func (s *sFdInvoiceDetail[
 
 	info.Filter = newFields
 
+	// 如果没有查询条件，那就会查询出来所有
+	if unionMainId == 0 {
+		info = s.modules.Company().FilterUnionMainId(ctx, info)
+	}
+
+	if userId == 0 {
+		info.Filter = append(info.Filter, base_model.FilterInfo{
+			Field: s.dao.FdInvoiceDetail.Columns().UserId,
+			Where: "=",
+			Value: sys_service.SysSession().Get(ctx).JwtClaimsUser.Id,
+		})
+	}
+
 	result, err := daoctl.Query[TR](s.dao.FdInvoiceDetail.Ctx(ctx), info, false)
 
 	return result, err
