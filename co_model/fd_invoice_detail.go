@@ -43,7 +43,7 @@ type FdMakeInvoiceDetail struct {
 
 // FdInvoiceAuditInfo 审核发票
 type FdInvoiceAuditInfo struct {
-	State       int    `json:"state" dc:"审核状态"`
+	State       int    `json:"state" dc:"审核状态：2待开票、4开票失败"  v:"required|in:2,4#请输入发票审核状态|审核行为错误"`
 	AuditUserId int64  `json:"auditUserId" dc:"审核者UserId"`
 	ReplyMsg    string `json:"replyMsg" dc:"审核失败时必填的原因回复"`
 }
