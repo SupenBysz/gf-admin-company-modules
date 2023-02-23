@@ -171,7 +171,7 @@ func (s *sEmployee[
 
 	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
 		company, _ := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
-		if company != nil {
+		if !reflect.ValueOf(company).IsNil() {
 			user.Detail.UnionMainName = company.Data().Name
 		}
 	}
