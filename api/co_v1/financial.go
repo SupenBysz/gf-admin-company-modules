@@ -6,17 +6,17 @@ import (
 )
 
 type BankCardRegisterReq struct {
-	g.Meta ` method:"post" summary:"申请提现账号" tags:"财务服务"`
+	g.Meta ` method:"post" summary:"添加银行卡" tags:"财务服务"`
 	co_company_api.BankCardRegisterReq
 }
 
 type DeleteBankCardReq struct {
-	g.Meta ` method:"post" summary:"删除提现账号" tags:"财务服务"`
+	g.Meta ` method:"post" summary:"删除银行卡" tags:"财务服务"`
 	co_company_api.DeleteBankCardReq
 }
 
 type QueryBankCardListReq struct {
-	g.Meta ` method:"post" summary:"获取提现账号|列表" tags:"财务服务"`
+	g.Meta ` method:"post" summary:"获取银行卡|列表" tags:"财务服务"`
 	co_company_api.QueryBankCardListReq
 }
 
