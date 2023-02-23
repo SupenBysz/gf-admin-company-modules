@@ -11,7 +11,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/en_crypto"
 	"github.com/kysion/base-library/utility/kconv"
 	"reflect"
 )
@@ -237,9 +236,7 @@ func (s *sMy[
 		return true, nil
 	}
 
-	pwdHash, err := en_crypto.PwdHash(password, gconv.String(sessionUser.Id))
-
-	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, pwdHash)
+	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, password)
 	if checkPassword != true {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
 	}
