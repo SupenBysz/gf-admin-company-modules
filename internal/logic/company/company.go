@@ -137,11 +137,11 @@ func (s *sCompany[
 		}
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
-	if err == sql.ErrNoRows || data != nil && data != nil && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -169,7 +169,7 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
@@ -415,11 +415,11 @@ func (s *sCompany[
 		}
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
-	if err == sql.ErrNoRows || data != nil && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
