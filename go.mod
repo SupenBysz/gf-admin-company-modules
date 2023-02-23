@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/SupenBysz/gf-admin-community v0.3.1
 	github.com/gogf/gf/v2 v2.3.2
-	github.com/kysion/base-library v0.0.4
+	github.com/kysion/base-library v0.0.5
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
@@ -49,6 +49,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/kysion/base-library => E:\CodeSpace.localized\kysionProject\kysion\base-library
-)
