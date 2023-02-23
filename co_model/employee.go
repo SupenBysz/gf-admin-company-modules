@@ -16,7 +16,7 @@ type Employee struct {
 	Mobile      string      `json:"mobile"       v:"phone#手机号校验失败" description:"手机号"`
 	State       int         `json:"state"        v:"in:-2,-1,0,1#请选择员工状态" description:"状态： -2已注销，-1已离职，0待认证，1已入职"`
 	UnionMainId int64       `json:"-"  description:"所属主体"`
-	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期" description:"入职日期"`
+	HiredAt     *gtime.Time `json:"hiredAt"      v:"date-format:Y-m-d#入职日期格式错误" description:"入职日期"`
 }
 
 type EmployeeUser struct {
