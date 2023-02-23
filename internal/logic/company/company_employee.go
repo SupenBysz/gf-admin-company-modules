@@ -72,14 +72,11 @@ func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType,
 		user.Detail.Realname = employee.Name
 	}
 
-	company := &co_model.CompanyRes{}
-
 	if employee != nil && employee.UnionMainId != 0 {
-		company, _ = s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
-	}
-
-	if company.Name != "" {
-		user.Detail.UnionMainName = company.Name
+		company, _ := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+		if company != nil {
+			user.Detail.UnionMainName = company.Name
+		}
 	}
 
 	return nil
