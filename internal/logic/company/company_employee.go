@@ -164,7 +164,7 @@ func (s *sEmployee[
 		user.Id,
 	)
 	var employee TR
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		employee = *data
 		user.Detail.Realname = employee.Data().Name
 	}
@@ -276,12 +276,12 @@ func (s *sEmployee[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
-	if err == sql.ErrNoRows || data != nil && response.Data().UnionMainId != sessionUser.UnionMainId && response.Data().UnionMainId != sessionUser.ParentId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && response.Data().UnionMainId != sessionUser.ParentId {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
@@ -784,7 +784,7 @@ func (s *sEmployee[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
