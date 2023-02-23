@@ -197,7 +197,7 @@ func (s *sEmployee[
 		return info, nil
 	}
 	var employee TR
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		employee = *data
 	}
 
@@ -789,7 +789,7 @@ func (s *sEmployee[
 	}
 
 	// 跨主体禁止查看员工信息，
-	if err == sql.ErrNoRows || data != nil && response.Data().UnionMainId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId {
 		// 下级公司也不可查看上级公司员工详细信息
 		if response.Data().UnionMainId == sessionUser.ParentId {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())

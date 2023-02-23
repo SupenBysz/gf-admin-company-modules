@@ -138,12 +138,12 @@ func (s *sTeam[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
 	}
 
-	if data != nil {
+	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
 	// 需要进行跨主体判断
-	if err == sql.ErrNoRows || data != nil && response.Data().UnionMainId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
 	}
 
