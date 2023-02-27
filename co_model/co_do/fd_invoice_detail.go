@@ -41,4 +41,5 @@ type FdInvoiceDetail struct {
 	UpdatedBy     interface{} //
 	DeletedAt     *gtime.Time //
 	DeletedBy     interface{} //
+	BelongTo      interface{} // 发票拥有者类型：1个人  2主体
 }
