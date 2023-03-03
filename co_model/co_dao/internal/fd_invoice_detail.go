@@ -52,6 +52,7 @@ type FdInvoiceDetailColumns struct {
 	UpdatedBy     string //
 	DeletedAt     string //
 	DeletedBy     string //
+	BelongTo      string // 发票拥有者类型：1个人  2主体
 }
 
 // fdInvoiceDetailColumns holds the columns for table co_fd_invoice_detail.
@@ -85,6 +86,7 @@ var fdInvoiceDetailColumns = FdInvoiceDetailColumns{
 	UpdatedBy:     "updated_by",
 	DeletedAt:     "deleted_at",
 	DeletedBy:     "deleted_by",
+	BelongTo:      "belong_to",
 }
 
 // NewFdInvoiceDetailDao creates and returns a new DAO object for table data access.

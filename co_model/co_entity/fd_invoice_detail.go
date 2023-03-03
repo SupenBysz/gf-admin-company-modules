@@ -39,4 +39,5 @@ type FdInvoiceDetail struct {
 	UpdatedBy     int64       `json:"updatedBy"     description:""`
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
 	DeletedBy     int64       `json:"deletedBy"     description:""`
+	BelongTo      int         `json:"belongTo"      description:"发票拥有者类型：1个人  2主体"`
 }

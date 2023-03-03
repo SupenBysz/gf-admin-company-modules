@@ -29,6 +29,7 @@ type FdInvoiceDetailRegister struct {
 	AuditAt       *gtime.Time `json:"auditAt"       dc:"审核时间"`
 	UserId        int64       `json:"userId"        dc:"申请者用户ID"`
 	UnionMainId   int64       `json:"unionMainId"   dc:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
+	BelongTo      int         `json:"belongTo"      dc:"发票拥有者类型：1个人  2主体" v:"required#请选择发票是个人发票还是主体发票"`
 }
 
 // FdMakeInvoiceDetail 开发票
