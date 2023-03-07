@@ -14,9 +14,10 @@ type (
 	FinancialInOutType = financial.InOutTypeEnum
 	FinancialTradeType = financial.TradeTypeEnum
 
-	InvoiceAuditType = invoice.AuditTypeEnum
-	InvoiceState     = invoice.StateEnum
-	InvoiceType      = invoice.TypeEnum
+	InvoiceAuditType  = invoice.AuditTypeEnum
+	InvoiceState      = invoice.StateEnum
+	InvoiceType       = invoice.TypeEnum
+	InvoiceBelongType = invoice.BelongTypeEnum
 )
 
 var (
