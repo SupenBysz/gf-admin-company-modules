@@ -8,6 +8,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type TeamController[
@@ -50,8 +51,9 @@ func (c *TeamController[ITTeamRes]) HasTeamByName(ctx context.Context, req *co_v
 	return c.ITeam.HasTeamByName(ctx, &req.HasTeamByNameReq)
 }
 
-func (c *TeamController[ITTeamRes]) QueryTeamList(ctx context.Context, req *co_v1.QueryTeamListReq) (api_v1.DataRes, error) {
-	return c.ITeam.QueryTeamList(ctx, &req.QueryTeamListReq)
+func (c *TeamController[ITTeamRes]) QueryTeamList(ctx context.Context, req *co_v1.QueryTeamListReq) (api_v1.MapRes, error) {
+	ret, err := c.ITeam.QueryTeamList(ctx, &req.QueryTeamListReq)
+	return kconv.Struct(ret, api_v1.MapRes{}), err
 }
 
 func (c *TeamController[ITTeamRes]) CreateTeam(ctx context.Context, req *co_v1.CreateTeamReq) (ITTeamRes, error) {
@@ -66,8 +68,9 @@ func (c *TeamController[ITTeamRes]) DeleteTeam(ctx context.Context, req *co_v1.D
 	return c.ITeam.DeleteTeam(ctx, &req.DeleteTeamReq)
 }
 
-func (c *TeamController[ITTeamRes]) QueryTeamListByEmployee(ctx context.Context, req *co_v1.QueryTeamListByEmployeeReq) (api_v1.DataRes, error) {
-	return c.ITeam.QueryTeamListByEmployee(ctx, &req.QueryTeamListByEmployeeReq)
+func (c *TeamController[ITTeamRes]) QueryTeamListByEmployee(ctx context.Context, req *co_v1.QueryTeamListByEmployeeReq) (api_v1.MapRes, error) {
+	ret, err := c.ITeam.QueryTeamListByEmployee(ctx, &req.QueryTeamListByEmployeeReq)
+	return kconv.Struct(ret, api_v1.MapRes{}), err
 }
 
 func (c *TeamController[ITTeamRes]) SetTeamMember(ctx context.Context, req *co_v1.SetTeamMemberReq) (api_v1.BoolRes, error) {
