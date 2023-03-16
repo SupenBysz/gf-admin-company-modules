@@ -283,7 +283,7 @@ func (s *sEmployee[
 	}
 
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && response.Data().UnionMainId != sessionUser.ParentId {
+	if err == sql.ErrNoRows || reflect.ValueOf(data).IsNil() && sessionUser != nil && sessionUser.Id != 0 && response.Data().UnionMainId != sessionUser.UnionMainId && response.Data().UnionMainId != sessionUser.ParentId {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
