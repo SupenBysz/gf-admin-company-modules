@@ -129,7 +129,7 @@ func (s *sFdInvoice[
 
 	// 判断审核状态
 	if info.State == co_enum.Invoice.AuditType.Reject.Code() && info.AuditReplyMsg == "" {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_AuditReplay_MustHasMsg"), s.dao.FdInvoice.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_AuditReply_MustHasMsg"), s.dao.FdInvoice.Table())
 	}
 
 	// 创建发票

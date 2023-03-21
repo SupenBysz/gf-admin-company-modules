@@ -250,7 +250,7 @@ func (s *sFdInvoiceDetail[
 	}
 
 	if auditInfo.State == co_enum.Invoice.State.Failure.Code() && auditInfo.ReplyMsg == "" {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_AuditReplay_MustHasMsg"), s.dao.FdInvoiceDetail.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_AuditReply_MustHasMsg"), s.dao.FdInvoiceDetail.Table())
 	}
 
 	invoiceDetailInfo, err := s.GetInvoiceDetailById(ctx, invoiceDetailId)
