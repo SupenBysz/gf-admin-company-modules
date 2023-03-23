@@ -355,3 +355,55 @@ func (s *sFdAccount[
 
 	return response, err
 }
+
+// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，如果主体id找不到财务账号的时候就创建财务账号
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, sceneType ...int) (response TR, err error) {
+	if unionUserId == 0 {
+		return response, gerror.New(s.modules.T(ctx, "error_Account_UnionUserId_NotNull"))
+	}
+
+	response = s.FactoryMakeResponseInstance()
+	doWhere := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
+		UnionUserId: unionUserId,
+	})
+
+	if len(sceneType) > 0 {
+		doWhere = doWhere.Where(co_do.FdAccount{
+			SceneType: sceneType[0],
+		})
+	}
+	err = doWhere.Scan(response.Data())
+
+	// var res co_model.FdAccountRes
+
+	// return s.GetAccountById(ctx, res.Id)
+
+	return response, err
+
+	//if data == nil { //如果主体id找不到财务账号的时候就创建财务账号  （不应该在这里）
+	//	s.CreateAccount(ctx,co_model.FdAccountRegister{
+	//		UnionLicenseId:     0,
+	//		UnionUserId:        0,
+	//		Name:               "",
+	//		CurrencyCode:       "",
+	//		IsEnabled:          0,
+	//		LimitState:         0,
+	//		PrecisionOfBalance: 0,
+	//		Version:            0,
+	//		SceneType:          0,
+	//		AccountType:        0,
+	//		AccountNumber:      "",
+	//	})
+	//}
+
+}

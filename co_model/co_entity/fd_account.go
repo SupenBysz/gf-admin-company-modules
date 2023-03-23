@@ -26,4 +26,7 @@ type FdAccount struct {
 	UpdatedBy          int64       `json:"updatedBy"          description:""`
 	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
 	DeletedBy          int64       `json:"deletedBy"          description:""`
+	SceneType          int         `json:"sceneType"          description:"场景类型：0不限制、1充电佣金收入、"`
+	AccountType        int         `json:"accountType"        description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
+	AccountNumber      string      `json:"accountNumber"      description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
 }

@@ -68,6 +68,7 @@ type (
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
+		GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, sceneType ...int) (response TR, err error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
 		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (response TR, err error)
