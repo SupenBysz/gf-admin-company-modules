@@ -13,6 +13,8 @@ type (
 
 	FinancialInOutType = financial.InOutTypeEnum
 	FinancialTradeType = financial.TradeTypeEnum
+	AccountType        = financial.AccountTypeEnum
+	SceneType          = financial.SceneTypeEnum
 
 	InvoiceAuditType  = invoice.AuditTypeEnum
 	InvoiceState      = invoice.StateEnum

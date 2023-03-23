@@ -39,6 +39,9 @@ type FdAccountColumns struct {
 	UpdatedBy          string //
 	DeletedAt          string //
 	DeletedBy          string //
+	SceneType          string // 场景类型：0不限制、1充电佣金收入、
+	AccountType        string // 账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付
+	AccountNumber      string // 账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号
 }
 
 // fdAccountColumns holds the columns for table co_fd_account.
@@ -59,6 +62,9 @@ var fdAccountColumns = FdAccountColumns{
 	UpdatedBy:          "updated_by",
 	DeletedAt:          "deleted_at",
 	DeletedBy:          "deleted_by",
+	SceneType:          "scene_type",
+	AccountType:        "account_type",
+	AccountNumber:      "account_number",
 }
 
 // NewFdAccountDao creates and returns a new DAO object for table data access.

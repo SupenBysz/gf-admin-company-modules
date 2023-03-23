@@ -12,6 +12,10 @@ type FdAccountRegister struct {
 	LimitState         int    `json:"limitState"         dc:"限制状态：0不限制，1限制支出、2限制收入"`
 	PrecisionOfBalance int    `json:"precisionOfBalance" v:"required#请输入财务账号货币单位精度" dc:"货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫"`
 	Version            int    `json:"version"            description:"乐观锁所需数据版本字段"`
+
+	SceneType     int    `json:"sceneType"          description:"场景类型：0不限制、1充电佣金收入、"`
+	AccountType   int    `json:"accountType"        description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
+	AccountNumber string `json:"accountNumber"      description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
 }
 
 type FdAccountRes struct {
