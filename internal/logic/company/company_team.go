@@ -271,13 +271,13 @@ func (s *sTeam[
 	for _, item := range data.Records {
 		if item.EmployeeId > 0 {
 			v, _ := s.modules.Employee().GetEmployeeById(ctx, item.EmployeeId)
-			if reflect.ValueOf(v).IsNil() {
+			if !reflect.ValueOf(v).IsNil() {
 				item.Employee = v.Data()
 			}
 		}
 		if item.InviteUserId > 0 {
 			v, _ := s.modules.Employee().GetEmployeeById(ctx, item.InviteUserId)
-			if reflect.ValueOf(v).IsNil() {
+			if !reflect.ValueOf(v).IsNil() {
 				item.InviteUser = v.Data()
 			}
 		}
@@ -871,7 +871,7 @@ func (s *sTeam[
 				}
 
 				v, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
-				if reflect.ValueOf(v).IsNil() {
+				if !reflect.ValueOf(v).IsNil() {
 					data.Data().Captain = v.Data()
 				}
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CaptainEmployeeId)
@@ -893,7 +893,7 @@ func (s *sTeam[
 				}
 
 				v, _ := s.modules.Company().GetCompanyById(ctx, data.Data().UnionMainId)
-				if reflect.ValueOf(v).IsNil() {
+				if !reflect.ValueOf(v).IsNil() {
 					data.Data().UnionMain = v.Data()
 				}
 				return data.Data().UnionMain
@@ -909,7 +909,7 @@ func (s *sTeam[
 				}
 
 				v, _ := s.modules.Team().GetTeamById(ctx, data.Data().ParentId)
-				if reflect.ValueOf(v).IsNil() {
+				if !reflect.ValueOf(v).IsNil() {
 					data.Data().Parent = v.Data()
 				}
 				return data.Data().Parent
