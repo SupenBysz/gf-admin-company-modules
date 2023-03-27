@@ -20,6 +20,7 @@ type FdAccountRegister struct {
 
 type FdAccountRes struct {
 	co_entity.FdAccount
+	Detail *co_entity.FdAccountDetail `json:"detail" dc:"财务账号周期金额统计"`
 }
 
 func (m *FdAccountRes) Data() *FdAccountRes {

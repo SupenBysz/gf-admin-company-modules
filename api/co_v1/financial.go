@@ -59,3 +59,33 @@ type AuditInvoiceDetailReq struct {
 	g.Meta ` method:"post" summary:"审核发票" tags:"财务服务"`
 	co_company_api.AuditInvoiceDetailReq
 }
+
+type GetAccountDetailReq struct {
+	g.Meta ` method:"post" summary:"获取财务账号详细数据" tags:"财务服务"`
+	co_company_api.GetAccountDetailReq
+}
+
+type UpdateAccountIsEnabledReq struct {
+	g.Meta ` method:"post" summary:"修改财务账号启用状态" tags:"财务服务"`
+	co_company_api.UpdateAccountIsEnabledReq
+}
+
+type UpdateAccountLimitStateReq struct {
+	g.Meta ` method:"post" summary:"修改财务账号限制状态" tags:"财务服务"`
+	co_company_api.UpdateAccountLimitStateReq
+}
+
+type GetAccountDetailByAccountIdReq struct {
+	g.Meta ` method:"post" summary:"获取财务账号金额明细" tags:"财务服务"`
+	co_company_api.GetAccountDetailByAccountIdReq
+}
+
+type IncrementReq struct {
+	g.Meta ` method:"post" summary:"收入" tags:"财务服务"`
+	co_company_api.IncrementReq
+}
+
+type DecrementReq struct {
+	g.Meta ` method:"post" summary:"支出" tags:"财务服务"`
+	co_company_api.DecrementReq
+}

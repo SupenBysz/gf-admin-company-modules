@@ -9,8 +9,12 @@ import (
 	"{TplImportPrefix}/internal"
 )
 
-type {TplTableNameCamelCase} = dao_interface.TIDao[internal.{TplTableNameCamelCase}Columns]
+type {TplTableNameCamelCase}Dao = dao_interface.TIDao[internal.{TplTableNameCamelCase}Columns]
 
-func New{TplTableNameCamelCase}(dao ...dao_interface.IDao) {TplTableNameCamelCase} {
-	return ({TplTableNameCamelCase})(internal.New{TplTableNameCamelCase}Dao(dao...))
+func New{TplTableNameCamelCase}(dao ...dao_interface.IDao) {TplTableNameCamelCase}Dao {
+	return ({TplTableNameCamelCase}Dao)(internal.New{TplTableNameCamelCase}Dao(dao...))
 }
+
+var (
+    {TplTableNameCamelCase} = New{TplTableNameCamelCase}()
+)

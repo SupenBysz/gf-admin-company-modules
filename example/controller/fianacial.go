@@ -242,3 +242,105 @@ func (c *FinancialController[
 
 	return kconv.Struct(ret, &co_model.FdBankCardListRes{}), err
 }
+
+// GetAccountDetail 查看财务账号明细
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountDetail(ctx context.Context, req *co_v1.GetAccountDetailReq) (ITFdAccountRes, error) {
+	ret, err := c.IFinancial.GetAccountDetail(ctx, &req.GetAccountDetailReq)
+
+	return ret, err
+}
+
+// UpdateAccountIsEnabled 修改财务账号启用状态
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountIsEnabled(ctx context.Context, req *co_v1.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinancial.UpdateAccountIsEnabled(ctx, &req.UpdateAccountIsEnabledReq)
+
+	return ret, err
+}
+
+// UpdateAccountLimitState 修改财务账号限制状态
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountLimitState(ctx context.Context, req *co_v1.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinancial.UpdateAccountLimitState(ctx, &req.UpdateAccountLimitStateReq)
+
+	return ret, err
+}
+
+// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountDetailById(ctx context.Context, req *co_v1.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
+	ret, err := c.IFinancial.GetAccountDetailById(ctx, &req.GetAccountDetailByAccountIdReq)
+
+	return ret, err
+}
+
+// Increment 收入
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Increment(ctx context.Context, req *co_v1.IncrementReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinancial.Increment(ctx, &req.IncrementReq)
+
+	return ret, err
+}
+
+// Decrement 支出
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Decrement(ctx context.Context, req *co_v1.DecrementReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinancial.Decrement(ctx, &req.DecrementReq)
+
+	return ret, err
+}

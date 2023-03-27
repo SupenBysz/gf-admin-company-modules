@@ -10,6 +10,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/kysion/base-library/base_model"
 )
@@ -320,4 +321,147 @@ func (c *FinancialController[
 		},
 		co_permission.Financial.PermissionType(c.modules).ViewBankCardDetail,
 	)
+}
+
+// GetAccountDetail 查看财务账号明细
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountDetail(ctx context.Context, req *co_company_api.GetAccountDetailReq) (ITFdAccountRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (ITFdAccountRes, error) {
+			ret, err := c.modules.Account().GetAccountById(ctx, req.AccountId)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// UpdateAccountIsEnabled 修改财务账号启用状态
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountIsEnabled(ctx context.Context, req *co_company_api.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
+	)
+}
+
+// UpdateAccountLimitState 修改财务账号限制状态
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
+	)
+}
+
+// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdAccountDetailRes, error) {
+			ret, err := c.modules.Account().GetAccountDetailById(ctx, req.AccountId)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// Increment 收入
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().Increment(ctx, req.AccountId, req.Amount)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+	)
+}
+
+// Decrement 支出
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Decrement(ctx context.Context, req *co_company_api.DecrementReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().Decrement(ctx, req.AccountId, req.Amount)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+	)
+}
+
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) makeMore(ctx context.Context) context.Context {
+	ctx = funs.AttrBuilder[co_model.FdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+
+	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
+	return ctx
 }

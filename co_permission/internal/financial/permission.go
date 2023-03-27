@@ -15,19 +15,22 @@ type permissionType[T co_interface.IConfig] struct {
 	modules T
 	enumMap *kmap.HashMap[string, Permission]
 
-	ViewInvoiceDetail  Permission
-	ViewInvoice        Permission
-	ViewBankCardDetail Permission
-	BankCardList       Permission
-	InvoiceList        Permission
-	InvoiceDetailList  Permission
-	AuditInvoiceDetail Permission
-	MakeInvoiceDetail  Permission
-	CreateInvoice      Permission
-	CreateBankCard     Permission
-	DeleteInvoice      Permission
-	DeleteBankCard     Permission
-	GetAccountBalance  Permission
+	ViewInvoiceDetail   Permission
+	ViewInvoice         Permission
+	ViewBankCardDetail  Permission
+	BankCardList        Permission
+	InvoiceList         Permission
+	InvoiceDetailList   Permission
+	AuditInvoiceDetail  Permission
+	MakeInvoiceDetail   Permission
+	CreateInvoice       Permission
+	CreateBankCard      Permission
+	DeleteInvoice       Permission
+	DeleteBankCard      Permission
+	GetAccountBalance   Permission
+	GetAccountDetail    Permission
+	UpdateAccountAmount Permission
+	UpdateAccountState  Permission
 }
 
 var (
@@ -53,6 +56,10 @@ var (
 			DeleteBankCard: permission.New(5953153121845345, "DeleteBankCard", "删除银行卡", "删除银行卡信息"),
 
 			GetAccountBalance: permission.New(5953153121845346, "GetAccountBalance", "查看余额", "查看账号余额"),
+
+			GetAccountDetail:    permission.New(5953153121849347, "GetAccountDetail", "查看财务账号详情", "查看财务账号金额明细"),
+			UpdateAccountAmount: permission.New(5953153121849348, "UpdateAccountAmount", "修改财务金额", "修改财务账号金额明细"),
+			UpdateAccountState:  permission.New(5953153121849349, "UpdateAccountState", "修改财务账号状态", "修改财务账号状态"),
 		})
 		for k, v := range gconv.Map(result) {
 			result.enumMap.Set(k, v.(Permission))
