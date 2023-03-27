@@ -180,8 +180,22 @@ func InitFinancialPermission[
 						co_permission.Financial.PermissionType(module).DeleteBankCard,
 					},
 				},
-				// 查看余额，查看账号余额
-				co_permission.Financial.PermissionType(module).GetAccountBalance,
+				{
+					SysPermission: &sys_entity.SysPermission{
+						Id:         6211883938021488,
+						Name:       "财务账号",
+						Identifier: "Account",
+						Type:       1,
+						IsShow:     1,
+					},
+					Children: []*sys_model.SysPermissionTree{
+						// 查看余额，查看账号余额
+						co_permission.Financial.PermissionType(module).GetAccountBalance,
+
+						// 查看财务账号金额明细
+						co_permission.Financial.PermissionType(module).GetAccountDetail,
+					},
+				},
 			},
 		},
 	}

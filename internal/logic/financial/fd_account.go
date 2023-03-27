@@ -5,13 +5,17 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/format_utils"
+
 	"reflect"
 
 	"github.com/gogf/gf/v2/os/gtime"
@@ -177,7 +181,7 @@ func (s *sFdAccount[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountById_Failed"), s.dao.FdAccount.Table())
 	}
 
-	return *data, nil
+	return makeMore(ctx, s.dao.FdAccountDetail, *data), nil
 }
 
 // UpdateAccountIsEnable 修改财务账号状态（是否启用：0禁用 1启用）
@@ -191,7 +195,7 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int64) (bool, error) {
+]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
@@ -210,7 +214,7 @@ func (s *sFdAccount[
 	return true, nil
 }
 
-// HasAccountByName 根据账户名查询财务账户
+// HasAccountByName 判断财务账号名是否存在
 func (s *sFdAccount[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -245,7 +249,7 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int64) (bool, error) {
+]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
@@ -280,6 +284,14 @@ func (s *sFdAccount[
 	if err != nil || len(data.Records) <= 0 {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
 	}
+
+	dataList := make([]TR, 0)
+
+	for _, item := range data.Records {
+		more := makeMore(ctx, s.dao.FdAccountDetail, item)
+		dataList = append(dataList, more)
+	}
+	data.Records = dataList
 
 	return data, nil
 }
@@ -353,7 +365,7 @@ func (s *sFdAccount[
 		CurrencyCode: currencyCode,
 	}).Scan(response.Data())
 
-	return response, err
+	return makeMore(ctx, s.dao.FdAccountDetail, response), err
 }
 
 // GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，如果主体id找不到财务账号的时候就创建财务账号
@@ -384,26 +396,211 @@ func (s *sFdAccount[
 	}
 	err = doWhere.Scan(response.Data())
 
-	// var res co_model.FdAccountRes
+	return makeMore(ctx, s.dao.FdAccountDetail, response), err
+}
 
-	// return s.GetAccountById(ctx, res.Id)
+// ========================财务账号金额明细统计=================================
 
-	return response, err
+// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error) {
+	if id == 0 {
+		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+	}
+	data, err := daoctl.GetByIdWithError[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx), id)
 
-	//if data == nil { //如果主体id找不到财务账号的时候就创建财务账号  （不应该在这里）
-	//	s.CreateAccount(ctx,co_model.FdAccountRegister{
-	//		UnionLicenseId:     0,
-	//		UnionUserId:        0,
-	//		Name:               "",
-	//		CurrencyCode:       "",
-	//		IsEnabled:          0,
-	//		LimitState:         0,
-	//		PrecisionOfBalance: 0,
-	//		Version:            0,
-	//		SceneType:          0,
-	//		AccountType:        0,
-	//		AccountNumber:      "",
-	//	})
-	//}
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountDetailById_Failed"), s.dao.FdAccountDetail.Table())
+	}
 
+	return data, nil
+}
+
+// CreateAccountDetail 创建财务账单金额明细统计记录
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) CreateAccountDetail(ctx context.Context, info *co_model.FdAccountDetail) (res *co_model.FdAccountDetailRes, err error) {
+	// 关联用户id是否正确
+	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.SysUserId)
+	if user == nil || err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+	}
+
+	// 生产随机id
+	data := co_do.FdAccountDetail{}
+	gconv.Struct(info, &data)
+	data.Id = idgen.NextId()
+
+	// 插入财务账号金额明细
+	_, err = s.dao.FdAccountDetail.Ctx(ctx).Insert(data)
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountDetail_Save_Failed"), s.dao.FdAccountDetail.Table())
+	}
+
+	return s.GetAccountDetailById(ctx, gconv.Int64(data.Id))
+}
+
+// Increment 收入
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Increment(ctx context.Context, id int64, amount int) (bool, error) {
+	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Financial.InOutType.In)
+
+	return ret > 0, err
+}
+
+// Decrement 支出
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) Decrement(ctx context.Context, id int64, amount int) (bool, error) {
+	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Financial.InOutType.Out)
+
+	return ret > 0, err
+}
+
+// UpdateAccountDetailAmount 修改财务账户余额(上下文, id, 需要修改的钱数目, 收支类型)
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) updateAccountDetailAmount(ctx context.Context, id int64, amount int, inOutType co_enum.FinancialInOutType) (int64, error) {
+	// 先通过财务账号id查询账号出来，然后查询出来的当前财务账号版本为修改条件
+	account, err := s.GetAccountDetailById(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+
+	// 版本
+	version := account.Data().Version
+
+	db := s.dao.FdAccountDetail.Ctx(ctx)
+
+	now := gtime.Now()
+
+	data := co_do.FdAccountDetail{
+		// gdb.Raw是字符串类型，该类型的参数将会直接作为SQL片段嵌入到提交到底层的SQL语句中，不会被自动转换为字符串参数类型、也不会被当做预处理参数
+		// Increment  自增
+		// Decrement  自减
+		Version:          gdb.Raw(s.dao.FdAccountDetail.Columns().Version + "+1"),
+		TodayUpdatedAt:   now,
+		WeekUpdatedAt:    now,
+		MonthUpdatedAt:   now,
+		QuarterUpdatedAt: now,
+		YearUpdatedAt:    now,
+	}
+	operator := " + "
+	if (inOutType.Code() & co_enum.Financial.InOutType.Out.Code()) == co_enum.Financial.InOutType.Out.Code() { // 支出
+		operator = " - "
+	}
+
+	// 判断是否是今日统计
+	if account.FdAccountDetail.TodayUpdatedAt.Format("Y-m-d") != now.Format("Y-m-d") {
+		data.TodayAccountSum = amount
+	} else {
+		data.TodayAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().TodayAccountSum + operator + gconv.String(amount))
+	}
+
+	if account.WeekUpdatedAt.Format("Y-W") != now.Format("Y-W") {
+		data.WeekAccountSum = amount
+	} else {
+		data.WeekAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().WeekAccountSum + operator + gconv.String(amount))
+	}
+
+	if account.MonthUpdatedAt.Format("Y-m") != now.Format("Y-m") {
+		data.MonthAccountSum = amount
+	} else {
+		data.MonthAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().MonthAccountSum + operator + gconv.String(amount))
+	}
+
+	// 季度
+	quarter := format_utils.GetQuarter(account.QuarterUpdatedAt)
+	quarter2 := format_utils.GetQuarter(now)
+	if account.QuarterUpdatedAt.Year() == now.Year() && quarter != quarter2 {
+		data.QuarterAccountSum = amount
+	} else {
+		data.QuarterAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().QuarterAccountSum + operator + gconv.String(amount))
+	}
+
+	if account.YearUpdatedAt.Year() != now.Year() {
+		data.YearAccountSum = amount
+	} else {
+		data.YearAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().YearAccountSum + operator + gconv.String(amount))
+	}
+
+	result, err := db.Data(data).Where(co_do.FdAccountDetail{
+		Id:      id,
+		Version: version,
+	}).Data(data).Update()
+
+	if err != nil {
+		return 0, err
+	}
+
+	affected, err := result.RowsAffected()
+
+	return affected, err
+}
+
+// 添加财务账号附加数据 - 明细信息
+
+// makeMore 按需加载附加数据
+func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccountDetailDao, info TR) TR {
+	if reflect.ValueOf(info).IsNil() {
+		return info
+	}
+
+	funs.AttrMake[TR](ctx,
+		"id",
+		func() TR {
+			g.Try(ctx, func(ctx context.Context) {
+				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
+				if err != nil {
+					return
+				}
+
+				info.Data().Detail = accountDetail
+			})
+			return info
+		},
+	)
+	return info
 }

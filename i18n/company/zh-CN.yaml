@@ -96,6 +96,13 @@ error_Transaction_FromUser_InsufficientBalance: "交易发起者的账户余额�
 error_AccountId_NonZero: "财务账号不能为0！"
 error_AccountAmount_NonNegative: "交易金额不能是负数"
 
+## 财务账号金额明细相关
+AccountDetail: "财务账号金额明细"
+error_AccountDetail_Save_Failed: "财务账号金额明细统计添加失败"
+error_GetAccountDetailById_Failed: "根据id获取财务账号金额明细失败"
+error_ThisUser_NotHas_AccountDetail: "该账户没有财务账号金额明细统计"
+error_AccountDetail_SysUserId_NotNull: "财务账号金额明细关联用户id不能为空"
+
 ## 银行卡相关
 BankCard: "银行卡账号"
 error_GetBankCardById_Failed: "根据银行卡id获取银行卡信息失败"
