@@ -2,8 +2,9 @@ package financial
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -13,15 +14,12 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 
-	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/yitter/idgenerator-go/idgen"
 )
-
-type hookInfo sys_model.HookEventType[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 
 // 财务账单
 type sFdAccountBill[
@@ -48,7 +46,7 @@ type sFdAccountBill[
 		ITFdInvoiceDetailRes,
 	]
 	dao     *co_dao.XDao
-	hookArr *garray.Array
+	hookArr base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 }
 
 func NewFdAccountBill[
@@ -92,6 +90,36 @@ func NewFdAccountBill[
 	return result
 }
 
+// InstallTradeHook 订阅Hook
+func (s *sFdAccountBill[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	TR,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc) {
+	s.hookArr.InstallHook(hookKey, hookFunc)
+}
+
+// GetTradeHook 获取Hook
+func (s *sFdAccountBill[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	TR,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc] {
+	return s.hookArr
+}
+
 // FactoryMakeResponseInstance 响应实例工厂方法
 func (s *sFdAccountBill[
 	ITCompanyRes,
@@ -109,64 +137,6 @@ func (s *sFdAccountBill[
 	return ret.(TR)
 }
 
-// InstallHook 安装Hook
-func (s *sFdAccountBill[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	TR,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) InstallHook(filter co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc) {
-	item := hookInfo{Key: filter, Value: hookFunc}
-	s.hookArr.Append(item)
-}
-
-// UnInstallHook 卸载Hook
-func (s *sFdAccountBill[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	TR,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) UnInstallHook(filter co_hook.AccountBillHookFilter) {
-	newFuncArr := garray.NewArray()
-	s.hookArr.Iterator(func(key int, value interface{}) bool {
-		item := value.(hookInfo)
-
-		if item.Key.TradeType != filter.TradeType ||
-			item.Key.InOutType != filter.InOutType ||
-			item.Key.InTransaction != filter.InTransaction {
-			newFuncArr.Append(item)
-		}
-
-		return true
-	})
-	s.hookArr = newFuncArr
-}
-
-// ClearAllHook 清除Hook
-func (s *sFdAccountBill[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	TR,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) ClearAllHook() {
-	s.hookArr.Clear()
-}
-
 // CreateAccountBill 创建财务账单
 func (s *sFdAccountBill[
 	ITCompanyRes,
@@ -180,9 +150,12 @@ func (s *sFdAccountBill[
 	ITFdInvoiceDetailRes,
 ]) CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
 	// 判断交易时间是否大于当前系统时间
-	now := *gtime.Now()
+	now := gtime.Now()
 
-	if !now.After(info.TradeAt) { // 系统时间是否在交易时间之后
+	if now.Format("Y-m-d H:i:s") < info.TradeAt.Format("Y-m-d H:i:s") { // 系统时间是否在交易时间之后
+		fmt.Println(now.Format("Y-m-d H:i:s"))
+		fmt.Println(info.TradeAt.Format("Y-m-d H:i:s"))
+
 		return false, gerror.New(s.modules.T(ctx, "error_Legal_Operation"))
 	}
 
@@ -249,7 +222,7 @@ func (s *sFdAccountBill[
 	bill := s.FactoryMakeResponseInstance()
 
 	// 使用乐观锁校验余额，和更新余额
-	err = s.dao.FdAccountBill.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.dao.FdAccountBill.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 版本
 		version := account.Data().Version
 		// 余额 = 之前的余额 + 本次交易的金额
@@ -277,14 +250,19 @@ func (s *sFdAccountBill[
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 		}
 
-		s.hookArr.Iterator(func(_ int, v interface{}) bool {
-			hook := v.(hookInfo)
-			if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
-				if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
-					hook.Value(ctx, hook.Key, bill)
+		// 3.修改财务账号金额明细统计
+		increment, err := s.modules.Account().Increment(ctx, account.Data().Id, gconv.Int(info.Amount))
+
+		if increment == false || err != nil {
+			return err
+		}
+
+		s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
+			if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+				if key.TradeType.Code()&info.TradeType == info.TradeType {
+					value(ctx, key, bill)
 				}
 			}
-			return true
 		})
 		return nil
 	})
@@ -293,14 +271,13 @@ func (s *sFdAccountBill[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
-	s.hookArr.Iterator(func(_ int, v interface{}) bool {
-		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.In {
-			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
-				hook.Value(ctx, hook.Key, bill)
+	s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
+		if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+			if key.TradeType.Code()&info.TradeType == info.TradeType {
+				value(ctx, key, bill)
 			}
+
 		}
-		return true
 	})
 
 	return true, nil
@@ -329,7 +306,7 @@ func (s *sFdAccountBill[
 	bill := s.FactoryMakeResponseInstance()
 
 	// 使用乐观锁校验余额，和更新余额
-	err = s.dao.FdAccountBill.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.dao.FdAccountBill.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 版本
 		version := account.Data().Version
 		// 余额 = 之前的余额 - 本次交易的金额
@@ -360,18 +337,20 @@ func (s *sFdAccountBill[
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 			}
 
-			s.hookArr.Iterator(func(_ int, v interface{}) bool {
-				hook := v.(hookInfo)
-				// 判断收支类型
-				if hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
-					// 判断交易类型
-					if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
-						hook.Value(ctx, hook.Key, bill)
+			// 3.修改财务账号金额明细统计
+			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
+
+			if decrement == false || err != nil {
+				return err
+			}
+
+			s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
+				if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+					if key.TradeType.Code()&info.TradeType == info.TradeType {
+						value(ctx, key, bill)
 					}
 				}
-				return true
 			})
-
 		} else {
 			return gerror.New(s.modules.T(ctx, "error_Transaction_FromUser_InsufficientBalance"))
 		}
@@ -383,14 +362,12 @@ func (s *sFdAccountBill[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
-	s.hookArr.Iterator(func(_ int, v interface{}) bool {
-		hook := v.(hookInfo)
-		if !hook.Key.InTransaction && hook.Key.InOutType == co_enum.Financial.InOutType.Out {
-			if hook.Key.TradeType.Code()&info.TradeType == info.TradeType {
-				hook.Value(ctx, hook.Key, bill)
+	s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
+		if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+			if key.TradeType.Code()&info.TradeType == info.TradeType {
+				value(ctx, key, bill)
 			}
 		}
-		return true
 	})
 
 	return true, nil

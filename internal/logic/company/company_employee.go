@@ -244,7 +244,7 @@ func (s *sEmployee[
 		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
 	}
 
-	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
+	claims.IsAdmin = claims.Type == sys_enum.User.Type.Admin.Code() || claims.Id == company.UserId
 	claims.UnionMainId = company.Id
 	claims.ParentId = company.ParentId
 
@@ -283,7 +283,12 @@ func (s *sEmployee[
 	}
 
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && sessionUser != nil && sessionUser.Id != 0 && response.Data().UnionMainId != sessionUser.UnionMainId && response.Data().UnionMainId != sessionUser.ParentId {
+	if err == sql.ErrNoRows ||
+		!reflect.ValueOf(data).IsNil() && sessionUser != nil &&
+			sessionUser.Id != 0 &&
+			response.Data().UnionMainId != sessionUser.UnionMainId &&
+			response.Data().UnionMainId != sessionUser.ParentId &&
+			!sessionUser.IsAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 

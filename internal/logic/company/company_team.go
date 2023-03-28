@@ -3,7 +3,6 @@ package company
 import (
 	"context"
 	"database/sql"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/gogf/gf/v2/database/gdb"
@@ -12,6 +11,7 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/funs"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
@@ -143,7 +143,7 @@ func (s *sTeam[
 	}
 
 	// 需要进行跨主体判断
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
 	}
 

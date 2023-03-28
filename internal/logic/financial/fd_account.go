@@ -5,7 +5,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
+	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -15,6 +15,8 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/format_utils"
+	"github.com/kysion/base-library/utility/funs"
+	"github.com/kysion/base-library/utility/kconv"
 
 	"reflect"
 
@@ -125,10 +127,6 @@ func (s *sFdAccount[
 	ITFdInvoiceDetailRes,
 ]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-	// 检查指定参数是否为空
-	if err := g.Validator().Data(info).Run(ctx); err != nil {
-		return response, err
-	}
 
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
@@ -144,12 +142,19 @@ func (s *sFdAccount[
 	if currency.Data().IsLegalTender != 1 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
 	}
+
 	// 生产随机id
-	data := co_do.FdAccount{}
-	gconv.Struct(info, &data)
+	data := kconv.Struct(info, &co_do.FdAccount{})
+
 	data.Id = idgen.NextId()
 	data.CreatedBy = sessionUser.Id
 	data.CreatedAt = gtime.Now()
+	data.UnionMainId = info.UnionMainId
+	data.IsEnabled = 1
+	data.LimitState = 0
+	if info.CurrencyCode == "" {
+		data.CurrencyCode = co_consts.Global.DefaultCurrency
+	}
 
 	// 插入财务账号
 	_, err = s.dao.FdAccount.Ctx(ctx).Insert(data)
@@ -368,7 +373,7 @@ func (s *sFdAccount[
 	return makeMore(ctx, s.dao.FdAccountDetail, response), err
 }
 
-// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，如果主体id找不到财务账号的时候就创建财务账号
+// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，
 func (s *sFdAccount[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -379,29 +384,34 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, sceneType ...int) (response TR, err error) {
+]) GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, accountType co_enum.AccountType, sceneType ...co_enum.SceneType) (response TR, err error) {
 	if unionUserId == 0 {
-		return response, gerror.New(s.modules.T(ctx, "error_Account_UnionUserId_NotNull"))
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Account_UnionUserId_NotNull"), s.dao.FdAccount.Table())
 	}
 
 	response = s.FactoryMakeResponseInstance()
 	doWhere := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
 		UnionUserId: unionUserId,
+		AccountType: accountType.Code(),
 	})
 
 	if len(sceneType) > 0 {
 		doWhere = doWhere.Where(co_do.FdAccount{
-			SceneType: sceneType[0],
+			SceneType: sceneType[0].Code(),
 		})
 	}
 	err = doWhere.Scan(response.Data())
+
+	if err != nil {
+		err = sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccount_Failed"), s.dao.FdAccount.Table())
+	}
 
 	return makeMore(ctx, s.dao.FdAccountDetail, response), err
 }
 
 // ========================财务账号金额明细统计=================================
 
-// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
+// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录，如果主体id找不到财务账号的时候就创建财务账号
 func (s *sFdAccount[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -417,6 +427,31 @@ func (s *sFdAccount[
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
 	}
 	data, err := daoctl.GetByIdWithError[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx), id)
+
+	if data == nil {
+		account, err := s.GetAccountById(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+
+		now := gtime.Now()
+		return s.CreateAccountDetail(ctx, &co_model.FdAccountDetail{
+			Id:                id,
+			TodayAccountSum:   0,
+			TodayUpdatedAt:    now,
+			WeekAccountSum:    0,
+			WeekUpdatedAt:     now,
+			MonthAccountSum:   0,
+			MonthUpdatedAt:    now,
+			QuarterAccountSum: 0,
+			QuarterUpdatedAt:  now,
+			YearAccountSum:    0,
+			YearUpdatedAt:     now,
+			UnionMainId:       account.Data().UnionMainId,
+			SysUserId:         account.Data().UnionUserId,
+			Version:           0,
+		})
+	}
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountDetailById_Failed"), s.dao.FdAccountDetail.Table())
@@ -446,7 +481,6 @@ func (s *sFdAccount[
 	// 生产随机id
 	data := co_do.FdAccountDetail{}
 	gconv.Struct(info, &data)
-	data.Id = idgen.NextId()
 
 	// 插入财务账号金额明细
 	_, err = s.dao.FdAccountDetail.Ctx(ctx).Insert(data)
@@ -504,7 +538,7 @@ func (s *sFdAccount[
 	ITFdInvoiceDetailRes,
 ]) updateAccountDetailAmount(ctx context.Context, id int64, amount int, inOutType co_enum.FinancialInOutType) (int64, error) {
 	// 先通过财务账号id查询账号出来，然后查询出来的当前财务账号版本为修改条件
-	account, err := s.GetAccountDetailById(ctx, id)
+	account, err := s.GetAccountDetailById(ctx, id) // 如果不存在，会创建
 	if err != nil {
 		return 0, err
 	}
@@ -536,19 +570,19 @@ func (s *sFdAccount[
 	if account.FdAccountDetail.TodayUpdatedAt.Format("Y-m-d") != now.Format("Y-m-d") {
 		data.TodayAccountSum = amount
 	} else {
-		data.TodayAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().TodayAccountSum + operator + gconv.String(amount))
+		data.TodayAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().TodayAccountSum + operator + gconv.String(amount))
 	}
 
 	if account.WeekUpdatedAt.Format("Y-W") != now.Format("Y-W") {
 		data.WeekAccountSum = amount
 	} else {
-		data.WeekAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().WeekAccountSum + operator + gconv.String(amount))
+		data.WeekAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().WeekAccountSum + operator + gconv.String(amount))
 	}
 
 	if account.MonthUpdatedAt.Format("Y-m") != now.Format("Y-m") {
 		data.MonthAccountSum = amount
 	} else {
-		data.MonthAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().MonthAccountSum + operator + gconv.String(amount))
+		data.MonthAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().MonthAccountSum + operator + gconv.String(amount))
 	}
 
 	// 季度
@@ -557,19 +591,19 @@ func (s *sFdAccount[
 	if account.QuarterUpdatedAt.Year() == now.Year() && quarter != quarter2 {
 		data.QuarterAccountSum = amount
 	} else {
-		data.QuarterAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().QuarterAccountSum + operator + gconv.String(amount))
+		data.QuarterAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().QuarterAccountSum + operator + gconv.String(amount))
 	}
 
 	if account.YearUpdatedAt.Year() != now.Year() {
 		data.YearAccountSum = amount
 	} else {
-		data.YearAccountSum = db.Raw(s.dao.FdAccountDetail.Columns().YearAccountSum + operator + gconv.String(amount))
+		data.YearAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().YearAccountSum + operator + gconv.String(amount))
 	}
 
 	result, err := db.Data(data).Where(co_do.FdAccountDetail{
 		Id:      id,
 		Version: version,
-	}).Data(data).Update()
+	}).Update()
 
 	if err != nil {
 		return 0, err
