@@ -8,61 +8,80 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
-type EmployeeController struct {
-	i_controller.IEmployee
+type EmployeeController[TIRes co_model.IEmployeeRes] struct {
+	i_controller.IEmployee[TIRes]
 }
 
-var Employee = func(modules co_interface.IModules) *EmployeeController {
-	return &EmployeeController{
-		co_controller.Employee(modules),
+func Employee[
+	ITCompanyRes co_model.ICompanyRes,
+	TIRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) *EmployeeController[TIRes] {
+	return &EmployeeController[TIRes]{
+		IEmployee: co_controller.Employee(modules),
 	}
 }
 
-func (c *EmployeeController) GetModules() co_interface.IModules {
-	return c.IEmployee.GetModules()
-}
-
-func (c *EmployeeController) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController[TIRes]) GetEmployeeById(ctx context.Context, req *co_v1.GetEmployeeByIdReq) (TIRes, error) {
 	return c.IEmployee.GetEmployeeById(ctx, &req.GetEmployeeByIdReq)
 }
 
 // GetEmployeeDetailById 获取员工详情信息
-func (c *EmployeeController) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (res *co_model.EmployeeRes, err error) {
+func (c *EmployeeController[TIRes]) GetEmployeeDetailById(ctx context.Context, req *co_v1.GetEmployeeDetailByIdReq) (TIRes, error) {
 	return c.IEmployee.GetEmployeeDetailById(ctx, &req.GetEmployeeDetailByIdReq)
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (c *EmployeeController) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController[TIRes]) HasEmployeeByName(ctx context.Context, req *co_v1.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
 	return c.IEmployee.HasEmployeeByName(ctx, &req.HasEmployeeByNameReq)
 }
 
 // HasEmployeeByNo 员工工号是否存在
-func (c *EmployeeController) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController[TIRes]) HasEmployeeByNo(ctx context.Context, req *co_v1.HasEmployeeByNoReq) (api_v1.BoolRes, error) {
 	return c.IEmployee.HasEmployeeByNo(ctx, &req.HasEmployeeByNoReq)
 }
 
 // QueryEmployeeList 查询员工列表
-func (c *EmployeeController) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
-	return c.IEmployee.QueryEmployeeList(ctx, &req.QueryEmployeeListReq)
+func (c *EmployeeController[TIRes]) QueryEmployeeList(ctx context.Context, req *co_v1.QueryEmployeeListReq) (*co_model.EmployeeListRes, error) {
+	ret, err := c.IEmployee.QueryEmployeeList(ctx, &req.QueryEmployeeListReq)
+	return kconv.Struct(ret, &co_model.EmployeeListRes{}), err
 }
 
 // CreateEmployee 创建员工信息
-func (c *EmployeeController) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController[TIRes]) CreateEmployee(ctx context.Context, req *co_v1.CreateEmployeeReq) (TIRes, error) {
 	return c.IEmployee.CreateEmployee(ctx, &req.CreateEmployeeReq)
 }
 
 // UpdateEmployee 更新员工信息
-func (c *EmployeeController) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (*co_model.EmployeeRes, error) {
+func (c *EmployeeController[TIRes]) UpdateEmployee(ctx context.Context, req *co_v1.UpdateEmployeeReq) (TIRes, error) {
 	return c.IEmployee.UpdateEmployee(ctx, &req.UpdateEmployeeReq)
 }
 
 // DeleteEmployee 删除员工信息
-func (c *EmployeeController) DeleteEmployee(ctx context.Context, req *co_v1.DeleteEmployeeReq) (api_v1.BoolRes, error) {
+func (c *EmployeeController[TIRes]) DeleteEmployee(ctx context.Context, req *co_v1.DeleteEmployeeReq) (api_v1.BoolRes, error) {
 	return c.IEmployee.DeleteEmployee(ctx, &req.DeleteEmployeeReq)
 }
 
-func (c *EmployeeController) GetEmployeeListByRoleId(ctx context.Context, req *co_v1.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
-	return c.IEmployee.GetEmployeeListByRoleId(ctx, &req.GetEmployeeListByRoleIdReq)
+func (c *EmployeeController[TIRes]) GetEmployeeListByRoleId(ctx context.Context, req *co_v1.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
+	ret, err := c.IEmployee.GetEmployeeListByRoleId(ctx, &req.GetEmployeeListByRoleIdReq)
+	return kconv.Struct(ret, &co_model.EmployeeListRes{}), err
 }

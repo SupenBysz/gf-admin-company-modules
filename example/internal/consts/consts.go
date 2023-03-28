@@ -10,7 +10,17 @@ import (
 )
 
 type global struct {
-	Modules co_interface.IModules
+	Modules co_interface.IModules[
+		*co_model.CompanyRes,
+		*co_model.EmployeeRes,
+		*co_model.TeamRes,
+		*co_model.FdAccountRes,
+		*co_model.FdAccountBillRes,
+		*co_model.FdBankCardRes,
+		*co_model.FdCurrencyRes,
+		*co_model.FdInvoiceRes,
+		*co_model.FdInvoiceDetailRes,
+	]
 }
 
 var (
@@ -20,7 +30,17 @@ var (
 	FinancialPermissionTree []*sys_model.SysPermissionTree
 
 	Global = global{
-		Modules: co_module.NewModules(
+		Modules: co_module.NewModules[
+			*co_model.CompanyRes,
+			*co_model.EmployeeRes,
+			*co_model.TeamRes,
+			*co_model.FdAccountRes,
+			*co_model.FdAccountBillRes,
+			*co_model.FdBankCardRes,
+			*co_model.FdCurrencyRes,
+			*co_model.FdInvoiceRes,
+			*co_model.FdInvoiceDetailRes,
+		](
 			&co_model.Config{
 				AllowEmptyNo:                   true,
 				IsCreateDefaultEmployeeAndRole: false,
@@ -28,7 +48,7 @@ var (
 				KeyIndex:                       "Company",
 				RoutePrefix:                    "/company",
 				StoragePath:                    "./resources/company",
-				UserType:                       sys_enum.User.Type.SuperAdmin,
+				UserType:                       sys_enum.User.Type.SuperAdmin, // 业务层用户类型需自定义
 				Identifier: co_model.Identifier{
 					Company:         "company",
 					Employee:        "employee",

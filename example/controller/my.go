@@ -14,14 +14,30 @@ type MyController struct {
 	i_controller.IMy
 }
 
-var My = func(modules co_interface.IModules) *MyController {
+func My[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) *MyController {
 	return &MyController{
-		co_controller.My(modules),
+		IMy: co_controller.My(modules),
 	}
-}
-
-func (c *MyController) GetModules() co_interface.IModules {
-	return c.IMy.GetModules()
 }
 
 // GetProfile 获取当前员工及用户信息

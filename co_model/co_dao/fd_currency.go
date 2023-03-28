@@ -9,8 +9,12 @@ import (
 	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 )
 
-type FdCurrency = dao_interface.TIDao[internal.FdCurrencyColumns]
+type FdCurrencyDao = dao_interface.TIDao[internal.FdCurrencyColumns]
 
-func NewFdCurrency(dao ...dao_interface.IDao) FdCurrency {
-	return (FdCurrency)(internal.NewFdCurrencyDao(dao...))
+func NewFdCurrency(dao ...dao_interface.IDao) FdCurrencyDao {
+	return (FdCurrencyDao)(internal.NewFdCurrencyDao(dao...))
 }
+
+var (
+	FdCurrency = NewFdCurrency()
+)

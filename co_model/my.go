@@ -9,7 +9,7 @@ type MyCompanyRes co_entity.Company
 
 type MyTeamRes struct {
 	TeamRes
-	EmployeeListRes `json:"memberItems" description:"团队或小组成员"`
+	MemberItems []*EmployeeRes `json:"memberItems" description:"团队或小组成员"`
 }
 
 type MyTeamListRes []MyTeamRes

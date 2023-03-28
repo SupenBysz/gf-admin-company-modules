@@ -4,19 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/funs"
 	"github.com/kysion/base-library/utility/masker"
 	"math"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -35,47 +37,142 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
-type hookInfo sys_model.HookEventType[co_hook.EmployeeHookFilter, co_hook.EmployeeHookFunc]
-
-type sEmployee struct {
-	modules co_interface.IModules
+type sEmployee[
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
+	base_hook.ResponseFactoryHook[TR]
+	modules co_interface.IModules[
+		ITCompanyRes,
+		TR,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]
 	dao     *co_dao.XDao
 	hookArr *garray.Array
 }
 
-func NewEmployee(modules co_interface.IModules) *sEmployee {
-	result := &sEmployee{
+func NewEmployee[
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) co_interface.IEmployee[TR] {
+	result := &sEmployee[
+		ITCompanyRes,
+		TR,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     modules.Dao(),
 		hookArr: garray.NewArray(),
 	}
+
+	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	// 注入钩子函数
 	result.injectHook()
 	return result
 }
 
+// FactoryMakeResponseInstance 响应实例工厂方法
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) FactoryMakeResponseInstance() TR {
+	var ret co_model.IEmployeeRes
+	ret = &co_model.EmployeeRes{
+		CompanyEmployee: co_entity.CompanyEmployee{},
+		User:            co_model.EmployeeUser{},
+		Detail:          sys_entity.SysUserDetail{},
+		TeamList:        []co_model.Team{},
+	}
+	return ret.(TR)
+}
+
 // InjectHook 注入Audit的Hook
-func (s *sEmployee) injectHook() {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) injectHook() {
 	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
 	sys_service.SysAuth().InstallHook(sys_enum.Auth.ActionType.Login, s.modules.GetConfig().UserType, s.authHookFunc)
 	sys_service.SysUser().InstallHook(sys_enum.User.Event.BeforeCreate, s.userHookFunc)
 }
 
 // AuthHookFunc 用户登录Hook函数
-func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
-	employee, _ := daoctl.GetByIdWithError[co_model.EmployeeRes](
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
+	data, _ := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		user.Id,
 	)
-	if employee != nil {
-		user.Detail.Realname = employee.Name
+	var employee TR
+	if !reflect.ValueOf(data).IsNil() {
+		employee = *data
+		user.Detail.Realname = employee.Data().Name
 	}
 
-	if employee != nil && employee.UnionMainId != 0 {
-		company, _ := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
-		if company != nil {
-			user.Detail.UnionMainName = company.Name
+	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
+		company, _ := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
+		if !reflect.ValueOf(company).IsNil() {
+			user.Detail.UnionMainName = company.Data().Name
 		}
 	}
 
@@ -83,27 +180,52 @@ func (s *sEmployee) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType,
 }
 
 // userHookFunc 新增用户Hook函数
-func (s *sEmployee) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
-	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
+	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		info.Id,
 	)
 	if err != nil {
 		return info, nil
 	}
-	info.Detail.Realname = employee.Name
+	var employee TR
+	if !reflect.ValueOf(data).IsNil() {
+		employee = *data
+	}
 
-	company, err := s.modules.Company().GetCompanyById(ctx, employee.UnionMainId)
+	info.Detail.Realname = employee.Data().Name
+
+	company, err := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
 	if err != nil {
 		return info, nil
 	}
-	info.Detail.UnionMainName = company.Name
+	info.Detail.UnionMainName = company.Data().Name
 
 	return info, nil
 }
 
 // JwtHookFunc Jwt钩子函数
-func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
 	// 获取到当前user的主体id，由于JWT钩子函数大多是登录成功前调用，所以这里不能使用 s.GetEmployeeById 方法调用获取员工数据
 	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
 		s.dao.Employee.Ctx(ctx),
@@ -122,7 +244,7 @@ func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustom
 		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
 	}
 
-	claims.IsAdmin = claims.Type == -1 || claims.Id == company.UserId
+	claims.IsAdmin = claims.Type == sys_enum.User.Type.Admin.Code() || claims.Id == company.UserId
 	claims.UnionMainId = company.Id
 	claims.ParentId = company.ParentId
 
@@ -130,10 +252,20 @@ func (s *sEmployee) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustom
 }
 
 // GetEmployeeById 根据ID获取员工信息
-func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	data, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
+	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		id,
 	)
@@ -143,20 +275,39 @@ func (s *sEmployee) GetEmployeeById(ctx context.Context, id int64) (*co_model.Em
 		if err != sql.ErrNoRows {
 			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
 		}
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+	}
+
+	if !reflect.ValueOf(data).IsNil() {
+		response = *data
 	}
 
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
-	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId && data.UnionMainId != sessionUser.ParentId {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	if err == sql.ErrNoRows ||
+		!reflect.ValueOf(data).IsNil() && sessionUser != nil &&
+			sessionUser.Id != 0 &&
+			response.Data().UnionMainId != sessionUser.UnionMainId &&
+			response.Data().UnionMainId != sessionUser.ParentId &&
+			!sessionUser.IsAdmin {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
-	return s.masker(s.makeMore(ctx, data)), nil
+	return s.masker(s.makeMore(ctx, response)), nil
 }
 
 // GetEmployeeByName 根据Name获取员工信息
-func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_model.EmployeeRes, error) {
-	data, err := daoctl.ScanWithError[co_model.EmployeeRes](
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeByName(ctx context.Context, name string) (response TR, err error) {
+	data, err := daoctl.ScanWithError[TR](
 		s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
 	)
 
@@ -165,14 +316,24 @@ func (s *sEmployee) GetEmployeeByName(ctx context.Context, name string) (*co_mod
 		if err != sql.ErrNoRows {
 			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
 		}
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 	}
 
-	return s.masker(s.makeMore(ctx, data)), nil
+	return s.masker(s.makeMore(ctx, *data)), nil
 }
 
 // HasEmployeeByName 员工名称是否存在
-func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
 	if unionMainId <= 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
@@ -199,7 +360,17 @@ func (s *sEmployee) HasEmployeeByName(ctx context.Context, name string, unionMai
 }
 
 // HasEmployeeByNo 员工工号是否存在
-func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool { // 如果工号为空则直接返回
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool { // 如果工号为空则直接返回
 	// 工号为空，且允许工号为空则不做校验
 	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
 		return false
@@ -231,22 +402,42 @@ func (s *sEmployee) HasEmployeeByNo(ctx context.Context, no string, unionMainId 
 }
 
 // GetEmployeeBySession 获取当前登录的员工信息
-func (s *sEmployee) GetEmployeeBySession(ctx context.Context) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeBySession(ctx context.Context) (response TR, err error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if user.Type != s.modules.GetConfig().UserType.Code() {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
 	}
 
 	result, _ := s.GetEmployeeById(ctx, user.Id)
-	if result == nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CheckLoginUser_Failed"), s.dao.Employee.Table())
+	if reflect.ValueOf(result).IsNil() {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CheckLoginUser_Failed"), s.dao.Employee.Table())
 	}
 	return result, nil
 }
 
 // QueryEmployeeList 获取员工列表
-func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*co_model.EmployeeListRes, error) { // 跨主体查询条件过滤
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) { // 跨主体查询条件过滤
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -276,36 +467,66 @@ func (s *sEmployee) QueryEmployeeList(ctx context.Context, search *base_model.Se
 	}
 
 	// 查询符合过滤条件的员工信息
-	result, err := daoctl.Query[*co_model.EmployeeRes](model.
+	result, err := daoctl.Query[TR](model.
 		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
-	items := make([]*co_model.EmployeeRes, 0)
+	items := make([]TR, 0)
 	for _, record := range result.Records {
 		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
-	return (*co_model.EmployeeListRes)(result), nil
+	return result, nil
 }
 
 // CreateEmployee 创建员工信息
-func (s *sEmployee) CreateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) CreateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error) {
 	info.Id = 0
 
 	return s.saveEmployee(ctx, info)
 }
 
 // UpdateEmployee 更新员工信息
-func (s *sEmployee) UpdateEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error) {
 	return s.saveEmployee(ctx, info)
 }
 
 // saveEmployee 保存员工信息
-func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) saveEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 除匿名用户外，其它用户在有权限的情况下均可以创建或更新员工信息，001 代表默认管理员工号
@@ -316,23 +537,23 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 
 	// 校验员工名称是否已存在
 	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否允许为空
 	if info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否已存在
 	if true == s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
 
-	err := s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
 		if info.Avatar != "" {
 			// 校验员工头像并保存
@@ -406,63 +627,73 @@ func (s *sEmployee) saveEmployee(ctx context.Context, info *co_model.Employee) (
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	return s.GetEmployeeById(ctx, gconv.Int64(data.Id))
 }
 
 // DeleteEmployee 删除员工信息
-func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
 	employee, err := s.GetEmployeeById(ctx, id)
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		if s.modules.GetConfig().HardDeleteWaitAt > 0 && employee.DeletedAt == nil {
+		if s.modules.GetConfig().HardDeleteWaitAt > 0 && employee.Data().DeletedAt == nil {
 			// 设置账户状态为已注销
-			_, err = sys_service.SysUser().SetUserState(ctx, employee.Id, sys_enum.User.State.Canceled)
+			_, err = sys_service.SysUser().SetUserState(ctx, employee.Data().Id, sys_enum.User.State.Canceled)
 			if err != nil {
 				return err
 			}
 			// 设置员工状态为已注销
 			_, err = s.dao.Employee.Ctx(ctx).
 				Data(co_do.CompanyEmployee{State: co_enum.Employee.State.Canceled.Code()}).
-				Where(co_do.CompanyEmployee{Id: employee.Id}).
+				Where(co_do.CompanyEmployee{Id: employee.Data().Id}).
 				Update()
 			if err != nil {
 				return err
 			}
 			// 软删除
-			_, err = s.dao.Employee.Ctx(ctx).Delete(co_do.CompanyEmployee{Id: employee.Id})
+			_, err = s.dao.Employee.Ctx(ctx).Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
 			if err != nil {
 				return err
 			}
 		} else {
-			if employee.DeletedAt != nil {
+			if employee.Data().DeletedAt != nil {
 				HardDeleteWaitAt := time.Hour * (time.Duration)(s.modules.GetConfig().HardDeleteWaitAt)
 
-				if gtime.Now().Before(employee.DeletedAt.Add(HardDeleteWaitAt)) {
-					hours := gtime.Now().Sub(employee.DeletedAt.Add(HardDeleteWaitAt)).Hours()
+				if gtime.Now().Before(employee.Data().DeletedAt.Add(HardDeleteWaitAt)) {
+					hours := gtime.Now().Sub(employee.Data().DeletedAt.Add(HardDeleteWaitAt)).Hours()
 					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + "数据延期保护中\r请于 " + gconv.String(math.Abs(hours)) + " 小时后操作"
 					return sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 				}
 			}
 
 			// 员工移出团队|小组
-			_, err := s.setEmployeeTeam(ctx, employee.Id)
+			_, err := s.setEmployeeTeam(ctx, employee.Data().Id)
 			if err != nil {
 				return err
 			}
 
 			// 删除员工
-			_, err = s.dao.Employee.Ctx(ctx).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Id})
+			_, err = s.dao.Employee.Ctx(ctx).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
 			if err != nil {
 				return err
 			}
 			// 删除用户
-			_, err = sys_service.SysUser().DeleteUser(ctx, employee.Id)
+			_, err = sys_service.SysUser().DeleteUser(ctx, employee.Data().Id)
 			if err != nil {
 				return err
 			}
@@ -477,7 +708,17 @@ func (s *sEmployee) DeleteEmployee(ctx context.Context, id int64) (bool, error) 
 }
 
 // setEmployeeTeam 员工移出小组 | 团队
-func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
 	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && isSuccess == false {
@@ -502,15 +743,15 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 	// 假如是队长或者组长，需要将团队表的队长或者组长设置为0
 	if len(teamList.Records) > 0 {
 		for _, item := range teamList.Records {
-			if item.CaptainEmployeeId == employeeId { // 队长或者组长
-				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Id, 0)
+			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
+				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
 
-			if item.OwnerEmployeeId == employeeId { // 团队负责人
-				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Id, 0)
+			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
+				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
@@ -521,7 +762,17 @@ func (s *sEmployee) setEmployeeTeam(ctx context.Context, employeeId int64) (bool
 }
 
 // GetEmployeeDetailById 根据ID获取员工详细信息
-func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_model.EmployeeRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	model := s.dao.Employee.Ctx(ctx)
@@ -534,31 +785,45 @@ func (s *sEmployee) GetEmployeeDetailById(ctx context.Context, id int64) (*co_mo
 		}
 	}
 
-	data, err := daoctl.ScanWithError[co_model.EmployeeRes](model.Where(co_do.CompanyEmployee{Id: id}))
+	data, err := daoctl.ScanWithError[TR](model.Where(co_do.CompanyEmployee{Id: id}))
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
+	}
+
+	if !reflect.ValueOf(data).IsNil() {
+		response = *data
 	}
 
 	// 跨主体禁止查看员工信息，
-	if err == sql.ErrNoRows || data != nil && data.UnionMainId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId {
 		// 下级公司也不可查看上级公司员工详细信息
-		if data.UnionMainId == sessionUser.ParentId {
-			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		if response.Data().UnionMainId == sessionUser.ParentId {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
 		}
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
-	return s.makeMore(ctx, data), err
+	return s.makeMore(ctx, response), err
 }
 
 // GetEmployeeListByRoleId 根据角色ID获取所有所属员工
-func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*co_model.EmployeeListRes, error) {
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	userIds, err := sys_service.SysRole().GetRoleMemberIds(ctx, roleId, sessionUser.UnionMainId)
 	if err != nil {
-		return &co_model.EmployeeListRes{
+		return &base_model.CollectRes[TR]{
 			PaginationRes: base_model.PaginationRes{
 				Pagination: base_model.Pagination{
 					PageNum:  1,
@@ -570,7 +835,7 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 		}, nil
 	}
 
-	result, err := daoctl.Query[*co_model.EmployeeRes](
+	result, err := daoctl.Query[TR](
 		s.dao.Employee.Ctx(ctx),
 		&base_model.SearchParams{
 			Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
@@ -584,44 +849,110 @@ func (s *sEmployee) GetEmployeeListByRoleId(ctx context.Context, roleId int64) (
 		true,
 	)
 
-	items := make([]*co_model.EmployeeRes, 0)
+	items := make([]TR, 0)
 	for _, record := range result.Records {
 		items = append(items, s.masker(s.makeMore(ctx, record)))
 	}
 	result.Records = items
 
-	return (*co_model.EmployeeListRes)(result), err
+	return result, err
+}
+
+// GetEmployeeListByTeamId 获取团队成员|列表
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error) {
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 团队成员信息
+	items, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
+		s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{
+			TeamId:      team.Data().Id,
+			UnionMainId: team.Data().UnionMainId,
+		}),
+	)
+
+	ids := make([]int64, 0)
+	for _, item := range *items {
+		ids = append(ids, item.EmployeeId)
+	}
+
+	return s.QueryEmployeeList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
+				Field: s.dao.Employee.Columns().Id,
+				Where: "in",
+				Value: ids,
+			},
+			base_model.FilterInfo{
+				Field: s.dao.Employee.Columns().UnionMainId,
+				Where: "=",
+				Value: team.Data().UnionMainId,
+			},
+		),
+	})
 }
 
 // Masker 员工信息脱敏，并加载附加数据
-func (s *sEmployee) masker(employee *co_model.EmployeeRes) *co_model.EmployeeRes {
-	if employee == nil {
-		return nil
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) masker(employee TR) TR {
+	if reflect.ValueOf(employee).IsNil() {
+		return employee
 	}
-	employee.Mobile = masker.MaskString(employee.Mobile, masker.MaskPhone)
-	employee.LastActiveIp = masker.MaskString(employee.LastActiveIp, masker.MaskIPv4)
-	employee.Detail.LastLoginIp = masker.MaskString(employee.Detail.LastLoginIp, masker.MaskIPv4)
+	employee.Data().Mobile = masker.MaskString(employee.Data().Mobile, masker.MaskPhone)
+	employee.Data().LastActiveIp = masker.MaskString(employee.Data().LastActiveIp, masker.MaskIPv4)
+	employee.Data().Detail.LastLoginIp = masker.MaskString(employee.Data().Detail.LastLoginIp, masker.MaskIPv4)
 	return employee
 }
 
 // makeMore 按需加载附加数据
-func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *co_model.EmployeeRes {
-	if data == nil {
-		return nil
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) makeMore(ctx context.Context, employee TR) TR {
+	if reflect.ValueOf(employee).IsNil() {
+		return employee
 	}
 
 	// team附加数据
-	if data.UnionMainId > 0 {
-		funs.AttrMake[co_model.EmployeeRes](ctx,
+	if employee.Data().UnionMainId > 0 {
+		funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []co_model.Team {
 				g.Try(ctx, func(ctx context.Context) {
 					// 获取到该员工的所有团队成员信息记录
 					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
 					s.dao.TeamMember.Ctx(ctx).
-						Where(co_do.CompanyTeamMember{EmployeeId: data.CompanyEmployee.Id}).Scan(&teamMemberItems)
+						Where(co_do.CompanyTeamMember{EmployeeId: employee.Data().CompanyEmployee.Id}).Scan(&teamMemberItems)
 					if len(teamMemberItems) == 0 {
-						data.TeamList = nil
+						employee.Data().TeamList = nil
 						return
 					}
 
@@ -631,32 +962,32 @@ func (s *sEmployee) makeMore(ctx context.Context, data *co_model.EmployeeRes) *c
 						teamIds = append(teamIds, memberItem.TeamId)
 					}
 					s.dao.Team.Ctx(ctx).
-						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&data.TeamList)
+						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&employee.Data().TeamList)
 				})
-				return data.TeamList
+				return employee.Data().TeamList
 			},
 		)
 	}
 
 	// user相关附加数据
-	if data.CompanyEmployee.Id > 0 {
-		funs.AttrMake[co_model.EmployeeRes](ctx,
+	if employee.Data().CompanyEmployee.Id > 0 {
+		funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().Id,
-			func() *co_model.EmployeeRes {
-				if data.CompanyEmployee.Id == 0 {
-					return nil
+			func() (res TR) {
+				if employee.Data().CompanyEmployee.Id == 0 {
+					return res
 				}
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.CompanyEmployee.Id)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, employee.Data().CompanyEmployee.Id)
 				if user != nil {
-					gconv.Struct(user.SysUser, &data.User)
-					gconv.Struct(user.Detail, &data.Detail)
+					gconv.Struct(user.SysUser, &employee.Data().User)
+					gconv.Struct(user.Detail, &employee.Data().Detail)
 				}
 
-				return data
+				return employee
 			},
 		)
 	}
 
-	return data
+	return employee
 }

@@ -18,6 +18,16 @@ type BankCardRegister struct {
 	Remark        string      `json:"remark"        dc:"备注信息"`
 }
 
-type BankCardInfoRes co_entity.FdBankCard
+type FdBankCardRes struct {
+	co_entity.FdBankCard
+}
 
-type BankCardListRes base_model.CollectRes[co_entity.FdBankCard]
+type FdBankCardListRes base_model.CollectRes[*FdBankCardRes]
+
+func (m *FdBankCardRes) Data() *FdBankCardRes {
+	return m
+}
+
+type IFdBankCardRes interface {
+	Data() *FdBankCardRes
+}

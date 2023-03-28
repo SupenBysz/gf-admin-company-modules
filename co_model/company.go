@@ -18,4 +18,12 @@ type CompanyRes struct {
 	AdminUser *EmployeeRes `json:"adminUser"`
 }
 
-type CompanyListRes base_model.CollectRes[*CompanyRes]
+type CompanyListRes base_model.CollectRes[CompanyRes]
+
+func (m *CompanyRes) Data() *CompanyRes {
+	return m
+}
+
+type ICompanyRes interface {
+	Data() *CompanyRes
+}

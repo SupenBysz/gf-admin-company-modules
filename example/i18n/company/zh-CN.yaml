@@ -12,6 +12,7 @@ permission_Company_AuditLicense: "审核资质认证信息"
 permission_Company_UpdateLicense: "更新资质认证信息"
 
 ## 称呼
+User: "用户"
 EmployeeName: "员工"
 CompanyName: "公司"
 TeamName: "团队"
@@ -36,6 +37,15 @@ error_NameAlreadyExists: "名称已被占用，请修改后再试"
 error_NoAlreadyExists: "工号已经存在，请修改后再试"
 error_NoNotNull: "工号不能为空，请修改后提交"
 error_SuperAdminNotServer: "超级管理员不支持调用该参数"
+error_Legal_Operation: "非法操作！"
+error_State_Update_Failed: "状态修改失败"
+error_Id_NotNull: "id不能为空"
+error_Add_Failed: "添加失败"
+error_Delete_Failed: "删除失败"
+error_Create_Failed: "创建失败"
+error_AlreadyExist: "已存在"
+error_NonExist: "不存在"
+
 
 ## 有关文件的错误信息
 error_File_FileVoid: "文件无效，请重新上传"
@@ -75,6 +85,16 @@ error_AccountId_NonNull: "财务账号id不能为空"
 error_Account_UnionUserId_NotNull: "财务账号用户id不能为空"
 error_GetAccountById_Failed: "根据id获取财务账号失败"
 error_ThisUser_NotHas_Account: "该账户没有财务账号"
+error_GetAccount_Failed: "财务账号查询失败"
+
+
+## 财务账号金额明细相关
+AccountDetail: "财务账号金额明细"
+error_AccountDetail_Save_Failed: "财务账号金额明细统计添加失败"
+error_GetAccountDetailById_Failed: "根据id获取财务账号金额明细失败"
+error_ThisUser_NotHas_AccountDetail: "该账户没有财务账号金额明细统计"
+error_AccountDetail_SysUserId_NotNull: "财务账号金额明细关联用户id不能为空"
+
 
 ## 财务账单(交易)相关
 AccountBill: "财务账单"
@@ -101,7 +121,7 @@ error_CurrencyCnName_NotNull: "货币国家名称不能为空"
 Invoice: "发票抬头"
 InvoiceDetail: "发票"
 error_OneCompany_CanRegisterOnlyOne_Invoice: "一个主体只能注册一个发票抬头"
-error_AuditReplay_MustHasMsg: "审核不通过时必须说明原因"
+error_AuditReply_MustHasMsg: "审核不通过时必须说明原因"
 error_Invoice_Create_Failed: "发票抬头添加失败"
 error_NotNowHas_Invoice: "当前没有发票抬头记录"
 error_TaxId_NotNull: "纳税识别号不能为空"

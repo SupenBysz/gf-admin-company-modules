@@ -79,7 +79,7 @@ var (
 				// 匿名路由绑定
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					// 鉴权：登录，注册，找回密码等
-					group.Group("/sys_auth", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.Auth) })
+					group.Group("/auth", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.Auth) })
 					// 图型验证码、短信验证码、地区
 					group.Group("/common", func(group *ghttp.RouterGroup) {
 						group.Bind(
