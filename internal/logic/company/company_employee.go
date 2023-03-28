@@ -466,9 +466,13 @@ func (s *sEmployee[
 		}
 	}
 
+	r := g.RequestFromCtx(ctx)
+	isExport := r.GetParam("isExport", false).Bool()
+
 	// 查询符合过滤条件的员工信息
 	result, err := daoctl.Query[TR](model.
 		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, false)
+
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
