@@ -22,7 +22,7 @@ type FdAccountBill struct {
 	TradeType     int         `json:"tradeType"     description:"交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它"`
 	TradeAt       *gtime.Time `json:"tradeAt"       description:"交易时间"`
 	Remark        string      `json:"remark"        description:"备注信息"`
-	TradeState    int         `json:"tradeState"    description:"交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、"`
+	TradeState    int         `json:"tradeState"    description:"交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭"`
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
 	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
 	CreatedBy     int64       `json:"createdBy"     description:""`
