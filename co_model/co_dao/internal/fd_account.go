@@ -32,10 +32,17 @@ type FdAccountColumns struct {
 	LimitState         string // 限制状态：0不限制，1限制支出、2限制收入
 	PrecisionOfBalance string // 货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……
 	Balance            string // 当前余额，必须要与账单最后一笔交易余额对应得上
-	CreatedAt          string //
-	UpdatedAt          string //
-	DeletedAt          string //
 	Version            string // 乐观锁所需数据版本字段
+	CreatedAt          string //
+	CreatedBy          string //
+	UpdatedAt          string //
+	UpdatedBy          string //
+	DeletedAt          string //
+	DeletedBy          string //
+	SceneType          string // 场景类型：0不限、1充电佣金收入
+	AccountType        string // 账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付
+	AccountNumber      string // 账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号
+	UnionMainId        string // 关联主体ID，与union_license_id 中的union_main_id 一致
 }
 
 // fdAccountColumns holds the columns for table co_fd_account.
@@ -49,10 +56,17 @@ var fdAccountColumns = FdAccountColumns{
 	LimitState:         "limit_state",
 	PrecisionOfBalance: "precision_of_balance",
 	Balance:            "balance",
-	CreatedAt:          "created_at",
-	UpdatedAt:          "updated_at",
-	DeletedAt:          "deleted_at",
 	Version:            "version",
+	CreatedAt:          "created_at",
+	CreatedBy:          "created_by",
+	UpdatedAt:          "updated_at",
+	UpdatedBy:          "updated_by",
+	DeletedAt:          "deleted_at",
+	DeletedBy:          "deleted_by",
+	SceneType:          "scene_type",
+	AccountType:        "account_type",
+	AccountNumber:      "account_number",
+	UnionMainId:        "union_main_id",
 }
 
 // NewFdAccountDao creates and returns a new DAO object for table data access.

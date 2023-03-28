@@ -21,8 +21,11 @@ type FdBankCard struct {
 	BankOfAccount interface{} // 开户行
 	State         interface{} // 状态：0禁用，1正常
 	Remark        interface{} // 备注信息
-	CreatedAt     *gtime.Time //
-	UpdatedAt     *gtime.Time //
-	DeletedAt     *gtime.Time //
 	UserId        interface{} // 用户id，表示属于谁
+	CreatedAt     *gtime.Time //
+	CreatedBy     interface{} //
+	UpdatedAt     *gtime.Time //
+	UpdatedBy     interface{} //
+	DeletedAt     *gtime.Time //
+	DeletedBy     interface{} //
 }

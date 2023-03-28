@@ -43,12 +43,16 @@ type FdInvoiceDetailColumns struct {
 	AuditUserId   string // 审核者UserID
 	AuditReplyMsg string // 审核回复，仅审核不通过时才有值
 	AuditAt       string // 审核时间
-	CreatedAt     string //
-	UpdatedAt     string //
-	DeletedAt     string //
 	UserId        string // 申请者用户ID
 	UnionMainId   string // 主体ID：运营商ID、服务商ID、商户ID、消费者ID
 	Email         string // 发票收件邮箱，限电子发票
+	CreatedAt     string //
+	CreatedBy     string //
+	UpdatedAt     string //
+	UpdatedBy     string //
+	DeletedAt     string //
+	DeletedBy     string //
+	BelongTo      string // 发票拥有者类型：1个人  2主体
 }
 
 // fdInvoiceDetailColumns holds the columns for table co_fd_invoice_detail.
@@ -73,12 +77,16 @@ var fdInvoiceDetailColumns = FdInvoiceDetailColumns{
 	AuditUserId:   "audit_user_id",
 	AuditReplyMsg: "audit_reply_msg",
 	AuditAt:       "audit_at",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
-	DeletedAt:     "deleted_at",
 	UserId:        "user_id",
 	UnionMainId:   "union_main_id",
 	Email:         "email",
+	CreatedAt:     "created_at",
+	CreatedBy:     "created_by",
+	UpdatedAt:     "updated_at",
+	UpdatedBy:     "updated_by",
+	DeletedAt:     "deleted_at",
+	DeletedBy:     "deleted_by",
+	BelongTo:      "belong_to",
 }
 
 // NewFdInvoiceDetailDao creates and returns a new DAO object for table data access.

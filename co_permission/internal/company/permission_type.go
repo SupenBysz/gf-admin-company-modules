@@ -12,7 +12,7 @@ import (
 
 type Permission = *sys_model.SysPermissionTree
 
-type permissionType[T co_interface.IModules] struct {
+type permissionType[T co_interface.IConfig] struct {
 	modules       T
 	enumMap       *kmap.HashMap[string, Permission]
 	ViewDetail    Permission
@@ -29,9 +29,9 @@ type permissionType[T co_interface.IModules] struct {
 }
 
 var (
-	permissionTypeMap = kmap.New[string, *permissionType[co_interface.IModules]]()
-	PermissionType    = func(modules co_interface.IModules) *permissionType[co_interface.IModules] {
-		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IModules]{
+	permissionTypeMap = kmap.New[string, *permissionType[co_interface.IConfig]]()
+	PermissionType    = func(modules co_interface.IConfig) *permissionType[co_interface.IConfig] {
+		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IConfig]{
 			modules:       modules,
 			enumMap:       kmap.New[string, Permission](),
 			ViewDetail:    permission.NewInIdentifier("ViewDetail", "查看明细", ""),

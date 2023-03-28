@@ -9,8 +9,12 @@ import (
 	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 )
 
-type CompanyTeamMember = dao_interface.TIDao[internal.CompanyTeamMemberColumns]
+type CompanyTeamMemberDao = dao_interface.TIDao[internal.CompanyTeamMemberColumns]
 
-func NewCompanyTeamMember(dao ...dao_interface.IDao) CompanyTeamMember {
-	return (CompanyTeamMember)(internal.NewCompanyTeamMemberDao(dao...))
+func NewCompanyTeamMember(dao ...dao_interface.IDao) CompanyTeamMemberDao {
+	return (CompanyTeamMemberDao)(internal.NewCompanyTeamMemberDao(dao...))
 }
+
+var (
+	CompanyTeamMember = NewCompanyTeamMember()
+)

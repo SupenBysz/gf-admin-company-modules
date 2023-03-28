@@ -30,10 +30,14 @@ type FdInvoiceDetail struct {
 	AuditUserId   int64       `json:"auditUserId"   description:"审核者UserID"`
 	AuditReplyMsg string      `json:"auditReplyMsg" description:"审核回复，仅审核不通过时才有值"`
 	AuditAt       *gtime.Time `json:"auditAt"       description:"审核时间"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
 	UserId        int64       `json:"userId"        description:"申请者用户ID"`
 	UnionMainId   int64       `json:"unionMainId"   description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
 	Email         string      `json:"email"         description:"发票收件邮箱，限电子发票"`
+	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
+	CreatedBy     int64       `json:"createdBy"     description:""`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
+	UpdatedBy     int64       `json:"updatedBy"     description:""`
+	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
+	DeletedBy     int64       `json:"deletedBy"     description:""`
+	BelongTo      int         `json:"belongTo"      description:"发票拥有者类型：1个人  2主体"`
 }

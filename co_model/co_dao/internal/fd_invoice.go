@@ -23,38 +23,44 @@ type FdInvoiceDao struct {
 
 // FdInvoiceColumns defines and stores column names for table co_fd_invoice.
 type FdInvoiceColumns struct {
-	Id             string //
-	Name           string // 发票抬头名称
-	TaxId          string // 纳税识别号
-	Addr           string // 发票收件地址，限纸质
-	Email          string // 发票收件邮箱，限电子发票
-	UserId         string // 申请人UserID
-	AuditUserId    string // 审核人UserID
-	AuditReplayMsg string // 审核回复，仅审核不通过时才有值
-	AuditAt        string // 审核时间
-	State          string // 状态：0待审核、1已通过、-1不通过
-	CreatedAt      string //
-	UpdatedAt      string //
-	DeletedAt      string //
-	UnionMainId    string // 主体ID：运营商ID、服务商ID、商户ID、消费者ID
+	Id            string //
+	Name          string // 发票抬头名称
+	TaxId         string // 纳税识别号
+	Addr          string // 发票收件地址，限纸质
+	Email         string // 发票收件邮箱，限电子发票
+	UserId        string // 申请人UserID
+	AuditUserId   string // 审核人UserID
+	AuditReplyMsg string // 审核回复，仅审核不通过时才有值
+	AuditAt       string // 审核时间
+	State         string // 状态：0待审核、1已通过、-1不通过
+	UnionMainId   string // 主体ID：运营商ID、服务商ID、商户ID、消费者ID
+	CreatedAt     string //
+	CreatedBy     string //
+	UpdatedAt     string //
+	UpdatedBy     string //
+	DeletedAt     string //
+	DeletedBy     string //
 }
 
 // fdInvoiceColumns holds the columns for table co_fd_invoice.
 var fdInvoiceColumns = FdInvoiceColumns{
-	Id:             "id",
-	Name:           "name",
-	TaxId:          "tax_id",
-	Addr:           "addr",
-	Email:          "email",
-	UserId:         "user_id",
-	AuditUserId:    "audit_user_id",
-	AuditReplayMsg: "audit_replay_msg",
-	AuditAt:        "audit_at",
-	State:          "state",
-	CreatedAt:      "created_at",
-	UpdatedAt:      "updated_at",
-	DeletedAt:      "deleted_at",
-	UnionMainId:    "union_main_id",
+	Id:            "id",
+	Name:          "name",
+	TaxId:         "tax_id",
+	Addr:          "addr",
+	Email:         "email",
+	UserId:        "user_id",
+	AuditUserId:   "audit_user_id",
+	AuditReplyMsg: "audit_reply_msg",
+	AuditAt:       "audit_at",
+	State:         "state",
+	UnionMainId:   "union_main_id",
+	CreatedAt:     "created_at",
+	CreatedBy:     "created_by",
+	UpdatedAt:     "updated_at",
+	UpdatedBy:     "updated_by",
+	DeletedAt:     "deleted_at",
+	DeletedBy:     "deleted_by",
 }
 
 // NewFdInvoiceDao creates and returns a new DAO object for table data access.

@@ -5,33 +5,30 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/kysion/base-library/base_model"
 )
 
-type ITeam interface {
-	iModule
+type ITeam[ITTeamRes co_model.ITeamRes] interface {
 	// GetTeamById 根据id获取团队信息
-	GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (*co_model.TeamRes, error)
+	GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (ITTeamRes, error)
 
 	// HasTeamByName 判断团队名称是否存在
 	HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error)
 
 	// QueryTeamList 查询团队列表
-	QueryTeamList(ctx context.Context, req *co_company_api.QueryTeamListReq) (*co_model.TeamListRes, error)
+	QueryTeamList(ctx context.Context, req *co_company_api.QueryTeamListReq) (*base_model.CollectRes[ITTeamRes], error)
 
 	// CreateTeam 创建团队
-	CreateTeam(ctx context.Context, req *co_company_api.CreateTeamReq) (*co_model.TeamRes, error)
+	CreateTeam(ctx context.Context, req *co_company_api.CreateTeamReq) (ITTeamRes, error)
 
 	// UpdateTeam 更新团队信息
-	UpdateTeam(ctx context.Context, req *co_company_api.UpdateTeamReq) (*co_model.TeamRes, error)
+	UpdateTeam(ctx context.Context, req *co_company_api.UpdateTeamReq) (ITTeamRes, error)
 
 	// DeleteTeam 删除团队信息
 	DeleteTeam(ctx context.Context, req *co_company_api.DeleteTeamReq) (api_v1.BoolRes, error)
 
-	// GetTeamMemberList 获取团队成员列表
-	GetTeamMemberList(ctx context.Context, req *co_company_api.GetTeamMemberListReq) (*co_model.EmployeeListRes, error)
-
 	// QueryTeamListByEmployee 根据员工获取团队列表
-	QueryTeamListByEmployee(ctx context.Context, req *co_company_api.QueryTeamListByEmployeeReq) (*co_model.TeamListRes, error)
+	QueryTeamListByEmployee(ctx context.Context, req *co_company_api.QueryTeamListByEmployeeReq) (*base_model.CollectRes[ITTeamRes], error)
 
 	// SetTeamMember 设置团队成员
 	SetTeamMember(ctx context.Context, req *co_company_api.SetTeamMemberReq) (api_v1.BoolRes, error)

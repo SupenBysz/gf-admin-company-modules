@@ -32,6 +32,7 @@ type FdCurrencyColumns struct {
 	Symbol        string // 货币符号
 	SymbolNative  string // 货币原生符号
 	IsLegalTender string // 是否法定货币：1是，0否
+	CurrencyRate  string // 货币汇率，本币为人民币
 }
 
 // fdCurrencyColumns holds the columns for table co_fd_currency.
@@ -45,6 +46,7 @@ var fdCurrencyColumns = FdCurrencyColumns{
 	Symbol:        "symbol",
 	SymbolNative:  "symbol_native",
 	IsLegalTender: "is_legal_tender",
+	CurrencyRate:  "currency_rate",
 }
 
 // NewFdCurrencyDao creates and returns a new DAO object for table data access.

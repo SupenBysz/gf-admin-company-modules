@@ -15,7 +15,6 @@ type Company struct {
 	ContactName   string      `json:"contactName"   description:"商务联系人"`
 	ContactMobile string      `json:"contactMobile" description:"商务联系电话"`
 	UserId        int64       `json:"userId"        description:"管理员ID"`
-	ParentId      int64       `json:"parentId"      description:"父级ID"`
 	State         int         `json:"state"         description:"状态：0未启用，1正常"`
 	Remark        string      `json:"remark"        description:"备注"`
 	CreatedBy     int64       `json:"createdBy"     description:"创建者"`
@@ -24,4 +23,5 @@ type Company struct {
 	UpdatedAt     *gtime.Time `json:"updatedAt"     description:"更新时间"`
 	DeletedBy     int64       `json:"deletedBy"     description:"删除者"`
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:"删除时间"`
+	ParentId      int64       `json:"parentId"      description:"父级ID"`
 }

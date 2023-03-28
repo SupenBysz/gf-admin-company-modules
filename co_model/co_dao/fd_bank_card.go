@@ -9,8 +9,12 @@ import (
 	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 )
 
-type FdBankCard = dao_interface.TIDao[internal.FdBankCardColumns]
+type FdBankCardDao = dao_interface.TIDao[internal.FdBankCardColumns]
 
-func NewFdBankCard(dao ...dao_interface.IDao) FdBankCard {
-	return (FdBankCard)(internal.NewFdBankCardDao(dao...))
+func NewFdBankCard(dao ...dao_interface.IDao) FdBankCardDao {
+	return (FdBankCardDao)(internal.NewFdBankCardDao(dao...))
 }
+
+var (
+	FdBankCard = NewFdBankCard()
+)

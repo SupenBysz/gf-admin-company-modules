@@ -19,8 +19,15 @@ type FdAccount struct {
 	LimitState         int         `json:"limitState"         description:"限制状态：0不限制，1限制支出、2限制收入"`
 	PrecisionOfBalance int         `json:"precisionOfBalance" description:"货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……"`
 	Balance            int64       `json:"balance"            description:"当前余额，必须要与账单最后一笔交易余额对应得上"`
-	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
-	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
-	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
 	Version            int         `json:"version"            description:"乐观锁所需数据版本字段"`
+	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
+	CreatedBy          int64       `json:"createdBy"          description:""`
+	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
+	UpdatedBy          int64       `json:"updatedBy"          description:""`
+	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
+	DeletedBy          int64       `json:"deletedBy"          description:""`
+	SceneType          int         `json:"sceneType"          description:"场景类型：0不限、1充电佣金收入"`
+	AccountType        int         `json:"accountType"        description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
+	AccountNumber      string      `json:"accountNumber"      description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
+	UnionMainId        int64       `json:"unionMainId"        description:"关联主体ID，与union_license_id 中的union_main_id 一致"`
 }

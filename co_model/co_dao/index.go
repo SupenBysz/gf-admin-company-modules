@@ -1,15 +1,16 @@
 package co_dao
 
 type XDao struct {
-	Company    Company
-	Employee   CompanyEmployee
-	Team       CompanyTeam
-	TeamMember CompanyTeamMember
+	Company    CompanyDao
+	Employee   CompanyEmployeeDao
+	Team       CompanyTeamDao
+	TeamMember CompanyTeamMemberDao
 
-	FdAccount       FdAccount
-	FdAccountBill   FdAccountBill
-	FdInvoice       FdInvoice
-	FdInvoiceDetail FdInvoiceDetail
-	FdCurrency      FdCurrency
-	FdBankCard      FdBankCard
+	FdAccount       FdAccountDao
+	FdAccountBill   FdAccountBillDao
+	FdInvoice       FdInvoiceDao
+	FdInvoiceDetail FdInvoiceDetailDao
+	FdCurrency      FdCurrencyDao
+	FdBankCard      FdBankCardDao
+	FdAccountDetail FdAccountDetailDao
 }

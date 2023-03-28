@@ -17,7 +17,6 @@ type Company struct {
 	ContactName   interface{} // 商务联系人
 	ContactMobile interface{} // 商务联系电话
 	UserId        interface{} // 管理员ID
-	ParentId      interface{} // 父级ID
 	State         interface{} // 状态：0未启用，1正常
 	Remark        interface{} // 备注
 	CreatedBy     interface{} // 创建者
@@ -26,4 +25,5 @@ type Company struct {
 	UpdatedAt     *gtime.Time // 更新时间
 	DeletedBy     interface{} // 删除者
 	DeletedAt     *gtime.Time // 删除时间
+	ParentId      interface{} // 父级ID
 }

@@ -9,12 +9,12 @@ import (
 	"github.com/kysion/base-library/utility/daoctl/dao_interface"
 )
 
-type FdAccountBillDao = dao_interface.TIDao[internal.FdAccountBillColumns]
+type FdAccountDetailDao = dao_interface.TIDao[internal.FdAccountDetailColumns]
 
-func NewFdAccountBill(dao ...dao_interface.IDao) FdAccountBillDao {
-	return (FdAccountBillDao)(internal.NewFdAccountBillDao(dao...))
+func NewFdAccountDetail(dao ...dao_interface.IDao) FdAccountDetailDao {
+	return (FdAccountDetailDao)(internal.NewFdAccountDetailDao(dao...))
 }
 
 var (
-	FdAccountBill = NewFdAccountBill()
+	FdAccountDetail = NewFdAccountDetail()
 )

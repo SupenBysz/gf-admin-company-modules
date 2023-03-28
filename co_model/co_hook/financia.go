@@ -12,4 +12,4 @@ type AccountBillHookFilter struct {
 	InTransaction bool
 }
 
-type AccountBillHookFunc sys_model.HookFunc[AccountBillHookFilter, co_model.AccountBillInfo]
+type AccountBillHookFunc sys_model.HookFunc[AccountBillHookFilter, co_model.IFdAccountBillRes]

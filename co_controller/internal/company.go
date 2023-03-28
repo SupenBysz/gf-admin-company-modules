@@ -13,29 +13,86 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/kysion/base-library/base_model"
 )
 
-type CompanyController struct {
-	i_controller.ICompany
-	modules co_interface.IModules
-	dao     *co_dao.XDao
+type CompanyController[
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
+	i_controller.ICompany[TIRes]
+	modules co_interface.IModules[
+		TIRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]
+	dao *co_dao.XDao
 }
 
-var Company = func(modules co_interface.IModules) i_controller.ICompany {
-	return &CompanyController{
+func Company[
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+](modules co_interface.IModules[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) i_controller.ICompany[TIRes] {
+	return &CompanyController[
+		TIRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     modules.Dao(),
 	}
 }
 
-func (c *CompanyController) GetModules() co_interface.IModules {
-	return c.modules
-}
-
 // GetCompanyById 通过ID获取公司信息
-func (c *CompanyController) GetCompanyById(ctx context.Context, req *co_company_api.GetCompanyByIdReq) (*co_model.CompanyRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCompanyById(ctx context.Context, req *co_company_api.GetCompanyByIdReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
-		func() (*co_model.CompanyRes, error) {
+		func() (TIRes, error) {
 			ret, err := c.modules.Company().GetCompanyById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
@@ -44,7 +101,17 @@ func (c *CompanyController) GetCompanyById(ctx context.Context, req *co_company_
 }
 
 // HasCompanyByName 公司名称是否存在
-func (c *CompanyController) HasCompanyByName(ctx context.Context, req *co_company_api.HasCompanyByNameReq) (api_v1.BoolRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) HasCompanyByName(ctx context.Context, req *co_company_api.HasCompanyByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			return c.modules.Company().HasCompanyByName(ctx, req.Name) == true, nil
@@ -53,9 +120,19 @@ func (c *CompanyController) HasCompanyByName(ctx context.Context, req *co_compan
 }
 
 // QueryCompanyList 查询公司列表
-func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_company_api.QueryCompanyListReq) (*co_model.CompanyListRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryCompanyList(ctx context.Context, req *co_company_api.QueryCompanyListReq) (*base_model.CollectRes[TIRes], error) {
 	return funs.CheckPermission(ctx,
-		func() (*co_model.CompanyListRes, error) {
+		func() (*base_model.CollectRes[TIRes], error) {
 			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams)
 		},
 		co_permission.Company.PermissionType(c.modules).List,
@@ -63,39 +140,76 @@ func (c *CompanyController) QueryCompanyList(ctx context.Context, req *co_compan
 }
 
 // CreateCompany 创建公司信息
-func (c *CompanyController) CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (*co_model.CompanyRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
-		func() (*co_model.CompanyRes, error) {
-			ret, err := c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
-			return ret, err
+		func() (TIRes, error) {
+			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
 		},
 		co_permission.Company.PermissionType(c.modules).Create,
 	)
 }
 
 // UpdateCompany 更新公司信息
-func (c *CompanyController) UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (*co_model.CompanyRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
-		func() (*co_model.CompanyRes, error) {
-			ret, err := c.modules.Company().UpdateCompany(c.makeMore(ctx), &req.Company)
-			return ret, err
+		func() (TIRes, error) {
+			return c.modules.Company().UpdateCompany(c.makeMore(ctx), &req.Company)
 		},
 		co_permission.Company.PermissionType(c.modules).Update,
 	)
 }
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话
-func (c *CompanyController) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (*co_model.CompanyRes, error) {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
-		func() (*co_model.CompanyRes, error) {
-			ret, err := c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
-			return ret, err
+		func() (TIRes, error) {
+			return c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
 		},
 		co_permission.Company.PermissionType(c.modules).ViewMobile,
 	)
 }
 
-func (c *CompanyController) makeMore(ctx context.Context) context.Context {
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) makeMore(ctx context.Context) context.Context {
 	ctx = funs.AttrBuilder[co_model.CompanyRes, *co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
 
 	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)

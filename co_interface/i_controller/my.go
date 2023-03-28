@@ -8,7 +8,6 @@ import (
 )
 
 type IMy interface {
-	iModule
 	// GetProfile 获取当前员工及用户信息
 	GetProfile(ctx context.Context, _ *co_company_api.GetProfileReq) (*co_model.MyProfileRes, error)
 

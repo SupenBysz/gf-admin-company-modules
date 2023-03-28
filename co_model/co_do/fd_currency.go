@@ -20,4 +20,5 @@ type FdCurrency struct {
 	Symbol        interface{} // 货币符号
 	SymbolNative  interface{} // 货币原生符号
 	IsLegalTender interface{} // 是否法定货币：1是，0否
+	CurrencyRate  interface{} // 货币汇率，本币为人民币
 }

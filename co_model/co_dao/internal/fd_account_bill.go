@@ -35,9 +35,10 @@ type FdAccountBillColumns struct {
 	TradeType     string // 交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它
 	TradeAt       string // 交易时间
 	Remark        string // 备注信息
-	TradeState    string // 交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、
-	CreatedAt     string //
+	TradeState    string // 交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭
 	DeletedAt     string //
+	CreatedAt     string //
+	CreatedBy     string //
 }
 
 // fdAccountBillColumns holds the columns for table co_fd_account_bill.
@@ -55,8 +56,9 @@ var fdAccountBillColumns = FdAccountBillColumns{
 	TradeAt:       "trade_at",
 	Remark:        "remark",
 	TradeState:    "trade_state",
-	CreatedAt:     "created_at",
 	DeletedAt:     "deleted_at",
+	CreatedAt:     "created_at",
+	CreatedBy:     "created_by",
 }
 
 // NewFdAccountBillDao creates and returns a new DAO object for table data access.

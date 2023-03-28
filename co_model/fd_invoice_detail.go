@@ -29,6 +29,7 @@ type FdInvoiceDetailRegister struct {
 	AuditAt       *gtime.Time `json:"auditAt"       dc:"审核时间"`
 	UserId        int64       `json:"userId"        dc:"申请者用户ID"`
 	UnionMainId   int64       `json:"unionMainId"   dc:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
+	BelongTo      int         `json:"belongTo"      dc:"发票拥有者类型：1个人  2主体" v:"required#请选择发票是个人发票还是主体发票"`
 }
 
 // FdMakeInvoiceDetail 开发票
@@ -43,10 +44,21 @@ type FdMakeInvoiceDetail struct {
 
 // FdInvoiceAuditInfo 审核发票
 type FdInvoiceAuditInfo struct {
-	State       int    `json:"state" dc:"审核状态"`
+	State       int    `json:"state" dc:"审核状态：2待开票、4开票失败"  v:"required|in:2,4#请输入发票审核状态|审核行为错误"`
 	AuditUserId int64  `json:"auditUserId" dc:"审核者UserId"`
 	ReplyMsg    string `json:"replyMsg" dc:"审核失败时必填的原因回复"`
 }
 
-type FdInvoiceDetailInfoRes co_entity.FdInvoiceDetail
-type FdInvoiceDetailListRes base_model.CollectRes[co_entity.FdInvoiceDetail]
+type FdInvoiceDetailRes struct {
+	co_entity.FdInvoiceDetail
+}
+
+type FdInvoiceDetailListRes base_model.CollectRes[FdInvoiceDetailRes]
+
+func (m *FdInvoiceDetailRes) Data() *FdInvoiceDetailRes {
+	return m
+}
+
+type IFdInvoiceDetailRes interface {
+	Data() *FdInvoiceDetailRes
+}

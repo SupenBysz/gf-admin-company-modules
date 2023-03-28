@@ -32,10 +32,14 @@ type FdInvoiceDetail struct {
 	AuditUserId   interface{} // 审核者UserID
 	AuditReplyMsg interface{} // 审核回复，仅审核不通过时才有值
 	AuditAt       *gtime.Time // 审核时间
-	CreatedAt     *gtime.Time //
-	UpdatedAt     *gtime.Time //
-	DeletedAt     *gtime.Time //
 	UserId        interface{} // 申请者用户ID
 	UnionMainId   interface{} // 主体ID：运营商ID、服务商ID、商户ID、消费者ID
 	Email         interface{} // 发票收件邮箱，限电子发票
+	CreatedAt     *gtime.Time //
+	CreatedBy     interface{} //
+	UpdatedAt     *gtime.Time //
+	UpdatedBy     interface{} //
+	DeletedAt     *gtime.Time //
+	DeletedBy     interface{} //
+	BelongTo      interface{} // 发票拥有者类型：1个人  2主体
 }
