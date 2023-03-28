@@ -6,8 +6,10 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/i18n/gi18n"
+	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 )
 
@@ -68,7 +70,7 @@ type (
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
-		GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, sceneType ...int) (response TR, err error)
+		GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, accountType co_enum.AccountType, sceneType ...co_enum.SceneType) (response TR, err error)
 		GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error)
 		Increment(ctx context.Context, id int64, amount int) (bool, error)
 		Decrement(ctx context.Context, id int64, amount int) (bool, error)
@@ -102,9 +104,8 @@ type (
 		QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 	}
 	IFdAccountBill[TR co_model.IFdAccountBillRes] interface {
-		InstallHook(filter co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
-		UnInstallHook(filter co_hook.AccountBillHookFilter)
-		ClearAllHook()
+		InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
+		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
 		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error)
 	}

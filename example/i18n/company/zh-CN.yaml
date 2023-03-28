@@ -85,6 +85,8 @@ error_AccountId_NonNull: "财务账号id不能为空"
 error_Account_UnionUserId_NotNull: "财务账号用户id不能为空"
 error_GetAccountById_Failed: "根据id获取财务账号失败"
 error_ThisUser_NotHas_Account: "该账户没有财务账号"
+error_GetAccount_Failed: "财务账号查询失败"
+
 
 ## 财务账号金额明细相关
 AccountDetail: "财务账号金额明细"

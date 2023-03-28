@@ -17,7 +17,7 @@ type AccountBillRegister struct {
 	TradeType     int         `json:"tradeType"      v:"required|in:1,2,4,8,16,32,64,128,256,512,8192#交易类型错误" dc:"交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它"`
 	TradeAt       *gtime.Time `json:"tradeAt"        v:"required#交易时间不能为空"   dc:"交易时间"`
 	Remark        string      `json:"remark"         dc:"备注信息"`
-	TradeState    int         `json:"tradeState"     v:"required|in:1,2,4,8,16#交易状态错误"  dc:"交易状态：1待支付、2支付中、4已支付、8支付失败、16交易完成、"`
+	TradeState    int         `json:"tradeState"     v:"required|in:1,2,4,8,16,32,64,128,256#交易状态错误"  dc:"交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭"`
 }
 
 type FdAccountBillRes struct {

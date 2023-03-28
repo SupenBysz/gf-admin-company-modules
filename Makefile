@@ -1,5 +1,5 @@
 ROOT_DIR    = $(shell pwd)
-NAMESPACE   = "github.com/SupenBysz/gf-admin-pro-modules"
+NAMESPACE   = "github.com/SupenBysz/gf-admin-company-modules"
 
 # Install/Update to the latest CLI tool.
 .PHONY: cli

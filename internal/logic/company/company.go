@@ -3,7 +3,6 @@ package company
 import (
 	"context"
 	"database/sql"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -15,6 +14,7 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/funs"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -313,7 +313,7 @@ func (s *sCompany[
 		if info.Id == 0 {
 			// 是否创建默认员工和角色
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
-				// 构建员工信息
+				// 1.构建员工信息 + user登录信息
 				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
 					No:          "001",
 					Name:        info.ContactName,
@@ -326,7 +326,7 @@ func (s *sCompany[
 					return err
 				}
 
-				// 构建角色信息
+				// 2.构建角色信息
 				roleData := sys_model.SysRole{
 					Name:        "管理员",
 					UnionMainId: UnionMainId,
@@ -336,6 +336,7 @@ func (s *sCompany[
 				if err != nil {
 					return err
 				}
+				// 设置首个员工为：自己内部管理员
 				_, err = sys_service.SysUser().SetUserRoleIds(ctx, []int64{roleInfo.Id}, employee.Data().Id)
 				if err != nil {
 					return err
@@ -349,6 +350,7 @@ func (s *sCompany[
 				data.UserId = 0
 			}
 
+			// 3.构建公司信息
 			data.Id = UnionMainId
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
@@ -361,6 +363,29 @@ func (s *sCompany[
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
+
+			// 4.创建主财务账号  通用账户
+			accountData := co_do.FdAccount{}
+			gconv.Struct(info, &accountData)
+
+			account := &co_model.FdAccountRegister{
+				Name: info.Name,
+				//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
+
+				UnionUserId:        gconv.Int64(data.UserId),
+				UnionMainId:        UnionMainId,
+				CurrencyCode:       "CNY",
+				PrecisionOfBalance: 100,
+				SceneType:          0,                                           // 不限
+				AccountType:        co_enum.Financial.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
+				AccountNumber:      "",                                          // 账户编号
+			}
+
+			createAccount, err := s.modules.Account().CreateAccount(ctx, *account)
+			if err != nil || reflect.ValueOf(createAccount).IsNil() {
+				return err
+			}
+
 		} else {
 			if gstr.Contains(info.ContactMobile, "***") || info.ContactMobile == "" {
 				data.ContactMobile = nil

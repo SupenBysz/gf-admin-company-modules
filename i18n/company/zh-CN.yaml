@@ -95,6 +95,7 @@ error_AccountBalance_Update_Failed: "更新账户余额失败"
 error_Transaction_FromUser_InsufficientBalance: "交易发起者的账户余额不足"
 error_AccountId_NonZero: "财务账号不能为0！"
 error_AccountAmount_NonNegative: "交易金额不能是负数"
+error_GetAccount_Failed: "财务账号查询失败"
 
 ## 财务账号金额明细相关
 AccountDetail: "财务账号金额明细"
