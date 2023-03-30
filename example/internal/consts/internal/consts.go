@@ -10,7 +10,7 @@ import (
 )
 
 type global struct {
-	Modules co_interface.IModules[
+	co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
@@ -30,7 +30,7 @@ var (
 	FinancialPermissionTree []*sys_model.SysPermissionTree
 
 	Global = global{
-		Modules: co_module.NewModules[
+		co_module.NewModules[
 			*co_model.CompanyRes,
 			*co_model.EmployeeRes,
 			*co_model.TeamRes,
