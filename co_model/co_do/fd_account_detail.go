@@ -26,4 +26,5 @@ type FdAccountDetail struct {
 	UnionMainId       interface{} // 关联主体id
 	SysUserId         interface{} // 关联用户id
 	Version           interface{} // 乐观锁所需数据版本字段
+	SceneType         interface{} // 场景类型：0不限、1充电佣金收入
 }
