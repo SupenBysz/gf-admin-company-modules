@@ -1,4 +1,4 @@
-package consts
+package internal
 
 import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -9,7 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_module"
 )
 
-type global struct {
+type Global struct {
 	co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
@@ -21,16 +21,22 @@ type global struct {
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
 	]
-}
 
-var (
 	PermissionTree []*sys_model.SysPermissionTree
 
 	// FinancialPermissionTree 财务服务权限树 (可选)
 	FinancialPermissionTree []*sys_model.SysPermissionTree
+}
 
-	Global = global{
-		co_module.NewModules[
+var global *Global
+
+func Modules() *Global {
+	if global != nil {
+		return global
+	}
+
+	global = &Global{
+		IModules: co_module.NewModules[
 			*co_model.CompanyRes,
 			*co_model.EmployeeRes,
 			*co_model.TeamRes,
@@ -76,4 +82,6 @@ var (
 			},
 		),
 	}
-)
+
+	return global
+}
