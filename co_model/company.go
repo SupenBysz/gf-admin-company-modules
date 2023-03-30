@@ -11,6 +11,7 @@ type Company struct {
 	ContactName   string `json:"contactName"    description:"商务联系人" v:"required|max-length:16#请输入商务联系人姓名|商务联系人姓名最多支持16个字符"`
 	ContactMobile string `json:"contactMobile"  description:"商务联系电话" v:"required-if:id,0|phone|max-length:32#请输入商务联系人电话|商务联系人电话格式错误|商务联系人电话最多支持16个字符"`
 	Remark        string `json:"remark"         description:"备注"`
+	Address       string `json:"address"       description:"地址，主体资质审核通过后，会通过实际地址覆盖掉该地址"`
 }
 
 type CompanyRes struct {

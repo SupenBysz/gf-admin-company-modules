@@ -450,6 +450,7 @@ func (s *sFdAccount[
 			UnionMainId:       account.Data().UnionMainId,
 			SysUserId:         account.Data().UnionUserId,
 			Version:           0,
+			SceneType:         account.Data().SceneType,
 		})
 	}
 
@@ -637,4 +638,48 @@ func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccou
 		},
 	)
 	return info
+}
+
+// QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error) {
+	if unionUserId == 0 {
+		return nil, gerror.New(s.modules.T(ctx, "error_Financial_UnionUserId_Failed"))
+	}
+
+	// 这是有缓存的情况，但是实际不能缓存
+	// result, err := daoctl.Query[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx).Where(co_do.FdAccountDetail{
+	//    SysUserId: unionUserId,
+	//    SceneType: sceneType,
+	// }), nil, false)
+
+	result, err := daoctl.Query[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx), &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
+				Field: s.dao.FdAccountDetail.Columns().SysUserId,
+				Where: "=",
+				Value: unionUserId,
+			},
+			base_model.FilterInfo{
+				Field: s.dao.FdAccountDetail.Columns().SceneType,
+				Where: "=",
+				Value: sceneType.Code(),
+			},
+		),
+	}, false)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountDetail}{#error_Data_Get_Failed}"), s.dao.FdAccountDetail.Table())
+	}
+
+	return result, nil
 }

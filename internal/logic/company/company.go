@@ -140,8 +140,15 @@ func (s *sCompany[
 	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
+	//
+	//err == sql.ErrNoRows ||
+	//    !reflect.ValueOf(data).IsNil() && sessionUser != nil &&
+	//        sessionUser.Id != 0 &&
+	//        response.Data().UnionMainId != sessionUser.UnionMainId &&
+	//        response.Data().UnionMainId != sessionUser.ParentId &&
+	//        !sessionUser.IsAdmin
 
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -476,21 +483,29 @@ func (s *sCompany[
 				},
 			}
 		}
+	}
 
-		if len(search.Filter) == 0 {
-			search.Filter = append(search.Filter, base_model.FilterInfo{
-				Field:     "union_main_id",
-				Where:     "=",
-				IsOrWhere: false,
-				Value:     sessionUser.UnionMainId,
-			})
+	hasUnionMainId := false
+	for _, field := range search.Filter {
+		if gstr.CaseSnake(field.Field) == "union_main_id" {
+			hasUnionMainId = true
+			break
 		}
+	}
+
+	if !hasUnionMainId {
+		search.Filter = append(search.Filter, base_model.FilterInfo{
+			Field:     "union_main_id",
+			Where:     "=",
+			IsOrWhere: false,
+			Value:     sessionUser.UnionMainId,
+		})
 	}
 
 	// 遍历所有过滤条件：
 	for _, field := range search.Filter {
 		// 过滤所有自定义主体ID条件
-		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") {
+		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") || gstr.CaseSnake(field.Field) == "union_main_id" {
 			unionMainId := gconv.Int64(field.Value)
 			if unionMainId == sessionUser.UnionMainId || unionMainId <= 0 {
 				filter = append(filter, field)
