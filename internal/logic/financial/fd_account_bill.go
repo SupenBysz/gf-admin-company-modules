@@ -311,9 +311,10 @@ func (s *sFdAccountBill[
 		version := account.Data().Version
 		// 余额 = 之前的余额 - 本次交易的金额
 		afterBalance := account.Data().Balance - info.Amount
-
-		// 判断余额是否足够
-		if account.Data().Balance >= info.Amount { // 足够
+		// 判断余额是否足够   // 余额足够、账号类型是系统账户，场景不限
+		if account.Data().Balance >= info.Amount ||
+			((account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
+				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() {
 			// 1. 添加一条财务账单流水
 			info.BeforeBalance = account.Data().Balance
 			info.AfterBalance = afterBalance
@@ -336,7 +337,6 @@ func (s *sFdAccountBill[
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 			}
-
 			// 3.修改财务账号金额明细统计
 			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
 
