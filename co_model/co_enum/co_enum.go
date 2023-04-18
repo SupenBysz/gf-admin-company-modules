@@ -10,6 +10,7 @@ import (
 
 type (
 	EmployeeState = employee.StateEnum
+	Sex           = employee.SexEnum
 
 	FinancialInOutType = financial.InOutTypeEnum
 	FinancialTradeType = financial.TradeTypeEnum

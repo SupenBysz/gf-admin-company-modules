@@ -8,6 +8,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -16,15 +17,15 @@ import (
 )
 
 type sMy[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -41,15 +42,15 @@ type sMy[
 }
 
 func NewMy[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -135,9 +136,9 @@ func (s *sMy[
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_SuperAdminNotServer"), "my")
 	}
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
-	if err != nil {
-		return nil, err
+	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.SysUser.Id)
+	if err != nil || reflect.ValueOf(employee).IsNil() {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工信息未找到", co_dao.CompanyEmployee.Table())
 	}
 
 	// 公司信息
@@ -218,7 +219,7 @@ func (s *sMy[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetMyMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error) {
+]) SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error) {
 	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
 	if err != nil {
 		return false, err
@@ -232,7 +233,7 @@ func (s *sMy[
 		return false, err
 	}
 
-	if newMobile == gconv.Int64(userInfo.Mobile) {
+	if newMobile == userInfo.Mobile {
 		return true, nil
 	}
 
@@ -271,6 +272,8 @@ func (s *sMy[
 ]) SetMyAvatar(ctx context.Context, imageId int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	// 上传 --> 保存
+
 	// 校验员工头像并保存
 	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, "头像"+s.modules.T(ctx, "error_File_FileVoid"))
 
@@ -278,12 +281,29 @@ func (s *sMy[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
 	}
 
-	storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
+	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
-	_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
+		storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
+
+		_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
+
+		if err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+		}
+
+		//avatar := s.modules.Employee().UpdateEmployeeAvatar(ctx, sessionUser.Id, fileInfo.Url)
+		updateAvatar := s.modules.Employee().UpdateEmployeeAvatar(ctx, sessionUser.Id, gconv.String(fileInfo.Id))
+
+		if updateAvatar == false {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+		}
+
+		return nil
+	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+		return false, err
 	}
+
 	return true, nil
 }

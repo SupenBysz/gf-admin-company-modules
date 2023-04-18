@@ -15,18 +15,19 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/kysion/base-library/base_model"
+	base_funs "github.com/kysion/base-library/utility/base_funs"
 )
 
 type EmployeeController[
-	ITCompanyRes co_model.ICompanyRes,
-	TIRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TIRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -43,15 +44,15 @@ type EmployeeController[
 }
 
 func Employee[
-	ITCompanyRes co_model.ICompanyRes,
-	TIRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TIRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TIRes,
@@ -215,7 +216,7 @@ func (c *EmployeeController[
 ]) UpdateEmployee(ctx context.Context, req *co_company_api.UpdateEmployeeReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.modules.Employee().UpdateEmployee(c.makeMore(ctx), &req.Employee)
+			ret, err := c.modules.Employee().UpdateEmployee(c.makeMore(ctx), &req.UpdateEmployee)
 			return ret, err
 		},
 		co_permission.Employee.PermissionType(c.modules).Update,
@@ -292,11 +293,57 @@ func (c *EmployeeController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+]) SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := sys_service.SysUser().SetUserRoles(
+				ctx,
+				req.UserId,
+				req.RoleIds,
+				sessionUser.UnionMainId,
+			)
+			return ret == true, err
+		},
+		co_permission.Employee.PermissionType(c.modules).SetRoles,
+	)
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Employee().SetEmployeeState(ctx, req.Id, req.State)
+			return ret == true, err
+		},
+		co_permission.Employee.PermissionType(c.modules).SetState,
+	)
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
+	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
+	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
-	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	return ctx
 }

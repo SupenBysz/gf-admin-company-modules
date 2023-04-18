@@ -10,8 +10,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/funs"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
@@ -23,15 +23,15 @@ import (
 )
 
 type sTeam[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TR co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TR co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -49,15 +49,15 @@ type sTeam[
 }
 
 func NewTeam[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TR co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TR co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -841,7 +841,7 @@ func (s *sTeam[
 	}
 
 	if data.Data().OwnerEmployeeId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().OwnerEmployeeId,
 			func() *co_model.EmployeeRes {
 				if data.Data().OwnerEmployeeId == 0 {
@@ -863,7 +863,7 @@ func (s *sTeam[
 		)
 	}
 	if data.Data().CaptainEmployeeId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().CaptainEmployeeId,
 			func() *co_model.EmployeeRes {
 				if data.Data().CaptainEmployeeId == 0 {
@@ -885,7 +885,7 @@ func (s *sTeam[
 		)
 	}
 	if data.Data().UnionMainId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().UnionMainId,
 			func() *co_model.CompanyRes {
 				if data.Data().UnionMainId == 0 {
@@ -901,7 +901,7 @@ func (s *sTeam[
 		)
 	}
 	if data.Data().ParentId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().ParentId,
 			func() *co_model.TeamRes {
 				if data.Data().ParentId == 0 {

@@ -22,6 +22,7 @@ type permissionType[T co_interface.IConfig] struct {
 	Delete        Permission
 	SetMobile     Permission
 	SetAvatar     Permission
+	SetRoles      Permission
 	SetState      Permission
 	ViewLicense   Permission
 	AuditLicense  Permission
@@ -42,6 +43,7 @@ var (
 			Delete:        permission.NewInIdentifier("Delete", "删除", "删除员工信息"),
 			SetMobile:     permission.NewInIdentifier("SetMobile", "设置手机号", "修改员工手机号"),
 			SetAvatar:     permission.NewInIdentifier("SetAvatar", "设置头像", "设置员工头像"),
+			SetRoles:      permission.NewInIdentifier("SetRoles", "设置员工角色", "设置员工角色"),
 			SetState:      permission.NewInIdentifier("SetState", "设置状态", "设置员工任职状态"),
 			ViewLicense:   permission.NewInIdentifier("ViewLicense", "查看认证信息", "查看员工认证信息"),
 			AuditLicense:  permission.NewInIdentifier("AuditLicense", "审核认证信息", "审核员工认证信息"),

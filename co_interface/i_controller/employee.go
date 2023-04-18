@@ -38,4 +38,10 @@ type IEmployee[TIRes co_model.IEmployeeRes] interface {
 
 	// GetEmployeeListByTeamId 获取团队成员|列表
 	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamId) (*base_model.CollectRes[TIRes], error)
+
+	// SetEmployeeRoles 设置员工角色
+	SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error)
+
+	// SetEmployeeState 设置员工状态
+	SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error)
 }

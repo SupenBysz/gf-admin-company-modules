@@ -13,8 +13,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/funs"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -27,15 +27,15 @@ import (
 )
 
 type sCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -53,15 +53,15 @@ type sCompany[
 }
 
 func NewCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -125,6 +125,9 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) GetCompanyById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	if id == 0 {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
+	}
 
 	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Company.Ctx(ctx),
@@ -136,11 +139,11 @@ func (s *sCompany[
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
-
+	// 为什么data为空，还是会进去if
 	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
-	//
+
 	//err == sql.ErrNoRows ||
 	//    !reflect.ValueOf(data).IsNil() && sessionUser != nil &&
 	//        sessionUser.Id != 0 &&
@@ -148,7 +151,7 @@ func (s *sCompany[
 	//        response.Data().UnionMainId != sessionUser.ParentId &&
 	//        !sessionUser.IsAdmin
 
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && !reflect.ValueOf(response).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -544,12 +547,15 @@ func (s *sCompany[
 
 	if data.Data().UserId > 0 {
 		// 附加数据 employee
-		funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
+		base_funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
 			func() *co_model.EmployeeRes {
 				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
 				if employee.Data() == nil {
 					return nil
 				}
+				//// 将头像中的文件id换成可访问地址
+				//employee.Data().Avatar = sys_service.File().MakeFileUrl(ctx, gconv.Int64(employee.Data().Avatar))
+
 				data.Data().AdminUser = employee.Data()
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)
