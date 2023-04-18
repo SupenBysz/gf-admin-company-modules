@@ -38,6 +38,7 @@ type CompanyEmployeeColumns struct {
 	UpdatedAt    string //
 	DeletedBy    string //
 	DeletedAt    string //
+	Sex          string // 性别：0女 1男
 }
 
 // companyEmployeeColumns holds the columns for table co_company_employee.
@@ -57,6 +58,7 @@ var companyEmployeeColumns = CompanyEmployeeColumns{
 	UpdatedAt:    "updated_at",
 	DeletedBy:    "deleted_by",
 	DeletedAt:    "deleted_at",
+	Sex:          "sex",
 }
 
 // NewCompanyEmployeeDao creates and returns a new DAO object for table data access.
