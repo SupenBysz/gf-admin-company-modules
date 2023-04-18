@@ -7,7 +7,7 @@ import (
 )
 
 type global struct {
-	// 默认货币单位
+	// 默认货币类型
 	DefaultCurrency string
 }
 

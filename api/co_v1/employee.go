@@ -49,3 +49,13 @@ type GetEmployeeListByRoleIdReq struct {
 	g.Meta `method:"post" summary:"根据角色ID获取所有所属员工|列表" tags:"员工"`
 	co_company_api.GetEmployeeListByRoleIdReq
 }
+
+type SetEmployeeRolesReq struct {
+	g.Meta `method:"post" summary:"设置员工角色" dc:"设置员工所属角色" tags:"员工"`
+	co_company_api.SetEmployeeRolesReq
+}
+
+type SetEmployeeStateReq struct {
+	g.Meta `method:"post" summary:"设置员工状态" dc:"设置员工状态" tags:"员工"`
+	co_company_api.SetEmployeeStateReq
+}

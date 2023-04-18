@@ -32,11 +32,13 @@ type (
 		GetEmployeeBySession(ctx context.Context) (response TR, err error)
 		QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 		CreateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error)
-		UpdateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error)
+		UpdateEmployee(ctx context.Context, info *co_model.UpdateEmployee) (response TR, err error)
+		UpdateEmployeeAvatar(ctx context.Context, id int64, avatar string) bool
 		DeleteEmployee(ctx context.Context, id int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error)
 		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*base_model.CollectRes[TR], error)
 		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error)
+		SetEmployeeState(ctx context.Context, id int64, state int) (bool, error)
 	}
 	ITeam[TR co_model.ITeamRes] interface {
 		GetTeamById(ctx context.Context, id int64) (TR, error)
@@ -57,7 +59,7 @@ type (
 		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
 		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
-		SetMyMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error)
+		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
 	}
 
@@ -117,15 +119,15 @@ type IConfig interface {
 }
 
 type IModules[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] interface {
 	IConfig
 	Company() ICompany[ITCompanyRes]

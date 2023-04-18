@@ -9,15 +9,15 @@ import (
 )
 
 func ModulesGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -39,15 +39,15 @@ func ModulesGroup[
 }
 
 func CompanyGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -72,15 +72,15 @@ func CompanyGroup[
 }
 
 func EmployeeGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -104,19 +104,22 @@ func EmployeeGroup[
 	group.POST(routePrefix+"/updateEmployee", controller.UpdateEmployee)
 	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
 	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
+	group.POST(routePrefix+"/setEmployeeRoles", controller.SetEmployeeRoles)
+	group.POST(routePrefix+"/setEmployeeState", controller.SetEmployeeState)
+
 	return group
 }
 
 func TeamGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -145,15 +148,15 @@ func TeamGroup[
 }
 
 func MyGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -176,15 +179,15 @@ func MyGroup[
 }
 
 func FinancialGroup[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
