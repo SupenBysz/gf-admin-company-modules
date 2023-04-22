@@ -315,6 +315,7 @@ func (s *sCompany[
 		ContactName:   info.ContactName,
 		ContactMobile: info.ContactMobile,
 		Remark:        info.Remark,
+		Address:       info.Address,
 	}
 
 	// 启用事务
