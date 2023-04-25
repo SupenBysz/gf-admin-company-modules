@@ -840,6 +840,7 @@ func (s *sTeam[
 		return data
 	}
 
+	// 附加数据1：团队负责人Owner
 	if data.Data().OwnerEmployeeId > 0 {
 		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().OwnerEmployeeId,
@@ -862,6 +863,8 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据2：团队队长Captain
 	if data.Data().CaptainEmployeeId > 0 {
 		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().CaptainEmployeeId,
@@ -884,6 +887,8 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据3：团队主体UnionMain
 	if data.Data().UnionMainId > 0 {
 		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().UnionMainId,
@@ -900,6 +905,8 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据4：团队或小组父级
 	if data.Data().ParentId > 0 {
 		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().ParentId,
