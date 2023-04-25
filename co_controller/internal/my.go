@@ -3,16 +3,13 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
-	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_funs"
 )
 
 type MyController[
@@ -191,13 +188,17 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	// team相关附加信息
-	ctx = base_funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.modules.Dao().Employee.Columns().UnionMainId)
+	// 附加数据1：团队负责人Owner
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
 
-	// 加上员工的附加信息订阅，
-	ctx = base_funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Employee.Columns().Id)
+	// 附加数据2：团队队长Captain
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
 
-	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
-	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	// 附加数据3：团队主体UnionMain
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+
+	// 附加数据4：团队或小组父级
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.TeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+
 	return ctx
 }
