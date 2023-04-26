@@ -61,11 +61,17 @@ type (
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
+		GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error)
+		GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error)
+		GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error)
+		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
+		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (api_v1.BoolRes, error)
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {
 		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error)
 		GetAccountById(ctx context.Context, id int64) (response TR, err error)
+		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error)
 		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error)
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
 		UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error)

@@ -18,3 +18,10 @@ type MyProfileRes struct {
 	User     *sys_model.SysUser `json:"user" description:"员工信息"`
 	Employee *EmployeeRes       `json:"employee" description:"员工信息"`
 }
+
+type AccountBillRes struct {
+	Account co_entity.FdAccount
+	Bill    *FdAccountBillListRes
+}
+
+type MyAccountBillRes []AccountBillRes

@@ -2,15 +2,18 @@ package company
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 	"reflect"
@@ -306,4 +309,138 @@ func (s *sMy[
 	}
 
 	return true, nil
+}
+
+// GetAccountBills 我的账单|列表
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error) {
+	// 1、获取到当前登录用户
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	// 2、根据userId查询该用户的所有财务账号  我可能有两个不同货币类型的财务账号
+	accounts, err := s.modules.Account().QueryAccountListByUserId(ctx, user.SysUser.Id)
+	if err != nil {
+		return &co_model.MyAccountBillRes{}, err
+	}
+
+	accountBillDetailList := co_model.MyAccountBillRes{}
+
+	// 3、遍历每一个账号，把账单统计出来
+	for _, account := range accounts.Records {
+		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, pagination)
+		// base_model.call[co_model.IFdAccountBillRes]
+		if err != nil {
+			return nil, err
+		}
+
+		// 账号信息
+		var accountInfo co_entity.FdAccount
+		gconv.Struct(account, &accountInfo)
+
+		// 账单信息
+		accountBillDetailList = append(accountBillDetailList, co_model.AccountBillRes{
+			Account: accountInfo,
+			Bill:    kconv.Struct(bills, &co_model.FdAccountBillListRes{}),
+		})
+	}
+
+	return &accountBillDetailList, nil
+}
+
+// GetAccounts 获取我的财务账号|列表
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error) {
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	accountList, err := s.modules.Account().QueryAccountListByUserId(ctx, user.Id)
+	if err != nil {
+		return &co_model.FdAccountListRes{}, nil
+	}
+
+	return kconv.Struct(accountList, &co_model.FdAccountListRes{}), nil
+}
+
+// GetBankCards 获取我的银行卡｜列表
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error) {
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	bankCardList, err := s.modules.BankCard().QueryBankCardListByUserId(ctx, user.Id)
+	if err != nil {
+		return &co_model.FdBankCardListRes{}, nil
+	}
+
+	return kconv.Struct(bankCardList, &co_model.FdBankCardListRes{}), nil
+}
+
+// GetInvoices 获取我的发票抬头|列表
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error) {
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	// 获取到所有的发票抬头+ 纳税识别号
+	invoiceList, err := s.modules.Invoice().QueryInvoiceList(ctx, nil, user.Id)
+	if err != nil {
+		return &co_model.FdInvoiceListRes{}, nil
+	}
+
+	return kconv.Struct(invoiceList, &co_model.FdInvoiceListRes{}), nil
+}
+
+// UpdateAccount  修改我的财务账号
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (api_v1.BoolRes, error) {
+	//user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	ret, err := s.modules.Account().UpdateAccount(ctx, accountId, info)
+	if err != nil {
+		return false, err
+	}
+
+	return ret == true, nil
 }
