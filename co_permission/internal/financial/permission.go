@@ -31,6 +31,7 @@ type permissionType[T co_interface.IConfig] struct {
 	GetAccountDetail    Permission
 	UpdateAccountAmount Permission
 	UpdateAccountState  Permission
+	UpdateAccountDetail Permission
 }
 
 var (
@@ -60,6 +61,7 @@ var (
 			GetAccountDetail:    permission.New(5953153121849347, "GetAccountDetail", "查看财务账号详情", "查看财务账号金额明细"),
 			UpdateAccountAmount: permission.New(5953153121849348, "UpdateAccountAmount", "修改财务金额", "修改财务账号金额明细"),
 			UpdateAccountState:  permission.New(5953153121849349, "UpdateAccountState", "修改财务账号状态", "修改财务账号状态"),
+			UpdateAccountDetail: permission.New(5953153121898321, "UpdateAccountDetail", "修改财务账号", "修改财务账号详情"),
 		})
 		for k, v := range gconv.Map(result) {
 			result.enumMap.Set(k, v.(Permission))

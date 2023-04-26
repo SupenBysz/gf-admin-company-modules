@@ -190,6 +190,38 @@ func (s *sFdAccount[
 	return makeMore(ctx, s.dao.FdAccountDetail, *data), nil
 }
 
+// UpdateAccount 修改财务账号
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error) {
+	if accountId == 0 {
+		return false, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+	}
+
+	//data := kconv.Struct(info, &co_do.FdAccount{})
+
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccount.Ctx(ctx).
+		Where(co_do.FdAccount{Id: accountId, AccountType: info.AccountType}).OmitNilData().
+		Data(co_do.FdAccount{
+			Name:          info.Name,
+			AccountNumber: info.AccountNumber,
+		}))
+
+	if err != nil || affected <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号修改失败！", s.dao.FdAccount.Table())
+	}
+
+	return true, nil
+}
+
 // UpdateAccountIsEnable 修改财务账号状态（是否启用：0禁用 1启用）
 func (s *sFdAccount[
 	ITCompanyRes,

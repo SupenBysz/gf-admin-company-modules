@@ -175,6 +175,14 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	group.POST(routePrefix+"/getTeams", controller.GetTeams)
 	group.POST(routePrefix+"/setAvatar", controller.SetAvatar)
 	group.POST(routePrefix+"/setMobile", controller.SetMobile)
+
+	// 我的财务相关
+	group.POST(routePrefix+"/getAccountBills", controller.GetAccountBills)
+	group.POST(routePrefix+"/getAccounts", controller.GetAccounts)
+	group.POST(routePrefix+"/getBankCards", controller.GetBankCards)
+	group.POST(routePrefix+"/getInvoices", controller.GetInvoices)
+	group.POST(routePrefix+"/updateAccount", controller.UpdateAccount)
+
 	return group
 }
 

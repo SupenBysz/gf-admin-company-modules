@@ -177,6 +177,111 @@ func (c *MyController[
 	)
 }
 
+// GetAccountBills 我的账单|列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.MyAccountBillRes, error) {
+			ret, err := c.modules.My().GetAccountBills(ctx, &req.Pagination)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// GetAccounts 获取我的财务账号|列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdAccountListRes, error) {
+			ret, err := c.modules.My().GetAccounts(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// GetBankCards 获取我的银行卡｜列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetBankCards(ctx context.Context, _ *co_company_api.GetBankCardsReq) (*co_model.FdBankCardListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdBankCardListRes, error) {
+			ret, err := c.modules.My().GetBankCards(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).BankCardList,
+	)
+}
+
+// GetInvoices 获取我的发票抬头｜列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetInvoices(ctx context.Context, _ *co_company_api.GetInvoicesReq) (*co_model.FdInvoiceListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdInvoiceListRes, error) {
+			ret, err := c.modules.My().GetInvoices(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).InvoiceList,
+	)
+}
+
+// UpdateAccount  修改我的财务账号
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccount(ctx context.Context, req *co_company_api.UpdateAccountReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.My().UpdateAccount(ctx, req.AccountId, &req.UpdateAccount)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountDetail,
+	)
+}
+
 func (c *MyController[
 	TIRes,
 	ITEmployeeRes,
