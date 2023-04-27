@@ -129,7 +129,7 @@ func (c *MyController[
 
 	result, err := c.modules.My().GetTeams(c.makeMore(ctx))
 	if err != nil {
-		return nil, err
+		return co_model.MyTeamListRes{}, err
 	}
 
 	return result, nil
