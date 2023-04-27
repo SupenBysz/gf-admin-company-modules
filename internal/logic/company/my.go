@@ -167,22 +167,23 @@ func (s *sMy[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error) {
+	res = co_model.MyTeamListRes{}
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断身份类型（超级管理员不支持此操作）
 	if session.Type == sys_enum.User.Type.SuperAdmin.Code() {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_SuperAdminNotServer"), "my")
+		return co_model.MyTeamListRes{}, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_SuperAdminNotServer"), "my")
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
 	if err != nil {
-		return nil, err
+		return co_model.MyTeamListRes{}, err
 	}
 
 	// 团队列表
 	teamList, err := s.modules.Team().QueryTeamListByEmployee(ctx, employee.Data().Id, employee.Data().UnionMainId)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamList}{#error_Data_Get_Failed}"), s.dao.Team.Table())
+		return co_model.MyTeamListRes{}, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamList}{#error_Data_Get_Failed}"), s.dao.Team.Table())
 	}
 
 	// 团队成员列表
@@ -195,7 +196,7 @@ func (s *sMy[
 		// 团队成员列表
 		memberList, err := s.modules.Employee().GetEmployeeListByTeamId(ctx, team.Data().Id)
 		if err != nil {
-			return nil, err
+			return co_model.MyTeamListRes{}, err
 		}
 
 		teamInfo.MemberItems = []*co_model.EmployeeRes{}
