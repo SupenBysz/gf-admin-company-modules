@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/SupenBysz/gf-admin-community v0.4.6
-	github.com/gogf/gf/v2 v2.3.2
+	github.com/gogf/gf/v2 v2.4.1
 	github.com/kysion/base-library v0.0.12
 	github.com/yitter/idgenerator-go v1.3.2
 )
