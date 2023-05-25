@@ -681,10 +681,15 @@ func (s *sEmployee[
 ]) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
 	employee, err := s.GetEmployeeById(ctx, id)
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Disabled_Delete}"), s.dao.Employee.Table())
+	}
+
+	if s.modules.GetConfig().HardDeleteWaitAt == -1 || s.modules.GetConfig().HardDeleteWaitAt == math.MaxInt64 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Nonsupport_Delete}"), s.dao.Employee.Table())
 	}
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+
 		if s.modules.GetConfig().HardDeleteWaitAt > 0 && employee.Data().DeletedAt == nil {
 			// 设置账户状态为已注销
 			_, err = sys_service.SysUser().SetUserState(ctx, employee.Data().Id, sys_enum.User.State.Canceled)
