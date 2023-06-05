@@ -20,7 +20,7 @@
 
 #### 脚本工具
 
-<img src="https://img.shields.io/badge/goframe cli-2.3.2+-red" alt="" />
+<img src="https://img.shields.io/badge/goframe cli-2.4.1+-red" alt="" />
 
 ## 二、项目结构
 ```
