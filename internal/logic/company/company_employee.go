@@ -61,8 +61,46 @@ type sEmployee[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao     *co_dao.XDao
+	dao     co_dao.XDao
 	hookArr *garray.Array
+
+	employee co_interface.IEmployee[TR]
+	team     co_interface.ITeam[ITTeamRes]
+}
+
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetModules() co_interface.IModules[
+	*co_model.CompanyRes,
+	*co_model.EmployeeRes,
+	*co_model.TeamRes,
+	*co_model.FdAccountRes,
+	*co_model.FdAccountBillRes,
+	*co_model.FdBankCardRes,
+	*co_model.FdCurrencyRes,
+	*co_model.FdInvoiceRes,
+	*co_model.FdInvoiceDetailRes,
+] {
+	result, _ := s.modules.(co_interface.IModules[
+		*co_model.CompanyRes,
+		*co_model.EmployeeRes,
+		*co_model.TeamRes,
+		*co_model.FdAccountRes,
+		*co_model.FdAccountBillRes,
+		*co_model.FdBankCardRes,
+		*co_model.FdCurrencyRes,
+		*co_model.FdInvoiceRes,
+		*co_model.FdInvoiceDetailRes,
+	])
+	return result
 }
 
 func NewEmployee[
@@ -98,15 +136,33 @@ func NewEmployee[
 		ITFdInvoiceDetailRes,
 	]{
 		modules: modules,
-		dao:     modules.Dao(),
+		dao:     *modules.Dao(),
 		hookArr: garray.NewArray(),
 	}
+
+	result.modules = modules
+	result.dao = *modules.Dao()
+	result.hookArr = garray.NewArray()
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	// 注入钩子函数
 	result.injectHook()
 	return result
+}
+
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetXDao(dao co_dao.XDao) {
+	s.dao = dao
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
@@ -453,7 +509,7 @@ func (s *sEmployee[
 		teamSearch := base_funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
-			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
+			items, _ := s.team.QueryTeamMemberList(ctx, teamSearch)
 
 			if len(items.Records) > 0 {
 				for _, item := range items.Records {
@@ -759,13 +815,13 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 ]) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
-	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
+	isSuccess, err := s.team.DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && isSuccess == false {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
 	}
 
 	// 查找到员工是管理员或者队长的团队
-	teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
+	teamList, err := s.team.QueryTeamList(ctx, &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field:     s.dao.Team.Columns().CaptainEmployeeId,
 			Where:     "=",
@@ -783,14 +839,14 @@ func (s *sEmployee[
 	if len(teamList.Records) > 0 {
 		for _, item := range teamList.Records {
 			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
-				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
+				ret, err := s.team.SetTeamCaptain(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
 
 			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
-				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
+				ret, err := s.team.SetTeamOwner(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
@@ -917,7 +973,7 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error) {
-	team, err := s.modules.Team().GetTeamById(ctx, teamId)
+	team, err := s.team.GetTeamById(ctx, teamId)
 	if err != nil {
 		return nil, err
 	}

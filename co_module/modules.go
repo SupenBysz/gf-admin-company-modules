@@ -24,6 +24,7 @@ type Modules[
 	TFdInvoiceRes co_model.IFdInvoiceRes,
 	TFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
+
 	co_interface.IConfig
 	conf          *co_model.Config
 	company       co_interface.ICompany[TCompanyRes]
@@ -262,6 +263,71 @@ func (m *Modules[
 	return m.xDao
 }
 
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillRes,
+	TFdBankCardRes,
+	TFdCurrencyRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+]) NewEmployee(info co_dao.XDao) co_interface.IEmployee[*co_model.EmployeeRes] { // co_model.IEmployeeRes
+
+	c := (co_interface.IModules[TCompanyRes,
+		TEmployeeRes,
+		TTeamRes,
+		TFdAccountRes,
+		TFdAccountBillRes,
+		TFdBankCardRes,
+		TFdCurrencyRes,
+		TFdInvoiceRes,
+		TFdInvoiceDetailRes])(m)
+
+	m.employee = nil
+	result := company.NewEmployee(c)
+
+	result.SetXDao(info)
+	res, _ := result.(co_interface.IEmployee[*co_model.EmployeeRes])
+
+	return res
+	//m.employee = info
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillRes,
+	TFdBankCardRes,
+	TFdCurrencyRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+]) NewTeam(info co_dao.XDao) co_interface.ITeam[*co_model.TeamRes] {
+	//m.team = info
+
+	c := (co_interface.IModules[TCompanyRes,
+		TEmployeeRes,
+		TTeamRes,
+		TFdAccountRes,
+		TFdAccountBillRes,
+		TFdBankCardRes,
+		TFdCurrencyRes,
+		TFdInvoiceRes,
+		TFdInvoiceDetailRes])(m)
+
+	result := company.NewTeam(c)
+
+	m.team = nil
+
+	result.SetXDao(info)
+
+	return result.(co_interface.ITeam[*co_model.TeamRes])
+}
+
 func NewModules[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
@@ -300,6 +366,8 @@ func NewModules[
 		conf: conf,
 		xDao: xDao,
 	}
+
+	//module. = module
 
 	response = module
 
