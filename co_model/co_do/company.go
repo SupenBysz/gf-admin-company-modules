@@ -26,4 +26,5 @@ type Company struct {
 	DeletedBy     interface{} // 删除者
 	DeletedAt     *gtime.Time // 删除时间
 	ParentId      interface{} // 父级ID
+	Address       interface{} // 地址
 }

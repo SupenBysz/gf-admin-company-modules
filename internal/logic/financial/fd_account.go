@@ -14,8 +14,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/format_utils"
-	"github.com/kysion/base-library/utility/funs"
 	"github.com/kysion/base-library/utility/kconv"
 
 	"reflect"
@@ -31,15 +31,15 @@ import (
 )
 
 type sFdAccount[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+TR co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -57,15 +57,15 @@ type sFdAccount[
 }
 
 func NewFdAccount[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+TR co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -133,7 +133,6 @@ func (s *sFdAccount[
 	if user == nil || err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
 	}
-
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)
 	if err != nil || reflect.ValueOf(currency).IsNil() {
@@ -152,6 +151,8 @@ func (s *sFdAccount[
 	data.UnionMainId = info.UnionMainId
 	data.IsEnabled = 1
 	data.LimitState = 0
+	data.PrecisionOfBalance = 100 // 货币精度 1元 = 100分
+
 	if info.CurrencyCode == "" {
 		data.CurrencyCode = co_consts.Global.DefaultCurrency
 	}
@@ -187,6 +188,38 @@ func (s *sFdAccount[
 	}
 
 	return makeMore(ctx, s.dao.FdAccountDetail, *data), nil
+}
+
+// UpdateAccount 修改财务账号
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error) {
+	if accountId == 0 {
+		return false, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+	}
+
+	//data := kconv.Struct(info, &co_do.FdAccount{})
+
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccount.Ctx(ctx).
+		Where(co_do.FdAccount{Id: accountId, AccountType: info.AccountType}).OmitNilData().
+		Data(co_do.FdAccount{
+			Name:          info.Name,
+			AccountNumber: info.AccountNumber,
+		}))
+
+	if err != nil || affected <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号修改失败！", s.dao.FdAccount.Table())
+	}
+
+	return true, nil
 }
 
 // UpdateAccountIsEnable 修改财务账号状态（是否启用：0禁用 1启用）
@@ -450,6 +483,7 @@ func (s *sFdAccount[
 			UnionMainId:       account.Data().UnionMainId,
 			SysUserId:         account.Data().UnionUserId,
 			Version:           0,
+			SceneType:         account.Data().SceneType,
 		})
 	}
 
@@ -622,7 +656,7 @@ func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccou
 		return info
 	}
 
-	funs.AttrMake[TR](ctx,
+	base_funs.AttrMake[TR](ctx,
 		"id",
 		func() TR {
 			g.Try(ctx, func(ctx context.Context) {
@@ -637,4 +671,48 @@ func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccou
 		},
 	)
 	return info
+}
+
+// QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error) {
+	if unionUserId == 0 {
+		return nil, gerror.New(s.modules.T(ctx, "error_Financial_UnionUserId_Failed"))
+	}
+
+	// 这是有缓存的情况，但是实际不能缓存
+	// result, err := daoctl.Query[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx).Where(co_do.FdAccountDetail{
+	//    SysUserId: unionUserId,
+	//    SceneType: sceneType,
+	// }), nil, false)
+
+	result, err := daoctl.Query[co_model.FdAccountDetailRes](s.dao.FdAccountDetail.Ctx(ctx), &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
+				Field: s.dao.FdAccountDetail.Columns().SysUserId,
+				Where: "=",
+				Value: unionUserId,
+			},
+			base_model.FilterInfo{
+				Field: s.dao.FdAccountDetail.Columns().SceneType,
+				Where: "=",
+				Value: sceneType.Code(),
+			},
+		),
+	}, false)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountDetail}{#error_Data_Get_Failed}"), s.dao.FdAccountDetail.Table())
+	}
+
+	return result, nil
 }

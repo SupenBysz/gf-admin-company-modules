@@ -9,12 +9,19 @@ type MyCompanyRes co_entity.Company
 
 type MyTeamRes struct {
 	TeamRes
-	MemberItems []*EmployeeRes `json:"memberItems" description:"团队或小组成员"`
+	MemberItems []*EmployeeRes `json:"memberItems" dc:"团队或小组成员"`
 }
 
 type MyTeamListRes []MyTeamRes
 
 type MyProfileRes struct {
-	User     *sys_model.SysUser `json:"user" description:"员工信息"`
-	Employee *EmployeeRes       `json:"employee" description:"员工信息"`
+	User     *sys_model.SysUser `json:"user" dc:"员工信息"`
+	Employee *EmployeeRes       `json:"employee" dc:"员工信息"`
 }
+
+type AccountBillRes struct {
+	Account co_entity.FdAccount
+	Bill    *FdAccountBillListRes
+}
+
+type MyAccountBillRes []AccountBillRes

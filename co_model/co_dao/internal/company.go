@@ -37,6 +37,7 @@ type CompanyColumns struct {
 	DeletedBy     string // 删除者
 	DeletedAt     string // 删除时间
 	ParentId      string // 父级ID
+	Address       string // 地址
 }
 
 // companyColumns holds the columns for table co_company.
@@ -55,6 +56,7 @@ var companyColumns = CompanyColumns{
 	DeletedBy:     "deleted_by",
 	DeletedAt:     "deleted_at",
 	ParentId:      "parent_id",
+	Address:       "address",
 }
 
 // NewCompanyDao creates and returns a new DAO object for table data access.

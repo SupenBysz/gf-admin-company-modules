@@ -16,15 +16,15 @@ type EmployeeController[TIRes co_model.IEmployeeRes] struct {
 }
 
 func Employee[
-	ITCompanyRes co_model.ICompanyRes,
-	TIRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TIRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TIRes,
@@ -84,4 +84,15 @@ func (c *EmployeeController[TIRes]) DeleteEmployee(ctx context.Context, req *co_
 func (c *EmployeeController[TIRes]) GetEmployeeListByRoleId(ctx context.Context, req *co_v1.GetEmployeeListByRoleIdReq) (*co_model.EmployeeListRes, error) {
 	ret, err := c.IEmployee.GetEmployeeListByRoleId(ctx, &req.GetEmployeeListByRoleIdReq)
 	return kconv.Struct(ret, &co_model.EmployeeListRes{}), err
+}
+
+// SetEmployeeRoles 设置员工角色
+func (c *EmployeeController[TIRes]) SetEmployeeRoles(ctx context.Context, req *co_v1.SetEmployeeRolesReq) (api_v1.BoolRes, error) {
+	return c.IEmployee.SetEmployeeRoles(ctx, &req.SetEmployeeRolesReq)
+}
+
+// SetEmployeeState 设置员工状态
+func (c *EmployeeController[TIRes]) SetEmployeeState(ctx context.Context, req *co_v1.SetEmployeeStateReq) (api_v1.BoolRes, error) {
+	ret, err := c.IEmployee.SetEmployeeState(ctx, &req.SetEmployeeStateReq)
+	return ret == true, err
 }

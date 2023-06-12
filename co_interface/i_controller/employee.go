@@ -4,11 +4,14 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
+	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/kysion/base-library/base_model"
 )
 
 type IEmployee[TIRes co_model.IEmployeeRes] interface {
+	SetEmployee(employee co_interface.IEmployee[*co_model.EmployeeRes], team co_interface.ITeam[*co_model.TeamRes])
+
 	// GetEmployeeById 根据id获取员工信息
 	GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (TIRes, error)
 
@@ -38,4 +41,10 @@ type IEmployee[TIRes co_model.IEmployeeRes] interface {
 
 	// GetEmployeeListByTeamId 获取团队成员|列表
 	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamId) (*base_model.CollectRes[TIRes], error)
+
+	// SetEmployeeRoles 设置员工角色
+	SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error)
+
+	// SetEmployeeState 设置员工状态
+	SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error)
 }

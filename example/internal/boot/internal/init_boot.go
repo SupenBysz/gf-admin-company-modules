@@ -8,8 +8,8 @@ import (
 )
 
 func init() {
-	consts.Global.Modules.SetI18n(nil)
-	consts.PermissionTree = boot.InitPermission(consts.Global.Modules.(co_interface.IModules[
+	consts.Global.SetI18n(nil)
+	consts.Global.PermissionTree = boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
@@ -22,7 +22,7 @@ func init() {
 	]))
 
 	// 导入财务服务权限树
-	consts.FinancialPermissionTree = boot.InitFinancialPermission(consts.Global.Modules.(co_interface.IModules[
+	consts.Global.FinancialPermissionTree = boot.InitFinancialPermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,

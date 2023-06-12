@@ -15,6 +15,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/kysion/base-library/base_model"
+	base_funs "github.com/kysion/base-library/utility/base_funs"
 )
 
 type EmployeeController[
@@ -39,7 +40,10 @@ type EmployeeController[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao *co_dao.XDao
+	employee co_interface.IEmployee[TIRes]
+	team     co_interface.ITeam[ITTeamRes]
+
+	dao co_dao.XDao
 }
 
 func Employee[
@@ -74,9 +78,26 @@ func Employee[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]{
-		modules: modules,
-		dao:     modules.Dao(),
+		modules:  modules,
+		dao:      *modules.Dao(),
+		employee: modules.Employee(),
+		team:     modules.Team(),
 	}
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetEmployee(employee co_interface.IEmployee[*co_model.EmployeeRes], team co_interface.ITeam[*co_model.TeamRes]) {
+	c.employee = employee.(co_interface.IEmployee[TIRes])
+	c.team = team.(co_interface.ITeam[ITTeamRes])
 }
 
 func (c *EmployeeController[
@@ -92,7 +113,7 @@ func (c *EmployeeController[
 ]) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			return c.modules.Employee().GetEmployeeById(c.makeMore(ctx), req.Id)
+			return c.employee.GetEmployeeById(c.makeMore(ctx), req.Id)
 		},
 		co_permission.Employee.PermissionType(c.modules).ViewDetail,
 	)
@@ -112,7 +133,7 @@ func (c *EmployeeController[
 ]) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res TIRes, err error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			return c.modules.Employee().GetEmployeeDetailById(c.makeMore(ctx), req.Id)
+			return c.employee.GetEmployeeDetailById(c.makeMore(ctx), req.Id)
 		},
 		co_permission.Employee.PermissionType(c.modules).MoreDetail,
 	)
@@ -132,7 +153,7 @@ func (c *EmployeeController[
 ]) HasEmployeeByName(ctx context.Context, req *co_company_api.HasEmployeeByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Employee().HasEmployeeByName(ctx, req.Name, req.UnionNameId, req.ExcludeId) == true, nil
+			return c.employee.HasEmployeeByName(ctx, req.Name, req.UnionNameId, req.ExcludeId) == true, nil
 		},
 	)
 }
@@ -153,7 +174,7 @@ func (c *EmployeeController[
 
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.modules.Employee().HasEmployeeByNo(ctx, req.No, unionMainId, req.ExcludeId) == true, nil
+			return c.employee.HasEmployeeByNo(ctx, req.No, unionMainId, req.ExcludeId) == true, nil
 		},
 	)
 }
@@ -172,7 +193,7 @@ func (c *EmployeeController[
 ]) QueryEmployeeList(ctx context.Context, req *co_company_api.QueryEmployeeListReq) (*base_model.CollectRes[TIRes], error) {
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
-			return c.modules.Employee().QueryEmployeeList(c.makeMore(ctx), &req.SearchParams)
+			return c.employee.QueryEmployeeList(c.makeMore(ctx), &req.SearchParams)
 		},
 		co_permission.Employee.PermissionType(c.modules).List,
 	)
@@ -194,7 +215,7 @@ func (c *EmployeeController[
 
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.modules.Employee().CreateEmployee(c.makeMore(ctx), &req.Employee)
+			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
 		co_permission.Employee.PermissionType(c.modules).Create,
@@ -215,7 +236,7 @@ func (c *EmployeeController[
 ]) UpdateEmployee(ctx context.Context, req *co_company_api.UpdateEmployeeReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.modules.Employee().UpdateEmployee(c.makeMore(ctx), &req.Employee)
+			ret, err := c.employee.UpdateEmployee(c.makeMore(ctx), &req.UpdateEmployee)
 			return ret, err
 		},
 		co_permission.Employee.PermissionType(c.modules).Update,
@@ -236,7 +257,7 @@ func (c *EmployeeController[
 ]) DeleteEmployee(ctx context.Context, req *co_company_api.DeleteEmployeeReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Employee().DeleteEmployee(ctx, req.Id)
+			ret, err := c.employee.DeleteEmployee(ctx, req.Id)
 			return ret == true, err
 		},
 		co_permission.Employee.PermissionType(c.modules).Delete,
@@ -257,7 +278,7 @@ func (c *EmployeeController[
 ]) GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*base_model.CollectRes[TIRes], error) {
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
-			return c.modules.Employee().GetEmployeeListByRoleId(c.makeMore(ctx), req.Id)
+			return c.employee.GetEmployeeListByRoleId(c.makeMore(ctx), req.Id)
 		},
 		co_permission.Employee.PermissionType(c.modules).ViewDetail,
 	)
@@ -276,7 +297,7 @@ func (c *EmployeeController[
 ]) GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamId) (*base_model.CollectRes[TIRes], error) {
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
-			return c.modules.Employee().GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
+			return c.employee.GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
 		},
 		co_permission.Team.PermissionType(c.modules).MemberDetail,
 	)
@@ -292,11 +313,57 @@ func (c *EmployeeController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+]) SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := sys_service.SysUser().SetUserRoles(
+				ctx,
+				req.UserId,
+				req.RoleIds,
+				sessionUser.UnionMainId,
+			)
+			return ret == true, err
+		},
+		co_permission.Employee.PermissionType(c.modules).SetRoles,
+	)
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.employee.SetEmployeeState(ctx, req.Id, req.State)
+			return ret == true, err
+		},
+		co_permission.Employee.PermissionType(c.modules).SetState,
+	)
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
+	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
+	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
-	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	return ctx
 }

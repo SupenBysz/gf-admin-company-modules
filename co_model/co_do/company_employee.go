@@ -27,4 +27,5 @@ type CompanyEmployee struct {
 	UpdatedAt    *gtime.Time //
 	DeletedBy    interface{} //
 	DeletedAt    *gtime.Time //
+	Sex          interface{} // 性别：0女 1男
 }

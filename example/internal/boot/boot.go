@@ -57,10 +57,10 @@ var (
 
 			{
 				// ImportPermissionTree 导入权限结构
-				sys_service.SysPermission().ImportPermissionTree(ctx, consts.PermissionTree, nil)
+				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.PermissionTree, nil)
 
 				// 导入财务服务权限结构 (可选)
-				sys_service.SysPermission().ImportPermissionTree(ctx, consts.FinancialPermissionTree, nil)
+				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.FinancialPermissionTree, nil)
 
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
@@ -101,10 +101,10 @@ var (
 					)
 
 					// 注册公司模块路由 （包含：公司、团队、员工）
-					router.ModulesGroup(consts.Global.Modules, group)
+					router.ModulesGroup(consts.Global.IModules, group)
 
 					// 注册财务模块路由 (可选)
-					router.FinancialGroup(consts.Global.Modules, group)
+					router.FinancialGroup(consts.Global.IModules, group)
 				})
 			})
 			s.Run()

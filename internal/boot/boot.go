@@ -7,19 +7,20 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/yitter/idgenerator-go/idgen"
 )
 
 // InitPermission 初始化权限树
 func InitPermission[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -35,7 +36,7 @@ func InitPermission[
 		// 公司
 		{
 			SysPermission: &sys_entity.SysPermission{
-				Id:         5947986066667973,
+				Id:         idgen.NextId(), // 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
 				Name:       module.T(context.TODO(), "{#CompanyName}"),
 				Identifier: module.GetConfig().Identifier.Company,
 				Type:       1,
@@ -56,7 +57,7 @@ func InitPermission[
 		// 员工
 		{
 			SysPermission: &sys_entity.SysPermission{
-				Id:         5948221667408325,
+				Id:         idgen.NextId(),
 				Name:       module.T(context.TODO(), "{#CompanyName}{#EmployeeName}"),
 				Identifier: module.GetConfig().Identifier.Employee,
 				Type:       1,
@@ -80,7 +81,7 @@ func InitPermission[
 		// 团队
 		{
 			SysPermission: &sys_entity.SysPermission{
-				Id:         5948221667408326,
+				Id:         idgen.NextId(),
 				Name:       module.T(context.TODO(), "{#CompanyName}{#TeamName}"),
 				Identifier: module.GetConfig().Identifier.Team,
 				Type:       1,
@@ -96,22 +97,26 @@ func InitPermission[
 				co_permission.Team.PermissionType(module).SetMember,
 				co_permission.Team.PermissionType(module).SetOwner,
 				co_permission.Team.PermissionType(module).SetCaptain,
-			}},
+			},
+		},
+		// sms短信
+
+		// oss
 	}
 	return result
 }
 
 // InitFinancialPermission 初始化财务服务权限树
 func InitFinancialPermission[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -127,7 +132,7 @@ func InitFinancialPermission[
 		// 财务服务权限树
 		{
 			SysPermission: &sys_entity.SysPermission{
-				Id:         5953153121845349,
+				Id:         idgen.NextId(),
 				Name:       "财务",
 				Identifier: "Financial",
 				Type:       1,
@@ -136,7 +141,7 @@ func InitFinancialPermission[
 			Children: []*sys_model.SysPermissionTree{
 				{
 					SysPermission: &sys_entity.SysPermission{
-						Id:         6211883938021486,
+						Id:         idgen.NextId(),
 						Name:       "发票",
 						Identifier: "Invoice",
 						Type:       1,
@@ -163,7 +168,7 @@ func InitFinancialPermission[
 				},
 				{
 					SysPermission: &sys_entity.SysPermission{
-						Id:         6211883938021487,
+						Id:         idgen.NextId(),
 						Name:       "银行卡",
 						Identifier: "BankCard",
 						Type:       1,
@@ -182,7 +187,7 @@ func InitFinancialPermission[
 				},
 				{
 					SysPermission: &sys_entity.SysPermission{
-						Id:         6211883938021488,
+						Id:         idgen.NextId(),
 						Name:       "财务账号",
 						Identifier: "Account",
 						Type:       1,

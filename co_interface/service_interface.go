@@ -25,6 +25,18 @@ type (
 		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
 	}
 	IEmployee[TR co_model.IEmployeeRes] interface {
+		GetModules() IModules[
+			*co_model.CompanyRes,
+			*co_model.EmployeeRes,
+			*co_model.TeamRes,
+			*co_model.FdAccountRes,
+			*co_model.FdAccountBillRes,
+			*co_model.FdBankCardRes,
+			*co_model.FdCurrencyRes,
+			*co_model.FdInvoiceRes,
+			*co_model.FdInvoiceDetailRes,
+		]
+		SetXDao(dao co_dao.XDao)
 		GetEmployeeById(ctx context.Context, id int64) (response TR, err error)
 		GetEmployeeByName(ctx context.Context, name string) (response TR, err error)
 		HasEmployeeByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
@@ -32,13 +44,16 @@ type (
 		GetEmployeeBySession(ctx context.Context) (response TR, err error)
 		QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 		CreateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error)
-		UpdateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error)
+		UpdateEmployee(ctx context.Context, info *co_model.UpdateEmployee) (response TR, err error)
+		UpdateEmployeeAvatar(ctx context.Context, id int64, avatar string) bool
 		DeleteEmployee(ctx context.Context, id int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error)
 		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*base_model.CollectRes[TR], error)
 		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error)
+		SetEmployeeState(ctx context.Context, id int64, state int) (bool, error)
 	}
 	ITeam[TR co_model.ITeamRes] interface {
+		SetXDao(dao co_dao.XDao)
 		GetTeamById(ctx context.Context, id int64) (TR, error)
 		GetTeamByName(ctx context.Context, name string) (TR, error)
 		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
@@ -57,13 +72,19 @@ type (
 		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
 		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
-		SetMyMobile(ctx context.Context, newMobile int64, captcha string, password string) (bool, error)
+		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
+		GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error)
+		GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error)
+		GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error)
+		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
+		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (api_v1.BoolRes, error)
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {
 		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error)
 		GetAccountById(ctx context.Context, id int64) (response TR, err error)
+		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error)
 		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error)
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
 		UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error)
@@ -74,6 +95,7 @@ type (
 		GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error)
 		Increment(ctx context.Context, id int64, amount int) (bool, error)
 		Decrement(ctx context.Context, id int64, amount int) (bool, error)
+		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
 		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (response TR, err error)
@@ -113,6 +135,50 @@ type (
 
 type IConfig interface {
 	GetConfig() *co_model.Config
+}
+
+type ModuleFactory[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+] struct {
+	NewEmployee func(modules IModules[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]) IEmployee[ITEmployeeRes]
+
+	NewTeam func(modules IModules[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdCurrencyRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+	]) ITeam[ITTeamRes]
+}
+
+type IBaseFactory interface {
+	NewEmployee(info co_dao.XDao) IEmployee[*co_model.EmployeeRes]
+	//NewEmployee(info IEmployee[co_model.IEmployeeRes]) IEmployee[co_model.IEmployeeRes]
+
+	//NewTeam(info ITeam[co_model.ITeamRes]) ITeam[co_model.ITeamRes]
+	NewTeam(info co_dao.XDao) ITeam[*co_model.TeamRes]
 }
 
 type IModules[

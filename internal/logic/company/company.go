@@ -13,8 +13,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/funs"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -49,7 +49,7 @@ type sCompany[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao *co_dao.XDao
+	dao co_dao.XDao
 }
 
 func NewCompany[
@@ -84,7 +84,7 @@ func NewCompany[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes]{
 		modules: modules,
-		dao:     modules.Dao(),
+		dao:     *modules.Dao(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
@@ -125,6 +125,9 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) GetCompanyById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	if id == 0 {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
+	}
 
 	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Company.Ctx(ctx),
@@ -136,12 +139,24 @@ func (s *sCompany[
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
-
+	// 为什么data为空，还是会进去if
 	if !reflect.ValueOf(data).IsNil() {
 		response = *data
 	}
 
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	//err == sql.ErrNoRows ||
+	//    !reflect.ValueOf(data).IsNil() && sessionUser != nil &&
+	//        sessionUser.Id != 0 &&
+	//        response.Data().UnionMainId != sessionUser.UnionMainId &&
+	//        response.Data().UnionMainId != sessionUser.ParentId &&
+	//        !sessionUser.IsAdmin
+
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
+		!reflect.ValueOf(response).IsNil() &&
+		response.Data().Id != sessionUser.UnionMainId &&
+		response.Data().ParentId != sessionUser.UnionMainId &&
+		!sessionUser.IsAdmin &&
+		!sessionUser.IsSuperAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -305,6 +320,7 @@ func (s *sCompany[
 		ContactName:   info.ContactName,
 		ContactMobile: info.ContactMobile,
 		Remark:        info.Remark,
+		Address:       info.Address,
 	}
 
 	// 启用事务
@@ -476,21 +492,29 @@ func (s *sCompany[
 				},
 			}
 		}
+	}
 
-		if len(search.Filter) == 0 {
-			search.Filter = append(search.Filter, base_model.FilterInfo{
-				Field:     "union_main_id",
-				Where:     "=",
-				IsOrWhere: false,
-				Value:     sessionUser.UnionMainId,
-			})
+	hasUnionMainId := false
+	for _, field := range search.Filter {
+		if gstr.CaseSnake(field.Field) == "union_main_id" {
+			hasUnionMainId = true
+			break
 		}
+	}
+
+	if !hasUnionMainId {
+		search.Filter = append(search.Filter, base_model.FilterInfo{
+			Field:     "union_main_id",
+			Where:     "=",
+			IsOrWhere: false,
+			Value:     sessionUser.UnionMainId,
+		})
 	}
 
 	// 遍历所有过滤条件：
 	for _, field := range search.Filter {
 		// 过滤所有自定义主体ID条件
-		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") {
+		if gstr.ToLower(field.Field) == gstr.ToLower("unionMainId") || gstr.CaseSnake(field.Field) == "union_main_id" {
 			unionMainId := gconv.Int64(field.Value)
 			if unionMainId == sessionUser.UnionMainId || unionMainId <= 0 {
 				filter = append(filter, field)
@@ -529,12 +553,15 @@ func (s *sCompany[
 
 	if data.Data().UserId > 0 {
 		// 附加数据 employee
-		funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
+		base_funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
 			func() *co_model.EmployeeRes {
 				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
 				if employee.Data() == nil {
 					return nil
 				}
+				//// 将头像中的文件id换成可访问地址
+				//employee.Data().Avatar = sys_service.File().MakeFileUrl(ctx, gconv.Int64(employee.Data().Avatar))
+
 				data.Data().AdminUser = employee.Data()
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)

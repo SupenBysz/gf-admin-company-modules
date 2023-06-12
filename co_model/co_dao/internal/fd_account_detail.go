@@ -37,6 +37,7 @@ type FdAccountDetailColumns struct {
 	UnionMainId       string // 关联主体id
 	SysUserId         string // 关联用户id
 	Version           string // 乐观锁所需数据版本字段
+	SceneType         string // 场景类型：0不限、1充电佣金收入
 }
 
 // fdAccountDetailColumns holds the columns for table co_fd_account_detail.
@@ -55,6 +56,7 @@ var fdAccountDetailColumns = FdAccountDetailColumns{
 	UnionMainId:       "union_main_id",
 	SysUserId:         "sys_user_id",
 	Version:           "version",
+	SceneType:         "scene_type",
 }
 
 // NewFdAccountDetailDao creates and returns a new DAO object for table data access.

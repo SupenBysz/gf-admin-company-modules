@@ -10,8 +10,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/funs"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
@@ -45,7 +45,9 @@ type sTeam[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao *co_dao.XDao
+	dao      co_dao.XDao
+	employee co_interface.IEmployee[ITEmployeeRes]
+	team     co_interface.ITeam[TR]
 }
 
 func NewTeam[
@@ -81,12 +83,26 @@ func NewTeam[
 		ITFdInvoiceDetailRes,
 	]{
 		modules: modules,
-		dao:     modules.Dao(),
+		dao:     *modules.Dao(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	return result
+}
+
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetXDao(dao co_dao.XDao) {
+	s.dao = dao
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
@@ -143,7 +159,10 @@ func (s *sTeam[
 	}
 
 	// 需要进行跨主体判断
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
+	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
+		response.Data().UnionMainId != sessionUser.UnionMainId &&
+		!sessionUser.IsAdmin &&
+		!sessionUser.IsSuperAdmin {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.Team.Table())
 	}
 
@@ -270,13 +289,13 @@ func (s *sTeam[
 	items := make([]*co_model.TeamMemberRes, 0)
 	for _, item := range data.Records {
 		if item.EmployeeId > 0 {
-			v, _ := s.modules.Employee().GetEmployeeById(ctx, item.EmployeeId)
+			v, _ := s.employee.GetEmployeeById(ctx, item.EmployeeId)
 			if !reflect.ValueOf(v).IsNil() {
 				item.Employee = v.Data()
 			}
 		}
 		if item.InviteUserId > 0 {
-			v, _ := s.modules.Employee().GetEmployeeById(ctx, item.InviteUserId)
+			v, _ := s.employee.GetEmployeeById(ctx, item.InviteUserId)
 			if !reflect.ValueOf(v).IsNil() {
 				item.InviteUser = v.Data()
 			}
@@ -324,14 +343,14 @@ func (s *sTeam[
 
 	// 判断团队管理人信息是否存在
 	if info.OwnerEmployeeId > 0 {
-		_, err := s.modules.Employee().GetEmployeeById(ctx, info.OwnerEmployeeId)
+		_, err := s.employee.GetEmployeeById(ctx, info.OwnerEmployeeId)
 		if err != nil {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), s.dao.Team.Table())
 		}
 	}
 
 	if info.CaptainEmployeeId > 0 {
-		employee, err := s.modules.Employee().GetEmployeeById(ctx, info.CaptainEmployeeId)
+		employee, err := s.employee.GetEmployeeById(ctx, info.CaptainEmployeeId)
 		if err != nil || employee.Data().UnionMainId != sessionUser.UnionMainId {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), s.dao.Team.Table())
 		}
@@ -558,7 +577,7 @@ func (s *sTeam[
 	}
 
 	// 校验新团队成员是否存在
-	res, err := s.modules.Employee().QueryEmployeeList(ctx, &base_model.SearchParams{
+	res, err := s.employee.QueryEmployeeList(ctx, &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0),
 			base_model.FilterInfo{
 				Field: s.dao.Employee.Columns().Id,
@@ -658,7 +677,7 @@ func (s *sTeam[
 		return affected == 1, err
 	}
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
+	employee, err := s.employee.GetEmployeeById(ctx, employeeId)
 	if err != nil {
 		return false, err
 	}
@@ -714,7 +733,7 @@ func (s *sTeam[
 		return affected == 1, err
 	}
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, employeeId)
+	employee, err := s.employee.GetEmployeeById(ctx, employeeId)
 	if err != nil {
 		return false, err
 	}
@@ -840,15 +859,16 @@ func (s *sTeam[
 		return data
 	}
 
+	// 附加数据1：团队负责人Owner
 	if data.Data().OwnerEmployeeId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().OwnerEmployeeId,
 			func() *co_model.EmployeeRes {
 				if data.Data().OwnerEmployeeId == 0 {
 					return nil
 				}
 
-				v, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().OwnerEmployeeId)
+				v, _ := s.employee.GetEmployeeById(ctx, data.Data().OwnerEmployeeId)
 				if reflect.ValueOf(v).IsNil() {
 					data.Data().Owner = v.Data()
 				}
@@ -862,15 +882,17 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据2：团队队长Captain
 	if data.Data().CaptainEmployeeId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().CaptainEmployeeId,
 			func() *co_model.EmployeeRes {
 				if data.Data().CaptainEmployeeId == 0 {
 					return nil
 				}
 
-				v, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
+				v, _ := s.employee.GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
 				if !reflect.ValueOf(v).IsNil() {
 					data.Data().Captain = v.Data()
 				}
@@ -884,8 +906,10 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据3：团队主体UnionMain
 	if data.Data().UnionMainId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().UnionMainId,
 			func() *co_model.CompanyRes {
 				if data.Data().UnionMainId == 0 {
@@ -900,8 +924,10 @@ func (s *sTeam[
 			},
 		)
 	}
+
+	// 附加数据4：团队或小组父级
 	if data.Data().ParentId > 0 {
-		funs.AttrMake[co_model.TeamRes](ctx,
+		base_funs.AttrMake[co_model.TeamRes](ctx,
 			s.dao.Team.Columns().ParentId,
 			func() *co_model.TeamRes {
 				if data.Data().ParentId == 0 {

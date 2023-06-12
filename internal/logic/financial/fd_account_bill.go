@@ -47,6 +47,7 @@ type sFdAccountBill[
 	]
 	dao     *co_dao.XDao
 	hookArr base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
+	account co_interface.IFdAccount[ITFdAccountRes]
 }
 
 func NewFdAccountBill[
@@ -83,6 +84,7 @@ func NewFdAccountBill[
 	]{
 		modules: modules,
 		dao:     modules.Dao(),
+		account: modules.Account(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
@@ -212,7 +214,7 @@ func (s *sFdAccountBill[
 	}
 
 	// 先通过财务账号id查询账号出来
-	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
+	account, err := s.account.GetAccountById(ctx, info.FdAccountId)
 
 	// 判断需要收款的用户是否存在
 	if err != nil {
@@ -244,14 +246,14 @@ func (s *sFdAccountBill[
 
 		// 2.修改财务账号的余额
 		// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
+		affected, err := s.account.UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
 
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 		}
 
 		// 3.修改财务账号金额明细统计
-		increment, err := s.modules.Account().Increment(ctx, account.Data().Id, gconv.Int(info.Amount))
+		increment, err := s.account.Increment(ctx, account.Data().Id, gconv.Int(info.Amount))
 
 		if increment == false || err != nil {
 			return err
@@ -298,7 +300,7 @@ func (s *sFdAccountBill[
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 先通过财务账号id查询账号出来
-	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
+	account, err := s.account.GetAccountById(ctx, info.FdAccountId)
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
 	}
@@ -311,9 +313,10 @@ func (s *sFdAccountBill[
 		version := account.Data().Version
 		// 余额 = 之前的余额 - 本次交易的金额
 		afterBalance := account.Data().Balance - info.Amount
-
-		// 判断余额是否足够
-		if account.Data().Balance >= info.Amount { // 足够
+		// 判断余额是否足够   // 余额足够、账号类型是系统账户，场景不限
+		if account.Data().Balance >= info.Amount ||
+			((account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
+				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() {
 			// 1. 添加一条财务账单流水
 			info.BeforeBalance = account.Data().Balance
 			info.AfterBalance = afterBalance
@@ -331,14 +334,13 @@ func (s *sFdAccountBill[
 
 			// 2.修改财务账号的余额
 			// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
+			affected, err := s.account.UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
 			}
-
 			// 3.修改财务账号金额明细统计
-			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
+			decrement, err := s.account.Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
 
 			if decrement == false || err != nil {
 				return err

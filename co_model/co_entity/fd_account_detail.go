@@ -24,4 +24,5 @@ type FdAccountDetail struct {
 	UnionMainId       int64       `json:"unionMainId"       description:"关联主体id"`
 	SysUserId         int64       `json:"sysUserId"         description:"关联用户id"`
 	Version           int         `json:"version"           description:"乐观锁所需数据版本字段"`
+	SceneType         int         `json:"sceneType"         description:"场景类型：0不限、1充电佣金收入"`
 }

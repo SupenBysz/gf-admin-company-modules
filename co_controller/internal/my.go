@@ -3,27 +3,25 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/kysion/base-library/utility/base_funs"
 )
 
 type MyController[
-	TIRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TIRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	i_controller.IMy
 	modules co_interface.IModules[
@@ -40,15 +38,15 @@ type MyController[
 }
 
 func My[
-	TIRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TIRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TIRes,
 	ITEmployeeRes,
@@ -131,7 +129,7 @@ func (c *MyController[
 
 	result, err := c.modules.My().GetTeams(c.makeMore(ctx))
 	if err != nil {
-		return nil, err
+		return co_model.MyTeamListRes{}, err
 	}
 
 	return result, nil
@@ -179,6 +177,111 @@ func (c *MyController[
 	)
 }
 
+// GetAccountBills 我的账单|列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.MyAccountBillRes, error) {
+			ret, err := c.modules.My().GetAccountBills(ctx, &req.Pagination)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// GetAccounts 获取我的财务账号|列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdAccountListRes, error) {
+			ret, err := c.modules.My().GetAccounts(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+	)
+}
+
+// GetBankCards 获取我的银行卡｜列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetBankCards(ctx context.Context, _ *co_company_api.GetBankCardsReq) (*co_model.FdBankCardListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdBankCardListRes, error) {
+			ret, err := c.modules.My().GetBankCards(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).BankCardList,
+	)
+}
+
+// GetInvoices 获取我的发票抬头｜列表
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetInvoices(ctx context.Context, _ *co_company_api.GetInvoicesReq) (*co_model.FdInvoiceListRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (*co_model.FdInvoiceListRes, error) {
+			ret, err := c.modules.My().GetInvoices(ctx)
+			return ret, err
+		},
+		co_permission.Financial.PermissionType(c.modules).InvoiceList,
+	)
+}
+
+// UpdateAccount  修改我的财务账号
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccount(ctx context.Context, req *co_company_api.UpdateAccountReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.My().UpdateAccount(ctx, req.AccountId, &req.UpdateAccount)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountDetail,
+	)
+}
+
 func (c *MyController[
 	TIRes,
 	ITEmployeeRes,
@@ -190,13 +293,17 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	// team相关附加信息
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, []co_model.Team](ctx, c.modules.Dao().Employee.Columns().UnionMainId)
+	// 附加数据1：团队负责人Owner
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
 
-	// 加上员工的附加信息订阅，
-	ctx = funs.AttrBuilder[co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Employee.Columns().Id)
+	// 附加数据2：团队队长Captain
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
 
-	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
-	ctx = funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	// 附加数据3：团队主体UnionMain
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+
+	// 附加数据4：团队或小组父级
+	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.TeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+
 	return ctx
 }
