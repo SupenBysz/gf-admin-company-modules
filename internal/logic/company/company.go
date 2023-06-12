@@ -49,7 +49,7 @@ type sCompany[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao *co_dao.XDao
+	dao co_dao.XDao
 }
 
 func NewCompany[
@@ -84,7 +84,7 @@ func NewCompany[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes]{
 		modules: modules,
-		dao:     modules.Dao(),
+		dao:     *modules.Dao(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
