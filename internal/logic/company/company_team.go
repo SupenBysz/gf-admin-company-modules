@@ -82,8 +82,10 @@ func NewTeam[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]{
-		modules: modules,
-		dao:     *modules.Dao(),
+		modules:  modules,
+		dao:      *modules.Dao(),
+		employee: modules.Employee(),
+		team:     modules.Team(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
@@ -274,7 +276,6 @@ func (s *sTeam[
 ]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
-
 	model := s.dao.TeamMember.Ctx(ctx)
 
 	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)

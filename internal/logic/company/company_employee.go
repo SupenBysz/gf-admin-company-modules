@@ -39,15 +39,15 @@ import (
 )
 
 type sEmployee[
-	ITCompanyRes co_model.ICompanyRes,
-	TR co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TR co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -104,15 +104,15 @@ func (s *sEmployee[
 }
 
 func NewEmployee[
-	ITCompanyRes co_model.ICompanyRes,
-	TR co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TR co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TR,
@@ -135,14 +135,12 @@ func NewEmployee[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]{
-		modules: modules,
-		dao:     *modules.Dao(),
-		hookArr: garray.NewArray(),
+		modules:  modules,
+		dao:      *modules.Dao(),
+		hookArr:  garray.NewArray(),
+		employee: modules.Employee(),
+		team:     modules.Team(),
 	}
-
-	result.modules = modules
-	result.dao = *modules.Dao()
-	result.hookArr = garray.NewArray()
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
