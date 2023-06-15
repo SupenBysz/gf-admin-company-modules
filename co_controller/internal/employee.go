@@ -95,21 +95,6 @@ func (c *EmployeeController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetEmployee(employee co_interface.IEmployee[*co_model.EmployeeRes], team co_interface.ITeam[*co_model.TeamRes]) {
-	c.employee = employee.(co_interface.IEmployee[TIRes])
-	c.team = team.(co_interface.ITeam[ITTeamRes])
-}
-
-func (c *EmployeeController[
-	ITCompanyRes,
-	TIRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
 ]) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
@@ -360,8 +345,8 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, []co_model.Team](ctx, c.dao.Employee.Columns().UnionMainId)
-	ctx = base_funs.AttrBuilder[*co_model.EmployeeRes, *co_model.EmployeeRes](ctx, c.dao.Employee.Columns().Id)
+	ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
+	ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Employee.Columns().Id)
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
 	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)

@@ -40,8 +40,7 @@ type FinancialController[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao     co_dao.XDao
-	account co_interface.IFdAccount[ITFdAccountRes]
+	dao co_dao.XDao
 }
 
 // Financial 财务服务
@@ -89,21 +88,7 @@ func Financial[
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
-		account: modules.Account(),
 	}
-}
-func (c *FinancialController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) SetAccount(account co_interface.IFdAccount[*co_model.FdAccountRes]) {
-	c.account = account.(co_interface.IFdAccount[ITFdAccountRes])
 }
 
 // GetAccountBalance 查看账户余额
@@ -121,7 +106,7 @@ func (c *FinancialController[
 
 	return funs.CheckPermission(ctx,
 		func() (api_v1.Int64Res, error) {
-			ret, err := c.account.GetAccountById(ctx, req.AccountId)
+			ret, err := c.modules.Account().GetAccountById(ctx, req.AccountId)
 			if err != nil {
 				return 0, err
 			}
@@ -353,7 +338,7 @@ func (c *FinancialController[
 ]) GetAccountDetail(ctx context.Context, req *co_company_api.GetAccountDetailReq) (ITFdAccountRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (ITFdAccountRes, error) {
-			ret, err := c.account.GetAccountById(ctx, req.AccountId)
+			ret, err := c.modules.Account().GetAccountById(ctx, req.AccountId)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -374,7 +359,7 @@ func (c *FinancialController[
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_company_api.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.account.UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled)
+			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
@@ -395,7 +380,7 @@ func (c *FinancialController[
 ]) UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.account.UpdateAccountLimitState(ctx, req.AccountId, req.LimitState)
+			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
@@ -416,7 +401,7 @@ func (c *FinancialController[
 ]) GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.FdAccountDetailRes, error) {
-			ret, err := c.account.GetAccountDetailById(ctx, req.AccountId)
+			ret, err := c.modules.Account().GetAccountDetailById(ctx, req.AccountId)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -437,7 +422,7 @@ func (c *FinancialController[
 ]) Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.account.Increment(ctx, req.AccountId, req.Amount)
+			ret, err := c.modules.Account().Increment(ctx, req.AccountId, req.Amount)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
@@ -458,7 +443,7 @@ func (c *FinancialController[
 ]) Decrement(ctx context.Context, req *co_company_api.DecrementReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.account.Decrement(ctx, req.AccountId, req.Amount)
+			ret, err := c.modules.Account().Decrement(ctx, req.AccountId, req.Amount)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
@@ -476,7 +461,7 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[co_model.FdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+	ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
 	return ctx

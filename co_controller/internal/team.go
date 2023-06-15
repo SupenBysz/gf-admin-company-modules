@@ -94,21 +94,6 @@ func (c *TeamController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetTeam(team co_interface.ITeam[*co_model.TeamRes], employee co_interface.IEmployee[*co_model.EmployeeRes]) {
-	c.team = team.(co_interface.ITeam[TIRes])
-	c.employee = employee.(co_interface.IEmployee[ITEmployeeRes])
-}
-
-func (c *TeamController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	TIRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
 ]) GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
@@ -301,9 +286,9 @@ func (c *TeamController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().UnionMainId)
+	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
+	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
 
 	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	return ctx

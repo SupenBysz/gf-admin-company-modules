@@ -15,7 +15,7 @@ type Company struct {
 }
 
 type CompanyRes struct {
-	co_entity.Company
+	*co_entity.Company
 	AdminUser *EmployeeRes `json:"adminUser"`
 }
 
