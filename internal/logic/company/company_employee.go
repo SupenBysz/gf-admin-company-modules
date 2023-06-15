@@ -39,15 +39,15 @@ import (
 )
 
 type sEmployee[
-ITCompanyRes co_model.ICompanyRes,
-TR co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -63,56 +63,18 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	]
 	dao     co_dao.XDao
 	hookArr *garray.Array
-
-	employee co_interface.IEmployee[TR]
-	team     co_interface.ITeam[ITTeamRes]
-}
-
-func (s *sEmployee[
-	ITCompanyRes,
-	TR,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) GetModules() co_interface.IModules[
-	*co_model.CompanyRes,
-	*co_model.EmployeeRes,
-	*co_model.TeamRes,
-	*co_model.FdAccountRes,
-	*co_model.FdAccountBillRes,
-	*co_model.FdBankCardRes,
-	*co_model.FdCurrencyRes,
-	*co_model.FdInvoiceRes,
-	*co_model.FdInvoiceDetailRes,
-] {
-	result, _ := s.modules.(co_interface.IModules[
-		*co_model.CompanyRes,
-		*co_model.EmployeeRes,
-		*co_model.TeamRes,
-		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
-		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
-		*co_model.FdInvoiceRes,
-		*co_model.FdInvoiceDetailRes,
-	])
-	return result
 }
 
 func NewEmployee[
-ITCompanyRes co_model.ICompanyRes,
-TR co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TR,
@@ -135,19 +97,60 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]{
-		modules:  modules,
-		dao:      *modules.Dao(),
-		hookArr:  garray.NewArray(),
-		employee: modules.Employee(),
-		team:     modules.Team(),
+		modules: modules,
+		dao:     *modules.Dao(),
+		hookArr: garray.NewArray(),
 	}
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	// 注入钩子函数
 	result.injectHook()
+	//result.employee = (co_interface.IEmployee[TR])(result)
+
+	//have GetModules() co_interface.IModules[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes]
+	//want GetModules() co_interface.IModules[co_model.ICompanyRes, TR, co_model.ITeamRes, co_model.IFdAccountRes, co_model.IFdAccountBillRes, co_model.IFdBankCardRes, co_model.IFdCurrencyRes, co_model.IFdInvoiceRes, co_model.IFdInvoiceDetailRes]
+
+	//*sEmployee[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes]            as type co_interface.IEmployee[TR]
+	//*sEmployee[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes] does not implement co_interface.IEmployee[TR]
+	//
 	return result
 }
+
+//func (s *sEmployee[
+//	ITCompanyRes,
+//	TR,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//]) GetModules() co_interface.IModules[
+//	ITCompanyRes,
+//	TR,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//] {
+//	result, _ := s.modules.(co_interface.IModules[
+//		ITCompanyRes,
+//		TR,
+//		ITTeamRes,
+//		ITFdAccountRes,
+//		ITFdAccountBillRes,
+//		ITFdBankCardRes,
+//		ITFdCurrencyRes,
+//		ITFdInvoiceRes,
+//		ITFdInvoiceDetailRes,
+//	])
+//	return result
+//}
 
 func (s *sEmployee[
 	ITCompanyRes,
@@ -224,7 +227,7 @@ func (s *sEmployee[
 		user.Detail.Realname = employee.Data().Name
 	}
 
-	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
+	if !reflect.ValueOf(data).IsNil() && employee.Data().UnionMainId != 0 {
 		company, _ := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
 		if !reflect.ValueOf(company).IsNil() {
 			user.Detail.UnionMainName = company.Data().Name
@@ -507,7 +510,7 @@ func (s *sEmployee[
 		teamSearch := base_funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
-			items, _ := s.team.QueryTeamMemberList(ctx, teamSearch)
+			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
 
 			if len(items.Records) > 0 {
 				for _, item := range items.Records {
@@ -813,13 +816,13 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 ]) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
-	isSuccess, err := s.team.DeleteTeamMemberByEmployee(ctx, employeeId)
+	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && isSuccess == false {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
 	}
 
 	// 查找到员工是管理员或者队长的团队
-	teamList, err := s.team.QueryTeamList(ctx, &base_model.SearchParams{
+	teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field:     s.dao.Team.Columns().CaptainEmployeeId,
 			Where:     "=",
@@ -837,14 +840,14 @@ func (s *sEmployee[
 	if len(teamList.Records) > 0 {
 		for _, item := range teamList.Records {
 			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
-				ret, err := s.team.SetTeamCaptain(ctx, item.Data().Id, 0)
+				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
 
 			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
-				ret, err := s.team.SetTeamOwner(ctx, item.Data().Id, 0)
+				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
@@ -971,7 +974,7 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error) {
-	team, err := s.team.GetTeamById(ctx, teamId)
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,7 +1080,7 @@ func (s *sEmployee[
 	if employee.Data().UnionMainId > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
-			func() []co_model.Team {
+			func() []ITTeamRes {
 				g.Try(ctx, func(ctx context.Context) {
 					// 获取到该员工的所有团队成员信息记录
 					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
@@ -1096,7 +1099,7 @@ func (s *sEmployee[
 					s.dao.Team.Ctx(ctx).
 						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&employee.Data().TeamList)
 				})
-				return employee.Data().TeamList
+				return kconv.Struct(employee.Data().TeamList, []ITTeamRes{})
 			},
 		)
 	}

@@ -102,8 +102,8 @@ func (c *FinancialController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetAccount(account co_interface.IFdAccount[*co_model.FdAccountRes]) {
-	c.account = account.(co_interface.IFdAccount[ITFdAccountRes])
+]) SetAccount(account co_interface.IFdAccount[ITFdAccountRes]) {
+	c.account = account
 }
 
 // GetAccountBalance 查看账户余额
@@ -476,7 +476,7 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[co_model.FdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+	ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
 	return ctx

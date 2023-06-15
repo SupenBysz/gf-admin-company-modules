@@ -15,6 +15,7 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -50,6 +51,7 @@ type sCompany[
 		ITFdInvoiceDetailRes,
 	]
 	dao co_dao.XDao
+	//makeMoreFunc func(ctx context.Context, data co_model.ICompanyRes, employeeModule co_interface.IEmployee[co_model.IEmployeeRes]) co_model.ICompanyRes
 }
 
 func NewCompany[
@@ -82,10 +84,13 @@ func NewCompany[
 		ITFdBankCardRes,
 		ITFdCurrencyRes,
 		ITFdInvoiceRes,
-		ITFdInvoiceDetailRes]{
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     *modules.Dao(),
 	}
+
+	//result.makeMoreFunc = MakeMore
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
@@ -106,7 +111,7 @@ func (s *sCompany[
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ICompanyRes
 	ret = &co_model.CompanyRes{
-		Company:   co_entity.Company{},
+		Company:   &co_entity.Company{},
 		AdminUser: nil,
 	}
 	return ret.(TR)
@@ -160,7 +165,7 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(s.makeMore(ctx, response)), nil
+	return s.masker(s.MakeMore(ctx, response)), nil
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
@@ -188,7 +193,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	return s.masker(s.makeMore(ctx, response)), nil
+	return s.masker(s.MakeMore(ctx, response)), nil
 }
 
 // HasCompanyByName 判断名称是否存在
@@ -249,7 +254,7 @@ func (s *sCompany[
 		items := make([]TR, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
-			items = append(items, s.masker(s.makeMore(ctx, item)))
+			items = append(items, s.masker(s.MakeMore(ctx, item)))
 		}
 		data.Records = items
 	}
@@ -464,7 +469,7 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.makeMore(ctx, response), nil
+	return s.MakeMore(ctx, response), nil
 }
 
 // FilterUnionMainId 跨主体查询条件过滤
@@ -546,31 +551,36 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) makeMore(ctx context.Context, data TR) TR {
+
+// ]) MakeMore(ctx context.Context, data TR, employeeModule co_interface.IEmployee[ITEmployeeRes]) TR {
+]) MakeMore(ctx context.Context, data TR) TR {
 	if reflect.ValueOf(data).IsNil() || data.Data() == nil {
 		return data
 	}
 
 	if data.Data().UserId > 0 {
 		// 附加数据 employee
-		base_funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
-			func() *co_model.EmployeeRes {
-				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
-				if employee.Data() == nil {
-					return nil
+		base_funs.AttrMake[TR](ctx, co_dao.Company.Columns().UserId,
+			func() ITEmployeeRes {
+				var returnres ITEmployeeRes
+				employee, err := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
+				//if err != nil || reflect.ValueOf(employee.Data()).IsNil() {
+				if err != nil || reflect.ValueOf(employee).IsNil() || employee.Data() == nil {
+					return returnres
 				}
 				//// 将头像中的文件id换成可访问地址
 				//employee.Data().Avatar = sys_service.File().MakeFileUrl(ctx, gconv.Int64(employee.Data().Avatar))
+				//var dd TR = *employee
 
 				data.Data().AdminUser = employee.Data()
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)
 				if user != nil {
-					gconv.Struct(user.SysUser, &data.Data().AdminUser.User)
+					gconv.Struct(user, &data.Data().AdminUser.User)
 					gconv.Struct(user.Detail, &data.Data().AdminUser.Detail)
 				}
 
-				return data.Data().AdminUser
+				return kconv.Struct(employee, returnres)
 			},
 		)
 	}

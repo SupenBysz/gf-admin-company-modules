@@ -211,7 +211,7 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[co_model.CompanyRes, *co_model.EmployeeRes](ctx, c.dao.Company.Columns().UserId)
+	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
 
 	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	return ctx
