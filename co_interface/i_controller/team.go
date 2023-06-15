@@ -4,14 +4,11 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/kysion/base-library/base_model"
 )
 
 type ITeam[ITTeamRes co_model.ITeamRes] interface {
-	SetTeam(team co_interface.ITeam[*co_model.TeamRes], employee co_interface.IEmployee[*co_model.EmployeeRes])
-
 	// GetTeamById 根据id获取团队信息
 	GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (ITTeamRes, error)
 

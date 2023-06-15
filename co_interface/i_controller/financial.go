@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
-	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/kysion/base-library/base_model"
 )
@@ -20,8 +19,6 @@ type IFinancial[
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] interface {
-	SetAccount(account co_interface.IFdAccount[*co_model.FdAccountRes])
-
 	// GetAccountBalance 查看账户余额
 	GetAccountBalance(ctx context.Context, req *co_company_api.GetAccountBalanceReq) (api_v1.Int64Res, error)
 

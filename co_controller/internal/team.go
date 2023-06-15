@@ -94,21 +94,6 @@ func (c *TeamController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetTeam(team co_interface.ITeam[*co_model.TeamRes], employee co_interface.IEmployee[*co_model.EmployeeRes]) {
-	c.team = team.(co_interface.ITeam[TIRes])
-	c.employee = employee.(co_interface.IEmployee[ITEmployeeRes])
-}
-
-func (c *TeamController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	TIRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
 ]) GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (TIRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
