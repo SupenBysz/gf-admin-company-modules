@@ -377,23 +377,37 @@ func (s *sTeam[
 		UnionMainId:       sessionUser.UnionMainId,
 		CreatedAt:         gtime.Now(),
 	}
-	captain := co_do.CompanyTeamMember{
+	member := co_do.CompanyTeamMember{
 		Id:          idgen.NextId(),
 		TeamId:      data.Id,
 		EmployeeId:  info.CaptainEmployeeId,
 		UnionMainId: sessionUser.UnionMainId,
 		JoinAt:      gtime.Now(),
 	}
-
 	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+
+		// 重载Do模型
+		doData, err := info.OverrideDo.MakeDo(data)
+		if err != nil {
+			return err
+		}
+
 		// 创建团队
 		affected, err := daoctl.InsertWithError(
-			s.dao.Team.Ctx(ctx).Data(data),
+			s.dao.Team.Ctx(ctx).Data(doData),
 		)
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
 		}
 		if info.CaptainEmployeeId > 0 {
+
+			// 构建待写入数据库的Do数据对象
+			captain, err := info.TeamMemberDo.DoFactory(member)
+
+			if err != nil {
+				return err
+			}
+
 			// 创建团队队长
 			_, err = s.dao.TeamMember.Ctx(ctx).Data(captain).Insert()
 			if err != nil {

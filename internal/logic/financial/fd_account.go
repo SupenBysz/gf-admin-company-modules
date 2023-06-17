@@ -204,14 +204,17 @@ func (s *sFdAccount[
 		return false, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
 	}
 
-	//data := kconv.Struct(info, &co_do.FdAccount{})
+	data := kconv.Struct(info, &co_do.FdAccount{})
+
+	// 重载Do模型
+	doData, err := info.OverrideDo.MakeDo(*data)
+	if err != nil {
+		return false, err
+	}
 
 	affected, err := daoctl.UpdateWithError(s.dao.FdAccount.Ctx(ctx).
 		Where(co_do.FdAccount{Id: accountId, AccountType: info.AccountType}).OmitNilData().
-		Data(co_do.FdAccount{
-			Name:          info.Name,
-			AccountNumber: info.AccountNumber,
-		}))
+		Data(doData))
 
 	if err != nil || affected <= 0 {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号修改失败！", s.dao.FdAccount.Table())
