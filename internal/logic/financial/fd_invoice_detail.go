@@ -11,6 +11,7 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -135,7 +136,15 @@ func (s *sFdInvoiceDetail[
 	data.Data().State = co_enum.Invoice.AuditType.WaitReview.Code()
 	data.Data().CreatedBy = sessionUser.Id
 
-	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Data(data).Insert()
+	newData := kconv.Struct(data.Data(), &co_do.FdInvoiceDetail{})
+
+	// 重载Do模型
+	doData, err := info.OverrideDo.MakeDo(*newData)
+	if err != nil {
+		return response, err
+	}
+
+	result, err := s.dao.FdInvoiceDetail.Ctx(ctx).Data(doData).Insert()
 
 	if err != nil || result == nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#InvoiceDetail}{#error_Create_Failed}"), s.dao.FdInvoiceDetail.Table())

@@ -28,15 +28,15 @@ import (
 )
 
 type sCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -55,15 +55,15 @@ type sCompany[
 }
 
 func NewCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -334,8 +334,7 @@ func (s *sCompany[
 		if info.Id == 0 {
 			// 是否创建默认员工和角色
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
-				// 1.构建员工信息 + user登录信息
-				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
 					No:          "001",
 					Name:        info.ContactName,
 					Mobile:      info.ContactMobile,
@@ -343,6 +342,8 @@ func (s *sCompany[
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
 				})
+				// 1.构建员工信息 + user登录信息
+				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeDoData)
 				if err != nil {
 					return err
 				}
@@ -377,9 +378,15 @@ func (s *sCompany[
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 
+			// 重载Do模型
+			doData, err := info.OverrideDo.MakeDo(data)
+			if err != nil {
+				return err
+			}
+
 			affected, err := daoctl.InsertWithError(
 				s.dao.Company.Ctx(ctx),
-				data,
+				doData,
 			)
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
@@ -414,10 +421,17 @@ func (s *sCompany[
 
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
+
+			// 重载Do模型
+			doData, err := info.OverrideDo.MakeDo(data)
+			if err != nil {
+				return err
+			}
+
 			_, err = daoctl.UpdateWithError(
 				s.dao.Company.Ctx(ctx).
 					Where(co_do.Company{Id: info.Id}),
-				data,
+				doData,
 			)
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
@@ -575,9 +589,11 @@ func (s *sCompany[
 				data.Data().AdminUser = employee.Data()
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)
+
 				if user != nil {
 					gconv.Struct(user, &data.Data().AdminUser.User)
 					gconv.Struct(user.Detail, &data.Data().AdminUser.Detail)
+					data.Data().SysUserRes.DoFactory(*user)
 				}
 
 				return kconv.Struct(employee, returnres)

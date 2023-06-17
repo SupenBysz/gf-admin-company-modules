@@ -688,7 +688,13 @@ func (s *sEmployee[
 				data.Id = newUser.Id
 			}
 
-			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(data))
+			// 重载Do模型
+			doData, err := info.OverrideDo.MakeDo(*data)
+			if err != nil {
+				return err
+			}
+
+			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(doData))
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())

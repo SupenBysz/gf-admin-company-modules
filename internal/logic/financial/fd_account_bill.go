@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/kysion/base-library/utility/kconv"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
@@ -236,7 +238,15 @@ func (s *sFdAccountBill[
 		bill.Data().CreatedAt = gtime.Now()
 		bill.Data().CreatedBy = sessionUser.Id
 
-		result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(bill)
+		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
+
+		// 重载Do模型
+		doData, err := info.OverrideDo.MakeDo(*data)
+		if err != nil {
+			return err
+		}
+
+		result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(doData)
 
 		if result == nil || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Create_Failed}"), s.dao.FdAccountBill.Table())
