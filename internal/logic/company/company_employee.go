@@ -1077,58 +1077,85 @@ func (s *sEmployee[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) makeMore(ctx context.Context, employee TR) TR {
-	if reflect.ValueOf(employee).IsNil() {
-		return employee
+]) makeMore(ctx context.Context, data TR) TR {
+	if reflect.ValueOf(data).IsNil() {
+		return data
 	}
 
 	// team附加数据
-	if employee.Data().UnionMainId > 0 {
+	if data.Data().UnionMainId > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
 				g.Try(ctx, func(ctx context.Context) {
 					// 获取到该员工的所有团队成员信息记录
-					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
-					s.dao.TeamMember.Ctx(ctx).
-						Where(co_do.CompanyTeamMember{EmployeeId: employee.Data().CompanyEmployee.Id}).Scan(&teamMemberItems)
-					if len(teamMemberItems) == 0 {
-						employee.Data().TeamList = nil
+					//teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+
+					ids, err := s.dao.TeamMember.Ctx(ctx).
+						Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Fields([]string{co_dao.CompanyTeamMember.Columns().TeamId}).All()
+
+					temIds := ids.Array()
+
+					if err != nil {
+						return
+					}
+
+					//s.modules.Dao().TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Scan(&teamMemberItems)
+
+					if len(ids) == 0 {
+						data.Data().TeamList = nil
 						return
 					}
 
 					// 记录该员工所在所有团队
-					teamIds := make([]int64, 0)
-					for _, memberItem := range teamMemberItems {
-						teamIds = append(teamIds, memberItem.TeamId)
-					}
+					//teamIds := make([]int64, 0)
+					//for _, memberItem := range ids {
+					//	//member := memberItem.(*co_entity.CompanyTeamMember)
+					//	teamIds = append(teamIds, memberItem.TeamId)
+					//}
+
 					s.dao.Team.Ctx(ctx).
-						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&employee.Data().TeamList)
+						WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
+
+					// 添加附加数据
+					data.Data().SetTeamList(data.Data())
+					// 业务层添加附加数据
+					data.SetTeamList(data)
+
 				})
-				return kconv.Struct(employee.Data().TeamList, []ITTeamRes{})
+
+				return kconv.Struct(data.Data().TeamList, []ITTeamRes{})
 			},
 		)
 	}
 
 	// user相关附加数据
-	if employee.Data().CompanyEmployee.Id > 0 {
+	if data.Data().CompanyEmployee.Id > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().Id,
 			func() (res TR) {
-				if employee.Data().CompanyEmployee.Id == 0 {
+				// 为什么要在内部订阅
+				//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
+				//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
+				//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+
+				if data.Data().CompanyEmployee.Id == 0 {
 					return res
 				}
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, employee.Data().CompanyEmployee.Id)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
 				if user != nil {
-					gconv.Struct(user.SysUser, &employee.Data().User)
-					gconv.Struct(user.Detail, &employee.Data().Detail)
+					gconv.Struct(user.SysUser, &data.Data().User)
+					gconv.Struct(user.Detail, &data.Data().Detail)
 				}
 
-				return employee
+				data.Data().SetUser(data.Data().User)
+				data.SetUser(data.Data().User)
+
+				return data
 			},
 		)
 	}
 
-	return employee
+	return data
 }
