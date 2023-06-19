@@ -8,6 +8,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/kconv"
+	"reflect"
 )
 
 type Employee struct {
@@ -49,14 +51,38 @@ type EmployeeRes struct {
 	TeamList []Team                   `json:"teamList"`
 }
 
+func (m *EmployeeRes) SetUser(user interface{}) {
+	if user == nil || reflect.ValueOf(user).Type() != reflect.ValueOf(m.User).Type() {
+		return
+	}
+	kconv.Struct(user, &m.User)
+}
+
+func (m *EmployeeRes) SetTeamList(data interface{}) {
+	if data == nil || reflect.ValueOf(data).Type() != reflect.ValueOf(m).Type() {
+		return
+	}
+
+	kconv.Struct(data, &m.TeamList)
+}
+
 type EmployeeListRes base_model.CollectRes[*EmployeeRes]
 
 func (m *EmployeeRes) Data() *EmployeeRes {
 	return m
 }
 
+func (m *EmployeeRes) NewTeamList() interface{} {
+	teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
+
+	return teamMemberItems
+}
+
 type IEmployeeRes interface {
+	NewTeamList() interface{}
 	Data() *EmployeeRes
+	SetUser(user interface{})
+	SetTeamList(teamList interface{})
 }
 
 // type EmployeeListRes base_model.CollectRes[*EmployeeRes]
