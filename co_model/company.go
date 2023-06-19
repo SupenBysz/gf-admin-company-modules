@@ -6,6 +6,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/kconv"
+	"reflect"
 )
 
 type Company struct {
@@ -21,8 +23,7 @@ type Company struct {
 
 type CompanyRes struct {
 	*co_entity.Company
-	AdminUser  *EmployeeRes                                `json:"adminUser"`
-	SysUserRes base_interface.BaseModel[sys_model.SysUser] `p:"-"`
+	AdminUser *EmployeeRes `json:"adminUser"`
 }
 
 type CompanyListRes base_model.CollectRes[CompanyRes]
@@ -31,6 +32,19 @@ func (m *CompanyRes) Data() *CompanyRes {
 	return m
 }
 
+func (m *CompanyRes) SetAdminUser(employee interface{}) {
+	if employee == nil || reflect.ValueOf(employee).Type() != reflect.ValueOf(m.AdminUser).Type() {
+		return
+	}
+	kconv.Struct(employee, &m.AdminUser)
+}
+
 type ICompanyRes interface {
 	Data() *CompanyRes
+	SetAdminUser(employee interface{})
+}
+
+type IRes[T interface{}] interface {
+	Data() *T
+	SetAdminUser(sysUser *sys_model.SysUser)
 }

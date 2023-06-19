@@ -12,7 +12,6 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/kconv"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
@@ -875,15 +874,15 @@ func (s *sTeam[
 	if data.Data().OwnerEmployeeId > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Team.Columns().OwnerEmployeeId,
-			func() ITCompanyRes {
-				var returnRes ITCompanyRes
+			func() ITEmployeeRes {
+				var returnRes ITEmployeeRes
 				if data.Data().OwnerEmployeeId == 0 {
 					return returnRes
 				}
 
-				v, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().OwnerEmployeeId)
-				if reflect.ValueOf(v).IsNil() {
-					data.Data().Owner = v.Data()
+				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().OwnerEmployeeId)
+				if !reflect.ValueOf(employee).IsNil() {
+					data.Data().Owner = employee.Data()
 				}
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().OwnerEmployeeId)
 				if user != nil && data.Data().Owner != nil {
@@ -891,7 +890,13 @@ func (s *sTeam[
 					gconv.Struct(user.Detail, &data.Data().Owner.Detail)
 				}
 
-				return kconv.Struct(data.Data().Owner, returnRes)
+				// 附加数据填充
+				data.Data().SetOwner(employee.Data())
+				// 业务层附加数据填充
+				data.SetOwner(employee)
+
+				return employee
+				//return kconv.Struct(data.Data().Owner, returnRes)
 			},
 		)
 	}
@@ -906,9 +911,9 @@ func (s *sTeam[
 					return returnRes
 				}
 
-				v, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
-				if !reflect.ValueOf(v).IsNil() {
-					data.Data().Captain = v.Data()
+				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
+				if !reflect.ValueOf(employee).IsNil() {
+					data.Data().Captain = employee.Data()
 				}
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CaptainEmployeeId)
 				if user != nil && data.Data().Captain != nil {
@@ -916,7 +921,13 @@ func (s *sTeam[
 					gconv.Struct(user.Detail, &data.Data().Captain.Detail)
 				}
 
-				return kconv.Struct(data.Data().Captain, returnRes)
+				// 附加数据填充
+				data.Data().SetCaptain(employee.Data())
+				// 业务层附加数据填充
+				data.SetCaptain(employee)
+
+				return employee
+				//return kconv.Struct(data.Data().Captain, returnRes)
 			},
 		)
 	}
@@ -931,11 +942,16 @@ func (s *sTeam[
 					return returnRes
 				}
 
-				v, _ := s.modules.Company().GetCompanyById(ctx, data.Data().UnionMainId)
-				if !reflect.ValueOf(v).IsNil() {
-					data.Data().UnionMain = v.Data()
+				unionMain, _ := s.modules.Company().GetCompanyById(ctx, data.Data().UnionMainId)
+				if !reflect.ValueOf(unionMain).IsNil() {
+					data.Data().UnionMain = unionMain.Data()
 				}
-				return kconv.Struct(data.Data().UnionMain, returnRes)
+
+				data.Data().SetUnionMain(unionMain)
+				data.SetUnionMain(unionMain)
+
+				return unionMain
+				//return kconv.Struct(data.Data().UnionMain, returnRes)
 			},
 		)
 	}
@@ -950,11 +966,16 @@ func (s *sTeam[
 					return returnRes
 				}
 
-				v, _ := s.modules.Team().GetTeamById(ctx, data.Data().ParentId)
-				if !reflect.ValueOf(v).IsNil() {
-					data.Data().Parent = v.Data()
+				team, _ := s.modules.Team().GetTeamById(ctx, data.Data().ParentId)
+				if !reflect.ValueOf(team).IsNil() {
+					data.Data().Parent = team.Data()
 				}
-				return kconv.Struct(data.Data().Parent, returnRes)
+
+				data.Data().SetParentTeam(team)
+				data.SetParentTeam(team)
+
+				return team
+				//return kconv.Struct(data.Data().Parent, returnRes)
 			},
 		)
 	}

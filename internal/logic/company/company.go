@@ -3,6 +3,8 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -15,7 +17,6 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
-	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -28,15 +29,15 @@ import (
 )
 
 type sCompany[
-TR co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TR co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -55,15 +56,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func NewCompany[
-TR co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TR co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -554,7 +555,7 @@ func (s *sCompany[
 	return search
 }
 
-// makeMore 按需加载附加数据
+// MakeMore 按需加载附加数据
 func (s *sCompany[
 	TR,
 	ITEmployeeRes,
@@ -576,27 +577,27 @@ func (s *sCompany[
 		// 附加数据 employee
 		base_funs.AttrMake[TR](ctx, co_dao.Company.Columns().UserId,
 			func() ITEmployeeRes {
-				var returnres ITEmployeeRes
+				// 订阅自定义类型的员工数据信息
+				ctx = base_funs.AttrBuilder[ITEmployeeRes, ITEmployeeRes](ctx, s.modules.Dao().Employee.Columns().Id)
+
+				// 追加订阅自定义类型的员工扩展数据
+				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+
 				employee, err := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
 				//if err != nil || reflect.ValueOf(employee.Data()).IsNil() {
 				if err != nil || reflect.ValueOf(employee).IsNil() || employee.Data() == nil {
-					return returnres
+					return employee
 				}
 				//// 将头像中的文件id换成可访问地址
 				//employee.Data().Avatar = sys_service.File().MakeFileUrl(ctx, gconv.Int64(employee.Data().Avatar))
 				//var dd TR = *employee
 
-				data.Data().AdminUser = employee.Data()
+				// 给Company中对象的AdminUser成员赋值
+				data.Data().SetAdminUser(employee.Data())
+				// 给自定义类型的AdminUser成员赋值
+				data.SetAdminUser(employee)
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)
-
-				if user != nil {
-					gconv.Struct(user, &data.Data().AdminUser.User)
-					gconv.Struct(user.Detail, &data.Data().AdminUser.Detail)
-					data.Data().SysUserRes.DoFactory(*user)
-				}
-
-				return kconv.Struct(employee, returnres)
+				return employee
 			},
 		)
 	}
