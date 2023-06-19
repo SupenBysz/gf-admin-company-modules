@@ -4,11 +4,13 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/base_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/kysion/base-library/utility/kconv"
+	"reflect"
 )
 
 type Team struct {
-	OverrideDo        base_interface.BaseModel[co_do.CompanyTeam]       `p:"-"`
-	TeamMemberDo      base_interface.BaseModel[co_do.CompanyTeamMember] `p:"-"`
+	OverrideDo        base_interface.BaseModel[co_do.CompanyTeam]       `json:"-"`
+	TeamMemberDo      base_interface.BaseModel[co_do.CompanyTeamMember] `json:"-"`
 	Id                int64                                             `json:"id"                dc:"ID"`
 	Name              string                                            `json:"name"              v:"required|max-length:128#名称不能为空|名称长度超128字符出限定范围" dc:"团队名称，公司维度下唯一"`
 	OwnerEmployeeId   int64                                             `json:"ownerEmployeeId"   dc:"团队所有者/业务总监/业务经理/团队队长"`
@@ -29,8 +31,40 @@ func (m *TeamRes) Data() *TeamRes {
 	return m
 }
 
+func (m *TeamRes) SetOwner(employee interface{}) {
+	if employee == nil || reflect.ValueOf(employee).Type() != reflect.ValueOf(m.Owner).Type() {
+		return
+	}
+	kconv.Struct(employee, &m.Owner)
+}
+
+func (m *TeamRes) SetCaptain(employee interface{}) {
+	if employee == nil || reflect.ValueOf(employee).Type() != reflect.ValueOf(m.Captain).Type() {
+		return
+	}
+	kconv.Struct(employee, &m.Captain)
+}
+
+func (m *TeamRes) SetUnionMain(unionMain interface{}) {
+	if unionMain == nil || reflect.ValueOf(unionMain).Type() != reflect.ValueOf(m.UnionMain).Type() {
+		return
+	}
+	kconv.Struct(unionMain, &m.UnionMain)
+}
+
+func (m *TeamRes) SetParentTeam(parent interface{}) {
+	if parent == nil || reflect.ValueOf(parent).Type() != reflect.ValueOf(m.Parent).Type() {
+		return
+	}
+	kconv.Struct(parent, &m.Parent)
+}
+
 type ITeamRes interface {
 	Data() *TeamRes
+	SetOwner(employee interface{})
+	SetCaptain(employee interface{})
+	SetUnionMain(unionMain interface{})
+	SetParentTeam(parent interface{})
 }
 
 type TeamMemberRes struct {
