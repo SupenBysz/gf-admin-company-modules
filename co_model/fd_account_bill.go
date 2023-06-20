@@ -9,7 +9,7 @@ import (
 )
 
 type AccountBillRegister struct {
-	OverrideDo    base_interface.BaseModel[co_do.FdAccountBill] `p:"-"`
+	OverrideDo    base_interface.BaseModel[co_do.FdAccountBill] `json:"-"`
 	FromUserId    int64                                         `json:"fromUserId"     v:"required#请输入交易发起方用户id" dc:"交易发起方UserID，如果是系统则固定为-1"`
 	ToUserId      int64                                         `json:"toUserId"       v:"required#请输入交易接收方用户id"  dc:"交易对象UserID"`
 	FdAccountId   int64                                         `json:"fdAccountId"    v:"required#财务账号ID不能为空" dc:"财务账户ID"`

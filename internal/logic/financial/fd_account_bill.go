@@ -241,7 +241,7 @@ func (s *sFdAccountBill[
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
 
 		// 重载Do模型
-		doData, err := info.OverrideDo.MakeDo(*data)
+		doData, err := info.OverrideDo.DoFactory(*data)
 		if err != nil {
 			return err
 		}

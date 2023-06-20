@@ -143,7 +143,7 @@ func (s *sFdInvoice[
 	invoice.Data().CreatedBy = sessionUser.Id
 
 	data := kconv.Struct(invoice.Data(), &co_do.FdInvoice{})
-	doData, err := info.OverrideDo.MakeDo(*data)
+	doData, err := info.OverrideDo.DoFactory(*data)
 	if err != nil {
 		return response, err
 	}
