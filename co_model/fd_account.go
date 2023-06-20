@@ -22,7 +22,7 @@ type FdAccountRegister struct {
 }
 
 type UpdateAccount struct {
-	OverrideDo base_interface.BaseModel[co_do.FdAccount] `json:"-"`
+	OverrideDo base_interface.DoModel[co_do.FdAccount] `json:"-"`
 
 	Name          *string `json:"name" dc:"账户开户名称，姓名或者是单位全称"`
 	AccountType   *int    `json:"accountType"       v:"required|in:1,2,3,4,5,6#请输入正确的货币代码|账户类型限定为：1系统帐户、2银行卡、3支付宝、4微信、5云闪付、6翼支付" dc:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
