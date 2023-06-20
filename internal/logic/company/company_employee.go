@@ -1088,9 +1088,7 @@ func (s *sEmployee[
 			s.dao.Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
 				g.Try(ctx, func(ctx context.Context) {
-					// 获取到该员工的所有团队成员信息记录
-					//teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
-
+					// 获取到该员工的所有团队成员信息记录ids
 					ids, err := s.dao.TeamMember.Ctx(ctx).
 						Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Fields([]string{co_dao.CompanyTeamMember.Columns().TeamId}).All()
 
@@ -1100,20 +1098,12 @@ func (s *sEmployee[
 						return
 					}
 
-					//s.modules.Dao().TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Scan(&teamMemberItems)
-
 					if len(ids) == 0 {
 						data.Data().TeamList = nil
 						return
 					}
 
 					// 记录该员工所在所有团队
-					//teamIds := make([]int64, 0)
-					//for _, memberItem := range ids {
-					//	//member := memberItem.(*co_entity.CompanyTeamMember)
-					//	teamIds = append(teamIds, memberItem.TeamId)
-					//}
-
 					s.dao.Team.Ctx(ctx).
 						WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
 
@@ -1145,12 +1135,12 @@ func (s *sEmployee[
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
 				if user != nil {
+					data.Data().SetUser(data.Data().User)
+					data.SetUser(data.Data().User)
+
 					gconv.Struct(user.SysUser, &data.Data().User)
 					gconv.Struct(user.Detail, &data.Data().Detail)
 				}
-
-				data.Data().SetUser(data.Data().User)
-				data.SetUser(data.Data().User)
 
 				return data
 			},

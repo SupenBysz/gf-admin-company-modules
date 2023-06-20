@@ -883,17 +883,18 @@ func (s *sTeam[
 				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().OwnerEmployeeId)
 				if !reflect.ValueOf(employee).IsNil() {
 					data.Data().Owner = employee.Data()
+
+					// 附加数据填充
+					data.Data().SetOwner(employee.Data())
+					// 业务层附加数据填充
+					data.SetOwner(employee)
 				}
+
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().OwnerEmployeeId)
 				if user != nil && data.Data().Owner != nil {
 					gconv.Struct(user.SysUser, &data.Data().Owner.User)
 					gconv.Struct(user.Detail, &data.Data().Owner.Detail)
 				}
-
-				// 附加数据填充
-				data.Data().SetOwner(employee.Data())
-				// 业务层附加数据填充
-				data.SetOwner(employee)
 
 				return employee
 				//return kconv.Struct(data.Data().Owner, returnRes)
@@ -914,17 +915,18 @@ func (s *sTeam[
 				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().CaptainEmployeeId)
 				if !reflect.ValueOf(employee).IsNil() {
 					data.Data().Captain = employee.Data()
+
+					// 附加数据填充
+					data.Data().SetCaptain(employee.Data())
+					// 业务层附加数据填充
+					data.SetCaptain(employee)
 				}
+
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CaptainEmployeeId)
 				if user != nil && data.Data().Captain != nil {
 					gconv.Struct(user.SysUser, &data.Data().Captain.User)
 					gconv.Struct(user.Detail, &data.Data().Captain.Detail)
 				}
-
-				// 附加数据填充
-				data.Data().SetCaptain(employee.Data())
-				// 业务层附加数据填充
-				data.SetCaptain(employee)
 
 				return employee
 				//return kconv.Struct(data.Data().Captain, returnRes)
@@ -945,10 +947,10 @@ func (s *sTeam[
 				unionMain, _ := s.modules.Company().GetCompanyById(ctx, data.Data().UnionMainId)
 				if !reflect.ValueOf(unionMain).IsNil() {
 					data.Data().UnionMain = unionMain.Data()
-				}
 
-				data.Data().SetUnionMain(unionMain)
-				data.SetUnionMain(unionMain)
+					data.Data().SetUnionMain(unionMain)
+					data.SetUnionMain(unionMain)
+				}
 
 				return unionMain
 				//return kconv.Struct(data.Data().UnionMain, returnRes)
@@ -969,10 +971,10 @@ func (s *sTeam[
 				team, _ := s.modules.Team().GetTeamById(ctx, data.Data().ParentId)
 				if !reflect.ValueOf(team).IsNil() {
 					data.Data().Parent = team.Data()
-				}
 
-				data.Data().SetParentTeam(team)
-				data.SetParentTeam(team)
+					data.Data().SetParentTeam(team)
+					data.SetParentTeam(team)
+				}
 
 				return team
 				//return kconv.Struct(data.Data().Parent, returnRes)
