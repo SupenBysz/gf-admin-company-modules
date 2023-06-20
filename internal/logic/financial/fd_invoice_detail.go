@@ -139,7 +139,7 @@ func (s *sFdInvoiceDetail[
 	newData := kconv.Struct(data.Data(), &co_do.FdInvoiceDetail{})
 
 	// 重载Do模型
-	doData, err := info.OverrideDo.MakeDo(*newData)
+	doData, err := info.OverrideDo.DoFactory(*newData)
 	if err != nil {
 		return response, err
 	}

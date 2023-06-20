@@ -13,7 +13,7 @@ import (
 )
 
 type Employee struct {
-	OverrideDo  base_interface.BaseModel[co_do.CompanyEmployee] `p:"-"`
+	OverrideDo  base_interface.BaseModel[co_do.CompanyEmployee] `json:"-"`
 	Id          int64                                           `json:"id"           dc:"ID，保持与USERID一致"`
 	No          string                                          `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
 	Avatar      string                                          `json:"avatar"       dc:"头像"`
@@ -26,7 +26,7 @@ type Employee struct {
 }
 
 type UpdateEmployee struct {
-	OverrideDo base_interface.BaseModel[co_do.CompanyEmployee] `p:"-"`
+	OverrideDo base_interface.BaseModel[co_do.CompanyEmployee] `json:"-"`
 	Id         int64                                           `json:"id"           dc:"ID，保持与USERID一致"`
 	No         string                                          `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
 	Name       string                                          `json:"name"         v:"required|max-length:16#名称不能为空|工号长度超出限定16字符" dc:"姓名"`

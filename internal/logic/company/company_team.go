@@ -386,7 +386,7 @@ func (s *sTeam[
 	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
 		// 重载Do模型
-		doData, err := info.OverrideDo.MakeDo(data)
+		doData, err := info.OverrideDo.DoFactory(data)
 		if err != nil {
 			return err
 		}
@@ -897,7 +897,6 @@ func (s *sTeam[
 				}
 
 				return employee
-				//return kconv.Struct(data.Data().Owner, returnRes)
 			},
 		)
 	}
@@ -929,7 +928,6 @@ func (s *sTeam[
 				}
 
 				return employee
-				//return kconv.Struct(data.Data().Captain, returnRes)
 			},
 		)
 	}
@@ -953,7 +951,6 @@ func (s *sTeam[
 				}
 
 				return unionMain
-				//return kconv.Struct(data.Data().UnionMain, returnRes)
 			},
 		)
 	}
@@ -977,7 +974,6 @@ func (s *sTeam[
 				}
 
 				return team
-				//return kconv.Struct(data.Data().Parent, returnRes)
 			},
 		)
 	}

@@ -689,7 +689,7 @@ func (s *sEmployee[
 			}
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.MakeDo(*data)
+			doData, err := info.OverrideDo.DoFactory(*data)
 			if err != nil {
 				return err
 			}

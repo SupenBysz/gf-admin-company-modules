@@ -9,7 +9,7 @@ import (
 )
 
 type FdInvoiceRegister struct {
-	OverrideDo    base_interface.BaseModel[co_do.FdInvoice] `p:"-"`
+	OverrideDo    base_interface.BaseModel[co_do.FdInvoice] `json:"-"`
 	Name          string                                    `json:"name"           v:"required#请输入发票抬头名称" dc:"发票抬头名称"`
 	TaxId         string                                    `json:"taxId"          v:"required#请输入纳税识别号" dc:"纳税识别号"`
 	Addr          string                                    `json:"addr"           dc:"发票收件地址，限纸质"`

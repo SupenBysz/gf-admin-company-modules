@@ -343,8 +343,10 @@ func (s *sCompany[
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
 				})
+				employeeData := employeeDoData.(*co_model.Employee)
+
 				// 1.构建员工信息 + user登录信息
-				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeDoData)
+				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData)
 				if err != nil {
 					return err
 				}
@@ -380,7 +382,7 @@ func (s *sCompany[
 			data.CreatedAt = gtime.Now()
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.MakeDo(data)
+			doData, err := info.OverrideDo.DoFactory(data)
 			if err != nil {
 				return err
 			}
@@ -424,7 +426,7 @@ func (s *sCompany[
 			data.UpdatedAt = gtime.Now()
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.MakeDo(data)
+			doData, err := info.OverrideDo.DoFactory(data)
 			if err != nil {
 				return err
 			}

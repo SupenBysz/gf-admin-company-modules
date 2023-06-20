@@ -10,7 +10,7 @@ import (
 
 // FdInvoiceDetailRegister 申请创建发票
 type FdInvoiceDetailRegister struct {
-	OverrideDo    base_interface.BaseModel[co_do.FdInvoiceDetail] `p:"-"`
+	OverrideDo    base_interface.BaseModel[co_do.FdInvoiceDetail] `json:"-"`
 	TaxNumber     string                                          `json:"taxNumber"     v:"required#请输入纳税识别号" dc:"纳税识别号"`
 	TaxName       string                                          `json:"taxName"       v:"required#请输入纳税人名称"  dc:"纳税人名称"`
 	BillIds       string                                          `json:"billIds"       v:"required#请输入开支账单"  dc:"账单ID组"`

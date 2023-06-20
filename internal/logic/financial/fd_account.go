@@ -207,7 +207,7 @@ func (s *sFdAccount[
 	data := kconv.Struct(info, &co_do.FdAccount{})
 
 	// 重载Do模型
-	doData, err := info.OverrideDo.MakeDo(*data)
+	doData, err := info.OverrideDo.DoFactory(*data)
 	if err != nil {
 		return false, err
 	}

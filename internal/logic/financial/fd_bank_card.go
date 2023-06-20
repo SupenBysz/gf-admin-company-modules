@@ -150,7 +150,7 @@ func (s *sFdBankCard[
 	data := kconv.Struct(bankCardInfo.Data(), &co_do.FdBankCard{})
 
 	// 重载Do模型
-	doData, err := info.OverrideDo.MakeDo(*data)
+	doData, err := info.OverrideDo.DoFactory(*data)
 	if err != nil {
 		return response, err
 	}
