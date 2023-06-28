@@ -16,6 +16,7 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 )
@@ -120,9 +121,9 @@ func (s *sFdInvoice[
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 一个公司只能有一个发票抬头
-	invoice, err := s.GetFdInvoiceByTaxId(ctx, info.TaxId)
+	selectInvoice, err := s.GetFdInvoiceByTaxId(ctx, info.TaxId)
 	if err == nil {
-		if info.UnionMainId == invoice.Data().UnionMainId {
+		if info.UnionMainId == selectInvoice.Data().UnionMainId {
 			return response, gerror.New(s.modules.T(ctx, "error_OneCompany_CanRegisterOnlyOne_Invoice"))
 		}
 	}
@@ -133,20 +134,26 @@ func (s *sFdInvoice[
 	}
 
 	// 创建发票
-	data := s.FactoryMakeResponseInstance()
-	gconv.Struct(info, data.Data())
-	data.Data().Id = idgen.NextId()
-	data.Data().AuditUserId = 0
-	data.Data().State = co_enum.Invoice.AuditType.WaitReview.Code()
+	invoice := s.FactoryMakeResponseInstance()
+	gconv.Struct(info, invoice.Data())
+	invoice.Data().Id = idgen.NextId()
+	invoice.Data().AuditUserId = 0
+	invoice.Data().State = co_enum.Invoice.AuditType.WaitReview.Code()
 
-	data.Data().CreatedBy = sessionUser.Id
+	invoice.Data().CreatedBy = sessionUser.Id
 
-	_, err = s.dao.FdInvoice.Ctx(ctx).Data(data).Insert()
+	data := kconv.Struct(invoice.Data(), &co_do.FdInvoice{})
+	doData, err := info.OverrideDo.DoFactory(*data)
+	if err != nil {
+		return response, err
+	}
+
+	_, err = s.dao.FdInvoice.Ctx(ctx).Data(doData).Insert()
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Invoice_Create_Failed"), s.dao.FdInvoice.Table())
 	}
 
-	return s.GetInvoiceById(ctx, data.Data().Id)
+	return s.GetInvoiceById(ctx, invoice.Data().Id)
 }
 
 // GetInvoiceById 根据id获取发票

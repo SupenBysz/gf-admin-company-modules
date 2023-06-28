@@ -11,6 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/utility/kconv"
 
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -146,8 +147,16 @@ func (s *sFdBankCard[
 	bankCardInfo.Data().CreatedAt = gtime.Now()
 	bankCardInfo.Data().CreatedBy = sessionUser.Id
 
+	data := kconv.Struct(bankCardInfo.Data(), &co_do.FdBankCard{})
+
+	// 重载Do模型
+	doData, err := info.OverrideDo.DoFactory(*data)
+	if err != nil {
+		return response, err
+	}
+
 	// 添加银行卡
-	_, err = s.dao.FdBankCard.Ctx(ctx).Data(bankCardInfo.Data()).Insert()
+	_, err = s.dao.FdBankCard.Ctx(ctx).Data(doData).Insert()
 
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#BankCard}{#error_Add_Failed}"), s.dao.FdBankCard.Table())

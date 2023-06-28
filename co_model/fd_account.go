@@ -1,6 +1,8 @@
 package co_model
 
 import (
+	"github.com/SupenBysz/gf-admin-company-modules/base_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/kysion/base-library/base_model"
 )
@@ -20,6 +22,8 @@ type FdAccountRegister struct {
 }
 
 type UpdateAccount struct {
+	OverrideDo base_interface.DoModel[co_do.FdAccount] `json:"-"`
+
 	Name          *string `json:"name" dc:"账户开户名称，姓名或者是单位全称"`
 	AccountType   *int    `json:"accountType"       v:"required|in:1,2,3,4,5,6#请输入正确的货币代码|账户类型限定为：1系统帐户、2银行卡、3支付宝、4微信、5云闪付、6翼支付" dc:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
 	AccountNumber *string `json:"accountNumber"      dc:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`

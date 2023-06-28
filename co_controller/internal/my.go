@@ -13,15 +13,15 @@ import (
 )
 
 type MyController[
-TIRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	i_controller.IMy
 	modules co_interface.IModules[
@@ -38,15 +38,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func My[
-TIRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TIRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TIRes,
 	ITEmployeeRes,
@@ -294,16 +294,16 @@ func (c *MyController[
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
 	// 附加数据1：团队负责人Owner
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
 
 	// 附加数据2：团队队长Captain
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.EmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
 
 	// 附加数据3：团队主体UnionMain
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.CompanyRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+	ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
 
 	// 附加数据4：团队或小组父级
-	ctx = base_funs.AttrBuilder[co_model.TeamRes, *co_model.TeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+	ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
 
 	return ctx
 }

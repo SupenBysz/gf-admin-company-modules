@@ -3,6 +3,8 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -50,6 +52,7 @@ type sCompany[
 		ITFdInvoiceDetailRes,
 	]
 	dao co_dao.XDao
+	//makeMoreFunc func(ctx context.Context, data co_model.ICompanyRes, employeeModule co_interface.IEmployee[co_model.IEmployeeRes]) co_model.ICompanyRes
 }
 
 func NewCompany[
@@ -82,10 +85,13 @@ func NewCompany[
 		ITFdBankCardRes,
 		ITFdCurrencyRes,
 		ITFdInvoiceRes,
-		ITFdInvoiceDetailRes]{
+		ITFdInvoiceDetailRes,
+	]{
 		modules: modules,
 		dao:     *modules.Dao(),
 	}
+
+	//result.makeMoreFunc = MakeMore
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
@@ -106,7 +112,7 @@ func (s *sCompany[
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ICompanyRes
 	ret = &co_model.CompanyRes{
-		Company:   co_entity.Company{},
+		Company:   &co_entity.Company{},
 		AdminUser: nil,
 	}
 	return ret.(TR)
@@ -160,7 +166,7 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.masker(s.makeMore(ctx, response)), nil
+	return s.masker(s.MakeMore(ctx, response)), nil
 }
 
 // GetCompanyByName 根据Name获取获取公司信息
@@ -188,7 +194,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	return s.masker(s.makeMore(ctx, response)), nil
+	return s.masker(s.MakeMore(ctx, response)), nil
 }
 
 // HasCompanyByName 判断名称是否存在
@@ -249,7 +255,7 @@ func (s *sCompany[
 		items := make([]TR, 0)
 		// 脱敏处理
 		for _, item := range data.Records {
-			items = append(items, s.masker(s.makeMore(ctx, item)))
+			items = append(items, s.masker(s.MakeMore(ctx, item)))
 		}
 		data.Records = items
 	}
@@ -329,8 +335,7 @@ func (s *sCompany[
 		if info.Id == 0 {
 			// 是否创建默认员工和角色
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
-				// 1.构建员工信息 + user登录信息
-				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
 					No:          "001",
 					Name:        info.ContactName,
 					Mobile:      info.ContactMobile,
@@ -338,6 +343,10 @@ func (s *sCompany[
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
 				})
+				employeeData := employeeDoData.(*co_model.Employee)
+
+				// 1.构建员工信息 + user登录信息
+				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData)
 				if err != nil {
 					return err
 				}
@@ -372,9 +381,15 @@ func (s *sCompany[
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(data)
+			if err != nil {
+				return err
+			}
+
 			affected, err := daoctl.InsertWithError(
 				s.dao.Company.Ctx(ctx),
-				data,
+				doData,
 			)
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
@@ -409,10 +424,17 @@ func (s *sCompany[
 
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
+
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(data)
+			if err != nil {
+				return err
+			}
+
 			_, err = daoctl.UpdateWithError(
 				s.dao.Company.Ctx(ctx).
 					Where(co_do.Company{Id: info.Id}),
-				data,
+				doData,
 			)
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
@@ -464,7 +486,7 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
-	return s.makeMore(ctx, response), nil
+	return s.MakeMore(ctx, response), nil
 }
 
 // FilterUnionMainId 跨主体查询条件过滤
@@ -535,7 +557,7 @@ func (s *sCompany[
 	return search
 }
 
-// makeMore 按需加载附加数据
+// MakeMore 按需加载附加数据
 func (s *sCompany[
 	TR,
 	ITEmployeeRes,
@@ -546,31 +568,38 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) makeMore(ctx context.Context, data TR) TR {
+
+// ]) MakeMore(ctx context.Context, data TR, employeeModule co_interface.IEmployee[ITEmployeeRes]) TR {
+]) MakeMore(ctx context.Context, data TR) TR {
 	if reflect.ValueOf(data).IsNil() || data.Data() == nil {
 		return data
 	}
 
 	if data.Data().UserId > 0 {
 		// 附加数据 employee
-		base_funs.AttrMake[co_model.CompanyRes](ctx, s.dao.Company.Columns().UserId,
-			func() *co_model.EmployeeRes {
-				employee, _ := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
-				if employee.Data() == nil {
-					return nil
+		base_funs.AttrMake[TR](ctx, co_dao.Company.Columns().UserId,
+			func() ITEmployeeRes {
+				// 订阅自定义类型的员工数据信息
+				ctx = base_funs.AttrBuilder[ITEmployeeRes, ITEmployeeRes](ctx, s.modules.Dao().Employee.Columns().Id)
+
+				// 追加订阅自定义类型的员工扩展数据
+				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+
+				employee, err := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
+				//if err != nil || reflect.ValueOf(employee.Data()).IsNil() {
+				if err != nil || reflect.ValueOf(employee).IsNil() || employee.Data() == nil {
+					return employee
 				}
 				//// 将头像中的文件id换成可访问地址
 				//employee.Data().Avatar = sys_service.File().MakeFileUrl(ctx, gconv.Int64(employee.Data().Avatar))
+				//var dd TR = *employee
 
-				data.Data().AdminUser = employee.Data()
+				// 给Company中对象的AdminUser成员赋值
+				data.Data().SetAdminUser(employee.Data())
+				// 给自定义类型的AdminUser成员赋值
+				data.SetAdminUser(employee)
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().UserId)
-				if user != nil {
-					gconv.Struct(user.SysUser, &data.Data().AdminUser.User)
-					gconv.Struct(user.Detail, &data.Data().AdminUser.Detail)
-				}
-
-				return data.Data().AdminUser
+				return employee
 			},
 		)
 	}

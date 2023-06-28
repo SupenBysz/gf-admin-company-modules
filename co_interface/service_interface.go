@@ -25,17 +25,6 @@ type (
 		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
 	}
 	IEmployee[TR co_model.IEmployeeRes] interface {
-		GetModules() IModules[
-			*co_model.CompanyRes,
-			*co_model.EmployeeRes,
-			*co_model.TeamRes,
-			*co_model.FdAccountRes,
-			*co_model.FdAccountBillRes,
-			*co_model.FdBankCardRes,
-			*co_model.FdCurrencyRes,
-			*co_model.FdInvoiceRes,
-			*co_model.FdInvoiceDetailRes,
-		]
 		SetXDao(dao co_dao.XDao)
 		GetEmployeeById(ctx context.Context, id int64) (response TR, err error)
 		GetEmployeeByName(ctx context.Context, name string) (response TR, err error)
@@ -171,14 +160,6 @@ type ModuleFactory[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]) ITeam[ITTeamRes]
-}
-
-type IBaseFactory interface {
-	NewEmployee(info co_dao.XDao) IEmployee[*co_model.EmployeeRes]
-	//NewEmployee(info IEmployee[co_model.IEmployeeRes]) IEmployee[co_model.IEmployeeRes]
-
-	//NewTeam(info ITeam[co_model.ITeamRes]) ITeam[co_model.ITeamRes]
-	NewTeam(info co_dao.XDao) ITeam[*co_model.TeamRes]
 }
 
 type IModules[

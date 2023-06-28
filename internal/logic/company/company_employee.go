@@ -63,44 +63,6 @@ type sEmployee[
 	]
 	dao     co_dao.XDao
 	hookArr *garray.Array
-
-	employee co_interface.IEmployee[TR]
-	team     co_interface.ITeam[ITTeamRes]
-}
-
-func (s *sEmployee[
-	ITCompanyRes,
-	TR,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) GetModules() co_interface.IModules[
-	*co_model.CompanyRes,
-	*co_model.EmployeeRes,
-	*co_model.TeamRes,
-	*co_model.FdAccountRes,
-	*co_model.FdAccountBillRes,
-	*co_model.FdBankCardRes,
-	*co_model.FdCurrencyRes,
-	*co_model.FdInvoiceRes,
-	*co_model.FdInvoiceDetailRes,
-] {
-	result, _ := s.modules.(co_interface.IModules[
-		*co_model.CompanyRes,
-		*co_model.EmployeeRes,
-		*co_model.TeamRes,
-		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
-		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
-		*co_model.FdInvoiceRes,
-		*co_model.FdInvoiceDetailRes,
-	])
-	return result
 }
 
 func NewEmployee[
@@ -140,16 +102,55 @@ func NewEmployee[
 		hookArr: garray.NewArray(),
 	}
 
-	result.modules = modules
-	result.dao = *modules.Dao()
-	result.hookArr = garray.NewArray()
-
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	// 注入钩子函数
 	result.injectHook()
+	//result.employee = (co_interface.IEmployee[TR])(result)
+
+	//have GetModules() co_interface.IModules[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes]
+	//want GetModules() co_interface.IModules[co_model.ICompanyRes, TR, co_model.ITeamRes, co_model.IFdAccountRes, co_model.IFdAccountBillRes, co_model.IFdBankCardRes, co_model.IFdCurrencyRes, co_model.IFdInvoiceRes, co_model.IFdInvoiceDetailRes]
+
+	//*sEmployee[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes]            as type co_interface.IEmployee[TR]
+	//*sEmployee[ITCompanyRes, TR, ITTeamRes, ITFdAccountRes, ITFdAccountBillRes, ITFdBankCardRes, ITFdCurrencyRes, ITFdInvoiceRes, ITFdInvoiceDetailRes] does not implement co_interface.IEmployee[TR]
+	//
 	return result
 }
+
+//func (s *sEmployee[
+//	ITCompanyRes,
+//	TR,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//]) GetModules() co_interface.IModules[
+//	ITCompanyRes,
+//	TR,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//] {
+//	result, _ := s.modules.(co_interface.IModules[
+//		ITCompanyRes,
+//		TR,
+//		ITTeamRes,
+//		ITFdAccountRes,
+//		ITFdAccountBillRes,
+//		ITFdBankCardRes,
+//		ITFdCurrencyRes,
+//		ITFdInvoiceRes,
+//		ITFdInvoiceDetailRes,
+//	])
+//	return result
+//}
 
 func (s *sEmployee[
 	ITCompanyRes,
@@ -226,7 +227,7 @@ func (s *sEmployee[
 		user.Detail.Realname = employee.Data().Name
 	}
 
-	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
+	if !reflect.ValueOf(data).IsNil() && employee.Data().UnionMainId != 0 {
 		company, _ := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
 		if !reflect.ValueOf(company).IsNil() {
 			user.Detail.UnionMainName = company.Data().Name
@@ -509,7 +510,7 @@ func (s *sEmployee[
 		teamSearch := base_funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
-			items, _ := s.team.QueryTeamMemberList(ctx, teamSearch)
+			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
 
 			if len(items.Records) > 0 {
 				for _, item := range items.Records {
@@ -687,7 +688,13 @@ func (s *sEmployee[
 				data.Id = newUser.Id
 			}
 
-			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(data))
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(*data)
+			if err != nil {
+				return err
+			}
+
+			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(doData))
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
@@ -815,13 +822,13 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 ]) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
-	isSuccess, err := s.team.DeleteTeamMemberByEmployee(ctx, employeeId)
+	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && isSuccess == false {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
 	}
 
 	// 查找到员工是管理员或者队长的团队
-	teamList, err := s.team.QueryTeamList(ctx, &base_model.SearchParams{
+	teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 			Field:     s.dao.Team.Columns().CaptainEmployeeId,
 			Where:     "=",
@@ -839,14 +846,14 @@ func (s *sEmployee[
 	if len(teamList.Records) > 0 {
 		for _, item := range teamList.Records {
 			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
-				ret, err := s.team.SetTeamCaptain(ctx, item.Data().Id, 0)
+				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
 
 			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
-				ret, err := s.team.SetTeamOwner(ctx, item.Data().Id, 0)
+				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
 				if err != nil || ret == false {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
@@ -973,7 +980,7 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error) {
-	team, err := s.team.GetTeamById(ctx, teamId)
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
 	if err != nil {
 		return nil, err
 	}
@@ -1070,58 +1077,75 @@ func (s *sEmployee[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) makeMore(ctx context.Context, employee TR) TR {
-	if reflect.ValueOf(employee).IsNil() {
-		return employee
+]) makeMore(ctx context.Context, data TR) TR {
+	if reflect.ValueOf(data).IsNil() {
+		return data
 	}
 
 	// team附加数据
-	if employee.Data().UnionMainId > 0 {
+	if data.Data().UnionMainId > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
-			func() []co_model.Team {
+			func() []ITTeamRes {
 				g.Try(ctx, func(ctx context.Context) {
-					// 获取到该员工的所有团队成员信息记录
-					teamMemberItems := make([]*co_entity.CompanyTeamMember, 0)
-					s.dao.TeamMember.Ctx(ctx).
-						Where(co_do.CompanyTeamMember{EmployeeId: employee.Data().CompanyEmployee.Id}).Scan(&teamMemberItems)
-					if len(teamMemberItems) == 0 {
-						employee.Data().TeamList = nil
+					// 获取到该员工的所有团队成员信息记录ids
+					ids, err := s.dao.TeamMember.Ctx(ctx).
+						Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Fields([]string{co_dao.CompanyTeamMember.Columns().TeamId}).All()
+
+					temIds := ids.Array()
+
+					if err != nil {
+						return
+					}
+
+					if len(ids) == 0 {
+						data.Data().TeamList = nil
 						return
 					}
 
 					// 记录该员工所在所有团队
-					teamIds := make([]int64, 0)
-					for _, memberItem := range teamMemberItems {
-						teamIds = append(teamIds, memberItem.TeamId)
-					}
 					s.dao.Team.Ctx(ctx).
-						WhereIn(s.dao.Team.Columns().Id, teamIds).Scan(&employee.Data().TeamList)
+						WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
+
+					// 添加附加数据
+					data.Data().SetTeamList(data.Data())
+					// 业务层添加附加数据
+					data.SetTeamList(data)
+
 				})
-				return employee.Data().TeamList
+
+				return kconv.Struct(data.Data().TeamList, []ITTeamRes{})
 			},
 		)
 	}
 
 	// user相关附加数据
-	if employee.Data().CompanyEmployee.Id > 0 {
+	if data.Data().CompanyEmployee.Id > 0 {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().Id,
 			func() (res TR) {
-				if employee.Data().CompanyEmployee.Id == 0 {
+				// 为什么要在内部订阅
+				//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
+				//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
+				//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+
+				if data.Data().CompanyEmployee.Id == 0 {
 					return res
 				}
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, employee.Data().CompanyEmployee.Id)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
 				if user != nil {
-					gconv.Struct(user.SysUser, &employee.Data().User)
-					gconv.Struct(user.Detail, &employee.Data().Detail)
+					data.Data().SetUser(data.Data().User)
+					data.SetUser(data.Data().User)
+
+					gconv.Struct(user.SysUser, &data.Data().User)
+					gconv.Struct(user.Detail, &data.Data().Detail)
 				}
 
-				return employee
+				return data
 			},
 		)
 	}
 
-	return employee
+	return data
 }
