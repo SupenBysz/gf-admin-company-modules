@@ -7,20 +7,27 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/SupenBysz/gf-admin-company-modules/utility/co_rules"
 	"github.com/yitter/idgenerator-go/idgen"
 )
 
+// InitCustomRules 注册自定义参数校验规则
+func InitCustomRules() {
+	// 注册资质自定义规则
+	co_rules.RequiredLicense()
+}
+
 // InitPermission 初始化权限树
 func InitPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -103,20 +110,25 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 		// oss
 	}
+
+	// 添加资质和审核权限树
+	licensePermission := initAuditAndLicensePermission()
+	result = append(result, licensePermission...)
+
 	return result
 }
 
 // InitFinancialPermission 初始化财务服务权限树
 func InitFinancialPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -201,6 +213,53 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 						co_permission.Financial.PermissionType(module).GetAccountDetail,
 					},
 				},
+			},
+		},
+	}
+	return result
+}
+
+func initAuditAndLicensePermission() []*sys_model.SysPermissionTree {
+	result := []*sys_model.SysPermissionTree{
+
+		// 资质权限树
+		{
+			SysPermission: &sys_entity.SysPermission{
+				Id:         idgen.NextId(),
+				Name:       "资质",
+				Identifier: "License",
+				Type:       1,
+				IsShow:     1,
+			},
+			Children: []*sys_model.SysPermissionTree{
+				// 查看资质信息，查看某条资质信息
+				co_permission.License.PermissionType.ViewDetail,
+				// 资质列表，查看所有资质信息
+				co_permission.License.PermissionType.List,
+				// 更新资质审核信息，更新某条资质审核信息
+				co_permission.License.PermissionType.Update,
+				// 创建资质，创建资质信息
+				co_permission.License.PermissionType.Create,
+				// 设置资质状态，设置某资质认证状态
+				co_permission.License.PermissionType.SetState,
+			},
+		},
+		// 审核管理权限树
+		{
+			SysPermission: &sys_entity.SysPermission{
+				Id:         idgen.NextId(),
+				Name:       "审核管理",
+				Identifier: "Audit",
+				Type:       1,
+				IsShow:     1,
+			},
+			Children: []*sys_model.SysPermissionTree{
+				// 查看审核信息，查看某条资质审核信息
+				co_permission.Audit.PermissionType.ViewDetail,
+				// 资质审核列表，查看所有资质审核
+				co_permission.Audit.PermissionType.List,
+				// 更新资质审核信息，更新某条资质审核信息
+				co_permission.Audit.PermissionType.Update,
 			},
 		},
 	}

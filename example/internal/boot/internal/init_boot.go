@@ -8,7 +8,13 @@ import (
 )
 
 func init() {
+	// 注册自定义参数校验规则
+	boot.InitCustomRules()
+
+	// 设置国际化语言
 	consts.Global.SetI18n(nil)
+
+	// 初始化权限树
 	consts.Global.PermissionTree = boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,

@@ -1,6 +1,7 @@
 package co_enum
 
 import (
+	audit "github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/audit"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/company"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/employee"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/financial"
@@ -21,6 +22,9 @@ type (
 	InvoiceState      = invoice.StateEnum
 	InvoiceType       = invoice.TypeEnum
 	InvoiceBelongType = invoice.BelongTypeEnum
+
+	AuditAction = audit.ActionEnum
+	AuditEvent  audit.EventEnum
 )
 
 var (
@@ -29,4 +33,7 @@ var (
 	Team      = team.Team
 	Financial = financial.Financial
 	Invoice   = invoice.Invoice
+
+	Audit = audit.Audit
+	//License = license.License
 )
