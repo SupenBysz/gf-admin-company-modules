@@ -14,7 +14,23 @@ gfcli:
   gen:
     dao:
       - link: "pgsql:user=dbUsername password=dbPassword host=127.0.0.1 port=5432 dbname=gf-admin sslmode=disable"
-        tables: "pro_audit, pro_fd_account, pro_fd_account_bill, pro_fd_bank_card, pro_fd_currency, pro_fd_invoice, pro_fd_invoice_detail, pro_facilitator, pro_facilitator_employee, pro_facilitator_team, pro_license, pro_operator, pro_operator_employee, pro_operator_team"
+        tables: "
+                co_company,
+                co_company_employee,
+                co_company_team,
+                co_company_team_member,
+
+                co_fd_account,
+                co_fd_account_bill,
+                co_fd_bank_card,
+                co_fd_currency,
+                co_fd_invoice,
+                co_fd_invoice_detail,
+                co_fd_account_detail,
+
+                co_audit,
+                co_license,
+                "
         removePrefix: "pro_"
         descriptionTag:  true
         noModelComment:  true
