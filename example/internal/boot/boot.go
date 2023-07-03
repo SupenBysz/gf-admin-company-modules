@@ -6,6 +6,10 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
+
+	"github.com/SupenBysz/gf-admin-company-modules/co_controller/audit"
+	"github.com/SupenBysz/gf-admin-company-modules/co_controller/lincense"
+
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/SupenBysz/gf-admin-company-modules/example/router"
 	"github.com/gogf/gf/v2/frame/g"
@@ -105,6 +109,17 @@ var (
 
 					// 注册财务模块路由 (可选)
 					router.FinancialGroup(consts.Global.IModules, group)
+
+					// 主体资质管理
+					group.Group("/license", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							// 主体资质
+							lincense.License,
+							// 资质审核
+							audit.Audit,
+						)
+					})
+
 				})
 			})
 			s.Run()

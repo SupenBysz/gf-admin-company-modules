@@ -18,6 +18,5 @@ main
 output/
 manifest/output/
 temp/
-co_service/
 hack/config.yaml
 .env
