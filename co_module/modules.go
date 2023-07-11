@@ -10,7 +10,6 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/financial"
 	"github.com/gogf/gf/v2/i18n/gi18n"
-	"github.com/gogf/gf/v2/text/gstr"
 )
 
 type Modules[
@@ -238,7 +237,8 @@ func (m *Modules[
 	if i18n == nil {
 		i18n = gi18n.New()
 		i18n.SetLanguage("zh-CN")
-		err := i18n.SetPath("i18n/" + gstr.ToLower(m.conf.KeyIndex))
+		//err := i18n.SetPath("i18n/" + gstr.ToLower(m.conf.KeyIndex))
+		err := i18n.SetPath("i18n/" + m.conf.KeyIndex)
 		if err != nil {
 			return err
 		}
