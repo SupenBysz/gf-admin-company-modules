@@ -238,7 +238,7 @@ func (m *Modules[
 		i18n = gi18n.New()
 		i18n.SetLanguage("zh-CN")
 		//err := i18n.SetPath("i18n/" + gstr.ToLower(m.conf.KeyIndex))
-		err := i18n.SetPath("i18n/" + m.conf.KeyIndex)
+		err := i18n.SetPath("i18n/" + m.conf.I18nName)
 		if err != nil {
 			return err
 		}
