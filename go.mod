@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.4.16
+	github.com/SupenBysz/gf-admin-community v0.4.19
 	github.com/gogf/gf/v2 v2.4.1
-	github.com/kysion/base-library v0.0.13
+	github.com/kysion/base-library v0.0.14
 	github.com/yitter/idgenerator-go v1.3.2
 )
 
@@ -64,6 +64,8 @@ require (
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

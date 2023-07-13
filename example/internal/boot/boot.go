@@ -5,10 +5,8 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
-	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
-
-	"github.com/SupenBysz/gf-admin-company-modules/co_controller/audit"
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller/lincense"
+	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/SupenBysz/gf-admin-company-modules/example/router"
@@ -90,7 +88,7 @@ var (
 							// 图型验证码
 							sys_controller.Captcha,
 							// 短信验证码
-							sys_controller.SysSms,
+							//sys_controller.SysSms,
 							// 地区
 							sys_controller.SysArea,
 						)
@@ -111,14 +109,13 @@ var (
 					router.FinancialGroup(consts.Global.IModules, group)
 
 					// 主体资质管理
-					group.Group("/license", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							// 主体资质
-							lincense.License,
-							// 资质审核
-							audit.Audit,
-						)
-					})
+					group.Group("/audit", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysAudit) })
+
+					// 个人资质管理
+					group.Group("/person_license", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysLicense) })
+
+					// 主体资质管理
+					group.Group("/license", func(group *ghttp.RouterGroup) { group.Bind(lincense.License) })
 
 				})
 			})
