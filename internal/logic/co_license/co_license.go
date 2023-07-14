@@ -3,6 +3,11 @@ package sys_license
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -15,6 +20,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -32,12 +38,86 @@ func init() {
 }
 
 func NewLicense() *sLicense {
-	return &sLicense{
+	result := &sLicense{
 		conf: gdb.CacheOption{
 			Duration: time.Hour,
 			Force:    false,
 		},
 	}
+
+	// 订阅审核Hook,审核通过添加主体资质主体信息
+	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approve, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.AuditChange)
+
+	// 订阅审核数据获取Hook, 将审核数据渲染成主体资质然后进行输出
+	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approve, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.GetAuditData)
+
+	return result
+}
+
+// GetAuditData 订阅审核数据获取Hook, 将审核数据渲染成主体资质然后进行输出  (数据处理渲染)
+func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_entity.SysAudit) error {
+	//  处理审核
+	if info == nil {
+		return sys_service.SysLogs().ErrorSimple(ctx, nil, "审核数据为空", "Audit")
+	}
+
+	if (auditEvent.Code() & sys_enum.Audit.Event.GetAuditData.Code()) == sys_enum.Audit.Event.GetAuditData.Code() {
+		if (info.Category & sys_enum.Audit.Category.CompanyLicenseAudit.Code()) == sys_enum.Audit.Category.CompanyLicenseAudit.Code() {
+
+			//auditData := co_model.AuditLicense{}
+			auditData := co_model.License{}
+
+			//解析json字符串
+			//decode, _ := gjson.Decode(info.AuditData)
+			gjson.DecodeTo(info.AuditData, &auditData)
+
+			// 还未审核的图片从缓存中寻找  0 缓存  1 数据库
+
+			// 将路径id换成可访问图片的url
+			{
+				if gstr.IsNumeric(auditData.IdcardFrontPath) {
+					auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardFrontPath)
+				}
+				if gstr.IsNumeric(auditData.IdcardBackPath) {
+					auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardBackPath)
+				}
+			}
+
+			//auditData.IdcardBackPath = "6666666666666666666666"
+
+			// 重新赋值  将id转为可访问路径
+			info.AuditData = gjson.MustEncodeString(auditData)
+		}
+	}
+	return nil
+}
+
+// AuditChange 审核成功的处理逻辑 Hook （数据存储）
+func (s *sLicense) AuditChange(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_entity.SysAudit) error {
+	//  处理审核
+	if (auditEvent.Code() & sys_enum.Audit.Event.ExecAudit.Code()) == sys_enum.Audit.Event.ExecAudit.Code() {
+		// 审核通过
+		if (info.State & sys_enum.Audit.Action.Approve.Code()) == sys_enum.Audit.Action.Approve.Code() {
+			// 创建主体资质
+			license := co_model.License{}
+			//license := co_model.AuditLicense{}
+			gjson.DecodeTo(info.AuditData, &license)
+
+			licenseRes, err := co_service.License().CreateLicense(ctx, license)
+			//licenseRes, err := sys_service.SysPersonLicense().CreateLicense(ctx, license)
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, nil, "审核通过后主体资质创建失败", co_dao.License.Table())
+			}
+
+			// 设置主体资质的审核编号
+			ret, err := co_service.License().SetLicenseAuditNumber(ctx, licenseRes.Id, gconv.String(info.Id))
+			if err != nil || ret == false {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, "", co_dao.License.Table())
+			}
+		}
+	}
+
+	return nil
 }
 
 // GetLicenseById 根据ID获取主体认证|信息
@@ -113,9 +193,9 @@ func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id 
 		}
 	}
 
-	err = co_dao.License.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = co_dao.License.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
-		newAudit := co_model.Audit{
+		newAudit := sys_model.Audit{
 			Id:          idgen.NextId(),
 			State:       0,
 			UnionMainId: data.Id,
@@ -125,7 +205,7 @@ func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id 
 		}
 
 		{
-			audit := co_service.Audit().GetAuditById(ctx, data.LatestAuditLogId)
+			audit := sys_service.SysAudit().GetAuditById(ctx, data.LatestAuditLogId)
 			// 未审核通过的主体资质，直接更改待审核的资质信息
 			if audit != nil && audit.State == 0 {
 				_, err := tx.Ctx(ctx).Model(co_dao.License.Table()).Where(co_do.License{Id: id}).OmitNil().Save(&newData)
@@ -137,7 +217,7 @@ func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id 
 				newAudit.Id = audit.Id
 				// TODO
 				//co_service.Audit().UpdateAudit()
-				_, err = co_dao.Audit.Ctx(ctx).Data(newAudit).Where(co_do.Audit{Id: audit.Id}).Update()
+				_, err = sys_dao.SysAudit.Ctx(ctx).Data(newAudit).Where(sys_do.SysAudit{Id: audit.Id}).Update()
 				if err != nil {
 					return sys_service.SysLogs().ErrorSimple(ctx, err, "更新审核信息失败", co_dao.License.Table())
 				}
@@ -202,7 +282,7 @@ func (s *sLicense) DeleteLicense(ctx context.Context, id int64, flag bool) (bool
 
 // UpdateLicenseAuditLogId 设置主体资质关联的审核ID
 func (s *sLicense) UpdateLicenseAuditLogId(ctx context.Context, id int64, latestAuditLogId int64) (bool, error) {
-	auditLog := co_service.Audit().GetAuditById(ctx, latestAuditLogId)
+	auditLog := sys_service.SysAudit().GetAuditById(ctx, latestAuditLogId)
 	if nil == auditLog {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "资质信息校验失败", co_dao.License.Table())
 	}
