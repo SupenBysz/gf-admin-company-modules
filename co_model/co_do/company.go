@@ -27,4 +27,6 @@ type Company struct {
 	DeletedAt     *gtime.Time // 删除时间
 	ParentId      interface{} // 父级ID
 	Address       interface{} // 地址
+	LicenseId     interface{} // 主体资质id
+	LicenseState  interface{} // 主体状态,和主体资质状态保持一致
 }

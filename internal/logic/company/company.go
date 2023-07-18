@@ -380,6 +380,7 @@ func (s *sCompany[
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
+			//data.LicenseId = 0 // 首次创建没有主体id
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(data)
