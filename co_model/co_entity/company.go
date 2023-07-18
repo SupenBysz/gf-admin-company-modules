@@ -25,4 +25,6 @@ type Company struct {
 	DeletedAt     *gtime.Time `json:"deletedAt"     description:"删除时间"`
 	ParentId      int64       `json:"parentId"      description:"父级ID"`
 	Address       string      `json:"address"       description:"地址"`
+	LicenseId     int64       `json:"licenseId"     description:"主体资质id"`
+	LicenseState  int         `json:"licenseState"  description:"主体状态,和主体资质状态保持一致"`
 }
