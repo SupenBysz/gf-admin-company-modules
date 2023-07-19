@@ -48,6 +48,7 @@ type LicenseColumns struct {
 	UpdatedAt                 string //
 	CreatedAt                 string //
 	DeletedAt                 string //
+	BrandName                 string // 品牌名称
 }
 
 // licenseColumns holds the columns for table co_license.
@@ -77,6 +78,7 @@ var licenseColumns = LicenseColumns{
 	UpdatedAt:                 "updated_at",
 	CreatedAt:                 "created_at",
 	DeletedAt:                 "deleted_at",
+	BrandName:                 "brand_name",
 }
 
 // NewLicenseDao creates and returns a new DAO object for table data access.

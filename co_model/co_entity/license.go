@@ -35,4 +35,5 @@ type License struct {
 	UpdatedAt                 *gtime.Time `json:"updatedAt"                 description:""`
 	CreatedAt                 *gtime.Time `json:"createdAt"                 description:""`
 	DeletedAt                 *gtime.Time `json:"deletedAt"                 description:""`
+	BrandName                 string      `json:"brandName"                 description:"品牌名称"`
 }
