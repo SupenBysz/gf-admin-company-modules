@@ -37,4 +37,5 @@ type License struct {
 	UpdatedAt                 *gtime.Time //
 	CreatedAt                 *gtime.Time //
 	DeletedAt                 *gtime.Time //
+	BrandName                 interface{} // 品牌名称
 }

@@ -25,6 +25,7 @@ type License struct {
 	BusinessLicenseLegal      string      `json:"businessLicenseLegal"      dc:"法人" v:"required-license|max-length:64#请输入法人名称|法人名称最大支持64个字符"`
 	BusinessLicenseLegalPath  string      `json:"businessLicenseLegalPath"  dc:"法人证照，如果法人不是自然人，则该项必填" v:"max-length:256#法人证照地址最大支持256个字符"`
 	Remake                    string      `json:"remake"                    dc:"备注"`
+	BrandName                 string      `json:"brandName"                 description:"品牌名称"`
 }
 
 type LicenseRes co_entity.License
