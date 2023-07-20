@@ -38,4 +38,7 @@ type ITeam[ITTeamRes co_model.ITeamRes] interface {
 
 	// SetTeamCaptain 设置团队队长或组长
 	SetTeamCaptain(ctx context.Context, req *co_company_api.SetTeamCaptainReq) (api_v1.BoolRes, error)
+
+	// GetEmployeeListByTeamId 获取团队成员|列表
+	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamIdReq) (*base_model.CollectRes[co_model.IEmployeeRes], error)
 }

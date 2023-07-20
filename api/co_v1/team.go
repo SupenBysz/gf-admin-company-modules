@@ -54,3 +54,8 @@ type SetTeamCaptainReq struct {
 	g.Meta `method:"post" summary:"设置团队队长" tags:"团队|小组"`
 	co_company_api.SetTeamCaptainReq
 }
+
+type GetEmployeeListByTeamIdReq struct {
+	g.Meta `method:"post" summary:"根据团队ID获取成员｜列表" tags:"团队|小组"`
+	co_company_api.GetEmployeeListByTeamIdReq
+}
