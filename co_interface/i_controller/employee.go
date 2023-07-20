@@ -36,9 +36,6 @@ type IEmployee[TIRes co_model.IEmployeeRes] interface {
 	// GetEmployeeListByRoleId 根据角色ID获取所有所属员工列表
 	GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*base_model.CollectRes[TIRes], error)
 
-	// GetEmployeeListByTeamId 获取团队成员|列表
-	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamId) (*base_model.CollectRes[TIRes], error)
-
 	// SetEmployeeRoles 设置员工角色
 	SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error)
 

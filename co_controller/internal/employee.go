@@ -279,25 +279,6 @@ func (c *EmployeeController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamId) (*base_model.CollectRes[TIRes], error) {
-	return funs.CheckPermission(ctx,
-		func() (*base_model.CollectRes[TIRes], error) {
-			return c.employee.GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
-		},
-		co_permission.Team.PermissionType(c.modules).MemberDetail,
-	)
-}
-
-func (c *EmployeeController[
-	ITCompanyRes,
-	TIRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
 ]) SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
