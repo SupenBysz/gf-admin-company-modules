@@ -9,9 +9,7 @@ import (
 )
 
 type IFinancial[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
+
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
