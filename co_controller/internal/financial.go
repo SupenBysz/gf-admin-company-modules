@@ -28,7 +28,6 @@ type FinancialController[
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
-	i_controller.IMy
 	modules co_interface.IModules[
 		ITCompanyRes,
 		ITEmployeeRes,
@@ -65,9 +64,6 @@ func Financial[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) i_controller.IFinancial[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
