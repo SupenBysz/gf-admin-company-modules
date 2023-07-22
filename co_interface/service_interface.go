@@ -22,7 +22,7 @@ type (
 		CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		GetCompanyDetail(ctx context.Context, id int64) (response TR, err error)
-		SetState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error)
+		SetCompanyState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error)
 		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
 	}
 	IEmployee[TR co_model.IEmployeeRes] interface {

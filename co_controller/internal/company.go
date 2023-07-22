@@ -211,10 +211,10 @@ func (c *CompanyController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetState(ctx context.Context, req *co_company_api.SetStateReq) (api_v1.BoolRes, error) {
+]) SetCompanyState(ctx context.Context, req *co_company_api.SetCompanyStateReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Company().SetState(ctx, req.Id, co_enum.Company.State.New(req.State, ""))
+			ret, err := c.modules.Company().SetCompanyState(ctx, req.Id, co_enum.Company.State.New(req.State, ""))
 			return ret == true, err
 		},
 		co_permission.Company.PermissionType(c.modules).SetState,

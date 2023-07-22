@@ -29,7 +29,7 @@ type GetCompanyDetailReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"组织单位ID"`
 }
 
-type SetStateReq struct {
+type SetCompanyStateReq struct {
 	Id    int64 `json:"id" v:"required#ID校验失败" dc:"组织单位ID"`
 	State int   `json:"state" v:"in:0,1,2" dc:"状态：0未激活，1正常，-1停用"`
 }

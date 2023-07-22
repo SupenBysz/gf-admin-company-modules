@@ -35,7 +35,7 @@ type GetCompanyDetailReq struct {
 	co_company_api.GetCompanyDetailReq
 }
 
-type SetStateReq struct {
+type SetCompanyStateReq struct {
 	g.Meta `method:"post" summary:"设置公司状态" tags:"组织单位/公司"`
-	co_company_api.SetStateReq
+	co_company_api.SetCompanyStateReq
 }
