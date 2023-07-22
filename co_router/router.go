@@ -48,6 +48,7 @@ func CompanyGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
 	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
 	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
+	group.POST(routePrefix+"/setState", controller.SetState)
 	return group
 }
 

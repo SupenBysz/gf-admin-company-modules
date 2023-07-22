@@ -29,15 +29,15 @@ import (
 )
 
 type sCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -56,15 +56,15 @@ type sCompany[
 }
 
 func NewCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -295,6 +295,26 @@ func (s *sCompany[
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 	return s.saveCompany(ctx, info)
+}
+
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error) {
+	if companyId <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
+	}
+
+	affected, err := daoctl.UpdateWithError(s.dao.Company.Ctx(ctx).Where(s.dao.Company.Columns().Id, companyId), companyState.Code())
+
+	return affected > 0, err
 }
 
 // SaveCompany 保存公司信息

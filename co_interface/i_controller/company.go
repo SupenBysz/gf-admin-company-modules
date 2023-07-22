@@ -28,4 +28,6 @@ type ICompany[
 
 	// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 	GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (TIRes, error)
+
+	SetState(ctx context.Context, companyId int64, req *co_company_api.SetStateReq) (api_v1.BoolRes, error)
 }

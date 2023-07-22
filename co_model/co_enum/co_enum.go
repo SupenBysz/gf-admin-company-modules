@@ -10,6 +10,8 @@ import (
 )
 
 type (
+	CompanyState = company.StateEnum
+
 	EmployeeState = employee.StateEnum
 	Sex           = employee.SexEnum
 

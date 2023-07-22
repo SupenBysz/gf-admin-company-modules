@@ -12,6 +12,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
@@ -197,6 +198,26 @@ func (c *CompanyController[
 			return c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
 		},
 		co_permission.Company.PermissionType(c.modules).ViewMobile,
+	)
+}
+
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetState(ctx context.Context, req *co_company_api.SetStateReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Company().SetState(ctx, req.Id, co_enum.Company.State.New(req.State, ""))
+			return ret == true, err
+		},
+		co_permission.Company.PermissionType(c.modules).SetState,
 	)
 }
 
