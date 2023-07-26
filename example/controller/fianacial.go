@@ -23,9 +23,6 @@ type FinancialController[
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	i_controller.IFinancial[
-		ITCompanyRes,
-		ITEmployeeRes,
-		ITTeamRes,
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,

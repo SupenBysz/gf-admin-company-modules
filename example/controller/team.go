@@ -84,3 +84,9 @@ func (c *TeamController[ITTeamRes]) SetTeamOwner(ctx context.Context, req *co_v1
 func (c *TeamController[ITTeamRes]) SetTeamCaptain(ctx context.Context, req *co_v1.SetTeamCaptainReq) (api_v1.BoolRes, error) {
 	return c.ITeam.SetTeamCaptain(ctx, &req.SetTeamCaptainReq)
 }
+
+func (c *TeamController[ITTeamRes]) GetEmployeeListByTeamId(ctx context.Context, req *co_v1.GetEmployeeListByTeamIdReq) (*api_v1.MapRes, error) {
+	ret, err := c.ITeam.GetEmployeeListByTeamId(ctx, &req.GetEmployeeListByTeamIdReq)
+
+	return kconv.Struct(ret, &api_v1.MapRes{}), err
+}

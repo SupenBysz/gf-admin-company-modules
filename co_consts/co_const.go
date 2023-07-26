@@ -2,8 +2,8 @@ package co_consts
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/kysion/base-library/utility/base_permission"
 )
 
 type global struct {
@@ -14,9 +14,9 @@ type global struct {
 var (
 	Global = global{}
 
-	PermissionTree []*sys_model.SysPermissionTree
+	PermissionTree []base_permission.IPermission
 
-	FinancialPermissionTree []*sys_model.SysPermissionTree
+	FinancialPermissionTree []base_permission.IPermission
 )
 
 func init() {

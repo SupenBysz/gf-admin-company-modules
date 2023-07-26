@@ -75,3 +75,8 @@ func (c *CompanyController[TIRes]) GetCompanyDetail(ctx context.Context, req *co
 	ret, err := c.ICompany.GetCompanyDetail(ctx, &req.GetCompanyDetailReq)
 	return ret.Data(), err
 }
+
+// SetCompanyState 设置公司状态
+func (c *CompanyController[TIRes]) SetCompanyState(ctx context.Context, req *co_v1.SetCompanyStateReq) (api_v1.BoolRes, error) {
+	return c.ICompany.SetCompanyState(ctx, &req.SetCompanyStateReq)
+}

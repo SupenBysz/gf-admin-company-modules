@@ -22,6 +22,7 @@ type (
 		CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		GetCompanyDetail(ctx context.Context, id int64) (response TR, err error)
+		SetCompanyState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error)
 		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
 	}
 	IEmployee[TR co_model.IEmployeeRes] interface {
@@ -38,7 +39,6 @@ type (
 		DeleteEmployee(ctx context.Context, id int64) (bool, error)
 		GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error)
 		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*base_model.CollectRes[TR], error)
-		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error)
 		SetEmployeeState(ctx context.Context, id int64, state int) (bool, error)
 	}
 	ITeam[TR co_model.ITeamRes] interface {
@@ -56,7 +56,9 @@ type (
 		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
+		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) // 移除到Team里面
 	}
+
 	IMy interface {
 		GetProfile(ctx context.Context) (*co_model.MyProfileRes, error)
 		GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error)
@@ -126,41 +128,41 @@ type IConfig interface {
 	GetConfig() *co_model.Config
 }
 
-type ModuleFactory[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-] struct {
-	NewEmployee func(modules IModules[
-		ITCompanyRes,
-		ITEmployeeRes,
-		ITTeamRes,
-		ITFdAccountRes,
-		ITFdAccountBillRes,
-		ITFdBankCardRes,
-		ITFdCurrencyRes,
-		ITFdInvoiceRes,
-		ITFdInvoiceDetailRes,
-	]) IEmployee[ITEmployeeRes]
-
-	NewTeam func(modules IModules[
-		ITCompanyRes,
-		ITEmployeeRes,
-		ITTeamRes,
-		ITFdAccountRes,
-		ITFdAccountBillRes,
-		ITFdBankCardRes,
-		ITFdCurrencyRes,
-		ITFdInvoiceRes,
-		ITFdInvoiceDetailRes,
-	]) ITeam[ITTeamRes]
-}
+//type ModuleFactory[
+//	ITCompanyRes co_model.ICompanyRes,
+//	ITEmployeeRes co_model.IEmployeeRes,
+//	ITTeamRes co_model.ITeamRes,
+//	ITFdAccountRes co_model.IFdAccountRes,
+//	ITFdAccountBillRes co_model.IFdAccountBillRes,
+//	ITFdBankCardRes co_model.IFdBankCardRes,
+//	ITFdCurrencyRes co_model.IFdCurrencyRes,
+//	ITFdInvoiceRes co_model.IFdInvoiceRes,
+//	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+//] struct {
+//	NewEmployee func(modules IModules[
+//		ITCompanyRes,
+//		ITEmployeeRes,
+//		ITTeamRes,
+//		ITFdAccountRes,
+//		ITFdAccountBillRes,
+//		ITFdBankCardRes,
+//		ITFdCurrencyRes,
+//		ITFdInvoiceRes,
+//		ITFdInvoiceDetailRes,
+//	]) IEmployee[ITEmployeeRes]
+//
+//	NewTeam func(modules IModules[
+//		ITCompanyRes,
+//		ITEmployeeRes,
+//		ITTeamRes,
+//		ITFdAccountRes,
+//		ITFdAccountBillRes,
+//		ITFdBankCardRes,
+//		ITFdCurrencyRes,
+//		ITFdInvoiceRes,
+//		ITFdInvoiceDetailRes,
+//	]) ITeam[ITTeamRes, ITEmployeeRes]
+//}
 
 type IModules[
 	ITCompanyRes co_model.ICompanyRes,

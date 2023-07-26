@@ -44,10 +44,6 @@ type GetEmployeeListByRoleIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"角色ID"`
 }
 
-type GetEmployeeListByTeamId struct {
-	TeamId int64 `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
-}
-
 type SetEmployeeRolesReq struct {
 	UserId  int64   `json:"userId" v:"required#用户ID校验失败" dc:"用户ID"`
 	RoleIds []int64 `json:"roleIds" v:"required#角色IDS校验失败" dc:"角色IDS"`

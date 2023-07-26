@@ -51,3 +51,7 @@ type SetTeamCaptainReq struct {
 	Id         int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 	EmployeeId int64 `json:"employeeId" v:"required#团队队长ID校验失败" dc:"团队队长ID"`
 }
+
+type GetEmployeeListByTeamIdReq struct {
+	TeamId int64 `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+}

@@ -297,6 +297,26 @@ func (s *sCompany[
 	return s.saveCompany(ctx, info)
 }
 
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetCompanyState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error) {
+	if companyId <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
+	}
+
+	affected, err := daoctl.UpdateWithError(s.dao.Company.Ctx(ctx).Where(s.dao.Company.Columns().Id, companyId), co_do.Company{State: companyState.Code()})
+
+	return affected > 0, err
+}
+
 // SaveCompany 保存公司信息
 func (s *sCompany[
 	TR,
@@ -380,6 +400,7 @@ func (s *sCompany[
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
+			//data.LicenseId = 0 // 首次创建没有主体id
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(data)

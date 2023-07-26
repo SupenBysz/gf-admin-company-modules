@@ -15,6 +15,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type TeamController[
@@ -272,6 +273,37 @@ func (c *TeamController[
 			return c.team.SetTeamCaptain(ctx, req.Id, req.EmployeeId)
 		},
 		co_permission.Team.PermissionType(c.modules).SetCaptain,
+	)
+}
+func (c *TeamController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TIRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamIdReq) (*base_model.CollectRes[co_model.IEmployeeRes], error) {
+	return funs.CheckPermission(ctx,
+		func() (*base_model.CollectRes[co_model.IEmployeeRes], error) {
+
+			ret, err := c.team.GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
+
+			result := base_model.CollectRes[co_model.IEmployeeRes]{}
+			for _, record := range ret.Records {
+				i := new(ITEmployeeRes)
+				res := kconv.Struct(record, i)
+				result.Records = append(result.Records, *res)
+			}
+
+			return &result, err
+
+			//return kconv.Struct(ret, &base_model.CollectRes[co_model.EmployeeRes]{}), err
+
+		},
+		co_permission.Team.PermissionType(c.modules).MemberDetail,
 	)
 }
 

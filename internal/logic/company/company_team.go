@@ -12,6 +12,7 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
@@ -47,6 +48,48 @@ type sTeam[
 	]
 	dao co_dao.XDao
 }
+
+//
+//func NewTeam[
+//	ITCompanyRes co_model.ICompanyRes,
+//	ITEmployeeRes co_model.IEmployeeRes,
+//	TR co_model.ITeamRes,
+//	ITFdAccountRes co_model.IFdAccountRes,
+//	ITFdAccountBillRes co_model.IFdAccountBillRes,
+//	ITFdBankCardRes co_model.IFdBankCardRes,
+//	ITFdCurrencyRes co_model.IFdCurrencyRes,
+//	ITFdInvoiceRes co_model.IFdInvoiceRes,
+//	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+//](modules co_interface.IModules[
+//	ITCompanyRes,
+//	ITEmployeeRes,
+//	TR,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//]) co_interface.ITeam[TR] {
+//	result := &sTeam[
+//		ITCompanyRes,
+//		ITEmployeeRes,
+//		TR,
+//		ITFdAccountRes,
+//		ITFdAccountBillRes,
+//		ITFdBankCardRes,
+//		ITFdCurrencyRes,
+//		ITFdInvoiceRes,
+//		ITFdInvoiceDetailRes,
+//	]{
+//		modules: modules,
+//		dao:     *modules.Dao(),
+//	}
+//
+//	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
+//
+//	return result
+//}
 
 func NewTeam[
 	ITCompanyRes co_model.ICompanyRes,
@@ -852,6 +895,61 @@ func (s *sTeam[
 	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
 
 	return affected > 0, err
+}
+
+// GetEmployeeListByTeamId 获取团队成员|列表
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) {
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 团队成员信息
+	items, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
+		s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{
+			TeamId:      team.Data().Id,
+			UnionMainId: team.Data().UnionMainId,
+		}),
+	)
+
+	ids := make([]int64, 0)
+	for _, item := range *items {
+		ids = append(ids, item.EmployeeId)
+	}
+	ret, err := s.modules.Employee().QueryEmployeeList(ctx, &base_model.SearchParams{
+		Filter: append(make([]base_model.FilterInfo, 0),
+			base_model.FilterInfo{
+				Field: s.dao.Employee.Columns().Id,
+				Where: "in",
+				Value: ids,
+			},
+			base_model.FilterInfo{
+				Field: s.dao.Employee.Columns().UnionMainId,
+				Where: "=",
+				Value: team.Data().UnionMainId,
+			},
+		),
+	})
+	//kconv.Struct(ret, &base_model.CollectRes[co_model.IEmployeeRes]{})
+
+	result := base_model.CollectRes[co_model.IEmployeeRes]{}
+	for _, record := range ret.Records {
+		i := new(ITEmployeeRes)
+		res := kconv.Struct(record, i)
+		result.Records = append(result.Records, *res)
+	}
+
+	return &result, err
 }
 
 // makeMore 按需加载附加数据

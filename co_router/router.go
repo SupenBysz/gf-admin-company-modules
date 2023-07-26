@@ -48,6 +48,7 @@ func CompanyGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
 	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
 	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
+	group.POST(routePrefix+"/setCompanyState", controller.SetCompanyState)
 	return group
 }
 
@@ -73,7 +74,6 @@ func EmployeeGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/updateEmployee", controller.UpdateEmployee)
 	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
 	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
-	group.POST(routePrefix+"/getEmployeeListByTeamId", controller.GetEmployeeListByTeamId)
 	group.POST(routePrefix+"/setEmployeeRoles", controller.SetEmployeeRoles)
 	group.POST(routePrefix+"/setEmployeeState", controller.SetEmployeeState)
 
@@ -103,6 +103,8 @@ func TeamGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/setTeamOwner", controller.SetTeamOwner)
 	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
 	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)
+	group.POST(routePrefix+"/getEmployeeListByTeamId", controller.GetEmployeeListByTeamId)
+
 	return group
 }
 

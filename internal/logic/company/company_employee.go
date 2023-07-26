@@ -217,10 +217,14 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
-	data, _ := daoctl.GetByIdWithError[TR](
+	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		user.Id,
 	)
+	if err != nil && err == sql.ErrNoRows {
+		return sys_service.SysLogs().ErrorSimple(ctx, err, "用户不存在", s.dao.Employee.Table())
+	}
+
 	var employee TR
 	if !reflect.ValueOf(data).IsNil() {
 		employee = *data
@@ -966,52 +970,6 @@ func (s *sEmployee[
 	result.Records = items
 
 	return result, err
-}
-
-// GetEmployeeListByTeamId 获取团队成员|列表
-func (s *sEmployee[
-	ITCompanyRes,
-	TR,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[TR], error) {
-	team, err := s.modules.Team().GetTeamById(ctx, teamId)
-	if err != nil {
-		return nil, err
-	}
-
-	// 团队成员信息
-	items, err := daoctl.ScanWithError[[]*co_entity.CompanyTeamMember](
-		s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{
-			TeamId:      team.Data().Id,
-			UnionMainId: team.Data().UnionMainId,
-		}),
-	)
-
-	ids := make([]int64, 0)
-	for _, item := range *items {
-		ids = append(ids, item.EmployeeId)
-	}
-
-	return s.QueryEmployeeList(ctx, &base_model.SearchParams{
-		Filter: append(make([]base_model.FilterInfo, 0),
-			base_model.FilterInfo{
-				Field: s.dao.Employee.Columns().Id,
-				Where: "in",
-				Value: ids,
-			},
-			base_model.FilterInfo{
-				Field: s.dao.Employee.Columns().UnionMainId,
-				Where: "=",
-				Value: team.Data().UnionMainId,
-			},
-		),
-	})
 }
 
 // SetEmployeeState 设置员工状态

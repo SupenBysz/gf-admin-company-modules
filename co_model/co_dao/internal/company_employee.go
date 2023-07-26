@@ -39,6 +39,7 @@ type CompanyEmployeeColumns struct {
 	DeletedBy    string //
 	DeletedAt    string //
 	Sex          string // 性别：0女 1男
+	Remark       string // 备注
 }
 
 // companyEmployeeColumns holds the columns for table co_company_employee.
@@ -59,6 +60,7 @@ var companyEmployeeColumns = CompanyEmployeeColumns{
 	DeletedBy:    "deleted_by",
 	DeletedAt:    "deleted_at",
 	Sex:          "sex",
+	Remark:       "remark",
 }
 
 // NewCompanyEmployeeDao creates and returns a new DAO object for table data access.

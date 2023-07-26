@@ -37,6 +37,7 @@ type Config struct {
 	IsCreateDefaultEmployeeAndRole bool              `p:"isCreateDefaultEmployeeAndRole" dc:"是否创建默认员工和角色"`
 	HardDeleteWaitAt               int64             `p:"hardDeleteWaitAt" dc:"硬删除等待时限,单位/小时" default:"12"`
 	KeyIndex                       string            `p:"keyIndex" dc:"配置索引"`
+	I18nName                       string            `p:"i18NName" dc:"i18n文件名称"`
 	RoutePrefix                    string            `p:"routePrefix" dc:"路由前缀"`
 	StoragePath                    string            `p:"storagePath" dc:"资源存储路径"`
 	UserType                       sys_enum.UserType `p:"userType" dc:"用户类型"`

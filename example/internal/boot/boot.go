@@ -5,7 +5,9 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-company-modules/co_controller/lincense"
 	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
+
 	"github.com/SupenBysz/gf-admin-company-modules/example/internal/consts"
 	"github.com/SupenBysz/gf-admin-company-modules/example/router"
 	"github.com/gogf/gf/v2/frame/g"
@@ -86,7 +88,7 @@ var (
 							// 图型验证码
 							sys_controller.Captcha,
 							// 短信验证码
-							sys_controller.SysSms,
+							//sys_controller.SysSms,
 							// 地区
 							sys_controller.SysArea,
 						)
@@ -105,6 +107,16 @@ var (
 
 					// 注册财务模块路由 (可选)
 					router.FinancialGroup(consts.Global.IModules, group)
+
+					// 主体资质管理
+					group.Group("/audit", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysAudit) })
+
+					// 个人资质管理
+					group.Group("/person_license", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysLicense) })
+
+					// 主体资质管理
+					group.Group("/license", func(group *ghttp.RouterGroup) { group.Bind(lincense.License) })
+
 				})
 			})
 			s.Run()

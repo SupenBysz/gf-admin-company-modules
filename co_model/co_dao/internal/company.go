@@ -38,6 +38,8 @@ type CompanyColumns struct {
 	DeletedAt     string // 删除时间
 	ParentId      string // 父级ID
 	Address       string // 地址
+	LicenseId     string // 主体资质id
+	LicenseState  string // 主体状态,和主体资质状态保持一致
 }
 
 // companyColumns holds the columns for table co_company.
@@ -57,6 +59,8 @@ var companyColumns = CompanyColumns{
 	DeletedAt:     "deleted_at",
 	ParentId:      "parent_id",
 	Address:       "address",
+	LicenseId:     "license_id",
+	LicenseState:  "license_state",
 }
 
 // NewCompanyDao creates and returns a new DAO object for table data access.
