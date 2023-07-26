@@ -1,12 +1,12 @@
 package internal
 
 import (
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_module"
+	"github.com/kysion/base-library/utility/base_permission"
 )
 
 type Global struct {
@@ -22,10 +22,10 @@ type Global struct {
 		*co_model.FdInvoiceDetailRes,
 	]
 
-	PermissionTree []*sys_model.SysPermissionTree
+	PermissionTree []base_permission.IPermission
 
 	// FinancialPermissionTree 财务服务权限树 (可选)
-	FinancialPermissionTree []*sys_model.SysPermissionTree
+	FinancialPermissionTree []base_permission.IPermission
 }
 
 var global *Global
