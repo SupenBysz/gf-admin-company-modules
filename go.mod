@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.5.0
+	github.com/SupenBysz/gf-admin-community v0.5.1
 	github.com/gogf/gf/v2 v2.5.0
 	github.com/kysion/base-library v0.0.18
 	github.com/yitter/idgenerator-go v1.3.3
@@ -40,7 +40,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kysion/sms-library v0.0.7 // indirect
+	github.com/kysion/sms-library v0.1.0 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20230717040633-c8446edaab76 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
