@@ -26,7 +26,7 @@ type SetAvatarReq struct {
 }
 
 type SetMobileReq struct {
-	g.Meta `method:"post" summary:"设置手机号|信息" tags:"组织单位/我的"`
+	g.Meta `method:"post" summary:"设置员工手机号|信息" tags:"组织单位/我的"`
 	co_company_api.SetMobileReq
 }
 

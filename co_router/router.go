@@ -125,7 +125,7 @@ func MyGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/getCompany", controller.GetCompany)
 	group.POST(routePrefix+"/getTeams", controller.GetTeams)
 	group.POST(routePrefix+"/setAvatar", controller.SetAvatar)
-	group.POST(routePrefix+"/setMobile", controller.SetMobile)
+	group.POST(routePrefix+"/setEmployeeMobile", controller.SetMobile)
 
 	// 我的财务相关
 	group.POST(routePrefix+"/getAccountBills", controller.GetAccountBills)
