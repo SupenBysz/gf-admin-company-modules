@@ -226,9 +226,13 @@ func (s *sEmployee[
 	}
 
 	var employee TR
-	if !reflect.ValueOf(data).IsNil() {
+	if data != nil && !reflect.ValueOf(data).IsNil() {
 		employee = *data
-		user.Detail.Realname = employee.Data().Name
+		if !reflect.ValueOf(employee).IsNil() {
+			user.Detail.Realname = employee.Data().Name
+		} else {
+			return nil
+		}
 	}
 
 	if !reflect.ValueOf(data).IsNil() && employee.Data().UnionMainId != 0 {
