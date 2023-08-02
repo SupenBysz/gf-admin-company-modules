@@ -41,4 +41,10 @@ type ITeam[ITTeamRes co_model.ITeamRes] interface {
 
 	// GetEmployeeListByTeamId 获取团队成员|列表
 	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamIdReq) (*base_model.CollectRes[co_model.IEmployeeRes], error)
+
+	// GetTeamInviteCode 获取团队邀约码
+	GetTeamInviteCode(ctx context.Context, req *co_company_api.GetTeamInviteCodeReq) (*co_model.TeamInviteCodeRes, error)
+
+	// JoinTeamByInviteCode 根据邀请码加入团队
+	JoinTeamByInviteCode(ctx context.Context, req *co_company_api.JoinTeamByInviteCodeReq) (api_v1.BoolRes, error)
 }

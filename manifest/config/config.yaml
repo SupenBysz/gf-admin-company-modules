@@ -37,6 +37,36 @@ service:
     default: 15
   # 系统默认货币单位
   defaultCurrency: "CNY"
+  # Session上下文缓存Key
+  sessionContextKey: "KysionGfCompanyBizCtxContextKye"
+  # 登陆支持的方式：1用户名+密码+图形验证码、 2手机号+密码或验证码、4邮箱+密码
+  loginRule: [ 1,2,4 ]
+  # 注册支持的方式：1用户名+密码+图形验证码、 2用户名+手机号+验证码、4用户名+邮箱+验证码
+  registerRule: [ 1,2,4 ]
+  # 注册是否强制需要填写邀约码: true必需填写邀约码、false可选
+  registerIsNeedInviteCode: false
+
+# 邮件设置
+email:
+  # 帐号
+  username: ""
+  # 密码
+  password: ""
+  # 发送者昵称
+  sendAuthor: ""
+  # 标题前缀
+  titlePrefix: ""
+  # 授权码
+  authCode: ""
+  pop3:
+    host: "pop3.qq.com"
+    port: 995
+    ssl: true
+  smtp:
+    host: "smtp.qq.com"
+    port: 25
+    ssl: false
+
 
 # 日志配置
 logger:

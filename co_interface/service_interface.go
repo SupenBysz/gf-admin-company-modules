@@ -56,7 +56,9 @@ type (
 		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
-		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) // 移除到Team里面
+		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error)
+		GetTeamInviteCode(ctx context.Context, teamId, userId int64, info *co_model.TeamInvite) (*co_model.TeamInviteCodeRes, error)
+		JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error)
 	}
 
 	IMy interface {

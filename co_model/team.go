@@ -1,9 +1,11 @@
 package co_model
 
 import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/base_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/utility/kconv"
 	"reflect"
 )
@@ -25,6 +27,16 @@ type TeamRes struct {
 	Captain   *EmployeeRes `json:"captain" dc:"团队队长编号/小组组长"`
 	UnionMain *CompanyRes  `json:"unionMain" dc:"关联主体"`
 	Parent    *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
+}
+
+type TeamInvite struct {
+	ExpireAt       *gtime.Time `json:"expireAt"       description:"邀约码的过期失效" `
+	ActivateNumber int         `json:"activateNumber" description:"邀约码的激活次数限制" dc:"邀约码激活总次数"`
+}
+
+type TeamInviteCodeRes struct {
+	Team      co_entity.CompanyTeam `json:"team" dc:"团队信息"`
+	InviteRes *sys_model.InviteRes  `json:"inviteRes" dc:"邀约信息"`
 }
 
 func (m *TeamRes) Data() *TeamRes {

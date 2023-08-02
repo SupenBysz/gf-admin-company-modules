@@ -59,3 +59,13 @@ type GetEmployeeListByTeamIdReq struct {
 	g.Meta `method:"post" summary:"根据团队ID获取成员｜列表" tags:"组织单位/团队｜小组"`
 	co_company_api.GetEmployeeListByTeamIdReq
 }
+
+type GetTeamInviteCodeReq struct {
+	g.Meta `method:"post" summary:"查看团队邀约码" tags:"组织单位/团队｜小组"`
+	co_company_api.GetTeamInviteCodeReq
+}
+
+type JoinTeamByInviteCodeReq struct {
+	g.Meta `method:"post" summary:"通过邀请码加入团队" tags:"组织单位/团队｜小组"`
+	co_company_api.JoinTeamByInviteCodeReq
+}
