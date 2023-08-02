@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -95,7 +96,57 @@ func NewCompany[
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
+	// 订阅邀约用户注册Hook，然后将新用户设置到邀约userId中所属主体中
+	sys_service.SysAuth().InstallInviteRegisterHook(sys_enum.Invite.Type.Register, result.SetNewUserJoinCompany)
+
 	return result
+}
+
+// SetNewUserJoinCompany 将注册的新用户添加至邀约者的主体中
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetNewUserJoinCompany(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
+	// 判断用户是够存在别的主体中了
+
+	// 找到userId对应的主体
+	user, err := sys_service.SysUser().GetSysUserById(ctx, invite.UserId)
+	if err != nil {
+		return true, nil
+	}
+
+	employee, err := s.modules.Employee().GetEmployeeById(ctx, user.Id)
+	if err != nil || reflect.ValueOf(employee).IsNil() {
+		return true, nil
+	}
+
+	// 将新用户设置至主体中  TODO 需要封装
+	data := co_do.CompanyEmployee{
+		Id:          registerInfo.Id,
+		No:          nil, // 工号暂定
+		Avatar:      nil, // 头像等后期用户登陆系统进行完善
+		Name:        registerInfo.Username,
+		Mobile:      registerInfo.Mobile,
+		UnionMainId: employee.Data().UnionMainId,
+		State:       0, // 状态：待确认
+		CreatedBy:   invite.UserId,
+		CreatedAt:   gtime.Now(),
+	}
+
+	affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).OmitNilData().Data(data))
+	if affected == 0 || err != nil {
+		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+	}
+
+	// 是否进行邀约码处理 （设置剩余次数，设置状态） 不处理
+	return true, nil
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
