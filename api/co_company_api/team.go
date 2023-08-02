@@ -57,8 +57,7 @@ type GetEmployeeListByTeamIdReq struct {
 }
 
 type GetTeamInviteCodeReq struct {
-	TeamId     int64               `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
-	TeamInvite co_model.TeamInvite `json:"teamInvite" dc:"团队邀请信息配置"`
+	TeamId int64 `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 }
 
 type JoinTeamByInviteCodeReq struct {

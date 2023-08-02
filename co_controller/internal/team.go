@@ -321,11 +321,11 @@ func (c *TeamController[
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamInviteCodeRes, error) {
 			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
-			ret, err := c.team.GetTeamInviteCode(ctx, req.TeamId, user.Id, &req.TeamInvite)
+			ret, err := c.team.GetTeamInviteCode(ctx, req.TeamId, user.Id)
 
 			return ret, err
 		},
-		co_permission.Team.PermissionType(c.modules).ViewDetail,
+		//co_permission.Team.PermissionType(c.modules).ViewDetail, 无需校验
 	)
 }
 

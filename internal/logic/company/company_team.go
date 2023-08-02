@@ -3,11 +3,17 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_consts"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/sys_rules"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
@@ -21,12 +27,6 @@ import (
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
-
-	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
 type sTeam[
@@ -973,7 +973,7 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetTeamInviteCode(ctx context.Context, teamId, userId int64, info *co_model.TeamInvite) (*co_model.TeamInviteCodeRes, error) {
+]) GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error) {
 	// 1.获取团队信息
 	team, err := s.modules.Team().GetTeamById(ctx, teamId)
 	if err != nil {
@@ -981,15 +981,22 @@ func (s *sTeam[
 	}
 
 	// 2.生成团队邀约码
-	encodeStr, _ := gjson.EncodeString(team)
-	invite, err := sys_service.SysInvite().CreateInvite(ctx, &sys_model.Invite{
+	encodeStr, _ := gjson.EncodeString(g.Map{
+		"teamId": teamId, // 团队邀约码信息存储团队ID即可
+	})
+	data := &sys_model.Invite{
 		UserId:         userId,
 		Value:          encodeStr,
-		ExpireAt:       info.ExpireAt,
-		ActivateNumber: info.ActivateNumber,
-		State:          1, //  默认正常
+		ExpireAt:       gtime.Now().AddDate(0, 0, sys_consts.Global.InviteCodeExpireDay), // 过期时间
+		ActivateNumber: sys_consts.Global.InviteCodeMaxActivateNumber,                    //
+		State:          1,                                                                //  默认正常
 		Type:           sys_enum.Invite.Type.JoinTeam.Code(),
-	})
+	}
+	if sys_consts.Global.InviteCodeExpireDay == 0 {
+		data.ExpireAt = nil
+	}
+
+	invite, err := sys_service.SysInvite().CreateInvite(ctx, data)
 
 	// 3.返回响应
 	res := co_model.TeamInviteCodeRes{}
@@ -1014,17 +1021,15 @@ func (s *sTeam[
 	// 1.解析邀约码，获取团队信息
 	//id := invite_id.CodeToInviteId(inviteCode)
 	inviteInfo, err := sys_rules.CheckInviteCode(ctx, inviteCode)
-	var companyTeam *co_entity.CompanyTeam
-	gjson.DecodeTo(inviteInfo.Value, &companyTeam)
-
-	var teamId int64
-	if companyTeam != nil {
-		teamId = companyTeam.Id
+	info := g.Map{
+		"teamId": 0,
 	}
+	gjson.DecodeTo(inviteInfo.Value, &info)
+	teamId := gconv.Int64(info["teamId"])
 
 	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 1.获取团队信息
-		_, err = s.modules.Team().GetTeamById(ctx, teamId)
+		team, err := s.modules.Team().GetTeamById(ctx, teamId)
 		if err != nil {
 			return err
 		}
@@ -1038,14 +1043,14 @@ func (s *sTeam[
 		// 3.需要处理邀约信息的：减少次数、改变状态
 		needToSettleInvite := true
 
-		// 广播邀约Hook
+		// 广播团队邀约处理Hook
 		if inviteCode != "" {
 			s.InviteJoinTeamHook.Iterator(func(key sys_enum.InviteType, value co_hook.InviteJoinTeamHookFunc) {
 				// 判断订阅的Hook类型是否一致
 				if key.Code()&inviteInfo.Type == inviteInfo.Type {
 					// 业务类型一致则调用注入的Hook函数
 					g.Try(ctx, func(ctx context.Context) {
-						needToSettleInvite, err = value(ctx, sys_enum.Invite.Type.Register, inviteInfo, companyTeam)
+						needToSettleInvite, err = value(ctx, sys_enum.Invite.Type.Register, inviteInfo, team)
 						if err != nil {
 							return
 						}
@@ -1056,10 +1061,12 @@ func (s *sTeam[
 
 		// 业务层没有处理邀约
 		if needToSettleInvite {
-			// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
-			_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false)
-			if err != nil {
-				return err
+			if sys_consts.Global.InviteCodeMaxActivateNumber != 0 { // 非无上限
+				// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
+				_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
