@@ -57,7 +57,7 @@ type (
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
 		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error)
-		GetTeamInviteCode(ctx context.Context, teamId, userId int64, info *co_model.TeamInvite) (*co_model.TeamInviteCodeRes, error)
+		GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error)
 		JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error)
 	}
 

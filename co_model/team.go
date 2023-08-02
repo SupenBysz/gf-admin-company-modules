@@ -5,7 +5,6 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/base_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
-	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/utility/kconv"
 	"reflect"
 )
@@ -29,10 +28,11 @@ type TeamRes struct {
 	Parent    *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
 }
 
-type TeamInvite struct {
-	ExpireAt       *gtime.Time `json:"expireAt"       description:"邀约码的过期失效" `
-	ActivateNumber int         `json:"activateNumber" description:"邀约码的激活次数限制" dc:"邀约码激活总次数"`
-}
+// 这些从配置加载
+//type TeamInvite struct {
+//	ExpireAt       *gtime.Time `json:"expireAt"       description:"邀约码的过期失效" `
+//	ActivateNumber int         `json:"activateNumber" description:"邀约码的激活次数限制" dc:"邀约码激活总次数"`
+//}
 
 type TeamInviteCodeRes struct {
 	Team      co_entity.CompanyTeam `json:"team" dc:"团队信息"`
