@@ -985,15 +985,10 @@ func (s *sTeam[
 		"teamId": teamId, // 团队邀约码信息存储团队ID即可
 	})
 	data := &sys_model.Invite{
-		UserId:         userId,
-		Value:          encodeStr,
-		ExpireAt:       gtime.Now().AddDate(0, 0, sys_consts.Global.InviteCodeExpireDay), // 过期时间
-		ActivateNumber: sys_consts.Global.InviteCodeMaxActivateNumber,                    //
-		State:          1,                                                                //  默认正常
-		Type:           sys_enum.Invite.Type.JoinTeam.Code(),
-	}
-	if sys_consts.Global.InviteCodeExpireDay == 0 {
-		data.ExpireAt = nil
+		UserId: userId,
+		Value:  encodeStr,
+		State:  1, //  默认正常
+		Type:   sys_enum.Invite.Type.JoinTeam.Code(),
 	}
 
 	invite, err := sys_service.SysInvite().CreateInvite(ctx, data)
