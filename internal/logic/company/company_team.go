@@ -3,9 +3,15 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/utility/sys_rules"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
@@ -35,6 +41,10 @@ type sTeam[
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
+
+	// 邀约&加入团队Hook
+	InviteJoinTeamHook base_hook.BaseHook[sys_enum.InviteType, co_hook.InviteJoinTeamHookFunc]
+
 	modules co_interface.IModules[
 		ITCompanyRes,
 		ITEmployeeRes,
@@ -950,6 +960,114 @@ func (s *sTeam[
 	}
 
 	return &result, err
+}
+
+// GetTeamInviteCode 获取团队邀约码
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetTeamInviteCode(ctx context.Context, teamId, userId int64, info *co_model.TeamInvite) (*co_model.TeamInviteCodeRes, error) {
+	// 1.获取团队信息
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2.生成团队邀约码
+	encodeStr, _ := gjson.EncodeString(team)
+	invite, err := sys_service.SysInvite().CreateInvite(ctx, &sys_model.Invite{
+		UserId:         userId,
+		Value:          encodeStr,
+		ExpireAt:       info.ExpireAt,
+		ActivateNumber: info.ActivateNumber,
+		State:          1, //  默认正常
+		Type:           sys_enum.Invite.Type.JoinTeam.Code(),
+	})
+
+	// 3.返回响应
+	res := co_model.TeamInviteCodeRes{}
+	res.InviteRes = invite
+	res.Team = team.Data().CompanyTeam
+
+	return &res, nil
+}
+
+// JoinTeamByInviteCode 扫码邀约码进入团队
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error) {
+	// 1.解析邀约码，获取团队信息
+	//id := invite_id.CodeToInviteId(inviteCode)
+	inviteInfo, err := sys_rules.CheckInviteCode(ctx, inviteCode)
+	var companyTeam *co_entity.CompanyTeam
+	gjson.DecodeTo(inviteInfo.Value, &companyTeam)
+
+	var teamId int64
+	if companyTeam != nil {
+		teamId = companyTeam.Id
+	}
+
+	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 1.获取团队信息
+		_, err = s.modules.Team().GetTeamById(ctx, teamId)
+		if err != nil {
+			return err
+		}
+
+		// 2.将扫码人员加入团队
+		_, err = s.SetTeamMember(ctx, teamId, []int64{userId})
+		if err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_JoinTeamByInviteCode_Failed"), s.dao.TeamMember.Table())
+		}
+
+		// 3.需要处理邀约信息的：减少次数、改变状态
+		needToSettleInvite := true
+
+		// 广播邀约Hook
+		if inviteCode != "" {
+			s.InviteJoinTeamHook.Iterator(func(key sys_enum.InviteType, value co_hook.InviteJoinTeamHookFunc) {
+				// 判断订阅的Hook类型是否一致
+				if key.Code()&inviteInfo.Type == inviteInfo.Type {
+					// 业务类型一致则调用注入的Hook函数
+					g.Try(ctx, func(ctx context.Context) {
+						needToSettleInvite, err = value(ctx, sys_enum.Invite.Type.Register, inviteInfo, companyTeam)
+						if err != nil {
+							return
+						}
+					})
+				}
+			})
+		}
+
+		// 业务层没有处理邀约
+		if needToSettleInvite {
+			// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
+			_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+
+	})
+
+	return err == nil, nil
 }
 
 // makeMore 按需加载附加数据

@@ -104,6 +104,8 @@ func TeamGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
 	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)
 	group.POST(routePrefix+"/getEmployeeListByTeamId", controller.GetEmployeeListByTeamId)
+	group.POST(routePrefix+"/getTeamInviteCode", controller.GetTeamInviteCode)
+	group.POST(routePrefix+"/joinTeamByInviteCode", controller.JoinTeamByInviteCode)
 
 	return group
 }

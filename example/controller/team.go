@@ -90,3 +90,15 @@ func (c *TeamController[ITTeamRes]) GetEmployeeListByTeamId(ctx context.Context,
 
 	return kconv.Struct(ret, &api_v1.MapRes{}), err
 }
+
+func (c *TeamController[ITTeamRes]) GetTeamInviteCode(ctx context.Context, req *co_v1.GetTeamInviteCodeReq) (*co_model.TeamInviteCodeRes, error) {
+	ret, err := c.ITeam.GetTeamInviteCode(ctx, &req.GetTeamInviteCodeReq)
+
+	return ret, err
+}
+
+func (c *TeamController[ITTeamRes]) JoinTeamByInviteCode(ctx context.Context, req *co_v1.JoinTeamByInviteCodeReq) (api_v1.BoolRes, error) {
+	ret, err := c.ITeam.JoinTeamByInviteCode(ctx, &req.JoinTeamByInviteCodeReq)
+
+	return ret, err
+}
