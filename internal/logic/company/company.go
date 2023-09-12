@@ -18,6 +18,7 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -381,7 +382,7 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	// 名称重名检测
-	if s.HasCompanyByName(ctx, info.Name, info.Id) {
+	if s.HasCompanyByName(ctx, *info.Name, info.Id) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 	}
 
@@ -391,14 +392,17 @@ func (s *sCompany[
 	// 构建公司ID
 	UnionMainId := idgen.NextId()
 
-	data := co_do.Company{
-		Id:            info.Id,
-		Name:          info.Name,
-		ContactName:   info.ContactName,
-		ContactMobile: info.ContactMobile,
-		Remark:        info.Remark,
-		Address:       info.Address,
-	}
+	data := kconv.Struct(info, &co_do.Company{})
+	//data := co_do.Company{
+	//	Id:            info.Id,
+	//	Name:          info.Name,
+	//	ContactName:   info.ContactName,
+	//	ContactMobile: info.ContactMobile,
+	//	Remark:        info.Remark,
+	//	Address:       info.Address,
+	//	LicenseId:     info.LicenseId,
+	//	LicenseState:  info.LicenseState,
+	//}
 
 	// 启用事务
 	err = s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
@@ -408,8 +412,8 @@ func (s *sCompany[
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
 				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
 					No:          "001",
-					Name:        info.ContactName,
-					Mobile:      info.ContactMobile,
+					Name:        *info.ContactName,
+					Mobile:      *info.ContactMobile,
 					UnionMainId: UnionMainId,
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
@@ -454,7 +458,7 @@ func (s *sCompany[
 			//data.LicenseId = 0 // 首次创建没有主体id
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.DoFactory(data)
+			doData, err := info.OverrideDo.DoFactory(*data)
 			if err != nil {
 				return err
 			}
@@ -472,7 +476,7 @@ func (s *sCompany[
 			gconv.Struct(info, &accountData)
 
 			account := &co_model.FdAccountRegister{
-				Name: info.Name,
+				Name: *info.Name,
 				//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
 
 				UnionUserId:        gconv.Int64(data.UserId),
@@ -490,22 +494,23 @@ func (s *sCompany[
 			}
 
 		} else {
-			if gstr.Contains(info.ContactMobile, "***") || info.ContactMobile == "" {
-				data.ContactMobile = nil
-			}
+			//if gstr.Contains(*info.ContactMobile, "***") || *info.ContactMobile == "" {
+			//	data.ContactMobile = nil
+			//}
 
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
+			data.Id = nil
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.DoFactory(data)
+			doData, err := info.OverrideDo.DoFactory(*data)
 			if err != nil {
 				return err
 			}
 
 			_, err = daoctl.UpdateWithError(
 				s.dao.Company.Ctx(ctx).
-					Where(co_do.Company{Id: info.Id}),
+					Where(co_do.Company{Id: info.Id}).OmitNilData(),
 				doData,
 			)
 			if err != nil {
@@ -522,7 +527,7 @@ func (s *sCompany[
 		return response, err
 	}
 
-	return s.GetCompanyById(ctx, data.Id.(int64))
+	return s.GetCompanyById(ctx, info.Id)
 }
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话

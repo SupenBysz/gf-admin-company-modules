@@ -11,12 +11,13 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
-func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context, info co_model.License, data *T) (response *T, err error) {
+func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context, info co_model.AuditLicense, data *T) (response *T, err error) {
 	newData := &co_entity.License{}
 	gconv.Struct(data, newData)
 
 	{
-		userId := sys_service.SysSession().Get(ctx).JwtClaimsUser.Id
+		//userId := sys_service.SysSession().Get(ctx).JwtClaimsUser.Id
+		userId := info.UserId
 
 		// 用户资源文件夹
 		userFolder := "./resources/license/" + gconv.String(newData.Id)

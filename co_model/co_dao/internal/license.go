@@ -23,62 +23,64 @@ type LicenseDao struct {
 
 // LicenseColumns defines and stores column names for table co_license.
 type LicenseColumns struct {
-	Id                        string //
-	IdcardFrontPath           string // 身份证头像面照片
-	IdcardBackPath            string // 身份证国徽面照片
-	IdcardNo                  string // 身份证号
-	IdcardExpiredDate         string // 身份证有效期
-	IdcardAddress             string // 身份证户籍地址
-	PersonContactName         string // 负责人，必须是自然人
-	PersonContactMobile       string // 负责人，联系电话
-	BusinessLicenseName       string // 公司全称
-	BusinessLicenseAddress    string // 公司地址
-	BusinessLicensePath       string // 营业执照图片地址
-	BusinessLicenseScope      string // 经营范围
-	BusinessLicenseRegCapital string // 注册资本
-	BusinessLicenseTermTime   string // 营业期限
-	BusinessLicenseOrgCode    string // 组织机构代码
-	BusinessLicenseCreditCode string // 统一社会信用代码
-	BusinessLicenseLegal      string // 法人
-	BusinessLicenseLegalPath  string // 法人证照，如果法人不是自然人，则该项必填
-	LatestAuditLogId          string // 最新的审核记录ID
-	State                     string //
-	AuthType                  string //
-	Remark                    string //
-	UpdatedAt                 string //
-	CreatedAt                 string //
-	DeletedAt                 string //
-	BrandName                 string // 品牌名称
+	Id                         string //
+	IdcardFrontPath            string // 身份证头像面照片
+	IdcardBackPath             string // 身份证国徽面照片
+	IdcardNo                   string // 身份证号
+	IdcardExpiredDate          string // 身份证有效期
+	IdcardAddress              string // 身份证户籍地址
+	PersonContactName          string // 负责人，必须是自然人
+	PersonContactMobile        string // 负责人，联系电话
+	BusinessLicenseName        string // 公司全称
+	BusinessLicenseAddress     string // 公司地址
+	BusinessLicensePath        string // 营业执照图片地址
+	BusinessLicenseScope       string // 经营范围
+	BusinessLicenseRegCapital  string // 注册资本
+	BusinessLicenseTermTime    string // 营业期限
+	BusinessLicenseOrgCode     string // 组织机构代码
+	BusinessLicenseCreditCode  string // 统一社会信用代码
+	BusinessLicenseLegal       string // 法人
+	BusinessLicenseLegalPath   string // 法人证照，如果法人不是自然人，则该项必填
+	LatestAuditLogId           string // 最新的审核记录ID
+	State                      string //
+	AuthType                   string //
+	Remark                     string //
+	UpdatedAt                  string //
+	CreatedAt                  string //
+	DeletedAt                  string //
+	BrandName                  string // 品牌名称
+	BusinessLicenseLegalMobile string // 法人联系电话
 }
 
 // licenseColumns holds the columns for table co_license.
 var licenseColumns = LicenseColumns{
-	Id:                        "id",
-	IdcardFrontPath:           "idcard_front_path",
-	IdcardBackPath:            "idcard_back_path",
-	IdcardNo:                  "idcard_no",
-	IdcardExpiredDate:         "idcard_expired_date",
-	IdcardAddress:             "idcard_address",
-	PersonContactName:         "person_contact_name",
-	PersonContactMobile:       "person_contact_mobile",
-	BusinessLicenseName:       "business_license_name",
-	BusinessLicenseAddress:    "business_license_address",
-	BusinessLicensePath:       "business_license_path",
-	BusinessLicenseScope:      "business_license_scope",
-	BusinessLicenseRegCapital: "business_license_reg_capital",
-	BusinessLicenseTermTime:   "business_license_term_time",
-	BusinessLicenseOrgCode:    "business_license_org_code",
-	BusinessLicenseCreditCode: "business_license_credit_code",
-	BusinessLicenseLegal:      "business_license_legal",
-	BusinessLicenseLegalPath:  "business_license_legal_path",
-	LatestAuditLogId:          "latest_audit_log_id",
-	State:                     "state",
-	AuthType:                  "auth_type",
-	Remark:                    "remark",
-	UpdatedAt:                 "updated_at",
-	CreatedAt:                 "created_at",
-	DeletedAt:                 "deleted_at",
-	BrandName:                 "brand_name",
+	Id:                         "id",
+	IdcardFrontPath:            "idcard_front_path",
+	IdcardBackPath:             "idcard_back_path",
+	IdcardNo:                   "idcard_no",
+	IdcardExpiredDate:          "idcard_expired_date",
+	IdcardAddress:              "idcard_address",
+	PersonContactName:          "person_contact_name",
+	PersonContactMobile:        "person_contact_mobile",
+	BusinessLicenseName:        "business_license_name",
+	BusinessLicenseAddress:     "business_license_address",
+	BusinessLicensePath:        "business_license_path",
+	BusinessLicenseScope:       "business_license_scope",
+	BusinessLicenseRegCapital:  "business_license_reg_capital",
+	BusinessLicenseTermTime:    "business_license_term_time",
+	BusinessLicenseOrgCode:     "business_license_org_code",
+	BusinessLicenseCreditCode:  "business_license_credit_code",
+	BusinessLicenseLegal:       "business_license_legal",
+	BusinessLicenseLegalPath:   "business_license_legal_path",
+	LatestAuditLogId:           "latest_audit_log_id",
+	State:                      "state",
+	AuthType:                   "auth_type",
+	Remark:                     "remark",
+	UpdatedAt:                  "updated_at",
+	CreatedAt:                  "created_at",
+	DeletedAt:                  "deleted_at",
+	BrandName:                  "brand_name",
+	BusinessLicenseLegalMobile: "business_license_legal_mobile",
 }
 
 // NewLicenseDao creates and returns a new DAO object for table data access.
