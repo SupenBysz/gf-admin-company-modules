@@ -64,26 +64,46 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 	if (auditEvent.Code() & sys_enum.Audit.Event.GetAuditData.Code()) == sys_enum.Audit.Event.GetAuditData.Code() {
 		if (info.Category & sys_enum.Audit.Category.CompanyLicenseAudit.Code()) == sys_enum.Audit.Category.CompanyLicenseAudit.Code() {
 
-			//auditData := co_model.AuditLicense{}
-			auditData := co_model.License{}
+			auditData := co_model.AuditLicense{}
 
 			//解析json字符串
 			//decode, _ := gjson.Decode(info.AuditData)
 			gjson.DecodeTo(info.AuditData, &auditData)
 
-			// 还未审核的图片从缓存中寻找  0 缓存  1 数据库
-
 			// 将路径id换成可访问图片的url
 			{
+				tempIdcardFrontPath := ""
 				if gstr.IsNumeric(auditData.IdcardFrontPath) {
-					auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardFrontPath)
+					// TODO 没审核通过的文件是没有保存的， 如何获取到
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.IdcardFrontPath), auditData.UserId); err == nil && uploadFile != nil {
+						tempIdcardFrontPath = uploadFile.Src
+					}
 				}
-				if gstr.IsNumeric(auditData.IdcardBackPath) {
-					auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardBackPath)
-				}
-			}
 
-			//auditData.IdcardBackPath = "6666666666666666666666"
+				auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardFrontPath)
+
+			}
+			{
+				tempIdcardBackPath := ""
+				if gstr.IsNumeric(auditData.IdcardBackPath) {
+					// TODO 没审核通过的文件是没有保存的， 如何获取到
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.IdcardBackPath), auditData.UserId); err == nil && uploadFile != nil {
+						tempIdcardBackPath = uploadFile.Src
+					}
+				}
+
+				auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardBackPath)
+			}
+			{
+				tempBusinessLicensePath := ""
+				if gstr.IsNumeric(auditData.BusinessLicensePath) {
+					// TODO 没审核通过的文件是没有保存的， 如何获取到
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.BusinessLicensePath), auditData.UserId); err == nil && uploadFile != nil {
+						tempBusinessLicensePath = uploadFile.Src
+					}
+				}
+				auditData.BusinessLicensePath = sys_service.File().MakeFileUrlByPath(ctx, tempBusinessLicensePath)
+			}
 
 			// 重新赋值  将id转为可访问路径
 			info.AuditData = gjson.MustEncodeString(auditData)
@@ -99,8 +119,8 @@ func (s *sLicense) AuditChange(ctx context.Context, auditEvent sys_enum.AuditEve
 		// 审核通过
 		if (info.State & sys_enum.Audit.Action.Approve.Code()) == sys_enum.Audit.Action.Approve.Code() {
 			// 创建主体资质
-			license := co_model.License{}
-			//license := co_model.AuditLicense{}
+			//license := co_model.License{}
+			license := co_model.AuditLicense{}
 			gjson.DecodeTo(info.AuditData, &license)
 
 			licenseRes, err := co_service.License().CreateLicense(ctx, license)
@@ -139,9 +159,10 @@ func (s *sLicense) QueryLicenseList(ctx context.Context, search base_model.Searc
 }
 
 // CreateLicense 新增主体资质|信息
-func (s *sLicense) CreateLicense(ctx context.Context, info co_model.License) (*co_entity.License, error) {
+func (s *sLicense) CreateLicense(ctx context.Context, info co_model.AuditLicense) (*co_entity.License, error) {
+	//result := co_model.AuditLicense{}
 	result := co_entity.License{}
-	gconv.Struct(info, &result)
+	gconv.Struct(info.License, &result)
 
 	result.Id = idgen.NextId()
 	result.State = 0
@@ -172,7 +193,7 @@ func (s *sLicense) CreateLicense(ctx context.Context, info co_model.License) (*c
 }
 
 // UpdateLicense 更新主体认证，如果是已经通过的认证，需要重新认证通过后才生效|信息
-func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id int64) (*co_entity.License, error) {
+func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.AuditLicense, id int64) (*co_entity.License, error) {
 	data, err := s.GetLicenseById(ctx, id)
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "操作失败，主体信息不存在", co_dao.License.Table())
@@ -184,7 +205,7 @@ func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id 
 
 	newData := co_do.License{}
 
-	gconv.Struct(info, &newData)
+	gconv.Struct(info.License, &newData)
 
 	{
 		_, err := co_funs.CheckLicenseFiles(ctx, info, &newData)

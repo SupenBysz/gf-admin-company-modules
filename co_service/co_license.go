@@ -26,9 +26,9 @@ type (
 		// QueryLicenseList 查询主体认证|列表
 		QueryLicenseList(ctx context.Context, search base_model.SearchParams) (*co_model.LicenseListRes, error)
 		// CreateLicense 新增主体资质|信息
-		CreateLicense(ctx context.Context, info co_model.License) (*co_entity.License, error)
+		CreateLicense(ctx context.Context, info co_model.AuditLicense) (*co_entity.License, error)
 		// UpdateLicense 更新主体认证，如果是已经通过的认证，需要重新认证通过后才生效|信息
-		UpdateLicense(ctx context.Context, info co_model.License, id int64) (*co_entity.License, error)
+		UpdateLicense(ctx context.Context, info co_model.AuditLicense, id int64) (*co_entity.License, error)
 		// GetLicenseByLatestAuditId 获取最新的审核记录Id获取资质信息
 		GetLicenseByLatestAuditId(ctx context.Context, auditId int64) *co_entity.License
 		// SetLicenseState 设置主体信息状态
