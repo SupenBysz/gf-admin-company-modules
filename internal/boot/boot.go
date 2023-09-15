@@ -2,6 +2,7 @@ package boot
 
 import (
 	"context"
+	"fmt"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
@@ -18,15 +19,15 @@ func InitCustomRules() {
 
 // InitPermission 初始化权限树
 func InitPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -38,6 +39,8 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) []base_permission.IPermission {
+	var rr = module.T(context.TODO(), "{#CompanyName}")
+	fmt.Println(rr)
 	result := []base_permission.IPermission{
 		// 公司
 		base_permission.Factory().
@@ -112,15 +115,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 // InitFinancialPermission 初始化财务服务权限树
 func InitFinancialPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -223,22 +226,6 @@ func initAuditAndLicensePermission() []base_permission.IPermission {
 				co_permission.License.PermissionType.Create,
 				// 设置资质状态，设置某资质认证状态
 				co_permission.License.PermissionType.SetState,
-			}),
-
-		// 审核管理权限树
-		base_permission.Factory().
-			SetId(idgen.NextId()).
-			SetName("审核管理").
-			SetIdentifier("Audit").
-			SetType(1).
-			SetIsShow(1).
-			SetItems([]base_permission.IPermission{
-				// 查看审核信息，查看某条资质审核信息
-				co_permission.Audit.PermissionType.ViewDetail,
-				// 资质审核列表，查看所有资质审核
-				co_permission.Audit.PermissionType.List,
-				// 更新资质审核信息，更新某条资质审核信息
-				co_permission.Audit.PermissionType.Update,
 			}),
 	}
 
