@@ -452,6 +452,7 @@ func (s *sCompany[
 
 			// 3.构建公司信息
 			data.Id = UnionMainId
+			info.Id = UnionMainId
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
