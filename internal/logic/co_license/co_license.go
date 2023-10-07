@@ -164,7 +164,12 @@ func (s *sLicense) CreateLicense(ctx context.Context, info co_model.AuditLicense
 	result := co_entity.License{}
 	gconv.Struct(info.License, &result)
 
-	result.Id = idgen.NextId()
+	if info.LicenseId == 0 {
+		result.Id = idgen.NextId()
+	} else {
+		result.Id = info.LicenseId
+	}
+
 	result.State = 0
 	result.AuthType = 0
 	result.CreatedAt = gtime.Now()
