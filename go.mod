@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.19
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.5.24
+	github.com/SupenBysz/gf-admin-community v0.5.26
 	github.com/gogf/gf/v2 v2.5.4
 	github.com/kysion/base-library v0.0.25
 	github.com/yitter/idgenerator-go v1.3.3
@@ -73,7 +73,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-// replace github.com/SupenBysz/gf-admin-community => ../gf-admin-community
+//replace github.com/SupenBysz/gf-admin-community => ../gf-admin-community
 
 //
 //replace github.com/kysion/base-library => ../base-library
