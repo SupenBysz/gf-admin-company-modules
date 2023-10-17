@@ -19,6 +19,8 @@ type FdAccountRegister struct {
 	SceneType     int    `json:"sceneType"          dc:"场景类型：0不限制、1充电佣金收入、"`
 	AccountType   int    `json:"accountType"       v:"required|in:1,2,3,4,5,6#请输入正确的货币代码|账户类型限定为：1系统帐户、2银行卡、3支付宝、4微信、5云闪付、6翼支付" dc:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
 	AccountNumber string `json:"accountNumber"      dc:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
+
+	LimitState  int `json:"limitState" dc:"限制状态：0不限制，1限制支出、2限制收入" v:"in:0,1,2#限制状态范围有误"`
 	AllowExceed int `json:"allowExceed"        dc:"是否允许存在负余额: 0禁止、1允许" v:"in:0,1#是否允许存在负余额数据校验失败"`
 }
 
