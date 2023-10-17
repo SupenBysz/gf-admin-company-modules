@@ -30,4 +30,5 @@ type FdAccount struct {
 	AccountType        int         `json:"accountType"        description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
 	AccountNumber      string      `json:"accountNumber"      description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
 	UnionMainId        int64       `json:"unionMainId"        description:"关联主体ID，与union_license_id 中的union_main_id 一致"`
+	AllowExceed        int         `json:"allowExceed"        description:"是否允许存在负余额: 0禁止、1允许"`
 }
