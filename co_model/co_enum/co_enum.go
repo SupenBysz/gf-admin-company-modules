@@ -19,6 +19,7 @@ type (
 	FinancialTradeType = financial.TradeTypeEnum
 	AccountType        = financial.AccountTypeEnum
 	SceneType          = financial.SceneTypeEnum
+	AllowExceed        = financial.AllowExceedEnum
 
 	InvoiceAuditType  = invoice.AuditTypeEnum
 	InvoiceState      = invoice.StateEnum
