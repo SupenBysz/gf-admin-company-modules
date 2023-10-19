@@ -73,11 +73,13 @@ type GetAccountDetailByAccountIdReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 }
 
+// TODO 这两个接口只是用于测试，后续需要去除
 type IncrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"收入金额"`
 }
 
+// TODO 这两个接口只是用于测试，后续需要去除
 type DecrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"支出金额"`

@@ -109,7 +109,14 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	return *new(TR)
+	var ret co_model.IFdAccountRes
+	ret = &co_model.FdAccountRes{
+		FdAccount: co_entity.FdAccount{},
+		Detail:    &co_entity.FdAccountDetail{},
+	}
+	return ret.(TR)
+
+	//return *new(TR)
 }
 
 // CreateAccount 创建财务账号
