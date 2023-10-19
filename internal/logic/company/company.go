@@ -487,6 +487,7 @@ func (s *sCompany[
 				SceneType:          0,                                           // 不限
 				AccountType:        co_enum.Financial.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
 				AccountNumber:      "",                                          // 账户编号
+				AllowExceed:        1,                                           // 系统账号默认是可以存在负余额
 			}
 
 			createAccount, err := s.modules.Account().CreateAccount(ctx, *account)
