@@ -322,10 +322,10 @@ func (s *sFdAccountBill[
 		// 余额 = 之前的余额 - 本次交易的金额
 		afterBalance := account.Data().Balance - info.Amount
 		// 判断余额是否足够
-		// 检验机制：余额足够 ||  账号类型是系统账户&&场景不限 || 允许存在负数余额
+		// 检验机制：余额足够 ||  账号类型是系统账户&&场景不限&&允许存在负数余额 || 允许存在负数余额  （相当于只校验了Allow参数，条件2直接忽略了）
 		if account.Data().Balance >= info.Amount ||
 			(((account.Data().AccountType & co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
-				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code()) ||
+				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() && account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code()) ||
 			account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code() {
 			// 1. 添加一条财务账单流水
 			info.BeforeBalance = account.Data().Balance

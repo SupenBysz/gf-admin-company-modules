@@ -5,6 +5,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/kconv"
+	"reflect"
 )
 
 type FdAccountRegister struct {
@@ -44,6 +46,15 @@ func (m *FdAccountRes) Data() *FdAccountRes {
 	return m
 }
 
+func (m *FdAccountRes) SetDetail(detail interface{}) {
+	if detail == nil || reflect.ValueOf(detail).Type() != reflect.ValueOf(m.Detail).Type() {
+		return
+	}
+	kconv.Struct(detail, &m.Detail)
+}
+
 type IFdAccountRes interface {
 	Data() *FdAccountRes
+
+	SetDetail(employee interface{})
 }
