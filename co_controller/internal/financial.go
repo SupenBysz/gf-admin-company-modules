@@ -446,6 +446,27 @@ func (c *FinancialController[
 	)
 }
 
+// SetAccountAllowExceed 设置财务账号是否允许存在负余额
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountAllowExceed(ctx context.Context, req *co_company_api.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().SetAccountAllowExceed(ctx, req.AccountId, req.AllowExceed)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+	)
+}
+
 func (c *FinancialController[
 	ITCompanyRes,
 	ITEmployeeRes,

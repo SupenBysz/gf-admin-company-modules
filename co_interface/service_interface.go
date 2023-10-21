@@ -88,6 +88,7 @@ type (
 		GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error)
 		Increment(ctx context.Context, id int64, amount int) (bool, error)
 		Decrement(ctx context.Context, id int64, amount int) (bool, error)
+		SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error)
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {

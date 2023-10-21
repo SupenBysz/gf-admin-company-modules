@@ -308,7 +308,42 @@ func (c *FinancialController[
 	return ret, err
 }
 
-// Increment 收入
+//
+//// Increment 收入
+//func (c *FinancialController[
+//	ITCompanyRes,
+//	ITEmployeeRes,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//]) Increment(ctx context.Context, req *co_v1.IncrementReq) (api_v1.BoolRes, error) {
+//	ret, err := c.IFinancial.Increment(ctx, &req.IncrementReq)
+//
+//	return ret, err
+//}
+//
+//// Decrement 支出
+//func (c *FinancialController[
+//	ITCompanyRes,
+//	ITEmployeeRes,
+//	ITTeamRes,
+//	ITFdAccountRes,
+//	ITFdAccountBillRes,
+//	ITFdBankCardRes,
+//	ITFdCurrencyRes,
+//	ITFdInvoiceRes,
+//	ITFdInvoiceDetailRes,
+//]) Decrement(ctx context.Context, req *co_v1.DecrementReq) (api_v1.BoolRes, error) {
+//	ret, err := c.IFinancial.Decrement(ctx, &req.DecrementReq)
+//
+//	return ret, err
+//}
+
+// SetAccountAllowExceed 设置财务账号是否允许存在负余额
 func (c *FinancialController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -319,25 +354,8 @@ func (c *FinancialController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) Increment(ctx context.Context, req *co_v1.IncrementReq) (api_v1.BoolRes, error) {
-	ret, err := c.IFinancial.Increment(ctx, &req.IncrementReq)
-
-	return ret, err
-}
-
-// Decrement 支出
-func (c *FinancialController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdCurrencyRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-]) Decrement(ctx context.Context, req *co_v1.DecrementReq) (api_v1.BoolRes, error) {
-	ret, err := c.IFinancial.Decrement(ctx, &req.DecrementReq)
+]) SetAccountAllowExceed(ctx context.Context, req *co_v1.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinancial.SetAccountAllowExceed(ctx, &req.SetAccountAllowExceedReq)
 
 	return ret, err
 }

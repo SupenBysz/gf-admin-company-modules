@@ -84,3 +84,8 @@ type DecrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"支出金额"`
 }
+
+type SetAccountAllowExceedReq struct {
+	AccountId   int64 `json:"accountId" dc:"财务账号ID"  v:"required#财务账号不允许为空"`
+	AllowExceed int   `json:"allowExceed" dc:"是否允许存在负余额: 0禁止、1允许，主体默认财务账号是允许超出" v:"required|in:0,1#请正确填写是否允许"`
+}

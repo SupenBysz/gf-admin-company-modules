@@ -65,8 +65,11 @@ type IFinancial[
 	GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error)
 
 	// Increment 收入
-	Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error)
+	//Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error)
 
 	// Decrement 支出
-	Decrement(ctx context.Context, req *co_company_api.DecrementReq) (api_v1.BoolRes, error)
+	//Decrement(ctx context.Context, req *co_company_api.DecrementReq) (api_v1.BoolRes, error)
+
+	// SetAccountAllowExceed 设置财务账号是否允许存在负数余额
+	SetAccountAllowExceed(ctx context.Context, req *co_company_api.SetAccountAllowExceedReq) (api_v1.BoolRes, error)
 }
