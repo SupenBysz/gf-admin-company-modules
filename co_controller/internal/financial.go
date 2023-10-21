@@ -334,7 +334,7 @@ func (c *FinancialController[
 ]) GetAccountDetail(ctx context.Context, req *co_company_api.GetAccountDetailReq) (ITFdAccountRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (ITFdAccountRes, error) {
-			ret, err := c.modules.Account().GetAccountById(ctx, req.AccountId)
+			ret, err := c.modules.Account().GetAccountById(c.makeMore(ctx), req.AccountId)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -479,6 +479,8 @@ func (c *FinancialController[
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
 	ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+
+	ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
 	return ctx
