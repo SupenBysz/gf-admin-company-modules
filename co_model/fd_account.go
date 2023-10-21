@@ -39,6 +39,7 @@ type FdAccountListRes base_model.CollectRes[FdAccountRes]
 
 type FdAccountRes struct {
 	co_entity.FdAccount
+
 	Detail *co_entity.FdAccountDetail `json:"detail" dc:"财务账号周期金额统计"`
 }
 
@@ -56,5 +57,5 @@ func (m *FdAccountRes) SetDetail(detail interface{}) {
 type IFdAccountRes interface {
 	Data() *FdAccountRes
 
-	SetDetail(employee interface{})
+	SetDetail(detail interface{})
 }
