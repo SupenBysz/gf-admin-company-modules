@@ -80,12 +80,7 @@ type GetAccountDetailByAccountIdReq struct {
 	co_company_api.GetAccountDetailByAccountIdReq
 }
 
-type IncrementReq struct {
-	g.Meta ` method:"post" summary:"收入" tags:"组织单位/财务服务"`
-	co_company_api.IncrementReq
-}
-
-type DecrementReq struct {
-	g.Meta ` method:"post" summary:"支出" tags:"组织单位/财务服务"`
-	co_company_api.DecrementReq
+type SetAccountAllowExceedReq struct {
+	g.Meta ` method:"post" summary:"设置财务账号是否允许存在负余额" tags:"组织单位/财务服务"`
+	co_company_api.SetAccountAllowExceedReq
 }

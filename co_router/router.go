@@ -170,8 +170,9 @@ func FinancialGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/updateAccountLimitState", controller.UpdateAccountLimitState)
 
 	group.POST(routePrefix+"/getAccountDetailByAccountId", controller.GetAccountDetailById)
-	group.POST(routePrefix+"/increment", controller.Increment)
-	group.POST(routePrefix+"/decrement", controller.Decrement)
+	//group.POST(routePrefix+"/increment", controller.Increment)
+	//group.POST(routePrefix+"/decrement", controller.Decrement)
+	group.POST(routePrefix+"/setAccountAllowExceed", controller.SetAccountAllowExceed)
 
 	return group
 }

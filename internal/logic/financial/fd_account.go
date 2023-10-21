@@ -567,6 +567,42 @@ func (s *sFdAccount[
 	return ret > 0, err
 }
 
+// SetAccountAllowExceed 设置财务账号是否允许存在负余额
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error) {
+	if accountId == 0 {
+		return false, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+	}
+
+	account, err := s.GetAccountById(ctx, accountId)
+	if err != nil {
+		return false, err
+	}
+
+	if !reflect.ValueOf(account.Data()).IsNil() && account.Data().AllowExceed == allowExceed {
+		return true, err
+	}
+
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccount.Ctx(ctx).
+		Where(co_do.FdAccount{Id: accountId}).OmitNilData().
+		Data(co_do.FdAccount{AllowExceed: allowExceed}))
+
+	if err != nil || affected <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号修改失败！", s.dao.FdAccount.Table())
+	}
+
+	return true, nil
+}
+
 // UpdateAccountDetailAmount 修改财务账户余额(上下文, id, 需要修改的钱数目, 收支类型)
 func (s *sFdAccount[
 	ITCompanyRes,
