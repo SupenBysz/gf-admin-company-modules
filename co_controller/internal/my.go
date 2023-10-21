@@ -215,7 +215,7 @@ func (c *MyController[
 ]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.FdAccountListRes, error) {
-			ret, err := c.modules.My().GetAccounts(ctx)
+			ret, err := c.modules.My().GetAccounts(c.makeMore(ctx))
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -310,6 +310,9 @@ func (c *MyController[
 
 	// 附加数据5：用户信息附加数据
 	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+
+	// 财务账号明细Detail附加数据
+	ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
 
 	return ctx
 }

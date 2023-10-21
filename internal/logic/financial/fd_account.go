@@ -658,29 +658,6 @@ func (s *sFdAccount[
 
 // 添加财务账号附加数据 - 明细信息
 
-// makeMore 按需加载附加数据
-func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccountDetailDao, info TR) TR {
-	if reflect.ValueOf(info).IsNil() {
-		return info
-	}
-
-	base_funs.AttrMake[TR](ctx,
-		"id",
-		func() TR {
-			g.Try(ctx, func(ctx context.Context) {
-				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
-				if err != nil {
-					return
-				}
-
-				info.Data().Detail = accountDetail
-			})
-			return info
-		},
-	)
-	return info
-}
-
 // QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
 func (s *sFdAccount[
 	ITCompanyRes,
@@ -723,4 +700,32 @@ func (s *sFdAccount[
 	}
 
 	return result, nil
+}
+
+// makeMore 按需加载附加数据
+func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccountDetailDao, info TR) TR {
+	if reflect.ValueOf(info).IsNil() {
+		return info
+	}
+
+	base_funs.AttrMake[TR](ctx,
+		"id",
+		func() TR {
+			g.Try(ctx, func(ctx context.Context) {
+				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
+				if err != nil {
+					return
+				}
+
+				//info.Data().Detail = accountDetail
+
+				info.Data().SetDetail(accountDetail)
+				info.SetDetail(accountDetail)
+
+			})
+			return info
+		},
+	)
+
+	return info
 }
