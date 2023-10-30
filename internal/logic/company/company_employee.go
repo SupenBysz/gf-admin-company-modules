@@ -1070,10 +1070,10 @@ func (s *sEmployee[
 						WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
 
 					// 添加附加数据
-					data.Data().SetTeamList(data.Data())
+					//data.Data().SetTeamList(data.Data().TeamList)
+
 					// 业务层添加附加数据
 					data.SetTeamList(data)
-
 				})
 
 				return kconv.Struct(data.Data().TeamList, []ITTeamRes{})
