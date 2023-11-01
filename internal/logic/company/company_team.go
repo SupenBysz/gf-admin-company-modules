@@ -488,15 +488,19 @@ func (s *sTeam[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateTeam(ctx context.Context, id int64, name string, remark string) (response TR, err error) {
-
-	if s.HasTeamByName(ctx, name, id) == true {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
+	if name != "" {
+		if s.HasTeamByName(ctx, name, id) == true {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
+		}
 	}
 
 	data := co_do.CompanyTeam{
-		Name:      name,
+		//Name:      name,
 		Remark:    remark,
 		UpdatedAt: gtime.Now(),
+	}
+	if name != "" {
+		data.Name = name
 	}
 
 	rowsAffected, err := daoctl.UpdateWithError(
