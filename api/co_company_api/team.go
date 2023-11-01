@@ -24,8 +24,9 @@ type CreateTeamReq struct {
 }
 
 type UpdateTeamReq struct {
-	Id     int64  `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
-	Name   string `json:"name" v:"required#名称不能为空" dc:"名称"`
+	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	//Name   string `json:"name" v:"required#名称不能为空" dc:"名称"`
+	Name   string `json:"name"  dc:"名称"`
 	Remark string `json:"remark" dc:"备注"`
 }
 
