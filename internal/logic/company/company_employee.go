@@ -30,7 +30,6 @@ import (
 	"github.com/yitter/idgenerator-go/idgen"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
@@ -723,9 +722,9 @@ func (s *sEmployee[
 
 		// 保存文件
 		if avatarFile != nil {
-			avatarFile, err := sys_service.File().SaveFile(ctx, storageSrc, avatarFile)
-			_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
-			if err != nil {
+			avatarFile, err = sys_service.File().SaveFile(ctx, storageSrc, avatarFile)
+			//_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
+			if err != nil || avatarFile == nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
 			}
 		}
