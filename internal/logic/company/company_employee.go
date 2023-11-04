@@ -582,9 +582,67 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateEmployee(ctx context.Context, info *co_model.UpdateEmployee) (response TR, err error) {
-	data := kconv.Struct(info, &co_model.Employee{})
+	//data := kconv.Struct(info, &co_model.Employee{})
+	//
+	//return s.saveEmployee(ctx, data)'
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	employee, err := s.GetEmployeeById(ctx, info.Id)
+	if err != nil {
+		return response, err
+	}
 
-	return s.saveEmployee(ctx, data)
+	// 校验员工名称是否已存在
+	if info.Name != nil {
+		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
+		}
+	}
+	// 校验工号是否允许为空
+	if info.No != nil {
+		if *info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
+		}
+	}
+	if info.No != nil {
+		// 校验工号是否已存在
+		if true == s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
+		}
+	}
+
+	data := kconv.Struct(info, &co_do.CompanyEmployee{})
+	if err != nil {
+		return response, err
+	}
+
+	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		if employee.Data() != nil {
+			// 更新员工信息
+			data.UpdatedBy = sessionUser.Id
+			data.UpdatedAt = gtime.Now()
+			// unionMainId不能修改，强制为nil
+			data.UnionMainId = nil
+			data.Mobile = nil
+
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(*data)
+			if err != nil {
+				return err
+			}
+
+			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: data.Id}))
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return response, err
+	}
+
+	return s.GetEmployeeById(ctx, gconv.Int64(data.Id))
 }
 
 // UpdateEmployeeAvatar 更新员工头像
@@ -646,6 +704,8 @@ func (s *sEmployee[
 
 	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
+	data2 := kconv.Struct(info, &co_do.CompanyEmployee{})
+	g.Dump(data2)
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
@@ -714,7 +774,13 @@ func (s *sEmployee[
 			data.UnionMainId = nil
 			data.Mobile = nil
 
-			_, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(data).Where(co_do.CompanyEmployee{Id: data.Id}))
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(*data)
+			if err != nil {
+				return err
+			}
+
+			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).Where(co_do.CompanyEmployee{Id: data.Id}))
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
 			}
