@@ -704,8 +704,6 @@ func (s *sEmployee[
 
 	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
-	data2 := kconv.Struct(info, &co_do.CompanyEmployee{})
-	g.Dump(data2)
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
@@ -766,25 +764,28 @@ func (s *sEmployee[
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
 			}
-		} else {
-			// 更新员工信息
-			data.UpdatedBy = sessionUser.Id
-			data.UpdatedAt = gtime.Now()
-			// unionMainId不能修改，强制为nil
-			data.UnionMainId = nil
-			data.Mobile = nil
-
-			// 重载Do模型
-			doData, err := info.OverrideDo.DoFactory(*data)
-			if err != nil {
-				return err
-			}
-
-			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).Where(co_do.CompanyEmployee{Id: data.Id}))
-			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
-			}
 		}
+
+		// 更新逻辑剥离至UpdateEmployee方法
+		//else {
+		//	// 更新员工信息
+		//	data.UpdatedBy = sessionUser.Id
+		//	data.UpdatedAt = gtime.Now()
+		//	// unionMainId不能修改，强制为nil
+		//	data.UnionMainId = nil
+		//	data.Mobile = nil
+		//
+		//	// 重载Do模型
+		//	doData, err := info.OverrideDo.DoFactory(*data)
+		//	if err != nil {
+		//		return err
+		//	}
+		//
+		//	_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).Where(co_do.CompanyEmployee{Id: data.Id}))
+		//	if err != nil {
+		//		return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+		//	}
+		//}
 
 		// 保存文件
 		if avatarFile != nil {
