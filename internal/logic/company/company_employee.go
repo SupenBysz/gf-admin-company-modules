@@ -623,7 +623,7 @@ func (s *sEmployee[
 			data.UpdatedAt = gtime.Now()
 			// unionMainId不能修改，强制为nil
 			data.UnionMainId = nil
-			data.Mobile = nil
+			//data.Mobile = nil
 			data.Id = nil
 
 			// 重载Do模型
