@@ -590,6 +590,7 @@ func (s *sEmployee[
 	if err != nil {
 		return response, err
 	}
+	id := employee.Data().Id
 
 	// 校验员工名称是否已存在
 	if info.Name != nil {
@@ -623,6 +624,7 @@ func (s *sEmployee[
 			// unionMainId不能修改，强制为nil
 			data.UnionMainId = nil
 			data.Mobile = nil
+			data.Id = nil
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(*data)
@@ -630,7 +632,7 @@ func (s *sEmployee[
 				return err
 			}
 
-			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: data.Id}))
+			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: id}))
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
 			}
@@ -642,7 +644,7 @@ func (s *sEmployee[
 		return response, err
 	}
 
-	return s.GetEmployeeById(ctx, gconv.Int64(data.Id))
+	return s.GetEmployeeById(ctx, id)
 }
 
 // UpdateEmployeeAvatar 更新员工头像
