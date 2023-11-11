@@ -534,7 +534,7 @@ func (s *sEmployee[
 	}
 
 	r := g.RequestFromCtx(ctx)
-	isExport := r.GetParam("isExport", false).Bool()
+	isExport := r.GetForm("isExport", false).Bool()
 
 	// 查询符合过滤条件的员工信息
 	result, err := daoctl.Query[TR](model.
