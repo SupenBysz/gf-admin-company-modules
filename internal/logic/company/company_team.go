@@ -300,7 +300,10 @@ func (s *sTeam[
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, false)
+	r := g.RequestFromCtx(ctx)
+	isExport := r.GetForm("isExport", false).Bool()
+
+	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, isExport)
 
 	items := make([]TR, 0)
 	for _, item := range data.Records {
