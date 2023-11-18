@@ -210,7 +210,8 @@ func (s *sTeam[
 	}
 
 	// 需要进行跨主体判断
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
+	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(response).IsNil() ||
+		err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
 		response.Data().UnionMainId != sessionUser.UnionMainId &&
 		!sessionUser.IsAdmin &&
 		!sessionUser.IsSuperAdmin {
