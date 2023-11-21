@@ -37,4 +37,5 @@ type License struct {
 	DeletedAt                  *gtime.Time `json:"deletedAt"                  description:""`
 	BrandName                  string      `json:"brandName"                  description:"品牌名称"`
 	BusinessLicenseLegalMobile string      `json:"businessLicenseLegalMobile" description:"法人联系电话"`
+	ServerMobile               string      `json:"serverMobile"               description:"服务电话"`
 }

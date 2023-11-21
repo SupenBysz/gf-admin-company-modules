@@ -39,4 +39,5 @@ type License struct {
 	DeletedAt                  *gtime.Time //
 	BrandName                  interface{} // 品牌名称
 	BusinessLicenseLegalMobile interface{} // 法人联系电话
+	ServerMobile               interface{} // 服务电话
 }
