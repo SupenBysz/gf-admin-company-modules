@@ -27,6 +27,7 @@ type License struct {
 	Remake                     string      `json:"remake"                    dc:"备注"`
 	BrandName                  string      `json:"brandName"                 description:"品牌名称"`
 	BusinessLicenseLegalMobile string      `json:"businessLicenseLegalMobile" description:"法人联系电话"`
+	ServerMobile               string      `json:"serverMobile"               description:"服务电话"`
 }
 
 type LicenseRes co_entity.License

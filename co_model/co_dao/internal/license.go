@@ -50,6 +50,7 @@ type LicenseColumns struct {
 	DeletedAt                  string //
 	BrandName                  string // 品牌名称
 	BusinessLicenseLegalMobile string // 法人联系电话
+	ServerMobile               string // 服务电话
 }
 
 // licenseColumns holds the columns for table co_license.
@@ -81,6 +82,7 @@ var licenseColumns = LicenseColumns{
 	DeletedAt:                  "deleted_at",
 	BrandName:                  "brand_name",
 	BusinessLicenseLegalMobile: "business_license_legal_mobile",
+	ServerMobile:               "server_mobile",
 }
 
 // NewLicenseDao creates and returns a new DAO object for table data access.
