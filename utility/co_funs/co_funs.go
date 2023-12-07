@@ -33,7 +33,9 @@ func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context,
 			if err != nil {
 				return nil, err
 			}
-			newData.IdcardFrontPath = fileInfo.Src
+
+			//  注意：实际存储的License 需要存储持久化后的文件ID，而不是路径
+			newData.IdcardFrontPath = gconv.String(fileInfo.Id)
 		}
 
 		if !gfile.Exists(info.IdcardBackPath) {
@@ -47,7 +49,9 @@ func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context,
 			if err != nil {
 				return nil, err
 			}
-			newData.IdcardBackPath = fileInfo.Src
+
+			//  注意：实际存储的License 需要存储持久化后的文件ID，而不是路径
+			newData.IdcardBackPath = gconv.String(fileInfo.Id)
 		}
 
 		if !gfile.Exists(info.BusinessLicensePath) {
@@ -61,7 +65,9 @@ func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context,
 			if err != nil {
 				return nil, err
 			}
-			newData.BusinessLicensePath = fileInfo.Src
+
+			//  注意：实际存储的License 需要存储持久化后的文件ID，而不是路径
+			newData.BusinessLicensePath = gconv.String(fileInfo.Id)
 		}
 
 		//if info.BusinessLicenseLegalPath != "" && !gfile.Exists(info.BusinessLicenseLegalPath) {
