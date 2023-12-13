@@ -104,7 +104,8 @@ func (s *sMy[
 	// 超级管理员直接返回用户信息
 	if session.Type == sys_enum.User.Type.SuperAdmin.Code() {
 		return &co_model.MyProfileRes{
-			User: user,
+			IsSuperAdmin: true,
+			User:         user,
 		}, nil
 	}
 
@@ -117,10 +118,17 @@ func (s *sMy[
 		}, nil
 	}
 
-	return &co_model.MyProfileRes{
+	res := co_model.MyProfileRes{
 		User:     user,
 		Employee: employee.Data(),
-	}, nil
+	}
+
+	response, err := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
+	if response.Data().UserId == employee.Data().Id {
+		res.IsAdmin = true
+	}
+
+	return &res, nil
 }
 
 // GetCompany 获取当前公司信息
