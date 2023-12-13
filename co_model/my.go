@@ -15,8 +15,10 @@ type MyTeamRes struct {
 type MyTeamListRes []MyTeamRes
 
 type MyProfileRes struct {
-	User     *sys_model.SysUser `json:"user" dc:"员工信息"`
-	Employee *EmployeeRes       `json:"employee" dc:"员工信息"`
+	User         *sys_model.SysUser `json:"user" dc:"员工信息"`
+	IsAdmin      bool               `json:"isAdmin" dc:"是否是主体的管理员"`
+	IsSuperAdmin bool               `json:"isSuperAdmin" dc:"是否是系统超级管理员"`
+	Employee     *EmployeeRes       `json:"employee" dc:"员工信息"`
 }
 
 type AccountBillRes struct {
