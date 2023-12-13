@@ -202,6 +202,43 @@ func (s *sEmployee[
 	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
 	sys_service.SysAuth().InstallHook(sys_enum.Auth.ActionType.Login, s.modules.GetConfig().UserType, s.authHookFunc)
 	sys_service.SysUser().InstallHook(sys_enum.User.Event.BeforeCreate, s.userHookFunc)
+	sys_service.SysRole().InstallInviteRegisterHook(sys_enum.Role.Change.Remove, s.removeRoleMember)
+}
+
+// removeRoleMember 判断是否能移除角色成员逻辑
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) removeRoleMember(ctx context.Context, event sys_enum.RoleMemberChange, role sys_entity.SysRole, sysUser *sys_model.SysUser) (bool, error) {
+	// 不能将系统管理员移除出默认的管理员角色
+	if (event.Code() & sys_enum.Role.Change.Remove.Code()) == sys_enum.Role.Change.Remove.Code() {
+		if role.IsSystem && role.Name == "管理员" {
+			employee, err := s.modules.Employee().GetEmployeeById(ctx, sysUser.Id)
+			if err != nil {
+				return false, err
+			}
+
+			company, err := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
+			if err != nil {
+				return false, err
+			}
+
+			if company.Data().UserId == sysUser.Id {
+				return false, sys_service.SysLogs().ErrorSimple(ctx, err, "不能将主体的管理员移除出系统默认的管理员角色", s.dao.Company.Table())
+			}
+
+			return true, nil
+		}
+	}
+
+	return true, nil
 }
 
 // AuthHookFunc 用户登录Hook函数
