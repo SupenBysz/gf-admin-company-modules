@@ -963,9 +963,14 @@ func (s *sEmployee[
 		}
 	}
 
-	data, err := daoctl.ScanWithError[TR](model.Where(co_do.CompanyEmployee{Id: id}))
+	data, err := daoctl.GetByIdWithError[TR](
+		model,
+		id,
+	)
 
-	if err != nil {
+	//data, err := daoctl.ScanWithError[TR](model.Where(co_do.CompanyEmployee{Id: id}))
+
+	if err != nil || data == nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
 	}
 
@@ -973,22 +978,36 @@ func (s *sEmployee[
 		response = *data
 	}
 
+	//if err == sql.ErrNoRows ||
+	//	!reflect.ValueOf(data).IsNil() && sessionUser != nil &&
+	//		sessionUser.Id != 0 &&
+	//		response.Data().UnionMainId != sessionUser.UnionMainId &&
+	//		response.Data().UnionMainId != sessionUser.ParentId &&
+	//		!sessionUser.IsAdmin {
+	//}
+
 	if err == sql.ErrNoRows ||
 		!reflect.ValueOf(data).IsNil() && sessionUser != nil &&
-			sessionUser.Id != 0 &&
+			sessionUser.Id != 0 && !reflect.ValueOf(response).IsNil() &&
 			response.Data().UnionMainId != sessionUser.UnionMainId &&
-			response.Data().UnionMainId != sessionUser.ParentId &&
-			!sessionUser.IsAdmin {
-
-	}
-	// 跨主体禁止查看员工信息，
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
+			//response.Data().UnionMainId != sessionUser.ParentId &&
+			!sessionUser.IsAdmin &&
+			!sessionUser.IsSuperAdmin {
 		// 下级公司也不可查看上级公司员工详细信息
 		if response.Data().UnionMainId == sessionUser.ParentId {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
 		}
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
+
+	// 跨主体禁止查看员工信息，
+	//if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().UnionMainId != sessionUser.UnionMainId && !sessionUser.IsAdmin {
+	//	// 下级公司也不可查看上级公司员工详细信息
+	//	if response.Data().UnionMainId == sessionUser.ParentId {
+	//		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+	//	}
+	//	return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+	//}
 
 	return s.makeMore(ctx, response), err
 }
