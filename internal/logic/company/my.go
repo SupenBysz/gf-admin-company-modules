@@ -95,7 +95,8 @@ func (s *sMy[
 ]) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	user, err := sys_service.SysUser().GetSysUserById(ctx, session.Id)
+	user, err := sys_service.SysUser().GetUserDetail(ctx, session.Id)
+	//user, err := sys_service.SysUser().GetSysUserById(ctx, session.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,8 @@ func (s *sMy[
 		}, nil
 	}
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
+	//employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
+	employee, err := s.modules.Employee().GetEmployeeDetailById(ctx, session.Id)
 	if err != nil || reflect.ValueOf(employee).IsNil() {
 		return &co_model.MyProfileRes{
 			User:     user,
