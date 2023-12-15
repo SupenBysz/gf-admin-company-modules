@@ -208,6 +208,8 @@ func (s *sFdInvoice[
 				newFields = append(newFields, field)
 			}
 		}
+	} else {
+		info = new(base_model.SearchParams)
 	}
 	info.Filter = newFields
 
