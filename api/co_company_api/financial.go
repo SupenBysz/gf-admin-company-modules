@@ -27,7 +27,7 @@ type CreateInvoiceReq struct {
 }
 
 type QueryInvoiceReq struct {
-	UserId int64 `json:"userId"  dc:"用户ID"`
+	UserId int64 `json:"userId"  dc:"用户ID" v:"required#请输入用户ID"'`
 	base_model.SearchParams
 }
 
