@@ -6,8 +6,9 @@ server:
   accessLogEnabled: false
   SessionIdName: "GfAdminProCompanySessionId"
   sessionPath: "temp/sessions/gf_admin_pro/company_sessions"    # Session文件存储目录
-  openapiPath: "/gf_admin-pro/company/openapi.json"
-  swaggerPath: "/gf_admin-pro/company/docs"
+  openapiPath: "/docs/openapi.json"
+  swaggerPath: "/docs"
+  swaggerJsURL: "https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js" # 自定义 文档 JS 镜像地址，需要 gf 2.6.0以上版本才支持
 
 
 service:
