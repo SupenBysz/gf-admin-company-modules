@@ -32,6 +32,13 @@ gfcli:
                 co_license,
                 "
         removePrefix: "pro_"
+        daoPath: "model/dao"
+        doPath: "model/do"
+        entityPath: "model/entity"
+        tplDaoIndexPath: "hack/tpls/dao_template.tpl"
+        tplDaoInternalPath: "hack/tpls/dao_internal_template.tpl"
+        tplDaoDoPath: "hack/tpls/do_template"
+        tplDaoEntityPath: "hack/tpls/entity_template"
         descriptionTag:  true
         noModelComment:  true
         withTime: false
