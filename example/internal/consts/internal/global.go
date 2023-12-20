@@ -54,7 +54,7 @@ func Modules() *Global {
 				KeyIndex:                       "Company",
 				I18nName:                       "company",
 				RoutePrefix:                    "/company",
-				StoragePath:                    "./resources/company",
+				StoragePath:                    "./resource/company",
 				UserType:                       sys_enum.User.Type.SuperAdmin, // 业务层用户类型需自定义
 				Identifier: co_model.Identifier{
 					Company:         "company",
