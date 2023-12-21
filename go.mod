@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.6.10
+	github.com/SupenBysz/gf-admin-community v0.6.11
 	github.com/gogf/gf/v2 v2.6.0
-	github.com/kysion/base-library v0.0.28
+	github.com/kysion/base-library v0.0.29
 	github.com/yitter/idgenerator-go v1.3.3
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-logr/logr v1.3.0 // indirect
+	github.com/go-logr/logr v1.4.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.6.0 // indirect
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.6.0 // indirect
