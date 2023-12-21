@@ -2,8 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/SupenBysz/gf-admin-community v0.6.11 h1:iK0GyZ0TIUR721ZF8UoYQ/j7AoZcJB9rfoTBcA1AEKs=
-github.com/SupenBysz/gf-admin-community v0.6.11/go.mod h1:XvoZJTJkD5ZklxZ0q57ZtWbEexvRbv6IYRWFzwu52ok=
+github.com/SupenBysz/gf-admin-community v0.6.12 h1:BK88Y7PTBseLWW7ZEs27g2V2IJJ2c6b3gR6Xq+0U1xA=
+github.com/SupenBysz/gf-admin-community v0.6.12/go.mod h1:gpSAmKpMlGgZvWPpdatlJrbi/ljstw8E1ott0oAMWh0=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 h1:iC9YFYKDGEy3n/FtqJnOkZsene9olVspKmkX5A2YBEo=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4/go.mod h1:sCavSAvdzOjul4cEqeVtvlSaSScfNsTQ+46HwlTL1hc=
 github.com/alibabacloud-go/darabonba-openapi v0.1.18/go.mod h1:PB4HffMhJVmAgNKNq3wYbTUlFvPgxJpTzd1F5pTuUsc=
@@ -119,8 +119,8 @@ github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfV
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kysion/base-library v0.0.29 h1:wQ0gWc186P9h2rLq+B6Wc4k1TOAwk3V/4fjXQkeIu0E=
-github.com/kysion/base-library v0.0.29/go.mod h1:uhM4zpOkSNVm8kECq99QWuAegVQCmW7yaHRCCsYrcjg=
+github.com/kysion/base-library v0.0.30 h1:L4JijaetTUcA6KFlBQoQW/+3NsNS0GQ9qJIDxmU+haQ=
+github.com/kysion/base-library v0.0.30/go.mod h1:uhM4zpOkSNVm8kECq99QWuAegVQCmW7yaHRCCsYrcjg=
 github.com/kysion/sms-library v0.1.2 h1:kgsY1wfMbK1nkGNlwQGQKsDI707OaKeajr12t6VZJhE=
 github.com/kysion/sms-library v0.1.2/go.mod h1:ooDrDCQireNPjJxA/2Lxz+AjlPtHHcAUOZRc3sj104c=
 github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
