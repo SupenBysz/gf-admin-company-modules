@@ -28,7 +28,7 @@ type Employee struct {
 
 type UpdateEmployee struct {
 	OverrideDo base_interface.DoModel[co_do.CompanyEmployee] `json:"-"`
-	Id         int64                                         `json:"id"           dc:"ID，保持与USERID一致"`
+	Id         int64                                         `json:"id"           dc:"ID，保持与USERID一致" v:"required#请输入员工ID"`
 	No         *string                                       `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
 	Name       *string                                       `json:"name"         v:"required|max-length:16#名称不能为空|工号长度超出限定16字符" dc:"姓名"`
 	Mobile     *string                                       `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
