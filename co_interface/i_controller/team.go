@@ -33,6 +33,9 @@ type ITeam[ITTeamRes co_model.ITeamRes] interface {
 	// SetTeamMember 设置团队成员
 	SetTeamMember(ctx context.Context, req *co_company_api.SetTeamMemberReq) (api_v1.BoolRes, error)
 
+	// RemoveTeamMember 移除团队成员
+	RemoveTeamMember(ctx context.Context, req *co_company_api.RemoveTeamMemberReq) (api_v1.BoolRes, error)
+
 	// SetTeamOwner 设置团队负责人
 	SetTeamOwner(ctx context.Context, req *co_company_api.SetTeamOwnerReq) (api_v1.BoolRes, error)
 

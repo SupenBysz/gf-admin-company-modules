@@ -240,6 +240,25 @@ func (c *TeamController[
 		co_permission.Team.PermissionType(c.modules).SetMember,
 	)
 }
+
+func (c *TeamController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TIRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) RemoveTeamMember(ctx context.Context, req *co_company_api.RemoveTeamMemberReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			return c.team.RemoveTeamMember(ctx, req.Id, req.EmployeeIds)
+		},
+		co_permission.Team.PermissionType(c.modules).SetMember,
+	)
+}
 func (c *TeamController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -291,6 +310,9 @@ func (c *TeamController[
 		func() (*base_model.CollectRes[co_model.IEmployeeRes], error) {
 
 			ret, err := c.team.GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
+			if err != nil {
+				return nil, err
+			}
 
 			result := base_model.CollectRes[co_model.IEmployeeRes]{}
 			for _, record := range ret.Records {

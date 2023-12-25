@@ -897,7 +897,7 @@ func (s *sEmployee[
 			}
 
 			// 员工移出团队|小组
-			_, err := s.setEmployeeTeam(ctx, employee.Data().Id)
+			_, err := s.deleteEmployeeTeam(ctx, employee.Data().Id)
 			if err != nil {
 				return err
 			}
@@ -922,7 +922,7 @@ func (s *sEmployee[
 	return true, nil
 }
 
-// setEmployeeTeam 员工移出小组 | 团队
+// deleteEmployeeTeam 员工移出小组 | 团队
 func (s *sEmployee[
 	ITCompanyRes,
 	TR,
@@ -933,7 +933,7 @@ func (s *sEmployee[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) setEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
+]) deleteEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
 	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && isSuccess == false {

@@ -141,6 +141,7 @@ func TeamGroup[
 	group.POST(routePrefix+"/updateTeam", controller.UpdateTeam)
 	// group.POST(routePrefix+"/queryTeamListByEmployee", controller.QueryTeamListByEmployee)
 	group.POST(routePrefix+"/setTeamMember", controller.SetTeamMember)
+	group.POST(routePrefix+"/removeTeamMember", controller.RemoveTeamMember)
 	group.POST(routePrefix+"/setTeamOwner", controller.SetTeamOwner)
 	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
 	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)

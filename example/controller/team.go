@@ -77,6 +77,10 @@ func (c *TeamController[ITTeamRes]) SetTeamMember(ctx context.Context, req *co_v
 	return c.ITeam.SetTeamMember(ctx, &req.SetTeamMemberReq)
 }
 
+func (c *TeamController[ITTeamRes]) RemoveTeamMember(ctx context.Context, req *co_v1.RemoveTeamMemberReq) (api_v1.BoolRes, error) {
+	return c.ITeam.RemoveTeamMember(ctx, &req.RemoveTeamMemberReq)
+}
+
 func (c *TeamController[ITTeamRes]) SetTeamOwner(ctx context.Context, req *co_v1.SetTeamOwnerReq) (api_v1.BoolRes, error) {
 	return c.ITeam.SetTeamOwner(ctx, &req.SetTeamOwnerReq)
 }
