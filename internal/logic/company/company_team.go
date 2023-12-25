@@ -719,6 +719,74 @@ func (s *sTeam[
 	return err == nil, err
 }
 
+// RemoveTeamMember  移除团队队员或小组组员
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) RemoveTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
+	err := s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		for _, employeeId := range employeeIds {
+			// 直接删除属于员工的团队成员记录
+			affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId, TeamId: teamId}))
+
+			//isSuccess, err := s.DeleteTeamMemberByEmployee(ctx, employeeId)
+			if err != nil || affected <= 0 {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
+			}
+
+			// 查找到员工是管理员或者队长的团队
+			teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
+				Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
+					Field:     s.dao.Team.Columns().CaptainEmployeeId,
+					Where:     "=",
+					Value:     employeeId,
+					IsOrWhere: true,
+				},
+				//base_model.FilterInfo{
+				//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
+				//	Where:     "=",
+				//	Value:     employeeId,
+				//	IsOrWhere: true,
+				//}
+				),
+			})
+
+			// 假如是队长或者组长，需要将团队表的队长或者组长设置为0
+			if len(teamList.Records) > 0 {
+				for _, item := range teamList.Records {
+					if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
+						ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
+						if err != nil || ret == false {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+						}
+					}
+
+					if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
+						ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
+						if err != nil || ret == false {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+						}
+					}
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	return err == nil, err
+}
+
 // SetTeamOwner 设置团队或小组的负责人
 func (s *sTeam[
 	ITCompanyRes,

@@ -45,6 +45,11 @@ type SetTeamMemberReq struct {
 	co_company_api.SetTeamMemberReq
 }
 
+type RemoveTeamMemberReq struct {
+	g.Meta `method:"post" summary:"移除团队成员" tags:"组织单位/团队｜小组"`
+	co_company_api.RemoveTeamMemberReq
+}
+
 type SetTeamOwnerReq struct {
 	g.Meta `method:"post" summary:"设置团队管理者" tags:"组织单位/团队｜小组"`
 	co_company_api.SetTeamOwnerReq

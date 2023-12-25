@@ -43,6 +43,11 @@ type SetTeamMemberReq struct {
 	EmployeeIds []int64 `json:"employeeIds" dc:"团队成员"`
 }
 
+type RemoveTeamMemberReq struct {
+	Id          int64   `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	EmployeeIds []int64 `json:"employeeIds" dc:"团队成员ids"`
+}
+
 type SetTeamOwnerReq struct {
 	Id         int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 	EmployeeId int64 `json:"employeeId" v:"required#团队管理者ID校验失败" dc:"团队管理者ID"`

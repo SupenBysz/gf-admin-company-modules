@@ -240,6 +240,25 @@ func (c *TeamController[
 		co_permission.Team.PermissionType(c.modules).SetMember,
 	)
 }
+
+func (c *TeamController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TIRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) RemoveTeamMember(ctx context.Context, req *co_company_api.RemoveTeamMemberReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			return c.team.RemoveTeamMember(ctx, req.Id, req.EmployeeIds)
+		},
+		co_permission.Team.PermissionType(c.modules).SetMember,
+	)
+}
 func (c *TeamController[
 	ITCompanyRes,
 	ITEmployeeRes,
