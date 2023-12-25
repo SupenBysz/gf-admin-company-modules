@@ -310,6 +310,9 @@ func (c *TeamController[
 		func() (*base_model.CollectRes[co_model.IEmployeeRes], error) {
 
 			ret, err := c.team.GetEmployeeListByTeamId(c.makeMore(ctx), req.TeamId)
+			if err != nil {
+				return nil, err
+			}
 
 			result := base_model.CollectRes[co_model.IEmployeeRes]{}
 			for _, record := range ret.Records {
