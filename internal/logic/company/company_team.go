@@ -301,8 +301,15 @@ func (s *sTeam[
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	r := g.RequestFromCtx(ctx)
-	isExport := r.GetForm("isExport", false).Bool()
+	isExport := false
+	if ctx.Value("isExport") == nil {
+		r := g.RequestFromCtx(ctx)
+		isExport = r.GetForm("isExport", false).Bool()
+	} else {
+		isExport = gconv.Bool(ctx.Value("isExport"))
+	}
+
+	//isExport := r.GetForm("isExport", false).Bool()
 
 	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, isExport)
 
