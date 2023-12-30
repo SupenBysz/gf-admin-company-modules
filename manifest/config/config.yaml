@@ -46,6 +46,8 @@ service:
   registerRule: [ 1,2,4 ]
   # 注册是否强制需要填写邀约码: true必需填写邀约码、false可选
   registerIsNeedInviteCode: false
+  # 是否允许主体下的不同团队内的小组同名: true允许、false不允许
+  groupNameCanRepeated  : true
 
 # 邮件设置
 email:

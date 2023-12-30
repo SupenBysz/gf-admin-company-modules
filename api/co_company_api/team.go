@@ -12,7 +12,8 @@ type GetTeamByIdReq struct {
 type HasTeamByNameReq struct {
 	Name        string `json:"name" v:"required#名称不能为空" dc:"名称"`
 	UnionNameId int64  `json:"unionNameId" dc:"关联主体ID"`
-	ExcludeId   int64  `json:"excludeId" dc:"要排除的团队ID"`
+	//ParentId    int64  `json:"parentId" dc:"关联的上级团队ID，没有的话或不限制就不填写"`
+	ExcludeId int64 `json:"excludeId" dc:"要排除的团队ID"`
 }
 
 type QueryTeamListReq struct {

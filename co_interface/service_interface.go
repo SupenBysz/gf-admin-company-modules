@@ -45,7 +45,7 @@ type (
 		SetXDao(dao co_dao.XDao)
 		GetTeamById(ctx context.Context, id int64) (TR, error)
 		GetTeamByName(ctx context.Context, name string) (TR, error)
-		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
+		HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool
 		QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (TR, error)

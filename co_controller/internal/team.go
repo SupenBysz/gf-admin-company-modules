@@ -119,7 +119,7 @@ func (c *TeamController[
 ]) HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			return c.team.HasTeamByName(ctx, req.Name, req.UnionNameId, req.ExcludeId) == true, nil
+			return c.team.HasTeamByName(ctx, req.Name, req.UnionNameId, 0, req.ExcludeId) == true, nil
 		},
 	)
 }
