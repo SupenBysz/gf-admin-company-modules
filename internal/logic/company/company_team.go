@@ -9,6 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/sys_rules"
+	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -260,7 +261,7 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+]) HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool {
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
@@ -269,6 +270,10 @@ func (s *sTeam[
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
+
+	if parentId != 0 && co_consts.Global.GroupNameCanRepeated { //
+		model = model.Where(co_do.CompanyTeam{ParentId: parentId})
+	}
 
 	if len(excludeIds) > 0 {
 		var ids []int64
@@ -397,8 +402,8 @@ func (s *sTeam[
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	// 判断团队名称是否存在
-	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId) == true {
+	// 判断团队名称是否存在 && 同一主体下的不同团队下的小组名称是否能重复
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) == true { // 1组  1组
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -499,8 +504,13 @@ func (s *sTeam[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateTeam(ctx context.Context, id int64, name string, remark string) (response TR, err error) {
+	team, err := s.GetTeamById(ctx, id)
+	if err != nil {
+		return response, err
+	}
+
 	if name != "" {
-		if s.HasTeamByName(ctx, name, id) == true {
+		if s.HasTeamByName(ctx, name, id, team.Data().ParentId) == true {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 		}
 	}
