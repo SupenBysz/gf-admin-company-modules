@@ -48,9 +48,9 @@ type EmployeeUser struct {
 
 type EmployeeRes struct {
 	co_entity.CompanyEmployee
-	User     EmployeeUser             `orm:"with:id" json:"user"`
-	Detail   sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
-	TeamList []Team                   `json:"teamList"`
+	User     *EmployeeUser             `orm:"with:id" json:"user"`
+	Detail   *sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
+	TeamList []Team                    `json:"teamList"`
 }
 
 func (m *EmployeeRes) SetUser(user interface{}) {

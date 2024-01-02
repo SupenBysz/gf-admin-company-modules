@@ -180,8 +180,8 @@ func (s *sEmployee[
 	var ret co_model.IEmployeeRes
 	ret = &co_model.EmployeeRes{
 		CompanyEmployee: co_entity.CompanyEmployee{},
-		User:            co_model.EmployeeUser{},
-		Detail:          sys_entity.SysUserDetail{},
+		User:            &co_model.EmployeeUser{},
+		Detail:          &sys_entity.SysUserDetail{},
 		TeamList:        []co_model.Team{},
 	}
 	return ret.(TR)
@@ -547,25 +547,25 @@ func (s *sEmployee[
 
 	model := s.dao.Employee.Ctx(ctx)
 
-	excludeIds := make([]int64, 0)
+	includeIds := make([]int64, 0)
 
 	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
 	{
-		teamSearch := base_funs.SearchFilterEx(*search, "teamId", "employeeId", "inviteUserId", "unionMainId")
+		teamSearch := base_funs.SearchFilterEx(search, "teamId.remove", "employeeId", "inviteUserId.remove", "unionMainId")
 
 		if len(teamSearch.Filter) > 0 {
 			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
 
 			if len(items.Records) > 0 {
 				for _, item := range items.Records {
-					excludeIds = append(excludeIds, item.EmployeeId)
+					includeIds = append(includeIds, item.EmployeeId)
 				}
 			}
 
-			if len(excludeIds) > 0 {
+			if len(includeIds) > 0 {
 				// 过滤掉重复的id
-				excludeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(excludeIds)).Unique().Slice())
-				model = model.WhereIn(s.dao.Employee.Columns().Id, excludeIds)
+				includeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(includeIds)).Unique().Slice())
+				model = model.WhereIn(s.dao.Employee.Columns().Id, includeIds)
 			}
 		}
 	}
@@ -1149,9 +1149,13 @@ func (s *sEmployee[
 	if reflect.ValueOf(employee).IsNil() {
 		return employee
 	}
+
 	employee.Data().Mobile = masker.MaskString(employee.Data().Mobile, masker.MaskPhone)
 	employee.Data().LastActiveIp = masker.MaskString(employee.Data().LastActiveIp, masker.MaskIPv4)
-	employee.Data().Detail.LastLoginIp = masker.MaskString(employee.Data().Detail.LastLoginIp, masker.MaskIPv4)
+
+	if employee.Data().Detail != nil {
+		employee.Data().Detail.LastLoginIp = masker.MaskString(employee.Data().Detail.LastLoginIp, masker.MaskIPv4)
+	}
 
 	// 将头像换成可访问url
 	employee.Data().Avatar = sys_service.File().MakeFileUrl(context.Background(), gconv.Int64(employee.Data().Avatar))
@@ -1175,8 +1179,12 @@ func (s *sEmployee[
 		return data
 	}
 
+	r := g.RequestFromCtx(ctx)
+	needTeamList := r.GetForm("teamList", true).Bool()
+	needUser := r.GetForm("user", true).Bool()
+
 	// team附加数据
-	if data.Data().UnionMainId > 0 {
+	if data.Data().UnionMainId > 0 && needTeamList {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
@@ -1214,30 +1222,36 @@ func (s *sEmployee[
 
 	// user相关附加数据
 	if data.Data().CompanyEmployee.Id > 0 {
-		base_funs.AttrMake[TR](ctx,
-			s.dao.Employee.Columns().Id,
-			func() (res TR) {
-				// 为什么要在内部订阅
-				//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
-				//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
-				//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		if !needUser {
+			data.Data().User = nil
+		} else {
+			base_funs.AttrMake[TR](ctx,
+				s.dao.Employee.Columns().Id,
+				func() (res TR) {
+					// 为什么要在内部订阅
+					//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
+					//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
+					//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 
-				if data.Data().CompanyEmployee.Id == 0 {
-					return res
-				}
+					if data.Data().CompanyEmployee.Id == 0 {
+						return res
+					}
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
-				if user != nil {
-					data.Data().SetUser(data.Data().User)
-					data.SetUser(data.Data().User)
+					user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
 
-					gconv.Struct(user.SysUser, &data.Data().User)
-					gconv.Struct(user.Detail, &data.Data().Detail)
-				}
+					if user != nil {
+						kconv.Struct(user, &data.Data().User)
+						data.Data().SetUser(data.Data().User)
+						data.SetUser(data.Data().User)
 
-				return data
-			},
-		)
+						gconv.Struct(user.SysUser, &data.Data().User)
+						gconv.Struct(user.Detail, &data.Data().Detail)
+					}
+
+					return data
+				},
+			)
+		}
 	}
 
 	return data

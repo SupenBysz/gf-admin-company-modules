@@ -7,6 +7,9 @@ import (
 
 type GetEmployeeByIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
+
+	TeamList *bool `json:"teamList" dc:"是否需要附加团队列表字段，默认true"`
+	User     *bool `json:"user" dc:"是否需要附加团队列表字段，默认true"`
 }
 
 type HasEmployeeByNameReq struct {
