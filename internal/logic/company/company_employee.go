@@ -297,7 +297,7 @@ func (s *sEmployee[
 		s.dao.Employee.Ctx(ctx),
 		info.Id,
 	)
-	if err != nil {
+	if err != nil || reflect.ValueOf(*data).IsNil() {
 		return info, nil
 	}
 	var employee TR
