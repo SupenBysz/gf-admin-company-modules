@@ -1180,11 +1180,11 @@ func (s *sEmployee[
 	}
 
 	r := g.RequestFromCtx(ctx)
-	needTeamList := r.GetForm("teamList", true).Bool()
-	needUser := r.GetForm("user", true).Bool()
+	arr := kconv.Struct(r.GetForm("exclude").Array(), &[]string{})
+	exclude := garray.NewStrArrayFrom(*arr)
 
 	// team附加数据
-	if data.Data().UnionMainId > 0 && needTeamList {
+	if data.Data().UnionMainId > 0 && !exclude.Contains("teamList") {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
@@ -1222,7 +1222,7 @@ func (s *sEmployee[
 
 	// user相关附加数据
 	if data.Data().CompanyEmployee.Id > 0 {
-		if !needUser {
+		if exclude.Contains("user") {
 			data.Data().User = nil
 		} else {
 			base_funs.AttrMake[TR](ctx,
