@@ -548,12 +548,20 @@ func (s *sEmployee[
 	model := s.dao.Employee.Ctx(ctx)
 
 	includeIds := make([]int64, 0)
+	var teamId int64
 
 	// 处理扩展条件，扩展支持 teamId，employeeId, inviteUserId, unionMainId 字段过滤支持
 	{
 		teamSearch := base_funs.SearchFilterEx(search, "teamId.remove", "employeeId", "inviteUserId.remove", "unionMainId")
+		for _, filter := range teamSearch.Filter {
+			if filter.Field == "team_id" {
+				teamId = gconv.Int64(filter.Value)
+				break
+			}
+		}
+		teamSearch.Pagination = search.Pagination
 
-		if len(teamSearch.Filter) > 0 {
+		if len(teamSearch.Filter) > 0 && teamId != 0 {
 			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
 
 			if len(items.Records) > 0 {
@@ -577,9 +585,14 @@ func (s *sEmployee[
 		isExport = gconv.Bool(ctx.Value("isExport"))
 	}
 
+	// 团队里面没有成员的情况，但是限定了团队ID，返回的列表就不应该是全部学生，应该是[]
+	if teamId != 0 && len(includeIds) <= 0 {
+		return &base_model.CollectRes[TR]{
+			Records: make([]TR, 0),
+		}, nil
+	}
 	//r := g.RequestFromCtx(ctx)
 	//isExport := r.GetForm("isExport", false).Bool()
-
 	// 查询符合过滤条件的员工信息
 	result, err := daoctl.Query[TR](model.
 		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
