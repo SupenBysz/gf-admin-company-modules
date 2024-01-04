@@ -343,7 +343,15 @@ func (s *sTeam[
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 	model := s.dao.TeamMember.Ctx(ctx)
 
-	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)
+	isExport := false
+	if ctx.Value("isExport") == nil {
+		r := g.RequestFromCtx(ctx)
+		isExport = r.GetForm("isExport", false).Bool()
+	} else {
+		isExport = gconv.Bool(ctx.Value("isExport"))
+	}
+
+	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, isExport)
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
