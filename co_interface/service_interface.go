@@ -47,7 +47,7 @@ type (
 		GetTeamByName(ctx context.Context, name string) (TR, error)
 		HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool
 		QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
-		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error)
+		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		UpdateTeam(ctx context.Context, id int64, name string, remark string) (TR, error)
 		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error)

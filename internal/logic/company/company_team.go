@@ -338,20 +338,15 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
+]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 	model := s.dao.TeamMember.Ctx(ctx)
-
-	isExport := false
-	if ctx.Value("isExport") == nil {
-		r := g.RequestFromCtx(ctx)
-		isExport = r.GetForm("isExport", false).Bool()
-	} else {
-		isExport = gconv.Bool(ctx.Value("isExport"))
+	export := false
+	if len(isExport) > 0 {
+		export = isExport[0]
 	}
-
-	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, isExport)
+	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, export)
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
