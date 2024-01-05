@@ -38,15 +38,15 @@ import (
 )
 
 type sEmployee[
-ITCompanyRes co_model.ICompanyRes,
-TR co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -65,15 +65,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func NewEmployee[
-ITCompanyRes co_model.ICompanyRes,
-TR co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	TR co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TR,
@@ -1191,12 +1191,29 @@ func (s *sEmployee[
 		return data
 	}
 
-	r := g.RequestFromCtx(ctx)
-	arr := kconv.Struct(r.GetForm("exclude").Array(), &[]string{})
-	exclude := garray.NewStrArrayFrom(*arr)
+	//exclude := &garray.StrArray{}
+	//arrayform := r.GetForm("exclude")
+	//if arrayform != nil {
+	//	array := arrayform.Array()
+	//	arr :=
+	//	exclude = garray.NewStrArrayFrom(*arr)
+	//
+	//}
+
+	//if ctx.Value("exclude") == nil {
+	//	r := g.RequestFromCtx(ctx)
+	//	array := r.GetForm("exclude").Array()
+	//	arr := kconv.Struct(array, &[]string{})
+	//	exclude = garray.NewStrArrayFrom(*arr)
+	//} else {
+	//	array := ctx.Value("isExport")
+	//	arr := kconv.Struct(array, &[]string{})
+	//	exclude = garray.NewStrArrayFrom(*arr)
+	//}
 
 	// team附加数据
-	if data.Data().UnionMainId > 0 && !exclude.Contains("teamList") {
+	if data.Data().UnionMainId > 0 {
+		//if data.Data().UnionMainId > 0 && !exclude.Contains("teamList") {
 		//if data.Data().UnionMainId > 0 && exclude.Contains("teamList") {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
@@ -1236,36 +1253,36 @@ func (s *sEmployee[
 
 	// user相关附加数据
 	if data.Data().CompanyEmployee.Id > 0 {
-		if exclude.Contains("user") {
-			data.Data().User = nil
-		} else {
-			base_funs.AttrMake[TR](ctx,
-				s.dao.Employee.Columns().Id,
-				func() (res TR) {
-					// 为什么要在内部订阅
-					//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
-					//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
-					//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		//if exclude.Contains("user") {
+		//	data.Data().User = nil
+		//} else {
+		base_funs.AttrMake[TR](ctx,
+			s.dao.Employee.Columns().Id,
+			func() (res TR) {
+				// 为什么要在内部订阅
+				//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
+				//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
+				//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 
-					if data.Data().CompanyEmployee.Id == 0 {
-						return res
-					}
+				if data.Data().CompanyEmployee.Id == 0 {
+					return res
+				}
 
-					user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
 
-					if user != nil {
-						kconv.Struct(user, &data.Data().User)
-						data.Data().SetUser(data.Data().User)
-						data.SetUser(data.Data().User)
+				if user != nil {
+					kconv.Struct(user, &data.Data().User)
+					data.Data().SetUser(data.Data().User)
+					data.SetUser(data.Data().User)
 
-						gconv.Struct(user.SysUser, &data.Data().User)
-						gconv.Struct(user.Detail, &data.Data().Detail)
-					}
+					gconv.Struct(user.SysUser, &data.Data().User)
+					gconv.Struct(user.Detail, &data.Data().Detail)
+				}
 
-					return data
-				},
-			)
-		}
+				return data
+			},
+		)
+		//}
 	}
 
 	return data
