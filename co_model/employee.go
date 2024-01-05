@@ -48,8 +48,8 @@ type EmployeeUser struct {
 
 type EmployeeRes struct {
 	co_entity.CompanyEmployee
-	User     *EmployeeUser             `orm:"with:id" json:"user"`
-	Detail   *sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
+	User     *EmployeeUser             ` json:"user"`
+	Detail   *sys_entity.SysUserDetail ` json:"detail"`
 	TeamList []Team                    `json:"teamList"`
 }
 
