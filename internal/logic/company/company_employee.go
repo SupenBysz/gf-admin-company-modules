@@ -38,15 +38,15 @@ import (
 )
 
 type sEmployee[
-	ITCompanyRes co_model.ICompanyRes,
-	TR co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TR co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -65,15 +65,15 @@ type sEmployee[
 }
 
 func NewEmployee[
-	ITCompanyRes co_model.ICompanyRes,
-	TR co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+TR co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TR,
@@ -542,6 +542,7 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) { // 跨主体查询条件过滤
+
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -559,10 +560,10 @@ func (s *sEmployee[
 				break
 			}
 		}
-		teamSearch.Pagination = search.Pagination
 
 		if len(teamSearch.Filter) > 0 && teamId != 0 {
-			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch)
+
+			items, _ := s.modules.Team().QueryTeamMemberList(ctx, teamSearch, true)
 
 			if len(items.Records) > 0 {
 				for _, item := range items.Records {
@@ -591,12 +592,8 @@ func (s *sEmployee[
 			Records: make([]TR, 0),
 		}, nil
 	}
-	//r := g.RequestFromCtx(ctx)
-	//isExport := r.GetForm("isExport", false).Bool()
-	// 查询符合过滤条件的员工信息
-	result, err := daoctl.Query[TR](model.
-		With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
 
+	result, err := daoctl.Query[TR](model.With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
@@ -1171,7 +1168,9 @@ func (s *sEmployee[
 	}
 
 	// 将头像换成可访问url
-	employee.Data().Avatar = sys_service.File().MakeFileUrl(context.Background(), gconv.Int64(employee.Data().Avatar))
+	if gconv.Int64(employee.Data().Avatar) > 0 {
+		employee.Data().Avatar = sys_service.File().MakeFileUrl(context.Background(), gconv.Int64(employee.Data().Avatar))
+	}
 
 	return employee
 }
@@ -1198,6 +1197,7 @@ func (s *sEmployee[
 
 	// team附加数据
 	if data.Data().UnionMainId > 0 && !exclude.Contains("teamList") {
+		//if data.Data().UnionMainId > 0 && exclude.Contains("teamList") {
 		base_funs.AttrMake[TR](ctx,
 			s.dao.Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
@@ -1218,9 +1218,10 @@ func (s *sEmployee[
 					}
 
 					// 记录该员工所在所有团队
-					s.dao.Team.Ctx(ctx).
-						WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
-
+					if len(temIds) > 0 {
+						s.dao.Team.Ctx(ctx).
+							WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
+					}
 					// 添加附加数据
 					//data.Data().SetTeamList(data.Data().TeamList)
 
