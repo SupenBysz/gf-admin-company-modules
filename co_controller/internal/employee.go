@@ -14,8 +14,11 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type EmployeeController[
@@ -326,10 +329,28 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("isExport")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
+
 	ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Employee.Columns().Id)
 
+	// 最新附加数据规范：前端有需求，通过请求参数传递，后端在控制层才进行订阅数据，然后在service逻辑层进行数据附加
+	if include.Contains("teamList") {
+		ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
+	}
+
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
-	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	if include.Contains("user") {
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
 	return ctx
 }

@@ -8,7 +8,8 @@ import (
 type GetEmployeeByIdReq struct {
 	Id int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
 
-	Exclude []string `json:"exclude" dc:"需要附加数据的返回值字段集，如果没有填写，默认添加所有附加数据"`
+	//Exclude []string `json:"exclude" dc:"需要附加数据的返回值字段集，如果没有填写，默认添加所有附加数据"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type HasEmployeeByNameReq struct {

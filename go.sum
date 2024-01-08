@@ -2,8 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/SupenBysz/gf-admin-community v0.6.21 h1:A1NoRZFue26AGDV2FoxoS7RDjElRYHaauY8dUkNEUMM=
-github.com/SupenBysz/gf-admin-community v0.6.21/go.mod h1:EGrFY9/3A36JgmwHEEnLnB3Q6dnhGryZC7EqbZWyTyA=
+github.com/SupenBysz/gf-admin-community v0.6.23 h1:ayAobh+jBa1IKKreBQH04AZvWcF0lFSfX7aiA9jOnwM=
+github.com/SupenBysz/gf-admin-community v0.6.23/go.mod h1:EGrFY9/3A36JgmwHEEnLnB3Q6dnhGryZC7EqbZWyTyA=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 h1:iC9YFYKDGEy3n/FtqJnOkZsene9olVspKmkX5A2YBEo=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4/go.mod h1:sCavSAvdzOjul4cEqeVtvlSaSScfNsTQ+46HwlTL1hc=
 github.com/alibabacloud-go/darabonba-openapi v0.1.18/go.mod h1:PB4HffMhJVmAgNKNq3wYbTUlFvPgxJpTzd1F5pTuUsc=
