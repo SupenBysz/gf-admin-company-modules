@@ -14,8 +14,11 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type CompanyController[
@@ -232,8 +235,25 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("isExport")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
 
-	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	if include.Contains("adminUser") {
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
+	}
+
+	if include.Contains("user") {
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
+
 	return ctx
 }

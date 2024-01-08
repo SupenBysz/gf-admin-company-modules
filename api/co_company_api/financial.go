@@ -56,7 +56,8 @@ type AuditInvoiceDetailReq struct {
 }
 
 type GetAccountDetailReq struct {
-	AccountId int64 `json:"accountId" dc:"财务账号id"`
+	AccountId int64    `json:"accountId" dc:"财务账号id"`
+	Include   []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type UpdateAccountIsEnabledReq struct {

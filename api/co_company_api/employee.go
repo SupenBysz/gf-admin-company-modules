@@ -25,14 +25,17 @@ type HasEmployeeByNoReq struct {
 
 type QueryEmployeeListReq struct {
 	base_model.SearchParams
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type CreateEmployeeReq struct {
 	co_model.Employee
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type UpdateEmployeeReq struct {
 	co_model.UpdateEmployee
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type DeleteEmployeeReq struct {
@@ -40,11 +43,13 @@ type DeleteEmployeeReq struct {
 }
 
 type GetEmployeeDetailByIdReq struct {
-	Id int64 `json:"id" v:"required#ID校验失败" dc:"员工ID"`
+	Id      int64    `json:"id" v:"required#ID校验失败" dc:"员工ID"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type GetEmployeeListByRoleIdReq struct {
-	Id int64 `json:"id" v:"required#ID校验失败" dc:"角色ID"`
+	Id      int64    `json:"id" v:"required#ID校验失败" dc:"角色ID"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type SetEmployeeRolesReq struct {

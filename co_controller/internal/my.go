@@ -12,7 +12,10 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type MyController[
@@ -296,23 +299,47 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
+
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("isExport")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
 	// 附加数据1：团队负责人Owner
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+	if include.Contains("owner") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+	}
 
 	// 附加数据2：团队队长Captain
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+	if include.Contains("captain") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+	}
 
 	// 附加数据3：团队主体UnionMain
-	ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+	if include.Contains("unionMain") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+	}
 
 	// 附加数据4：团队或小组父级
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+	if include.Contains("parent") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+	}
 
 	// 附加数据5：用户信息附加数据
-	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	if include.Contains("user") {
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
 
 	// 财务账号明细Detail附加数据
-	ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	if include.Contains("detail") {
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	}
 
 	return ctx
 }
