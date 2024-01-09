@@ -14,6 +14,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/kconv"
@@ -385,11 +387,37 @@ func (c *TeamController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
-	ctx = base_funs.AttrBuilder[TIRes, ITCompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
-	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
-	ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
-	ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Team.Columns().ParentId)
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("isExport")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
 
-	ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	if include.Contains("unionMain") {
+		ctx = base_funs.AttrBuilder[TIRes, ITCompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
+	}
+
+	if include.Contains("owner") {
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
+	}
+
+	if include.Contains("captain") {
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+	}
+
+	if include.Contains("parent") {
+		ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Team.Columns().ParentId)
+	}
+
+	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
+	if include.Contains("user") {
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
 	return ctx
 }

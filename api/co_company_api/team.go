@@ -6,7 +6,8 @@ import (
 )
 
 type GetTeamByIdReq struct {
-	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	Id      int64    `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type HasTeamByNameReq struct {
@@ -18,25 +19,29 @@ type HasTeamByNameReq struct {
 
 type QueryTeamListReq struct {
 	base_model.SearchParams
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type CreateTeamReq struct {
 	co_model.Team
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type UpdateTeamReq struct {
 	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 	//Name   string `json:"name" v:"required#名称不能为空" dc:"名称"`
-	Name   string `json:"name"  dc:"名称"`
-	Remark string `json:"remark" dc:"备注"`
+	Name    string   `json:"name"  dc:"名称"`
+	Remark  string   `json:"remark" dc:"备注"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type DeleteTeamReq struct {
 	Id int64 `json:"id" v:"required#团队ID校验失败" dc:"团队或小组ID"`
 }
 type QueryTeamListByEmployeeReq struct {
-	EmployeeId  int64 `json:"employeeId" v:"required#员工ID校验失败" dc:"员工ID"`
-	UnionMainId int64 `json:"unionMainId" dc:"关联主体，默认当前主体"`
+	EmployeeId  int64    `json:"employeeId" v:"required#员工ID校验失败" dc:"员工ID"`
+	UnionMainId int64    `json:"unionMainId" dc:"关联主体，默认当前主体"`
+	Include     []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type SetTeamMemberReq struct {
@@ -60,7 +65,8 @@ type SetTeamCaptainReq struct {
 }
 
 type GetEmployeeListByTeamIdReq struct {
-	TeamId int64 `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	TeamId  int64    `json:"teamId" v:"required#团队ID校验失败" dc:"团队或小组ID"`
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type GetTeamInviteCodeReq struct {
