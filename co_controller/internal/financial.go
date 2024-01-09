@@ -21,15 +21,15 @@ import (
 
 // FinancialController 财务服务控制器
 type FinancialController[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -47,15 +47,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 // Financial 财务服务
 func Financial[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -488,7 +488,7 @@ func (c *FinancialController[
 		arr := kconv.Struct(array, &[]string{})
 		include = garray.NewStrArrayFrom(*arr)
 	} else {
-		array := ctx.Value("isExport")
+		array := ctx.Value("include")
 		arr := kconv.Struct(array, &[]string{})
 		include = garray.NewStrArrayFrom(*arr)
 	}
