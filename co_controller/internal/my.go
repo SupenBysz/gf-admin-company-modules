@@ -311,6 +311,15 @@ func (c *MyController[
 		arr := kconv.Struct(array, &[]string{})
 		include = garray.NewStrArrayFrom(*arr)
 	}
+
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	}
 	// 附加数据1：团队负责人Owner
 	if include.Contains("owner") {
 		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)

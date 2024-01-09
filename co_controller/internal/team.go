@@ -399,6 +399,14 @@ func (c *TeamController[
 		include = garray.NewStrArrayFrom(*arr)
 	}
 
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[TIRes, ITCompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().OwnerEmployeeId)
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Team.Columns().CaptainEmployeeId)
+		ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Team.Columns().ParentId)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
+
 	if include.Contains("unionMain") {
 		ctx = base_funs.AttrBuilder[TIRes, ITCompanyRes](ctx, c.dao.Team.Columns().UnionMainId)
 	}

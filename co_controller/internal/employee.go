@@ -341,6 +341,12 @@ func (c *EmployeeController[
 		include = garray.NewStrArrayFrom(*arr)
 	}
 
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
+		ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Employee.Columns().Id)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
+
 	// 最新附加数据规范：前端有需求，通过请求参数传递，后端在控制层才进行订阅数据，然后在service逻辑层进行数据附加
 	if include.Contains("teamList") {
 		ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
