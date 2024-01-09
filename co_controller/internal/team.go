@@ -394,7 +394,7 @@ func (c *TeamController[
 		arr := kconv.Struct(array, &[]string{})
 		include = garray.NewStrArrayFrom(*arr)
 	} else {
-		array := ctx.Value("isExport")
+		array := ctx.Value("include")
 		arr := kconv.Struct(array, &[]string{})
 		include = garray.NewStrArrayFrom(*arr)
 	}
