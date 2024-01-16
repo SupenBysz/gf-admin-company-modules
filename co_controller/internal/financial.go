@@ -493,6 +493,11 @@ func (c *FinancialController[
 		include = garray.NewStrArrayFrom(*arr)
 	}
 
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+	}
+
 	if include.Contains("detail") {
 		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
 	}

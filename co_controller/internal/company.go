@@ -247,6 +247,11 @@ func (c *CompanyController[
 		include = garray.NewStrArrayFrom(*arr)
 	}
 
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
+
 	if include.Contains("adminUser") {
 		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
 	}
