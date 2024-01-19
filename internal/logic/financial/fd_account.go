@@ -2,6 +2,7 @@ package financial
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -130,8 +131,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister, userId int64) (response TR, err error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
@@ -151,7 +152,7 @@ func (s *sFdAccount[
 	data := kconv.Struct(info, &co_do.FdAccount{})
 
 	data.Id = idgen.NextId()
-	data.CreatedBy = sessionUser.Id
+	data.CreatedBy = userId
 	data.CreatedAt = gtime.Now()
 	data.UnionMainId = info.UnionMainId
 	data.IsEnabled = 1
@@ -241,8 +242,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int, userId int64) (bool, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
 	if account == nil || err != nil {
@@ -251,7 +252,7 @@ func (s *sFdAccount[
 
 	_, err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
 		IsEnabled: isEnabled,
-		UpdatedBy: sessionUser.Id,
+		UpdatedBy: userId,
 	})
 	if err != nil {
 		return false, err
@@ -295,12 +296,12 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
 		LimitState: limitState,
-		UpdatedBy:  sessionUser.Id,
+		UpdatedBy:  userId,
 	})
 	if err != nil {
 		return false, err
@@ -354,7 +355,10 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	sessionUser := sys_model.JwtCustomClaims{}
+	user, _ := sys_service.SysUser().GetSysUserById(ctx, 8053726458347589)
+	sessionUser.SysUser = *user
 
 	db := s.dao.FdAccount.Ctx(ctx)
 

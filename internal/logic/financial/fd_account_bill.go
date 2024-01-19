@@ -205,7 +205,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) income(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
@@ -236,7 +236,8 @@ func (s *sFdAccountBill[
 		gconv.Struct(info, bill.Data())
 		bill.Data().Id = idgen.NextId()
 		bill.Data().CreatedAt = gtime.Now()
-		bill.Data().CreatedBy = sessionUser.Id
+		//bill.Data().CreatedBy = sessionUser.Id
+		bill.Data().CreatedBy = info.ToUserId
 
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
 
@@ -305,7 +306,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) spending(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
@@ -334,7 +335,8 @@ func (s *sFdAccountBill[
 			gconv.Struct(info, bill.Data())
 			bill.Data().Id = idgen.NextId()
 			bill.Data().CreatedAt = gtime.Now()
-			bill.Data().CreatedBy = sessionUser.Id
+			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
+			bill.Data().CreatedBy = info.FromUserId
 
 			result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(bill)
 

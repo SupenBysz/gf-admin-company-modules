@@ -76,12 +76,12 @@ type (
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {
-		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error)
+		CreateAccount(ctx context.Context, info co_model.FdAccountRegister, userId int64) (response TR, err error)
 		GetAccountById(ctx context.Context, id int64) (response TR, err error)
 		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error)
-		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error)
+		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int, userId int64) (bool, error)
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
-		UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error)
+		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
