@@ -22,8 +22,8 @@ type MyProfileRes struct {
 }
 
 type AccountBillRes struct {
-	Account co_entity.FdAccount
-	Bill    *FdAccountBillListRes
+	Account co_entity.FdAccount `json:"account" dc:"财务账号"`
+	Bill    *FdAccountBillListRes `json:"bill" dc:"财务账号对应的账单"`
 }
 
 type MyAccountBillRes []AccountBillRes

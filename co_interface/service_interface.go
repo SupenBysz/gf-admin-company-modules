@@ -68,7 +68,7 @@ type (
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
-		GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error)
+		GetAccountBills(ctx context.Context, pagination *base_model.SearchParams) (*co_model.MyAccountBillRes, error)
 		GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error)
 		GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error)
 		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
@@ -124,7 +124,7 @@ type (
 		InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error)
+		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
 )
 

@@ -197,7 +197,7 @@ func (c *MyController[
 ]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.MyAccountBillRes, error) {
-			ret, err := c.modules.My().GetAccountBills(ctx, &req.Pagination)
+			ret, err := c.modules.My().GetAccountBills(ctx, &req.SearchParams)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,

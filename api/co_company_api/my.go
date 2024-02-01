@@ -26,7 +26,7 @@ type SetMobileReq struct {
 }
 
 type GetAccountBillsReq struct {
-	base_model.Pagination
+	base_model.SearchParams
 }
 
 type GetAccountsReq struct{}

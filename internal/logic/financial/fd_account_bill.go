@@ -398,30 +398,21 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error) {
+]) GetAccountBillByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}
 
-	if pagination == nil {
-		pagination = &base_model.Pagination{
-			PageNum:  1,
-			PageSize: 20,
-		}
-	}
+	//if pagination == nil {
+	//	pagination = &base_model.Pagination{
+	//		PageNum:  1,
+	//		PageSize: 20,
+	//	}
+	//}
 
-	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx), &base_model.SearchParams{
-		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
-			Field: s.dao.FdAccountBill.Columns().FdAccountId,
-			Where: "=",
-			Value: accountId,
-		}),
-		OrderBy: append(make([]base_model.OrderBy, 0), base_model.OrderBy{
-			Field: s.dao.FdAccountBill.Columns().CreatedAt,
-			Sort:  "asc",
-		}),
-		Pagination: *pagination,
-	}, false)
+	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx).
+		Where(s.dao.FdAccountBill.Columns().FdAccountId, accountId).
+		OrderAsc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())

@@ -334,7 +334,7 @@ func (s *sMy[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error) {
+]) GetAccountBills(ctx context.Context, searchParams *base_model.SearchParams) (*co_model.MyAccountBillRes, error) {
 	// 1、获取到当前登录用户
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -348,7 +348,7 @@ func (s *sMy[
 
 	// 3、遍历每一个账号，把账单统计出来
 	for _, account := range accounts.Records {
-		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, pagination)
+		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, searchParams)
 		// base_model.call[co_model.IFdAccountBillRes]
 		if err != nil {
 			return nil, err
