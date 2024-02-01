@@ -358,7 +358,8 @@ func (c *FinancialController[
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_company_api.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled)
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled, user.Id)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
@@ -379,7 +380,8 @@ func (c *FinancialController[
 ]) UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState)
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState, user.Id)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,

@@ -68,7 +68,7 @@ type (
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
-		GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error)
+		GetAccountBills(ctx context.Context, pagination *base_model.SearchParams) (*co_model.MyAccountBillRes, error)
 		GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error)
 		GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error)
 		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
@@ -76,12 +76,12 @@ type (
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {
-		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error)
+		CreateAccount(ctx context.Context, info co_model.FdAccountRegister, userId int64) (response TR, err error)
 		GetAccountById(ctx context.Context, id int64) (response TR, err error)
 		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error)
-		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error)
+		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int, userId int64) (bool, error)
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
-		UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error)
+		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
@@ -124,7 +124,7 @@ type (
 		InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error)
+		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
 )
 

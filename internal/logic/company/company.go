@@ -490,7 +490,7 @@ func (s *sCompany[
 				AllowExceed:        1,                                           // 系统账号默认是可以存在负余额
 			}
 
-			createAccount, err := s.modules.Account().CreateAccount(ctx, *account)
+			createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)
 			if err != nil || reflect.ValueOf(createAccount).IsNil() {
 				return err
 			}

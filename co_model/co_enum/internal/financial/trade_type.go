@@ -46,5 +46,8 @@ func (e tradeType) New(code int, description string) TradeTypeEnum {
 		(code&TradeType.Other.Code()) == TradeType.Other.Code() {
 		return enum.New[TradeTypeEnum](code, description)
 	}
-	panic("kyFinancial.TradeType.New: error")
+
+	return enum.New[TradeTypeEnum](code, description)
+
+	//panic("kyFinancial.TradeType.New: error")
 }

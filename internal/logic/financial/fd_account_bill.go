@@ -205,7 +205,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) income(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
@@ -236,7 +236,8 @@ func (s *sFdAccountBill[
 		gconv.Struct(info, bill.Data())
 		bill.Data().Id = idgen.NextId()
 		bill.Data().CreatedAt = gtime.Now()
-		bill.Data().CreatedBy = sessionUser.Id
+		//bill.Data().CreatedBy = sessionUser.Id
+		bill.Data().CreatedBy = info.ToUserId
 
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
 
@@ -305,7 +306,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) spending(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
@@ -334,7 +335,8 @@ func (s *sFdAccountBill[
 			gconv.Struct(info, bill.Data())
 			bill.Data().Id = idgen.NextId()
 			bill.Data().CreatedAt = gtime.Now()
-			bill.Data().CreatedBy = sessionUser.Id
+			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
+			bill.Data().CreatedBy = info.FromUserId
 
 			result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(bill)
 
@@ -396,30 +398,21 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error) {
+]) GetAccountBillByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}
 
-	if pagination == nil {
-		pagination = &base_model.Pagination{
-			PageNum:  1,
-			PageSize: 20,
-		}
-	}
+	//if pagination == nil {
+	//	pagination = &base_model.Pagination{
+	//		PageNum:  1,
+	//		PageSize: 20,
+	//	}
+	//}
 
-	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx), &base_model.SearchParams{
-		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
-			Field: s.dao.FdAccountBill.Columns().FdAccountId,
-			Where: "=",
-			Value: accountId,
-		}),
-		OrderBy: append(make([]base_model.OrderBy, 0), base_model.OrderBy{
-			Field: s.dao.FdAccountBill.Columns().CreatedAt,
-			Sort:  "asc",
-		}),
-		Pagination: *pagination,
-	}, false)
+	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx).
+		Where(s.dao.FdAccountBill.Columns().FdAccountId, accountId).
+		OrderAsc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())
