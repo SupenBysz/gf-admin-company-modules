@@ -2,7 +2,6 @@ package financial
 
 import (
 	"context"
-	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -355,10 +354,7 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
-	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-	sessionUser := sys_model.JwtCustomClaims{}
-	user, _ := sys_service.SysUser().GetSysUserById(ctx, 8053726458347589)
-	sessionUser.SysUser = *user
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	db := s.dao.FdAccount.Ctx(ctx)
 
