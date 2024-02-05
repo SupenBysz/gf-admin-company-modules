@@ -83,7 +83,7 @@ type (
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
 		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
-		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
+		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
 		GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, accountType co_enum.AccountType, sceneType ...co_enum.SceneType) (response TR, err error)
 		GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error)
