@@ -648,7 +648,8 @@ func (s *sEmployee[
 
 	// 校验员工名称是否已存在
 	if info.Name != nil {
-		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) {
+		// 重名 & 系统不允许员工重名
+		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 		}
 	}
@@ -744,7 +745,7 @@ func (s *sEmployee[
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) {
+	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
