@@ -48,6 +48,8 @@ service:
   registerIsNeedInviteCode: false
   # 是否允许主体下的不同团队内的小组同名: true允许、false不允许
   groupNameCanRepeated  : true
+  # 是否允许主体下的员工同名: true允许、false不允许
+  employeeNameCanRepeated: false
 
 # 邮件设置
 email:
