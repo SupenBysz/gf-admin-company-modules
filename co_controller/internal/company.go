@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -18,6 +19,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
 
@@ -96,12 +98,14 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetCompanyById(ctx context.Context, req *co_company_api.GetCompanyByIdReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).ViewDetail)
 	return funs.CheckPermission(ctx,
+
 		func() (TIRes, error) {
 			ret, err := c.modules.Company().GetCompanyById(c.makeMore(ctx), req.Id)
 			return ret, err
 		},
-		co_permission.Company.PermissionType(c.modules).ViewDetail,
+		permission,
 	)
 }
 
@@ -136,11 +140,12 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryCompanyList(ctx context.Context, req *co_company_api.QueryCompanyListReq) (*base_model.CollectRes[TIRes], error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).List)
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
 			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams)
 		},
-		co_permission.Company.PermissionType(c.modules).List,
+		permission,
 	)
 }
 
@@ -156,11 +161,13 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).Create)
+
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
 		},
-		co_permission.Company.PermissionType(c.modules).Create,
+		permission,
 	)
 }
 
@@ -176,11 +183,13 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).Update)
+
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			return c.modules.Company().UpdateCompany(c.makeMore(ctx), &req.Company)
 		},
-		co_permission.Company.PermissionType(c.modules).Update,
+		permission,
 	)
 }
 
@@ -196,11 +205,13 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).ViewMobile)
+
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			return c.modules.Company().GetCompanyDetail(c.makeMore(ctx), req.Id)
 		},
-		co_permission.Company.PermissionType(c.modules).ViewMobile,
+		permission,
 	)
 }
 
@@ -215,12 +226,13 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetCompanyState(ctx context.Context, req *co_company_api.SetCompanyStateReq) (api_v1.BoolRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).SetState)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.Company().SetCompanyState(ctx, req.Id, co_enum.Company.State.New(req.State, ""))
 			return ret == true, err
 		},
-		co_permission.Company.PermissionType(c.modules).SetState,
+		permission,
 	)
 }
 
@@ -261,4 +273,31 @@ func (c *CompanyController[
 	}
 
 	return ctx
+}
+
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) getPermission(ctx context.Context, permission base_permission.IPermission) base_permission.IPermission {
+	// 这种只满足两级edu_school_class::Create，
+	// 还需要兼容这样子的Financial::BankCard::ViewBankCardDetail （先不考虑）
+
+	//identifierStr := c.getPermissionIdentifier(permission)
+	identifierStr := c.modules.GetConfig().Identifier.Company + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
+		// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
+	return permission
 }

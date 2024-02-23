@@ -47,6 +47,7 @@ func InitPermission[
 			SetId(idgen.NextId()). // 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
 			SetName(module.T(context.TODO(), "{#CompanyName}")).
 			SetIdentifier(module.GetConfig().Identifier.Company).
+			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
@@ -63,9 +64,11 @@ func InitPermission[
 
 		// 员工
 		base_permission.Factory().
+			// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
 			SetId(idgen.NextId()).
 			SetName(module.T(context.TODO(), "{#CompanyName}{#EmployeeName}")).
 			SetIdentifier(module.GetConfig().Identifier.Employee).
+			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
@@ -90,6 +93,7 @@ func InitPermission[
 			SetIdentifier(module.GetConfig().Identifier.Team).
 			SetType(1).
 			SetIsShow(1).
+			SetMatchMode(1).
 			SetItems([]base_permission.IPermission{
 				co_permission.Team.PermissionType(module).Create,
 				co_permission.Team.PermissionType(module).ViewDetail,
@@ -215,6 +219,7 @@ func initAuditAndLicensePermission() []base_permission.IPermission {
 			SetIdentifier("License").
 			SetType(1).
 			SetIsShow(1).
+			SetMatchMode(1).
 			SetItems([]base_permission.IPermission{
 				// 查看资质信息，查看某条资质信息
 				co_permission.License.PermissionType.ViewDetail,

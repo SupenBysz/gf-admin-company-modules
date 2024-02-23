@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -15,6 +16,7 @@ import (
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
 
@@ -153,12 +155,23 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
+	permission := co_permission.Employee.PermissionType(c.modules).SetAvatar
+	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
+		// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
+	//permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetAvatar)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetAvatar,
+		permission,
 	)
 }
 
@@ -174,12 +187,20 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
+	permission := co_permission.Employee.PermissionType(c.modules).SetMobile
+	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetMobile,
+		permission,
 	)
 }
 
@@ -351,4 +372,19 @@ func (c *MyController[
 	}
 
 	return ctx
+}
+
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) getPermissionIdentifier(permission base_permission.IPermission) (identifierStr string) {
+	// 拼装标识符
+	return c.modules.GetConfig().Identifier.Team + "::" + permission.GetIdentifier()
 }
