@@ -18,6 +18,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
 
@@ -99,11 +100,12 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeById(ctx context.Context, req *co_company_api.GetEmployeeByIdReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).ViewDetail)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			return c.employee.GetEmployeeById(c.makeMore(ctx), req.Id)
 		},
-		co_permission.Employee.PermissionType(c.modules).ViewDetail,
+		permission,
 	)
 }
 
@@ -119,11 +121,12 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeDetailById(ctx context.Context, req *co_company_api.GetEmployeeDetailByIdReq) (res TIRes, err error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).MoreDetail)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			return c.employee.GetEmployeeDetailById(c.makeMore(ctx), req.Id)
 		},
-		co_permission.Employee.PermissionType(c.modules).MoreDetail,
+		permission,
 	)
 }
 
@@ -179,11 +182,13 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryEmployeeList(ctx context.Context, req *co_company_api.QueryEmployeeListReq) (*base_model.CollectRes[TIRes], error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).List)
+
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
 			return c.employee.QueryEmployeeList(c.makeMore(ctx), &req.SearchParams)
 		},
-		co_permission.Employee.PermissionType(c.modules).List,
+		permission,
 	)
 }
 
@@ -199,14 +204,15 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) CreateEmployee(ctx context.Context, req *co_company_api.CreateEmployeeReq) (TIRes, error) {
-	req.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 
+	req.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Create)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee)
 			return ret, err
 		},
-		co_permission.Employee.PermissionType(c.modules).Create,
+		permission,
 	)
 }
 
@@ -222,12 +228,13 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateEmployee(ctx context.Context, req *co_company_api.UpdateEmployeeReq) (TIRes, error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Update)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
 			ret, err := c.employee.UpdateEmployee(c.makeMore(ctx), &req.UpdateEmployee)
 			return ret, err
 		},
-		co_permission.Employee.PermissionType(c.modules).Update,
+		permission,
 	)
 }
 
@@ -243,12 +250,13 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) DeleteEmployee(ctx context.Context, req *co_company_api.DeleteEmployeeReq) (api_v1.BoolRes, error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Delete)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.employee.DeleteEmployee(ctx, req.Id)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).Delete,
+		permission,
 	)
 }
 
@@ -264,11 +272,12 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetEmployeeListByRoleId(ctx context.Context, req *co_company_api.GetEmployeeListByRoleIdReq) (*base_model.CollectRes[TIRes], error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).ViewDetail)
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
 			return c.employee.GetEmployeeListByRoleId(c.makeMore(ctx), req.Id)
 		},
-		co_permission.Employee.PermissionType(c.modules).ViewDetail,
+		permission,
 	)
 }
 
@@ -283,6 +292,7 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetEmployeeRoles(ctx context.Context, req *co_company_api.SetEmployeeRolesReq) (api_v1.BoolRes, error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetRoles)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -294,7 +304,7 @@ func (c *EmployeeController[
 			)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetRoles,
+		permission,
 	)
 }
 
@@ -309,12 +319,14 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error) {
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetState)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.employee.SetEmployeeState(ctx, req.Id, req.State)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetState,
+		permission,
 	)
 }
 
@@ -358,4 +370,29 @@ func (c *EmployeeController[
 		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	}
 	return ctx
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) getPermission(ctx context.Context, permission base_permission.IPermission) base_permission.IPermission {
+
+	//identifierStr := c.getPermissionIdentifier(permission)
+	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
+		// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
+	return permission
 }

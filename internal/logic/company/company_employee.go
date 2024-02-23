@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -593,7 +594,8 @@ func (s *sEmployee[
 		}, nil
 	}
 
-	result, err := daoctl.Query[TR](model.With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
+	//result, err := daoctl.Query[TR](model.With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
+	result, err := daoctl.Query[TR](model, search, isExport)
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
 	}
@@ -648,7 +650,8 @@ func (s *sEmployee[
 
 	// 校验员工名称是否已存在
 	if info.Name != nil {
-		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) {
+		// 重名 & 系统不允许员工重名
+		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 		}
 	}
@@ -744,7 +747,7 @@ func (s *sEmployee[
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) {
+	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
@@ -872,7 +875,13 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) DeleteEmployee(ctx context.Context, id int64) (bool, error) {
-	employee, err := s.GetEmployeeById(ctx, id)
+	// 这个下面两行查询会过滤掉DeletedAt不为空的
+	//employee, err := s.GetEmployeeById(ctx, id)
+	//employee, err := s.GetEmployeeDetailById(ctx, id)
+
+	//  Unscoped 找到被软删除的记录
+	var employee TR
+	err := s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Unscoped().Scan(&employee)
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Disabled_Delete}"), s.dao.Employee.Table())
 	}
@@ -883,7 +892,7 @@ func (s *sEmployee[
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
-		if s.modules.GetConfig().HardDeleteWaitAt > 0 && employee.Data().DeletedAt == nil {
+		if s.modules.GetConfig().HardDeleteWaitAt > 0 && !reflect.ValueOf(employee).IsNil() && employee.Data() != nil && employee.Data().DeletedAt == nil {
 			// 设置账户状态为已注销
 			_, err = sys_service.SysUser().SetUserState(ctx, employee.Data().Id, sys_enum.User.State.Canceled)
 			if err != nil {
@@ -908,7 +917,7 @@ func (s *sEmployee[
 
 				if gtime.Now().Before(employee.Data().DeletedAt.Add(HardDeleteWaitAt)) {
 					hours := gtime.Now().Sub(employee.Data().DeletedAt.Add(HardDeleteWaitAt)).Hours()
-					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + "数据延期保护中\r请于 " + gconv.String(math.Abs(hours)) + " 小时后操作"
+					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + "数据延期保护中，请于 " + gconv.String(math.Abs(hours)) + " 小时后操作"
 					return sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 				}
 			}
@@ -924,6 +933,7 @@ func (s *sEmployee[
 			if err != nil {
 				return err
 			}
+
 			// 删除用户
 			_, err = sys_service.SysUser().DeleteUser(ctx, employee.Data().Id)
 			if err != nil {
@@ -934,7 +944,7 @@ func (s *sEmployee[
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed")+": "+err.Error(), s.dao.Employee.Table())
 	}
 	return true, nil
 }
@@ -1240,7 +1250,7 @@ func (s *sEmployee[
 							WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
 					}
 					// 添加附加数据
-					//data.Data().SetTeamList(data.Data().TeamList)
+					data.Data().SetTeamList(data.Data().TeamList)
 
 					// 业务层添加附加数据
 					data.SetTeamList(data)

@@ -353,8 +353,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	db := s.dao.FdAccount.Ctx(ctx)
 
@@ -365,12 +365,12 @@ func (s *sFdAccount[
 	if inOutType == 1 { // 收入
 		// 余额 = 之前的余额 + 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "+" + gconv.String(amount))
-		data.UpdatedBy = sessionUser.Id
+		data.UpdatedBy = sysSessionUserId
 
 	} else if inOutType == 2 { // 支出
 		// 余额 = 之前的余额 - 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "-" + gconv.String(amount))
-		data.UpdatedBy = sessionUser.Id
+		data.UpdatedBy = sysSessionUserId
 	}
 
 	result, err := db.Data(data).Where(co_do.FdAccount{
