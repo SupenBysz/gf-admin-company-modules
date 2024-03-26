@@ -46,6 +46,7 @@ error_Create_Failed: "创建失败"
 error_AlreadyExist: "已存在"
 error_NonExist: "不存在"
 error_Disabled_Delete: "禁止删除"
+error_JoinTeamByInviteCode_Failed: "扫邀约码加入团队失败"
 
 
 ## 有关文件的错误信息

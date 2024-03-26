@@ -6,6 +6,8 @@ type financial struct {
 
 	AccountType accountType
 	SceneType   sceneType
+
+	AllowExceed allowExceed
 }
 
 var Financial = financial{
@@ -13,4 +15,5 @@ var Financial = financial{
 	TradeType:   TradeType,
 	AccountType: AccountType,
 	SceneType:   SceneType,
+	AllowExceed: AllowExceed,
 }

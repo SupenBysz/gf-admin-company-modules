@@ -108,7 +108,7 @@ var (
 					// 注册财务模块路由 (可选)
 					router.FinancialGroup(consts.Global.IModules, group)
 
-					// 主体资质管理
+					// 审核管理
 					group.Group("/audit", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysAudit) })
 
 					// 个人资质管理

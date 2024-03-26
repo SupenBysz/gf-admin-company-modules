@@ -20,15 +20,15 @@ import (
 )
 
 type sMy[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -45,15 +45,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func NewMy[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -95,7 +95,8 @@ func (s *sMy[
 ]) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	user, err := sys_service.SysUser().GetSysUserById(ctx, session.Id)
+	user, err := sys_service.SysUser().GetUserDetail(ctx, session.Id)
+	//user, err := sys_service.SysUser().GetSysUserById(ctx, session.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -103,11 +104,13 @@ func (s *sMy[
 	// 超级管理员直接返回用户信息
 	if session.Type == sys_enum.User.Type.SuperAdmin.Code() {
 		return &co_model.MyProfileRes{
-			User: user,
+			IsSuperAdmin: true,
+			User:         user,
 		}, nil
 	}
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
+	//employee, err := s.modules.Employee().GetEmployeeById(ctx, session.Id)
+	employee, err := s.modules.Employee().GetEmployeeDetailById(ctx, session.Id)
 	if err != nil || reflect.ValueOf(employee).IsNil() {
 		return &co_model.MyProfileRes{
 			User:     user,
@@ -115,10 +118,17 @@ func (s *sMy[
 		}, nil
 	}
 
-	return &co_model.MyProfileRes{
+	res := co_model.MyProfileRes{
 		User:     user,
 		Employee: employee.Data(),
-	}, nil
+	}
+
+	response, err := s.modules.Company().GetCompanyById(ctx, employee.Data().UnionMainId)
+	if response.Data().UserId == employee.Data().Id {
+		res.IsAdmin = true
+	}
+
+	return &res, nil
 }
 
 // GetCompany 获取当前公司信息
@@ -288,7 +298,7 @@ func (s *sMy[
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
-		storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
+		storageAddr := s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar" + fileInfo.Ext
 
 		_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
 
@@ -324,7 +334,7 @@ func (s *sMy[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error) {
+]) GetAccountBills(ctx context.Context, searchParams *base_model.SearchParams) (*co_model.MyAccountBillRes, error) {
 	// 1、获取到当前登录用户
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -338,7 +348,7 @@ func (s *sMy[
 
 	// 3、遍历每一个账号，把账单统计出来
 	for _, account := range accounts.Records {
-		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, pagination)
+		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, searchParams)
 		// base_model.call[co_model.IFdAccountBillRes]
 		if err != nil {
 			return nil, err

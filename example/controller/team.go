@@ -77,6 +77,10 @@ func (c *TeamController[ITTeamRes]) SetTeamMember(ctx context.Context, req *co_v
 	return c.ITeam.SetTeamMember(ctx, &req.SetTeamMemberReq)
 }
 
+func (c *TeamController[ITTeamRes]) RemoveTeamMember(ctx context.Context, req *co_v1.RemoveTeamMemberReq) (api_v1.BoolRes, error) {
+	return c.ITeam.RemoveTeamMember(ctx, &req.RemoveTeamMemberReq)
+}
+
 func (c *TeamController[ITTeamRes]) SetTeamOwner(ctx context.Context, req *co_v1.SetTeamOwnerReq) (api_v1.BoolRes, error) {
 	return c.ITeam.SetTeamOwner(ctx, &req.SetTeamOwnerReq)
 }
@@ -89,4 +93,16 @@ func (c *TeamController[ITTeamRes]) GetEmployeeListByTeamId(ctx context.Context,
 	ret, err := c.ITeam.GetEmployeeListByTeamId(ctx, &req.GetEmployeeListByTeamIdReq)
 
 	return kconv.Struct(ret, &api_v1.MapRes{}), err
+}
+
+func (c *TeamController[ITTeamRes]) GetTeamInviteCode(ctx context.Context, req *co_v1.GetTeamInviteCodeReq) (*co_model.TeamInviteCodeRes, error) {
+	ret, err := c.ITeam.GetTeamInviteCode(ctx, &req.GetTeamInviteCodeReq)
+
+	return ret, err
+}
+
+func (c *TeamController[ITTeamRes]) JoinTeamByInviteCode(ctx context.Context, req *co_v1.JoinTeamByInviteCodeReq) (api_v1.BoolRes, error) {
+	ret, err := c.ITeam.JoinTeamByInviteCode(ctx, &req.JoinTeamByInviteCodeReq)
+
+	return ret, err
 }

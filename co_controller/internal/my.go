@@ -3,13 +3,21 @@ package internal
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_permission"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 type MyController[
@@ -147,12 +155,23 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
+	permission := co_permission.Employee.PermissionType(c.modules).SetAvatar
+	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
+		// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
+	//permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetAvatar)
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetAvatar,
+		permission,
 	)
 }
 
@@ -168,12 +187,20 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
+	permission := co_permission.Employee.PermissionType(c.modules).SetMobile
+	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	if sqlPermission != nil {
+		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	}
+
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
 			ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
 			return ret == true, err
 		},
-		co_permission.Employee.PermissionType(c.modules).SetMobile,
+		permission,
 	)
 }
 
@@ -191,7 +218,7 @@ func (c *MyController[
 ]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.MyAccountBillRes, error) {
-			ret, err := c.modules.My().GetAccountBills(ctx, &req.Pagination)
+			ret, err := c.modules.My().GetAccountBills(ctx, &req.SearchParams)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -212,7 +239,7 @@ func (c *MyController[
 ]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.FdAccountListRes, error) {
-			ret, err := c.modules.My().GetAccounts(ctx)
+			ret, err := c.modules.My().GetAccounts(c.makeMore(ctx))
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -293,17 +320,71 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
+
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("include")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
+
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	}
 	// 附加数据1：团队负责人Owner
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+	if include.Contains("owner") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().OwnerEmployeeId)
+	}
 
 	// 附加数据2：团队队长Captain
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+	if include.Contains("captain") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITEmployeeRes](ctx, c.modules.Dao().Team.Columns().CaptainEmployeeId)
+	}
 
 	// 附加数据3：团队主体UnionMain
-	ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+	if include.Contains("unionMain") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, TIRes](ctx, c.modules.Dao().Team.Columns().UnionMainId)
+	}
 
 	// 附加数据4：团队或小组父级
-	ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+	if include.Contains("parent") {
+		ctx = base_funs.AttrBuilder[ITTeamRes, ITTeamRes](ctx, c.modules.Dao().Team.Columns().ParentId)
+	}
+
+	// 附加数据5：用户信息附加数据
+	if include.Contains("user") {
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+	}
+
+	// 财务账号明细Detail附加数据
+	if include.Contains("detail") {
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	}
 
 	return ctx
+}
+
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) getPermissionIdentifier(permission base_permission.IPermission) (identifierStr string) {
+	// 拼装标识符
+	return c.modules.GetConfig().Identifier.Team + "::" + permission.GetIdentifier()
 }

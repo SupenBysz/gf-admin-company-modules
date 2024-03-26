@@ -12,8 +12,11 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/gogf/gf/v2/container/garray"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
 	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/kconv"
 )
 
 // FinancialController 财务服务控制器
@@ -334,7 +337,7 @@ func (c *FinancialController[
 ]) GetAccountDetail(ctx context.Context, req *co_company_api.GetAccountDetailReq) (ITFdAccountRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (ITFdAccountRes, error) {
-			ret, err := c.modules.Account().GetAccountById(ctx, req.AccountId)
+			ret, err := c.modules.Account().GetAccountById(c.makeMore(ctx), req.AccountId)
 			return ret, err
 		},
 		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
@@ -355,7 +358,8 @@ func (c *FinancialController[
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_company_api.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled)
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled, user.Id)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
@@ -376,7 +380,8 @@ func (c *FinancialController[
 ]) UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState)
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState, user.Id)
 			return ret == true, err
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
@@ -446,6 +451,27 @@ func (c *FinancialController[
 	)
 }
 
+// SetAccountAllowExceed 设置财务账号是否允许存在负余额
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountAllowExceed(ctx context.Context, req *co_company_api.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			ret, err := c.modules.Account().SetAccountAllowExceed(ctx, req.AccountId, req.AllowExceed)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+	)
+}
+
 func (c *FinancialController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -457,8 +483,30 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) makeMore(ctx context.Context) context.Context {
+	include := &garray.StrArray{}
+	if ctx.Value("include") == nil {
+		r := g.RequestFromCtx(ctx)
+		array := r.GetForm("include").Array()
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	} else {
+		array := ctx.Value("include")
+		arr := kconv.Struct(array, &[]string{})
+		include = garray.NewStrArrayFrom(*arr)
+	}
+
+	if include.Contains("*") {
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
+	}
+
+	if include.Contains("detail") {
+		ctx = base_funs.AttrBuilder[ITFdAccountRes, ITFdAccountRes](ctx, "id")
+	}
+
 	ctx = base_funs.AttrBuilder[ITFdAccountRes, co_entity.FdAccountDetail](ctx, "id")
 
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
+
 	return ctx
 }

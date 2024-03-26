@@ -3,9 +3,22 @@ package company
 import (
 	"context"
 	"database/sql"
+	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_consts"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/sys_rules"
+	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_hook"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_hook"
@@ -15,12 +28,6 @@ import (
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
-
-	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 )
 
 type sTeam[
@@ -35,6 +42,10 @@ type sTeam[
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
+
+	// 邀约&加入团队Hook
+	InviteJoinTeamHook base_hook.BaseHook[sys_enum.InviteType, co_hook.InviteJoinTeamHookFunc]
+
 	modules co_interface.IModules[
 		ITCompanyRes,
 		ITEmployeeRes,
@@ -200,7 +211,8 @@ func (s *sTeam[
 	}
 
 	// 需要进行跨主体判断
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
+	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(response).IsNil() ||
+		err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
 		response.Data().UnionMainId != sessionUser.UnionMainId &&
 		!sessionUser.IsAdmin &&
 		!sessionUser.IsSuperAdmin {
@@ -249,7 +261,7 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool {
+]) HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool {
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
@@ -258,6 +270,10 @@ func (s *sTeam[
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
+
+	if parentId != 0 && co_consts.Global.GroupNameCanRepeated { //
+		model = model.Where(co_do.CompanyTeam{ParentId: parentId})
+	}
 
 	if len(excludeIds) > 0 {
 		var ids []int64
@@ -290,7 +306,17 @@ func (s *sTeam[
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, false)
+	isExport := false
+	if ctx.Value("isExport") == nil {
+		r := g.RequestFromCtx(ctx)
+		isExport = r.GetForm("isExport", false).Bool()
+	} else {
+		isExport = gconv.Bool(ctx.Value("isExport"))
+	}
+
+	//isExport := r.GetForm("isExport", false).Bool()
+
+	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, isExport)
 
 	items := make([]TR, 0)
 	for _, item := range data.Records {
@@ -312,12 +338,15 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
+]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 	model := s.dao.TeamMember.Ctx(ctx)
-
-	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, false)
+	export := false
+	if len(isExport) > 0 {
+		export = isExport[0]
+	}
+	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, export)
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -376,8 +405,8 @@ func (s *sTeam[
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	// 判断团队名称是否存在
-	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId) == true {
+	// 判断团队名称是否存在 && 同一主体下的不同团队下的小组名称是否能重复
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) == true { // 1组  1组
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -478,15 +507,24 @@ func (s *sTeam[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateTeam(ctx context.Context, id int64, name string, remark string) (response TR, err error) {
+	team, err := s.GetTeamById(ctx, id)
+	if err != nil {
+		return response, err
+	}
 
-	if s.HasTeamByName(ctx, name, id) == true {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
+	if name != "" {
+		if s.HasTeamByName(ctx, name, id, team.Data().ParentId) == true {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
+		}
 	}
 
 	data := co_do.CompanyTeam{
-		Name:      name,
+		//Name:      name,
 		Remark:    remark,
 		UpdatedAt: gtime.Now(),
+	}
+	if name != "" {
+		data.Name = name
 	}
 
 	rowsAffected, err := daoctl.UpdateWithError(
@@ -697,6 +735,74 @@ func (s *sTeam[
 		}
 		return nil
 	})
+
+	return err == nil, err
+}
+
+// RemoveTeamMember  移除团队队员或小组组员
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) RemoveTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
+	err := s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		for _, employeeId := range employeeIds {
+			// 直接删除属于员工的团队成员记录
+			affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId, TeamId: teamId}))
+
+			//isSuccess, err := s.DeleteTeamMemberByEmployee(ctx, employeeId)
+			if err != nil || affected <= 0 {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
+			}
+
+			// 查找到员工是管理员或者队长的团队
+			teamList, err := s.modules.Team().QueryTeamList(ctx, &base_model.SearchParams{
+				Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
+					Field:     s.dao.Team.Columns().CaptainEmployeeId,
+					Where:     "=",
+					Value:     employeeId,
+					IsOrWhere: true,
+				},
+				//base_model.FilterInfo{
+				//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
+				//	Where:     "=",
+				//	Value:     employeeId,
+				//	IsOrWhere: true,
+				//}
+				),
+			})
+
+			// 假如是队长或者组长，需要将团队表的队长或者组长设置为0
+			if len(teamList.Records) > 0 {
+				for _, item := range teamList.Records {
+					if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
+						ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
+						if err != nil || ret == false {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+						}
+					}
+
+					if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
+						ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
+						if err != nil || ret == false {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+						}
+					}
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return false, err
+	}
 
 	return err == nil, err
 }
@@ -950,6 +1056,116 @@ func (s *sTeam[
 	}
 
 	return &result, err
+}
+
+// GetTeamInviteCode 获取团队邀约码
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error) {
+	// 1.获取团队信息
+	team, err := s.modules.Team().GetTeamById(ctx, teamId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2.生成团队邀约码
+	encodeStr, _ := gjson.EncodeString(g.Map{
+		"teamId": teamId, // 团队邀约码信息存储团队ID即可
+	})
+	data := &sys_model.Invite{
+		UserId: userId,
+		Value:  encodeStr,
+		State:  1, //  默认正常
+		Type:   sys_enum.Invite.Type.JoinTeam.Code(),
+	}
+
+	invite, err := sys_service.SysInvite().CreateInvite(ctx, data)
+
+	// 3.返回响应
+	res := co_model.TeamInviteCodeRes{}
+	res.InviteRes = invite
+	res.Team = team.Data().CompanyTeam
+
+	return &res, nil
+}
+
+// JoinTeamByInviteCode 扫码邀约码进入团队
+func (s *sTeam[
+	ITCompanyRes,
+	ITEmployeeRes,
+	TR,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error) {
+	// 1.解析邀约码，获取团队信息
+	//id := invite_id.CodeToInviteId(inviteCode)
+	inviteInfo, err := sys_rules.CheckInviteCode(ctx, inviteCode)
+	info := g.Map{
+		"teamId": 0,
+	}
+	gjson.DecodeTo(inviteInfo.Value, &info)
+	teamId := gconv.Int64(info["teamId"])
+
+	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 1.获取团队信息
+		team, err := s.modules.Team().GetTeamById(ctx, teamId)
+		if err != nil {
+			return err
+		}
+
+		// 2.将扫码人员加入团队
+		_, err = s.SetTeamMember(ctx, teamId, []int64{userId})
+		if err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_JoinTeamByInviteCode_Failed"), s.dao.TeamMember.Table())
+		}
+
+		// 3.需要处理邀约信息的：减少次数、改变状态
+		needToSettleInvite := true
+
+		// 广播团队邀约处理Hook
+		if inviteCode != "" {
+			s.InviteJoinTeamHook.Iterator(func(key sys_enum.InviteType, value co_hook.InviteJoinTeamHookFunc) {
+				// 判断订阅的Hook类型是否一致
+				if key.Code()&inviteInfo.Type == inviteInfo.Type {
+					// 业务类型一致则调用注入的Hook函数
+					g.Try(ctx, func(ctx context.Context) {
+						needToSettleInvite, err = value(ctx, sys_enum.Invite.Type.Register, inviteInfo, team)
+						if err != nil {
+							return
+						}
+					})
+				}
+			})
+		}
+
+		// 业务层没有处理邀约
+		if needToSettleInvite {
+			if sys_consts.Global.InviteCodeMaxActivateNumber != 0 { // 非无上限
+				// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
+				_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+
+	})
+
+	return err == nil, nil
 }
 
 // makeMore 按需加载附加数据

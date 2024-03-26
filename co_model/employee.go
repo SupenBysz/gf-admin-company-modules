@@ -28,14 +28,14 @@ type Employee struct {
 
 type UpdateEmployee struct {
 	OverrideDo base_interface.DoModel[co_do.CompanyEmployee] `json:"-"`
-	Id         int64                                         `json:"id"           dc:"ID，保持与USERID一致"`
-	No         string                                        `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
-	Name       string                                        `json:"name"         v:"required|max-length:16#名称不能为空|工号长度超出限定16字符" dc:"姓名"`
-	Mobile     string                                        `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
-	State      int                                           `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
+	Id         int64                                         `json:"id"           dc:"ID，保持与USERID一致" v:"required#请输入员工ID"`
+	No         *string                                       `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
+	Name       *string                                       `json:"name"         v:"required|max-length:16#名称不能为空|工号长度超出限定16字符" dc:"姓名"`
+	Mobile     *string                                       `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
+	State      *int                                          `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 	HiredAt    *gtime.Time                                   `json:"hiredAt"      v:"date-format:Y-m-d#入职日期格式错误" dc:"入职日期"`
-	Sex        int                                           `json:"sex"          dc:"性别：0女 1男"`
-	Remark     string                                        `json:"remark"       description:"备注"`
+	Sex        *int                                          `json:"sex"          dc:"性别：0女 1男"`
+	Remark     *string                                       `json:"remark"       description:"备注"`
 }
 
 type EmployeeUser struct {
@@ -48,9 +48,9 @@ type EmployeeUser struct {
 
 type EmployeeRes struct {
 	co_entity.CompanyEmployee
-	User     EmployeeUser             `orm:"with:id" json:"user"`
-	Detail   sys_entity.SysUserDetail `orm:"with:id" json:"detail"`
-	TeamList []Team                   `json:"teamList"`
+	User     *EmployeeUser             ` json:"user"`
+	Detail   *sys_entity.SysUserDetail ` json:"detail"`
+	TeamList []Team                    `json:"teamList"`
 }
 
 func (m *EmployeeRes) SetUser(user interface{}) {

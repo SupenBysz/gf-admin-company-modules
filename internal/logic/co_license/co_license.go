@@ -64,26 +64,46 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 	if (auditEvent.Code() & sys_enum.Audit.Event.GetAuditData.Code()) == sys_enum.Audit.Event.GetAuditData.Code() {
 		if (info.Category & sys_enum.Audit.Category.CompanyLicenseAudit.Code()) == sys_enum.Audit.Category.CompanyLicenseAudit.Code() {
 
-			//auditData := co_model.AuditLicense{}
-			auditData := co_model.License{}
+			auditData := co_model.AuditLicense{}
 
 			//解析json字符串
 			//decode, _ := gjson.Decode(info.AuditData)
 			gjson.DecodeTo(info.AuditData, &auditData)
 
-			// 还未审核的图片从缓存中寻找  0 缓存  1 数据库
-
 			// 将路径id换成可访问图片的url
 			{
+				tempIdcardFrontPath := ""
 				if gstr.IsNumeric(auditData.IdcardFrontPath) {
-					auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardFrontPath)
+					// TODO 没审核通过的文件是没有保存的， 如何获取到，（从缓存获取）
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.IdcardFrontPath), auditData.UserId); err == nil && uploadFile != nil {
+						tempIdcardFrontPath = uploadFile.Src
+					}
 				}
-				if gstr.IsNumeric(auditData.IdcardBackPath) {
-					auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, auditData.IdcardBackPath)
-				}
-			}
 
-			//auditData.IdcardBackPath = "6666666666666666666666"
+				auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardFrontPath)
+
+			}
+			{
+				tempIdcardBackPath := ""
+				if gstr.IsNumeric(auditData.IdcardBackPath) {
+					// TODO 没审核通过的文件是没有保存的， 如何获取到，（从缓存获取）
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.IdcardBackPath), auditData.UserId); err == nil && uploadFile != nil {
+						tempIdcardBackPath = uploadFile.Src
+					}
+				}
+
+				auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardBackPath)
+			}
+			{
+				tempBusinessLicensePath := ""
+				if gstr.IsNumeric(auditData.BusinessLicensePath) {
+					// TODO 没审核通过的文件是没有保存的， 如何获取到，（从缓存获取）
+					if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(auditData.BusinessLicensePath), auditData.UserId); err == nil && uploadFile != nil {
+						tempBusinessLicensePath = uploadFile.Src
+					}
+				}
+				auditData.BusinessLicensePath = sys_service.File().MakeFileUrlByPath(ctx, tempBusinessLicensePath)
+			}
 
 			// 重新赋值  将id转为可访问路径
 			info.AuditData = gjson.MustEncodeString(auditData)
@@ -99,8 +119,8 @@ func (s *sLicense) AuditChange(ctx context.Context, auditEvent sys_enum.AuditEve
 		// 审核通过
 		if (info.State & sys_enum.Audit.Action.Approve.Code()) == sys_enum.Audit.Action.Approve.Code() {
 			// 创建主体资质
-			license := co_model.License{}
-			//license := co_model.AuditLicense{}
+			//license := co_model.License{}
+			license := co_model.AuditLicense{}
 			gjson.DecodeTo(info.AuditData, &license)
 
 			licenseRes, err := co_service.License().CreateLicense(ctx, license)
@@ -128,22 +148,46 @@ func (s *sLicense) GetLicenseById(ctx context.Context, id int64) (*co_entity.Lic
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "主体信息不存在", co_dao.License.Table())
 	}
+
+	// 需要将持久化的文件ID替换成可访问的接口URL
+	s.buildURL(ctx, &data)
+
 	return &data, nil
 }
 
 // QueryLicenseList 查询主体认证|列表
 func (s *sLicense) QueryLicenseList(ctx context.Context, search base_model.SearchParams) (*co_model.LicenseListRes, error) {
 	result, err := daoctl.Query[co_entity.License](co_dao.License.Ctx(ctx), &search, false)
+	if err != nil {
+		return &co_model.LicenseListRes{}, err
+	}
 
-	return (*co_model.LicenseListRes)(result), err
+	response := co_model.LicenseListRes{}
+	for _, record := range result.Records {
+		// 需要将持久化的文件ID替换成可访问的接口URL
+		s.buildURL(ctx, &record)
+
+		response.Records = append(response.Records, record)
+	}
+
+	response.PaginationRes = result.PaginationRes
+
+	return &response, err
+	//return (*co_model.LicenseListRes)(result), err
 }
 
 // CreateLicense 新增主体资质|信息
-func (s *sLicense) CreateLicense(ctx context.Context, info co_model.License) (*co_entity.License, error) {
+func (s *sLicense) CreateLicense(ctx context.Context, info co_model.AuditLicense) (*co_entity.License, error) {
+	//result := co_model.AuditLicense{}
 	result := co_entity.License{}
-	gconv.Struct(info, &result)
+	gconv.Struct(info.License, &result)
 
-	result.Id = idgen.NextId()
+	if info.LicenseId == 0 {
+		result.Id = idgen.NextId()
+	} else {
+		result.Id = info.LicenseId
+	}
+
 	result.State = 0
 	result.AuthType = 0
 	result.CreatedAt = gtime.Now()
@@ -168,12 +212,17 @@ func (s *sLicense) CreateLicense(ctx context.Context, info co_model.License) (*c
 		}
 	}
 
+	// 需要将持久化的文件ID替换成可访问的接口URL
+	s.buildURL(ctx, &result)
+
 	return &result, nil
 }
 
 // UpdateLicense 更新主体认证，如果是已经通过的认证，需要重新认证通过后才生效|信息
-func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id int64) (*co_entity.License, error) {
-	data, err := s.GetLicenseById(ctx, id)
+func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.AuditLicense, id int64) (*co_entity.License, error) {
+	//data, err := s.GetLicenseById(ctx, id)
+	data := co_entity.License{}
+	err := co_dao.License.Ctx(ctx).Scan(&data, co_do.License{Id: id})
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "操作失败，主体信息不存在", co_dao.License.Table())
 	}
@@ -184,7 +233,7 @@ func (s *sLicense) UpdateLicense(ctx context.Context, info co_model.License, id 
 
 	newData := co_do.License{}
 
-	gconv.Struct(info, &newData)
+	gconv.Struct(info.License, &newData)
 
 	{
 		_, err := co_funs.CheckLicenseFiles(ctx, info, &newData)
@@ -241,12 +290,18 @@ func (s *sLicense) GetLicenseByLatestAuditId(ctx context.Context, auditId int64)
 	if err != nil {
 		return nil
 	}
+
+	// 需要将持久化的文件ID替换成可访问的接口URL
+	s.buildURL(ctx, &result)
+
 	return &result
 }
 
 // SetLicenseState 设置主体信息状态
 func (s *sLicense) SetLicenseState(ctx context.Context, id int64, state int) (bool, error) {
-	_, err := s.GetLicenseById(ctx, id)
+	//_, err := s.GetLicenseById(ctx, id)
+	data := co_entity.License{}
+	err := co_dao.License.Ctx(ctx).Scan(&data, co_do.License{Id: id})
 	if err != nil {
 		return false, err
 	}
@@ -262,7 +317,9 @@ func (s *sLicense) SetLicenseState(ctx context.Context, id int64, state int) (bo
 
 // SetLicenseAuditNumber 设置主体神审核编号
 func (s *sLicense) SetLicenseAuditNumber(ctx context.Context, id int64, auditNumber string) (bool, error) {
-	_, err := s.GetLicenseById(ctx, id)
+	//_, err := s.GetLicenseById(ctx, id)
+	data := co_entity.License{}
+	err := co_dao.License.Ctx(ctx).Scan(&data, co_do.License{Id: id})
 	if err != nil {
 		return false, err
 	}
@@ -329,4 +386,35 @@ func (s *sLicense) Masker(license *co_entity.License) *co_entity.License {
 	license.IdcardBackPath = ""
 
 	return license
+}
+
+// buildURL 将文件id替换成可访问的URL
+func (s *sLicense) buildURL(ctx context.Context, data *co_entity.License) {
+
+	{
+		if gstr.IsNumeric(data.BusinessLicensePath) {
+			data.BusinessLicensePath = sys_service.File().MakeFileUrl(ctx, gconv.Int64(data.BusinessLicensePath))
+		}
+
+	}
+	{
+		if gstr.IsNumeric(data.BusinessLicenseLegalPath) {
+			data.BusinessLicenseLegalPath = sys_service.File().MakeFileUrl(ctx, gconv.Int64(data.BusinessLicenseLegalPath))
+		}
+
+	}
+	{
+		if gstr.IsNumeric(data.IdcardFrontPath) {
+			data.IdcardFrontPath = sys_service.File().MakeFileUrl(ctx, gconv.Int64(data.IdcardFrontPath))
+		}
+
+	}
+	{
+		if gstr.IsNumeric(data.IdcardBackPath) {
+			data.IdcardBackPath = sys_service.File().MakeFileUrl(ctx, gconv.Int64(data.IdcardBackPath))
+		}
+
+	}
+
+	//return data
 }

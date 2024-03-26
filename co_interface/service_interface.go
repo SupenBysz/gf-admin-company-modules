@@ -45,18 +45,21 @@ type (
 		SetXDao(dao co_dao.XDao)
 		GetTeamById(ctx context.Context, id int64) (TR, error)
 		GetTeamByName(ctx context.Context, name string) (TR, error)
-		HasTeamByName(ctx context.Context, name string, unionMainId int64, excludeIds ...int64) bool
+		HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool
 		QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
-		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[*co_model.TeamMemberRes], error)
+		QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error)
 		CreateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		UpdateTeam(ctx context.Context, id int64, name string, remark string) (TR, error)
 		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 		SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error)
+		RemoveTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error)
 		SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error)
 		DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error)
 		DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error)
-		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) // 移除到Team里面
+		GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error)
+		GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error)
+		JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error)
 	}
 
 	IMy interface {
@@ -65,7 +68,7 @@ type (
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
-		GetAccountBills(ctx context.Context, pagination *base_model.Pagination) (*co_model.MyAccountBillRes, error)
+		GetAccountBills(ctx context.Context, pagination *base_model.SearchParams) (*co_model.MyAccountBillRes, error)
 		GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error)
 		GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error)
 		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
@@ -73,19 +76,20 @@ type (
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {
-		CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error)
+		CreateAccount(ctx context.Context, info co_model.FdAccountRegister, userId int64) (response TR, err error)
 		GetAccountById(ctx context.Context, id int64) (response TR, err error)
 		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (bool, error)
-		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error)
+		UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int, userId int64) (bool, error)
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
-		UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error)
+		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
-		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error)
+		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error)
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
 		GetAccountByUnionUserIdAndScene(ctx context.Context, unionUserId int64, accountType co_enum.AccountType, sceneType ...co_enum.SceneType) (response TR, err error)
 		GetAccountDetailById(ctx context.Context, id int64) (res *co_model.FdAccountDetailRes, err error)
 		Increment(ctx context.Context, id int64, amount int) (bool, error)
 		Decrement(ctx context.Context, id int64, amount int) (bool, error)
+		SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error)
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
@@ -120,7 +124,7 @@ type (
 		InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error)
+		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
 )
 

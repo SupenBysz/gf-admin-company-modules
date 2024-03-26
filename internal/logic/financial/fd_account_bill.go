@@ -205,7 +205,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) income(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
@@ -236,7 +236,8 @@ func (s *sFdAccountBill[
 		gconv.Struct(info, bill.Data())
 		bill.Data().Id = idgen.NextId()
 		bill.Data().CreatedAt = gtime.Now()
-		bill.Data().CreatedBy = sessionUser.Id
+		//bill.Data().CreatedBy = sessionUser.Id
+		bill.Data().CreatedBy = info.ToUserId
 
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
 
@@ -254,7 +255,7 @@ func (s *sFdAccountBill[
 
 		// 2.修改财务账号的余额
 		// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
+		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType,info.FromUserId )
 
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -305,7 +306,7 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) spending(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
@@ -321,10 +322,12 @@ func (s *sFdAccountBill[
 		version := account.Data().Version
 		// 余额 = 之前的余额 - 本次交易的金额
 		afterBalance := account.Data().Balance - info.Amount
-		// 判断余额是否足够   // 余额足够、账号类型是系统账户，场景不限
+		// 判断余额是否足够
+		// 检验机制：余额足够 ||  账号类型是系统账户&&场景不限&&允许存在负数余额 || 允许存在负数余额  （相当于只校验了Allow参数，条件2直接忽略了）
 		if account.Data().Balance >= info.Amount ||
-			((account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
-				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() {
+			(((account.Data().AccountType & co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
+				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() && account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code()) ||
+			account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code() {
 			// 1. 添加一条财务账单流水
 			info.BeforeBalance = account.Data().Balance
 			info.AfterBalance = afterBalance
@@ -332,7 +335,8 @@ func (s *sFdAccountBill[
 			gconv.Struct(info, bill.Data())
 			bill.Data().Id = idgen.NextId()
 			bill.Data().CreatedAt = gtime.Now()
-			bill.Data().CreatedBy = sessionUser.Id
+			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
+			bill.Data().CreatedBy = info.FromUserId
 
 			result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(bill)
 
@@ -342,7 +346,7 @@ func (s *sFdAccountBill[
 
 			// 2.修改财务账号的余额
 			// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType)
+			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType,info.FromUserId)
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -394,30 +398,21 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.Pagination) (*base_model.CollectRes[TR], error) {
+]) GetAccountBillByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}
 
-	if pagination == nil {
-		pagination = &base_model.Pagination{
-			PageNum:  1,
-			PageSize: 20,
-		}
-	}
+	//if pagination == nil {
+	//	pagination = &base_model.Pagination{
+	//		PageNum:  1,
+	//		PageSize: 20,
+	//	}
+	//}
 
-	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx), &base_model.SearchParams{
-		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
-			Field: s.dao.FdAccountBill.Columns().FdAccountId,
-			Where: "=",
-			Value: accountId,
-		}),
-		OrderBy: append(make([]base_model.OrderBy, 0), base_model.OrderBy{
-			Field: s.dao.FdAccountBill.Columns().CreatedAt,
-			Sort:  "asc",
-		}),
-		Pagination: *pagination,
-	}, false)
+	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx).
+		Where(s.dao.FdAccountBill.Columns().FdAccountId, accountId).
+		OrderAsc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())

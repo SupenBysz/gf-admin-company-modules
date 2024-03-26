@@ -32,8 +32,9 @@ var (
 	permissionTypeMap = kmap.New[string, *permissionType[co_interface.IConfig]]()
 	PermissionType    = func(modules co_interface.IConfig) *permissionType[co_interface.IConfig] {
 		result := permissionTypeMap.GetOrSet(modules.GetConfig().KeyIndex, &permissionType[co_interface.IConfig]{
-			modules:       modules,
-			enumMap:       kmap.New[string, Permission](),
+			modules: modules,
+			enumMap: kmap.New[string, Permission](),
+			// ViewDetail1:   base_permission.New("232424342423534","ViewDetail", "详情", "查看员工详情"),
 			ViewDetail:    base_permission.NewInIdentifier("ViewDetail", "详情", "查看员工详情"),
 			MoreDetail:    base_permission.NewInIdentifier("MoreDetail", "更多详情", "查看员工更多详情含手机号等"),
 			ViewMobile:    base_permission.NewInIdentifier("ViewMobile", "查看手机号", ""),

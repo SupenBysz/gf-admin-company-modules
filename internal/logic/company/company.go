@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -17,6 +18,7 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
+	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
 	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
@@ -95,7 +97,57 @@ func NewCompany[
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
+	// 订阅邀约用户注册Hook，然后将新用户设置到邀约userId中所属主体中
+	sys_service.SysAuth().InstallInviteRegisterHook(sys_enum.Invite.Type.Register, result.SetNewUserJoinCompany)
+
 	return result
+}
+
+// SetNewUserJoinCompany 将注册的新用户添加至邀约者的主体中
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetNewUserJoinCompany(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
+	// 判断用户是够存在别的主体中了
+
+	// 找到userId对应的主体
+	user, err := sys_service.SysUser().GetSysUserById(ctx, invite.UserId)
+	if err != nil {
+		return true, nil
+	}
+
+	employee, err := s.modules.Employee().GetEmployeeById(ctx, user.Id)
+	if err != nil || reflect.ValueOf(employee).IsNil() {
+		return true, nil
+	}
+
+	// 将新用户设置至主体中  TODO 需要封装
+	data := co_do.CompanyEmployee{
+		Id:          registerInfo.Id,
+		No:          nil, // 工号暂定
+		Avatar:      nil, // 头像等后期用户登陆系统进行完善
+		Name:        registerInfo.Username,
+		Mobile:      registerInfo.Mobile,
+		UnionMainId: employee.Data().UnionMainId,
+		State:       0, // 状态：待确认
+		CreatedBy:   invite.UserId,
+		CreatedAt:   gtime.Now(),
+	}
+
+	affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).OmitNilData().Data(data))
+	if affected == 0 || err != nil {
+		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+	}
+
+	// 是否进行邀约码处理 （设置剩余次数，设置状态） 不处理
+	return true, nil
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
@@ -330,7 +382,7 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	// 名称重名检测
-	if s.HasCompanyByName(ctx, info.Name, info.Id) {
+	if s.HasCompanyByName(ctx, *info.Name, info.Id) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 	}
 
@@ -340,14 +392,17 @@ func (s *sCompany[
 	// 构建公司ID
 	UnionMainId := idgen.NextId()
 
-	data := co_do.Company{
-		Id:            info.Id,
-		Name:          info.Name,
-		ContactName:   info.ContactName,
-		ContactMobile: info.ContactMobile,
-		Remark:        info.Remark,
-		Address:       info.Address,
-	}
+	data := kconv.Struct(info, &co_do.Company{})
+	//data := co_do.Company{
+	//	Id:            info.Id,
+	//	Name:          info.Name,
+	//	ContactName:   info.ContactName,
+	//	ContactMobile: info.ContactMobile,
+	//	Remark:        info.Remark,
+	//	Address:       info.Address,
+	//	LicenseId:     info.LicenseId,
+	//	LicenseState:  info.LicenseState,
+	//}
 
 	// 启用事务
 	err = s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
@@ -357,8 +412,8 @@ func (s *sCompany[
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
 				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
 					No:          "001",
-					Name:        info.ContactName,
-					Mobile:      info.ContactMobile,
+					Name:        *info.ContactName,
+					Mobile:      *info.ContactMobile,
 					UnionMainId: UnionMainId,
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
@@ -397,13 +452,14 @@ func (s *sCompany[
 
 			// 3.构建公司信息
 			data.Id = UnionMainId
+			info.Id = UnionMainId
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			//data.LicenseId = 0 // 首次创建没有主体id
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.DoFactory(data)
+			doData, err := info.OverrideDo.DoFactory(*data)
 			if err != nil {
 				return err
 			}
@@ -421,7 +477,7 @@ func (s *sCompany[
 			gconv.Struct(info, &accountData)
 
 			account := &co_model.FdAccountRegister{
-				Name: info.Name,
+				Name: *info.Name,
 				//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
 
 				UnionUserId:        gconv.Int64(data.UserId),
@@ -431,30 +487,32 @@ func (s *sCompany[
 				SceneType:          0,                                           // 不限
 				AccountType:        co_enum.Financial.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
 				AccountNumber:      "",                                          // 账户编号
+				AllowExceed:        1,                                           // 系统账号默认是可以存在负余额
 			}
 
-			createAccount, err := s.modules.Account().CreateAccount(ctx, *account)
+			createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)
 			if err != nil || reflect.ValueOf(createAccount).IsNil() {
 				return err
 			}
 
 		} else {
-			if gstr.Contains(info.ContactMobile, "***") || info.ContactMobile == "" {
-				data.ContactMobile = nil
-			}
+			//if gstr.Contains(*info.ContactMobile, "***") || *info.ContactMobile == "" {
+			//	data.ContactMobile = nil
+			//}
 
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
+			data.Id = nil
 
 			// 重载Do模型
-			doData, err := info.OverrideDo.DoFactory(data)
+			doData, err := info.OverrideDo.DoFactory(*data)
 			if err != nil {
 				return err
 			}
 
 			_, err = daoctl.UpdateWithError(
 				s.dao.Company.Ctx(ctx).
-					Where(co_do.Company{Id: info.Id}),
+					Where(co_do.Company{Id: info.Id}).OmitNilData(),
 				doData,
 			)
 			if err != nil {
@@ -471,7 +529,7 @@ func (s *sCompany[
 		return response, err
 	}
 
-	return s.GetCompanyById(ctx, data.Id.(int64))
+	return s.GetCompanyById(ctx, info.Id)
 }
 
 // GetCompanyDetail 获取公司详情，包含完整商务联系人电话

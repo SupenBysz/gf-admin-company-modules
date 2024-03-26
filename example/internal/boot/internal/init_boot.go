@@ -12,7 +12,7 @@ func init() {
 	boot.InitCustomRules()
 
 	// 设置国际化语言
-	consts.Global.SetI18n(nil)
+	_ = consts.Global.SetI18n(nil)
 
 	// 初始化权限树
 	consts.Global.PermissionTree = boot.InitPermission(consts.Global.IModules.(co_interface.IModules[

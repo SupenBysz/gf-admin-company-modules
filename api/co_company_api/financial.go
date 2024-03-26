@@ -27,7 +27,7 @@ type CreateInvoiceReq struct {
 }
 
 type QueryInvoiceReq struct {
-	UserId int64 `json:"userId"  dc:"用户ID"`
+	UserId int64 `json:"userId"  dc:"用户ID" v:"required#请输入用户ID"'`
 	base_model.SearchParams
 }
 
@@ -56,7 +56,8 @@ type AuditInvoiceDetailReq struct {
 }
 
 type GetAccountDetailReq struct {
-	AccountId int64 `json:"accountId" dc:"财务账号id"`
+	AccountId int64    `json:"accountId" dc:"财务账号id"`
+	Include   []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 
 type UpdateAccountIsEnabledReq struct {
@@ -73,12 +74,19 @@ type GetAccountDetailByAccountIdReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 }
 
+// TODO 这两个接口只是用于测试，后续需要去除
 type IncrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"收入金额"`
 }
 
+// TODO 这两个接口只是用于测试，后续需要去除
 type DecrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"支出金额"`
+}
+
+type SetAccountAllowExceedReq struct {
+	AccountId   int64 `json:"accountId" dc:"财务账号ID"  v:"required#财务账号不允许为空"`
+	AllowExceed int   `json:"allowExceed" dc:"是否允许存在负余额: 0禁止、1允许，主体默认财务账号是允许超出" v:"required|in:0,1#请正确填写是否允许"`
 }

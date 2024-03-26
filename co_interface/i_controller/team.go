@@ -33,6 +33,9 @@ type ITeam[ITTeamRes co_model.ITeamRes] interface {
 	// SetTeamMember 设置团队成员
 	SetTeamMember(ctx context.Context, req *co_company_api.SetTeamMemberReq) (api_v1.BoolRes, error)
 
+	// RemoveTeamMember 移除团队成员
+	RemoveTeamMember(ctx context.Context, req *co_company_api.RemoveTeamMemberReq) (api_v1.BoolRes, error)
+
 	// SetTeamOwner 设置团队负责人
 	SetTeamOwner(ctx context.Context, req *co_company_api.SetTeamOwnerReq) (api_v1.BoolRes, error)
 
@@ -41,4 +44,10 @@ type ITeam[ITTeamRes co_model.ITeamRes] interface {
 
 	// GetEmployeeListByTeamId 获取团队成员|列表
 	GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamIdReq) (*base_model.CollectRes[co_model.IEmployeeRes], error)
+
+	// GetTeamInviteCode 获取团队邀约码
+	GetTeamInviteCode(ctx context.Context, req *co_company_api.GetTeamInviteCodeReq) (*co_model.TeamInviteCodeRes, error)
+
+	// JoinTeamByInviteCode 根据邀请码加入团队
+	JoinTeamByInviteCode(ctx context.Context, req *co_company_api.JoinTeamByInviteCodeReq) (api_v1.BoolRes, error)
 }

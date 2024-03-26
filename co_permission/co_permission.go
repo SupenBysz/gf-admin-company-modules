@@ -1,7 +1,6 @@
 package co_permission
 
 import (
-	"github.com/SupenBysz/gf-admin-company-modules/co_permission/internal/audit"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission/internal/company"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission/internal/employee"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission/internal/financial"
@@ -16,7 +15,6 @@ type (
 	FinancialPermissionType = financial.Permission
 
 	LicensePermissionType = liceense.PermissionTypeEnum
-	AuditPermissionType   = audit.PermissionTypeEnum
 )
 
 var (
@@ -26,5 +24,4 @@ var (
 	Financial = financial.Financial
 
 	License = liceense.License
-	Audit   = audit.Audit
 )

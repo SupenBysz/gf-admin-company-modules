@@ -5,11 +5,15 @@ import (
 	"github.com/kysion/base-library/base_model"
 )
 
-type GetProfileReq struct{}
+type GetProfileReq struct {
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
+}
 
 type GetCompanyReq struct{}
 
-type GetTeamsReq struct{}
+type GetTeamsReq struct {
+	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
+}
 
 type SetAvatarReq struct {
 	ImageId int64 `json:"imageId" dc:"头像ID"`
@@ -22,7 +26,7 @@ type SetMobileReq struct {
 }
 
 type GetAccountBillsReq struct {
-	base_model.Pagination
+	base_model.SearchParams
 }
 
 type GetAccountsReq struct{}

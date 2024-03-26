@@ -31,7 +31,16 @@ gfcli:
                 co_audit,
                 co_license,
                 "
-        removePrefix: "pro_"
+        removePrefix: "co_"
+
+        daoPath: "../co_model/co_dao"
+        doPath: "../co_model/co_do"
+        entityPath: "../co_model/co_entity"
+        tplDaoIndexPath: "hack/tpls/dao_template.tpl"
+        tplDaoInternalPath: "hack/tpls/dao_internal_template.tpl"
+        tplDaoDoPath: "hack/tpls/do_template.tpl"
+        tplDaoEntityPath: "hack/tpls/entity_template.tpl"
+
         descriptionTag:  true
         noModelComment:  true
         withTime: false

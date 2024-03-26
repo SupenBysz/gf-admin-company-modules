@@ -109,7 +109,14 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	return *new(TR)
+	var ret co_model.IFdAccountRes
+	ret = &co_model.FdAccountRes{
+		FdAccount: co_entity.FdAccount{},
+		Detail:    &co_entity.FdAccountDetail{},
+	}
+	return ret.(TR)
+
+	//return *new(TR)
 }
 
 // CreateAccount 创建财务账号
@@ -123,8 +130,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) CreateAccount(ctx context.Context, info co_model.FdAccountRegister, userId int64) (response TR, err error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
@@ -144,7 +151,7 @@ func (s *sFdAccount[
 	data := kconv.Struct(info, &co_do.FdAccount{})
 
 	data.Id = idgen.NextId()
-	data.CreatedBy = sessionUser.Id
+	data.CreatedBy = userId
 	data.CreatedAt = gtime.Now()
 	data.UnionMainId = info.UnionMainId
 	data.IsEnabled = 1
@@ -234,8 +241,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountIsEnable(ctx context.Context, id int64, isEnabled int, userId int64) (bool, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	account, err := daoctl.GetByIdWithError[co_entity.FdAccount](s.dao.FdAccount.Ctx(ctx), id)
 	if account == nil || err != nil {
@@ -244,7 +251,7 @@ func (s *sFdAccount[
 
 	_, err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
 		IsEnabled: isEnabled,
-		UpdatedBy: sessionUser.Id,
+		UpdatedBy: userId,
 	})
 	if err != nil {
 		return false, err
@@ -288,12 +295,12 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int) (bool, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
 		LimitState: limitState,
-		UpdatedBy:  sessionUser.Id,
+		UpdatedBy:  userId,
 	})
 	if err != nil {
 		return false, err
@@ -346,8 +353,8 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int) (int64, error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error) {
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	db := s.dao.FdAccount.Ctx(ctx)
 
@@ -358,12 +365,12 @@ func (s *sFdAccount[
 	if inOutType == 1 { // 收入
 		// 余额 = 之前的余额 + 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "+" + gconv.String(amount))
-		data.UpdatedBy = sessionUser.Id
+		data.UpdatedBy = sysSessionUserId
 
 	} else if inOutType == 2 { // 支出
 		// 余额 = 之前的余额 - 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "-" + gconv.String(amount))
-		data.UpdatedBy = sessionUser.Id
+		data.UpdatedBy = sysSessionUserId
 	}
 
 	result, err := db.Data(data).Where(co_do.FdAccount{
@@ -560,6 +567,42 @@ func (s *sFdAccount[
 	return ret > 0, err
 }
 
+// SetAccountAllowExceed 设置财务账号是否允许存在负余额
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error) {
+	if accountId == 0 {
+		return false, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
+	}
+
+	account, err := s.GetAccountById(ctx, accountId)
+	if err != nil {
+		return false, err
+	}
+
+	if !reflect.ValueOf(account.Data()).IsNil() && account.Data().AllowExceed == allowExceed {
+		return true, err
+	}
+
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccount.Ctx(ctx).
+		Where(co_do.FdAccount{Id: accountId}).OmitNilData().
+		Data(co_do.FdAccount{AllowExceed: allowExceed}))
+
+	if err != nil || affected <= 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "财务账号修改失败！", s.dao.FdAccount.Table())
+	}
+
+	return true, nil
+}
+
 // UpdateAccountDetailAmount 修改财务账户余额(上下文, id, 需要修改的钱数目, 收支类型)
 func (s *sFdAccount[
 	ITCompanyRes,
@@ -651,29 +694,6 @@ func (s *sFdAccount[
 
 // 添加财务账号附加数据 - 明细信息
 
-// makeMore 按需加载附加数据
-func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccountDetailDao, info TR) TR {
-	if reflect.ValueOf(info).IsNil() {
-		return info
-	}
-
-	base_funs.AttrMake[TR](ctx,
-		"id",
-		func() TR {
-			g.Try(ctx, func(ctx context.Context) {
-				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
-				if err != nil {
-					return
-				}
-
-				info.Data().Detail = accountDetail
-			})
-			return info
-		},
-	)
-	return info
-}
-
 // QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
 func (s *sFdAccount[
 	ITCompanyRes,
@@ -716,4 +736,32 @@ func (s *sFdAccount[
 	}
 
 	return result, nil
+}
+
+// makeMore 按需加载附加数据
+func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccountDetailDao, info TR) TR {
+	if reflect.ValueOf(info).IsNil() {
+		return info
+	}
+
+	base_funs.AttrMake[TR](ctx,
+		"id",
+		func() TR {
+			g.Try(ctx, func(ctx context.Context) {
+				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
+				if err != nil {
+					return
+				}
+
+				//info.Data().Detail = accountDetail
+
+				info.Data().SetDetail(accountDetail)
+				info.SetDetail(accountDetail)
+
+			})
+			return info
+		},
+	)
+
+	return info
 }

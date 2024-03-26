@@ -2,6 +2,7 @@ package boot
 
 import (
 	"context"
+	"fmt"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
@@ -18,15 +19,15 @@ func InitCustomRules() {
 
 // InitPermission 初始化权限树
 func InitPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -38,12 +39,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) []base_permission.IPermission {
+	var rr = module.T(context.TODO(), "{#CompanyName}")
+	fmt.Println(rr)
 	result := []base_permission.IPermission{
 		// 公司
 		base_permission.Factory().
 			SetId(idgen.NextId()). // 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
 			SetName(module.T(context.TODO(), "{#CompanyName}")).
 			SetIdentifier(module.GetConfig().Identifier.Company).
+			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
@@ -60,9 +64,11 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 		// 员工
 		base_permission.Factory().
+			// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
 			SetId(idgen.NextId()).
 			SetName(module.T(context.TODO(), "{#CompanyName}{#EmployeeName}")).
 			SetIdentifier(module.GetConfig().Identifier.Employee).
+			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
@@ -87,6 +93,7 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 			SetIdentifier(module.GetConfig().Identifier.Team).
 			SetType(1).
 			SetIsShow(1).
+			SetMatchMode(1).
 			SetItems([]base_permission.IPermission{
 				co_permission.Team.PermissionType(module).Create,
 				co_permission.Team.PermissionType(module).ViewDetail,
@@ -112,15 +119,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 // InitFinancialPermission 初始化财务服务权限树
 func InitFinancialPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -212,6 +219,7 @@ func initAuditAndLicensePermission() []base_permission.IPermission {
 			SetIdentifier("License").
 			SetType(1).
 			SetIsShow(1).
+			SetMatchMode(1).
 			SetItems([]base_permission.IPermission{
 				// 查看资质信息，查看某条资质信息
 				co_permission.License.PermissionType.ViewDetail,
@@ -223,22 +231,6 @@ func initAuditAndLicensePermission() []base_permission.IPermission {
 				co_permission.License.PermissionType.Create,
 				// 设置资质状态，设置某资质认证状态
 				co_permission.License.PermissionType.SetState,
-			}),
-
-		// 审核管理权限树
-		base_permission.Factory().
-			SetId(idgen.NextId()).
-			SetName("审核管理").
-			SetIdentifier("Audit").
-			SetType(1).
-			SetIsShow(1).
-			SetItems([]base_permission.IPermission{
-				// 查看审核信息，查看某条资质审核信息
-				co_permission.Audit.PermissionType.ViewDetail,
-				// 资质审核列表，查看所有资质审核
-				co_permission.Audit.PermissionType.List,
-				// 更新资质审核信息，更新某条资质审核信息
-				co_permission.Audit.PermissionType.Update,
 			}),
 	}
 

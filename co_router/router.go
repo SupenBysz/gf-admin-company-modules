@@ -100,10 +100,13 @@ func TeamGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/updateTeam", controller.UpdateTeam)
 	group.POST(routePrefix+"/queryTeamListByEmployee", controller.QueryTeamListByEmployee)
 	group.POST(routePrefix+"/setTeamMember", controller.SetTeamMember)
+	group.POST(routePrefix+"/removeTeamMember", controller.RemoveTeamMember)
 	group.POST(routePrefix+"/setTeamOwner", controller.SetTeamOwner)
 	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
 	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)
 	group.POST(routePrefix+"/getEmployeeListByTeamId", controller.GetEmployeeListByTeamId)
+	group.POST(routePrefix+"/getTeamInviteCode", controller.GetTeamInviteCode)
+	group.POST(routePrefix+"/joinTeamByInviteCode", controller.JoinTeamByInviteCode)
 
 	return group
 }
@@ -125,7 +128,7 @@ func MyGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/getCompany", controller.GetCompany)
 	group.POST(routePrefix+"/getTeams", controller.GetTeams)
 	group.POST(routePrefix+"/setAvatar", controller.SetAvatar)
-	group.POST(routePrefix+"/setMobile", controller.SetMobile)
+	group.POST(routePrefix+"/setEmployeeMobile", controller.SetMobile)
 
 	// 我的财务相关
 	group.POST(routePrefix+"/getAccountBills", controller.GetAccountBills)
@@ -168,8 +171,9 @@ func FinancialGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/updateAccountLimitState", controller.UpdateAccountLimitState)
 
 	group.POST(routePrefix+"/getAccountDetailByAccountId", controller.GetAccountDetailById)
-	group.POST(routePrefix+"/increment", controller.Increment)
-	group.POST(routePrefix+"/decrement", controller.Decrement)
+	//group.POST(routePrefix+"/increment", controller.Increment)
+	//group.POST(routePrefix+"/decrement", controller.Decrement)
+	group.POST(routePrefix+"/setAccountAllowExceed", controller.SetAccountAllowExceed)
 
 	return group
 }
