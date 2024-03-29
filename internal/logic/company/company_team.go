@@ -606,6 +606,11 @@ func (s *sTeam[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
+	team, err := s.GetTeamById(ctx, teamId)
+	if err != nil {
+		return false, err
+	}
+
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 获取团队所有旧成员
@@ -617,23 +622,20 @@ func (s *sTeam[
 			}),
 	)
 
-	// 待移除的团队成员
-	waitIds := make([]int64, 0)
 	// 已存在的团队成员
 	existIds := make([]int64, 0)
 
 	// 遍历所有旧成员
 	for _, member := range *teamMemberArr {
 		if len(employeeIds) == 0 {
-			waitIds = append(existIds, member.EmployeeId)
+			existIds = append(existIds, member.EmployeeId)
+
 			continue
 		}
 		// 遍历待加入团队的员工
 		for _, employeeId := range employeeIds {
-			if member.EmployeeId != employeeId {
-				// 追加已移除的团队成员ID到待移除数组
-				waitIds = append(waitIds, employeeId)
-			} else {
+			// 如果旧成员，在新的成员ids中，说明已存在
+			if member.EmployeeId == employeeId {
 				existIds = append(existIds, employeeId)
 			}
 		}
@@ -659,7 +661,7 @@ func (s *sTeam[
 			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId})
 
 		if len(existIds) > 0 {
-			model = model.WhereNotIn(s.dao.TeamMember.Columns().EmployeeId, existIds)
+			model = model.WhereIn(s.dao.TeamMember.Columns().EmployeeId, existIds)
 		}
 
 		if _, err = model.Delete(); err != nil {
@@ -687,17 +689,11 @@ func (s *sTeam[
 			PageSize: 1000,
 		},
 	})
-
 	if res.Total < gconv.Int64(len(newTeamMemberIds)) {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NewTeam_NotFoundMembers"), s.dao.Team.Table())
 	}
 
-	team, err := s.GetTeamById(ctx, teamId)
-	if err != nil {
-		return false, err
-	}
-
-	//
+	// 团队队员不能是其他团队的队员
 	if team.Data().ParentId == 0 {
 		count, _ := s.dao.TeamMember.Ctx(ctx).
 			WhereIn(s.dao.TeamMember.Columns().EmployeeId, newTeamMemberIds).
@@ -708,15 +704,6 @@ func (s *sTeam[
 	}
 
 	err = s.dao.TeamMember.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
-		// 清理团队成员
-		_, err = s.dao.TeamMember.Ctx(ctx).
-			WhereIn(s.dao.TeamMember.Columns().Id, existIds).
-			Delete()
-
-		if err != nil {
-			return err
-		}
-
 		for _, employeeId := range newTeamMemberIds {
 			affected, err := daoctl.InsertWithError(
 				s.dao.TeamMember.Ctx(ctx).Data(
