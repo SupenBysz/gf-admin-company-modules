@@ -656,7 +656,7 @@ func (s *sTeam[
 	}
 
 	// 如果新团队成员为空，则直接移除所有团队成员
-	if len(newTeamMemberIds) <= 0 {
+	if len(newTeamMemberIds) <= 0 && len(employeeIds) <= 0 {
 		model := s.dao.TeamMember.Ctx(ctx).
 			Where(co_do.CompanyTeamMember{TeamId: teamId, UnionMainId: sessionUser.UnionMainId})
 
