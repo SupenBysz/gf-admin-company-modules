@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.6.29
+	github.com/SupenBysz/gf-admin-community v0.7.1
 	github.com/gogf/gf/v2 v2.6.1
 	github.com/kysion/base-library v0.0.32
 	github.com/yitter/idgenerator-go v1.3.3
@@ -21,7 +21,7 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/aliyun/credentials-go v1.3.2 // indirect
-	github.com/casbin/casbin/v2 v2.81.0 // indirect
+	github.com/casbin/casbin/v2 v2.87.1 // indirect
 	github.com/casbin/govaluate v1.1.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
@@ -38,7 +38,7 @@ require (
 	github.com/grokify/html-strip-tags-go v0.1.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kysion/sms-library v0.1.3 // indirect
+	github.com/kysion/sms-library v0.1.4 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20231013030745-3066d243cd04 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
