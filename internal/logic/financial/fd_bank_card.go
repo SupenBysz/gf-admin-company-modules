@@ -120,8 +120,9 @@ func (s *sFdBankCard[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, createUser *sys_model.SysUser) (response TR, err error) {
+
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断userid是否存在
 	userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
@@ -141,11 +142,12 @@ func (s *sFdBankCard[
 	bankCardInfo.Data().Id = idgen.NextId()
 
 	// 当前用户创建的就是自己的银行卡账号
-	bankCardInfo.Data().UserId = user.Id
+	//bankCardInfo.Data().UserId = user.Id
+	bankCardInfo.Data().UserId = info.UserId
 	// 默认状态正常
 	bankCardInfo.Data().State = 1
 	bankCardInfo.Data().CreatedAt = gtime.Now()
-	bankCardInfo.Data().CreatedBy = sessionUser.Id
+	bankCardInfo.Data().CreatedBy = createUser.Id
 
 	data := kconv.Struct(bankCardInfo.Data(), &co_do.FdBankCard{})
 
