@@ -93,7 +93,7 @@ type (
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
-		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (response TR, err error)
+		CreateBankCard(ctx context.Context, info co_model.BankCardRegister, createUser *sys_model.SysUser) (response TR, err error)
 		GetBankCardById(ctx context.Context, id int64) (response TR, err error)
 		GetBankCardByCardNumber(ctx context.Context, cardNumber string) (response TR, err error)
 		UpdateBankCardState(ctx context.Context, bankCardId int64, state int) (bool, error)

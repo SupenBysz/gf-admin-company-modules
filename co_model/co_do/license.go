@@ -31,9 +31,9 @@ type License struct {
 	BusinessLicenseLegal       interface{} // 法人
 	BusinessLicenseLegalPath   interface{} // 法人证照，如果法人不是自然人，则该项必填
 	LatestAuditLogId           interface{} // 最新的审核记录ID
-	State                      interface{} //
-	AuthType                   interface{} //
-	Remark                     interface{} //
+	State                      interface{} // 状态：0失效、1正常
+	AuthType                   interface{} // 认证类型：
+	Remark                     interface{} // 备注信息
 	UpdatedAt                  *gtime.Time //
 	CreatedAt                  *gtime.Time //
 	DeletedAt                  *gtime.Time //
