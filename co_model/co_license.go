@@ -29,6 +29,9 @@ type License struct {
 	Remark                     string `json:"remark"                    dc:"备注"`
 	BrandName                  string `json:"brandName"                 dc:"品牌名称"`
 	ServerMobile               string `json:"serverMobile"               dc:"服务电话"`
+
+	State    int `json:"state"                      description:"状态：0失效、1正常" v:"in:0,1#状态错误"`
+	AuthType int `json:"authType"                   description:"主体资质认证类型："`
 }
 
 type LicenseRes co_entity.License

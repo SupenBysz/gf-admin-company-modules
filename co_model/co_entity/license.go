@@ -29,9 +29,9 @@ type License struct {
 	BusinessLicenseLegal       string      `json:"businessLicenseLegal"       description:"法人"`
 	BusinessLicenseLegalPath   string      `json:"businessLicenseLegalPath"   description:"法人证照，如果法人不是自然人，则该项必填"`
 	LatestAuditLogId           int64       `json:"latestAuditLogId"           description:"最新的审核记录ID"`
-	State                      int         `json:"state"                      description:""`
-	AuthType                   int         `json:"authType"                   description:""`
-	Remark                     string      `json:"remark"                     description:""`
+	State                      int         `json:"state"                      description:"状态：0失效、1正常"`
+	AuthType                   int         `json:"authType"                   description:"认证类型："`
+	Remark                     string      `json:"remark"                     description:"备注信息"`
 	UpdatedAt                  *gtime.Time `json:"updatedAt"                  description:""`
 	CreatedAt                  *gtime.Time `json:"createdAt"                  description:""`
 	DeletedAt                  *gtime.Time `json:"deletedAt"                  description:""`
