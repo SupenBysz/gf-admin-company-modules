@@ -210,9 +210,9 @@ type (
 	}
 	IFdAccountBill[TR co_model.IFdAccountBillRes] interface {
 		// InstallTradeHook 订阅Hook
-		InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc)
+		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
-		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
+		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
 		// CreateAccountBill 创建财务账单
 		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
 		// GetAccountBillByAccountId  根据财务账号id获取账单

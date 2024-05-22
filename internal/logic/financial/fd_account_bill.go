@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/utility/kconv"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -48,7 +49,7 @@ type sFdAccountBill[
 		ITFdInvoiceDetailRes,
 	]
 	dao     *co_dao.XDao
-	hookArr base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc]
+	hookArr base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
 }
 
 func NewFdAccountBill[
@@ -103,7 +104,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) InstallTradeHook(hookKey co_hook.AccountBillHookFilter, hookFunc co_hook.AccountBillHookFunc) {
+]) InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc) {
 	s.hookArr.InstallHook(hookKey, hookFunc)
 }
 
@@ -118,7 +119,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookFilter, co_hook.AccountBillHookFunc] {
+]) GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc] {
 	return s.hookArr
 }
 
@@ -255,7 +256,7 @@ func (s *sFdAccountBill[
 
 		// 2.修改财务账号的余额
 		// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType,info.FromUserId )
+		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType, info.FromUserId)
 
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -267,14 +268,16 @@ func (s *sFdAccountBill[
 		if increment == false || err != nil {
 			return err
 		}
-
-		s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
-			if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
-				if key.TradeType.Code()&info.TradeType == info.TradeType {
-					value(ctx, key, bill)
+		g.Try(ctx, func(ctx context.Context) {
+			s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
+				if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+					if key.TradeType.Code()&info.TradeType == info.TradeType {
+						value(ctx, key, bill)
+					}
 				}
-			}
+			})
 		})
+
 		return nil
 	})
 
@@ -282,13 +285,17 @@ func (s *sFdAccountBill[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
-	s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
-		if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
-			if key.TradeType.Code()&info.TradeType == info.TradeType {
-				value(ctx, key, bill)
-			}
+	g.Try(ctx, func(ctx context.Context) {
+		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
+			// 在事务中 && 订阅key是收入类型的
+			if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+				// 订阅的交易类型一致
+				if key.TradeType.Code()&info.TradeType == info.TradeType {
+					value(ctx, key, bill)
+				}
 
-		}
+			}
+		})
 	})
 
 	return true, nil
@@ -346,7 +353,7 @@ func (s *sFdAccountBill[
 
 			// 2.修改财务账号的余额
 			// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType,info.FromUserId)
+			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType, info.FromUserId)
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -357,13 +364,16 @@ func (s *sFdAccountBill[
 			if decrement == false || err != nil {
 				return err
 			}
-
-			s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
-				if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
-					if key.TradeType.Code()&info.TradeType == info.TradeType {
-						value(ctx, key, bill)
+			g.Try(ctx, func(ctx context.Context) {
+				s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
+					// 在事务中 && 订阅key是收入类型的
+					if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+						// 订阅的交易类型一致
+						if key.TradeType.Code()&info.TradeType == info.TradeType {
+							value(ctx, key, bill)
+						}
 					}
-				}
+				})
 			})
 		} else {
 			return gerror.New(s.modules.T(ctx, "error_Transaction_FromUser_InsufficientBalance"))
@@ -376,12 +386,14 @@ func (s *sFdAccountBill[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
 	}
 
-	s.hookArr.Iterator(func(key co_hook.AccountBillHookFilter, value co_hook.AccountBillHookFunc) {
-		if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
-			if key.TradeType.Code()&info.TradeType == info.TradeType {
-				value(ctx, key, bill)
+	g.Try(ctx, func(ctx context.Context) {
+		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
+			if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+				if key.TradeType.Code()&info.TradeType == info.TradeType {
+					value(ctx, key, bill)
+				}
 			}
-		}
+		})
 	})
 
 	return true, nil
