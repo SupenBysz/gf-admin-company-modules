@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.7.3
+	github.com/SupenBysz/gf-admin-community v0.7.4
 	github.com/gogf/gf/v2 v2.6.1
-	github.com/kysion/base-library v0.0.33
+	github.com/kysion/base-library v0.0.34
 	github.com/yitter/idgenerator-go v1.3.3
 )
 
