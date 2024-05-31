@@ -125,11 +125,12 @@ func (s *sFdBankCard[
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断userid是否存在
-	userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
-	if err != nil || userInfo == nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#User}{#error_Data_Get_Failed}"), sys_dao.SysUser.Table())
+	if info.UserId != 0 {
+		userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
+		if err != nil || userInfo == nil {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#User}{#error_Data_Get_Failed}"), sys_dao.SysUser.Table())
+		}
 	}
-
 	// 判断银行卡是否重复
 	_, err = s.GetBankCardByCardNumber(ctx, info.CardNumber)
 
