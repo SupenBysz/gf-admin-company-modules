@@ -134,9 +134,11 @@ func (s *sFdAccount[
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 关联用户id是否正确
-	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
-	if user == nil || err != nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+	if info.UnionUserId != 0 {
+		user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
+		if user == nil || err != nil {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+		}
 	}
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)
