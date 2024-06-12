@@ -20,7 +20,8 @@ func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context,
 		userId := info.UserId
 
 		// 用户资源文件夹
-		userFolder := "./resource/license/" + gconv.String(newData.Id)
+		userFolder := "resource/license/" + gconv.String(newData.Id)
+
 		fileAt := gtime.Now().Format("YmdHis")
 		if !gfile.Exists(info.IdcardFrontPath) {
 			// 检测缓存文件
