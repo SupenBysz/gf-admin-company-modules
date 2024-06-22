@@ -218,6 +218,10 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) removeRoleMember(ctx context.Context, event sys_enum.RoleMemberChange, role sys_entity.SysRole, sysUser *sys_model.SysUser) (bool, error) {
+	if s.dao.Employee == nil {
+		return false, nil
+	}
+
 	// 不能将系统管理员移除出默认的管理员角色
 	if (event.Code() & sys_enum.Role.Change.Remove.Code()) == sys_enum.Role.Change.Remove.Code() {
 		if role.IsSystem && role.Name == "管理员" {
@@ -254,6 +258,10 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
+	if s.dao.Employee == nil {
+		return nil
+	}
+
 	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		user.Id,
@@ -294,6 +302,7 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
+
 	data, err := daoctl.GetByIdWithError[TR](
 		s.dao.Employee.Ctx(ctx),
 		info.Id,
@@ -329,6 +338,9 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
+	if s.dao.Employee == nil {
+		return claims, nil
+	}
 	// 获取到当前user的主体id，由于JWT钩子函数大多是登录成功前调用，所以这里不能使用 s.GetEmployeeById 方法调用获取员工数据
 	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
 		s.dao.Employee.Ctx(ctx),
