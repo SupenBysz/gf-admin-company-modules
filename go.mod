@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.7.6
+	github.com/SupenBysz/gf-admin-community v0.7.8
 	github.com/gogf/gf/v2 v2.6.1
-	github.com/kysion/base-library v0.0.34
+	github.com/kysion/base-library v0.0.35
 	github.com/yitter/idgenerator-go v1.3.3
 )
 
@@ -52,6 +52,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mojocn/base64Captcha v1.3.6 // indirect
+	github.com/mozillazg/go-pinyin v0.20.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
 	github.com/redis/go-redis/v9 v9.3.1 // indirect
