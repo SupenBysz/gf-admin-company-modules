@@ -382,10 +382,11 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	// 名称重名检测
-	if s.HasCompanyByName(ctx, *info.Name, info.Id) {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
+	if info.Name != nil {
+		if s.HasCompanyByName(ctx, *info.Name, info.Id) {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
+		}
 	}
-
 	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
