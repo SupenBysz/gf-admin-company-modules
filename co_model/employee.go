@@ -22,7 +22,7 @@ type Employee struct {
 	State       int                                           `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 	UnionMainId int64                                         `json:"-"  dc:"所属主体"`
 	HiredAt     *gtime.Time                                   `json:"hiredAt"      v:"date-format:Y-m-d#入职日期格式错误" dc:"入职日期"`
-	Sex         int                                           `json:"sex"          dc:"性别：0女 1男"`
+	Sex         int                                           `json:"sex"          dc:"性别：0未知、1男、2女"`
 	Remark      string                                        `json:"remark"       description:"备注"`
 }
 
@@ -34,7 +34,7 @@ type UpdateEmployee struct {
 	Mobile     *string                                       `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
 	State      *int                                          `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 	HiredAt    *gtime.Time                                   `json:"hiredAt"      v:"date-format:Y-m-d#入职日期格式错误" dc:"入职日期"`
-	Sex        *int                                          `json:"sex"          dc:"性别：0女 1男"`
+	Sex        *int                                          `json:"sex"          dc:"性别：0未知、1男、2女"`
 	Remark     *string                                       `json:"remark"       description:"备注"`
 }
 
