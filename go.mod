@@ -3,10 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.7.15
+	github.com/SupenBysz/gf-admin-community v0.7.16
 	github.com/gogf/gf/v2 v2.6.1
 	github.com/kysion/base-library v0.0.36
-	github.com/yitter/idgenerator-go v1.3.3
 )
 
 require (
@@ -42,8 +41,8 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kysion/oss-library v0.1.8 // indirect
-	github.com/kysion/sms-library v0.1.7 // indirect
+	github.com/kysion/oss-library v0.1.11 // indirect
+	github.com/kysion/sms-library v0.1.9 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20231013030745-3066d243cd04 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
@@ -63,6 +62,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.798 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.972 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
+	github.com/yitter/idgenerator-go v1.3.3 // indirect
 	go.opentelemetry.io/otel v1.21.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.21.0 // indirect
