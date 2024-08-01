@@ -3,12 +3,12 @@ package boot
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/SupenBysz/gf-admin-company-modules/utility/co_rules"
 	"github.com/kysion/base-library/utility/base_permission"
-	"github.com/yitter/idgenerator-go/idgen"
 )
 
 // InitCustomRules 注册自定义参数校验规则
