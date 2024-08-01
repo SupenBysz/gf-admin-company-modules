@@ -8,6 +8,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-community/utility/sys_rules"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -26,7 +27,6 @@ import (
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
-	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 )
 

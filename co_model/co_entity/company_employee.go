@@ -25,6 +25,6 @@ type CompanyEmployee struct {
 	UpdatedAt    *gtime.Time `json:"updatedAt"    description:""`
 	DeletedBy    int64       `json:"deletedBy"    description:""`
 	DeletedAt    *gtime.Time `json:"deletedAt"    description:""`
-	Sex          int         `json:"sex"          description:"性别：0女 1男"`
+	Sex          int         `json:"sex"          description:"性别：0未知、1男、2女"`
 	Remark       string      `json:"remark"       description:"备注"`
 }
