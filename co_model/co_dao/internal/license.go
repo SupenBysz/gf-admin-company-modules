@@ -42,9 +42,9 @@ type LicenseColumns struct {
 	BusinessLicenseLegal       string // 法人
 	BusinessLicenseLegalPath   string // 法人证照，如果法人不是自然人，则该项必填
 	LatestAuditLogId           string // 最新的审核记录ID
-	State                      string //
-	AuthType                   string //
-	Remark                     string //
+	State                      string // 状态：0失效、1正常
+	AuthType                   string // 认证类型：
+	Remark                     string // 备注信息
 	UpdatedAt                  string //
 	CreatedAt                  string //
 	DeletedAt                  string //

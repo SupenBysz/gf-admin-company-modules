@@ -7,12 +7,12 @@ import (
 )
 
 type GetLicenseByIdReq struct {
-	g.Meta `path:"/getLicenseById" method:"post" summary:"根据ID获取主体|信息" tags:"主体资质"`
+	g.Meta `path:"/getLicenseById" method:"post" summary:"根据ID获取主体资质|信息" tags:"主体资质"`
 	Id     int64 `json:"id" v:"required#主体ID校验失败" dc:"ID"`
 }
 
 type QueryLicenseListReq struct {
-	g.Meta `path:"/queryLicenseList" method:"post" summary:"查询主体认证|列表" tags:"主体资质"`
+	g.Meta `path:"/queryLicenseList" method:"post" summary:"查询主体资质认证|列表" tags:"主体资质"`
 	base_model.SearchParams
 }
 
@@ -23,10 +23,11 @@ type QueryLicenseListReq struct {
 // }
 
 type UpdateLicenseReq struct {
-	g.Meta `path:"/updateLicense" method:"post" summary:"更新主体认证｜信息" tags:"主体资质"`
+	g.Meta `path:"/updateLicense" method:"post" summary:"更新主体资质认证｜信息" tags:"主体资质"`
 	co_model.License
 	Id int64 `json:"id" v:"required#主体ID校验失败" dc:"ID"`
 }
+
 type SetLicenseStateReq struct {
 	g.Meta `path:"/setLicenseState" method:"post" summary:"设置主体信息状态" tags:"主体资质"`
 	Id     int64 `json:"id" v:"required#主体ID校验失败" dc:"ID"`

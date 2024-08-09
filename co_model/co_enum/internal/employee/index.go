@@ -2,7 +2,7 @@ package employee
 
 type employee struct {
 	State state
-	Sex   sex
+	Sex   userSex
 }
 
 var Employee = employee{

@@ -38,7 +38,7 @@ type CompanyEmployeeColumns struct {
 	UpdatedAt    string //
 	DeletedBy    string //
 	DeletedAt    string //
-	Sex          string // 性别：0女 1男
+	Sex          string // 性别：0未知、1男、2女
 	Remark       string // 备注
 }
 

@@ -13,12 +13,12 @@ import (
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/yitter/idgenerator-go/idgen"
 )
 
 // 发票详情

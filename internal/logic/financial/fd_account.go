@@ -23,11 +23,11 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/kysion/base-library/utility/daoctl"
 
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/yitter/idgenerator-go/idgen"
 )
 
 type sFdAccount[
@@ -134,9 +134,11 @@ func (s *sFdAccount[
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 关联用户id是否正确
-	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
-	if user == nil || err != nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+	if info.UnionUserId != 0 {
+		user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
+		if user == nil || err != nil {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+		}
 	}
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)

@@ -16,12 +16,12 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
-	"github.com/yitter/idgenerator-go/idgen"
 )
 
 // 银行卡管理
@@ -120,15 +120,17 @@ func (s *sFdBankCard[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, user *sys_model.SysUser) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+]) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, createUser *sys_model.SysUser) (response TR, err error) {
+
+	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断userid是否存在
-	userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
-	if err != nil || userInfo == nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#User}{#error_Data_Get_Failed}"), sys_dao.SysUser.Table())
+	if info.UserId != 0 {
+		userInfo, err := sys_service.SysUser().GetSysUserById(ctx, info.UserId)
+		if err != nil || userInfo == nil {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#User}{#error_Data_Get_Failed}"), sys_dao.SysUser.Table())
+		}
 	}
-
 	// 判断银行卡是否重复
 	_, err = s.GetBankCardByCardNumber(ctx, info.CardNumber)
 
@@ -141,11 +143,12 @@ func (s *sFdBankCard[
 	bankCardInfo.Data().Id = idgen.NextId()
 
 	// 当前用户创建的就是自己的银行卡账号
-	bankCardInfo.Data().UserId = user.Id
+	//bankCardInfo.Data().UserId = user.Id
+	bankCardInfo.Data().UserId = info.UserId
 	// 默认状态正常
 	bankCardInfo.Data().State = 1
 	bankCardInfo.Data().CreatedAt = gtime.Now()
-	bankCardInfo.Data().CreatedBy = sessionUser.Id
+	bankCardInfo.Data().CreatedBy = createUser.Id
 
 	data := kconv.Struct(bankCardInfo.Data(), &co_do.FdBankCard{})
 

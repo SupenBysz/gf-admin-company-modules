@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -20,7 +21,6 @@ import (
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
-	"github.com/yitter/idgenerator-go/idgen"
 	"reflect"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -98,12 +98,12 @@ func NewCompany[
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
 
 	// 订阅邀约用户注册Hook，然后将新用户设置到邀约userId中所属主体中
-	sys_service.SysAuth().InstallInviteRegisterHook(sys_enum.Invite.Type.Register, result.SetNewUserJoinCompany)
+	sys_service.SysAuth().InstallInviteRegisterHook(sys_enum.Invite.Type.Register, result.SetNewUserJoinCompanyHook)
 
 	return result
 }
 
-// SetNewUserJoinCompany 将注册的新用户添加至邀约者的主体中
+// SetNewUserJoinCompanyHook 将注册的新用户添加至邀约者的主体中
 func (s *sCompany[
 	TR,
 	ITEmployeeRes,
@@ -114,8 +114,8 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) SetNewUserJoinCompany(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
-	// 判断用户是够存在别的主体中了
+]) SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
+	// 如下的逻辑：符合邀约的情况，为xx主体邀请新用户，下列逻辑只是将新用户设置为该主体的员工
 
 	// 找到userId对应的主体
 	user, err := sys_service.SysUser().GetSysUserById(ctx, invite.UserId)
@@ -382,15 +382,16 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 ]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	// 名称重名检测
-	if s.HasCompanyByName(ctx, *info.Name, info.Id) {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
+	if info.Name != nil {
+		if s.HasCompanyByName(ctx, *info.Name, info.Id) {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
+		}
 	}
-
 	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 构建公司ID
-	UnionMainId := idgen.NextId()
+	unionMainId := idgen.NextId()
 
 	data := kconv.Struct(info, &co_do.Company{})
 	//data := co_do.Company{
@@ -414,7 +415,7 @@ func (s *sCompany[
 					No:          "001",
 					Name:        *info.ContactName,
 					Mobile:      *info.ContactMobile,
-					UnionMainId: UnionMainId,
+					UnionMainId: unionMainId,
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
 				})
@@ -429,7 +430,7 @@ func (s *sCompany[
 				// 2.构建角色信息
 				roleData := sys_model.SysRole{
 					Name:        "管理员",
-					UnionMainId: UnionMainId,
+					UnionMainId: unionMainId,
 					IsSystem:    true,
 				}
 				roleInfo, err := sys_service.SysRole().Create(ctx, roleData)
@@ -451,8 +452,8 @@ func (s *sCompany[
 			}
 
 			// 3.构建公司信息
-			data.Id = UnionMainId
-			info.Id = UnionMainId
+			data.Id = unionMainId
+			info.Id = unionMainId
 			data.ParentId = sessionUser.UnionMainId
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
@@ -481,7 +482,7 @@ func (s *sCompany[
 				//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
 
 				UnionUserId:        gconv.Int64(data.UserId),
-				UnionMainId:        UnionMainId,
+				UnionMainId:        unionMainId,
 				CurrencyCode:       "CNY",
 				PrecisionOfBalance: 100,
 				SceneType:          0,                                           // 不限
@@ -566,6 +567,77 @@ func (s *sCompany[
 	}
 
 	return s.MakeMore(ctx, response), nil
+}
+
+// SetCompanyAdminUser 设置主体的管理员用户
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetCompanyAdminUser(ctx context.Context, sysUserId, unionMainId int64) (bool, error) {
+	// 用户是否存在
+	sysUser, err := sys_service.SysUser().GetSysUserById(ctx, sysUserId)
+	if err != nil {
+		return false, err
+	}
+
+	// 主体是否存在
+	company, err := daoctl.GetByIdWithError[co_model.Company](
+		s.dao.Company.Ctx(ctx),
+		unionMainId,
+	)
+
+	// 是否是本主体员工
+	isCompanyEmployee := false
+
+	// 1、 判断用户是够存在别的主体中了
+	employee, _ := s.modules.Employee().GetEmployeeById(ctx, sysUser.Id)
+	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
+		if employee.Data().UnionMainId != unionMainId {
+			return false, sys_service.SysLogs().ErrorSimple(ctx, err, "该用户已经存在于别的主体，不能设置为管理员", s.dao.Company.Table())
+		} else {
+			isCompanyEmployee = true
+		}
+	}
+
+	// 2、将用户添加为主体的员工
+	if !isCompanyEmployee {
+		// 不能：如下方法会将当前登陆用户作为本主体的员工操作添加员工这一行为
+		// s.modules.Employee().CreateEmployee()
+
+		data := co_do.CompanyEmployee{
+			Id:          sysUser.Id,
+			No:          nil, // 工号暂定
+			Avatar:      nil, // 头像等后期用户登陆系统进行完善
+			Name:        sysUser.Username,
+			Mobile:      sysUser.Mobile,
+			UnionMainId: company.Id,
+			State:       0,   // 状态：待确认
+			HiredAt:     nil, // 入职时间：nil
+			CreatedBy:   0,   // 系统创建：0
+			CreatedAt:   gtime.Now(),
+		}
+		affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).OmitNilData().Data(data))
+		if affected == 0 || err != nil {
+			return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+		}
+	}
+
+	// 3、修改主体的UserId
+	affected, err := daoctl.UpdateWithError(s.dao.Company.Ctx(ctx).Where(s.dao.Company.Columns().Id, company.Id).Data(s.dao.Company.Columns().UserId, sysUser.Id))
+	if affected == 0 || err != nil {
+		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "主体的管理员用户设置失败"), s.dao.Company.Table())
+	}
+
+	// TODO 4、是否需要创建管理员角色、并设置为该用户...
+
+	return true, nil
 }
 
 // FilterUnionMainId 跨主体查询条件过滤

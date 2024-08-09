@@ -1,4 +1,4 @@
-package sys_license
+package co_license
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
@@ -25,7 +26,6 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/masker"
-	"github.com/yitter/idgenerator-go/idgen"
 	"time"
 )
 
@@ -69,6 +69,9 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 			//解析json字符串
 			//decode, _ := gjson.Decode(info.AuditData)
 			gjson.DecodeTo(info.AuditData, &auditData)
+			if auditData.IdcardNo == "" { // 说明不是默认结构，业务层自己封装了结构
+				return nil
+			}
 
 			// 将路径id换成可访问图片的url
 			{
@@ -79,8 +82,9 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 						tempIdcardFrontPath = uploadFile.Src
 					}
 				}
-
-				auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardFrontPath)
+				if tempIdcardFrontPath != "" {
+					auditData.IdcardFrontPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardFrontPath)
+				}
 
 			}
 			{
@@ -91,8 +95,10 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 						tempIdcardBackPath = uploadFile.Src
 					}
 				}
+				if tempIdcardBackPath != "" {
+					auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardBackPath)
+				}
 
-				auditData.IdcardBackPath = sys_service.File().MakeFileUrlByPath(ctx, tempIdcardBackPath)
 			}
 			{
 				tempBusinessLicensePath := ""
@@ -102,11 +108,19 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 						tempBusinessLicensePath = uploadFile.Src
 					}
 				}
-				auditData.BusinessLicensePath = sys_service.File().MakeFileUrlByPath(ctx, tempBusinessLicensePath)
+				if tempBusinessLicensePath != "" {
+					auditData.BusinessLicensePath = sys_service.File().MakeFileUrlByPath(ctx, tempBusinessLicensePath)
+				}
+
 			}
 
-			// 重新赋值  将id转为可访问路径
-			info.AuditData = gjson.MustEncodeString(auditData)
+			if auditData.IdcardNo != "" { // 说明是默认结构
+				// 重新赋值  将id转为可访问路径
+				info.AuditData = gjson.MustEncodeString(auditData)
+			} else { // 业务层自己自定义的审核机构，业务层自己解析即可
+
+			}
+
 		}
 	}
 	return nil
@@ -122,7 +136,9 @@ func (s *sLicense) AuditChange(ctx context.Context, auditEvent sys_enum.AuditEve
 			//license := co_model.License{}
 			license := co_model.AuditLicense{}
 			gjson.DecodeTo(info.AuditData, &license)
-
+			if license.IdcardNo == "" { // 业务层自己处理审核通过的逻辑
+				return nil
+			}
 			licenseRes, err := co_service.License().CreateLicense(ctx, license)
 			//licenseRes, err := sys_service.SysPersonLicense().CreateLicense(ctx, license)
 			if err != nil {
@@ -188,8 +204,8 @@ func (s *sLicense) CreateLicense(ctx context.Context, info co_model.AuditLicense
 		result.Id = info.LicenseId
 	}
 
-	result.State = 0
-	result.AuthType = 0
+	//result.State = 0
+	//result.AuthType = 0
 	result.CreatedAt = gtime.Now()
 
 	{

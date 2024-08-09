@@ -2,25 +2,34 @@ package employee
 
 import "github.com/kysion/base-library/utility/enum"
 
+//用户性别: 0未知、1男、2女
+
 type SexEnum enum.IEnumCode[int]
 
-type sex struct {
-	In  SexEnum
-	Out SexEnum
+type userSex struct {
+	Unknown SexEnum
+	Woman   SexEnum
+	Man     SexEnum
 }
 
-var Sex = sex{
-	In:  enum.New[SexEnum](0, "女"),
-	Out: enum.New[SexEnum](1, "男"),
+var Sex = userSex{
+	Unknown: enum.New[SexEnum](0, "未知"),
+	Man:     enum.New[SexEnum](1, "男"),
+	Woman:   enum.New[SexEnum](2, "女"),
 }
 
-func (e sex) New(code int, description string) SexEnum {
-	// 0 进行运算都是true
-	if code == Sex.In.Code() {
-		return e.In
+func (e userSex) New(code int) SexEnum {
+	if code == Sex.Unknown.Code() {
+		return Sex.Unknown
 	}
-	if code == Sex.Out.Code() {
-		return e.Out
+
+	if code == Sex.Man.Code() {
+		return Sex.Man
 	}
-	return enum.New[SexEnum](code, description)
+
+	if code == Sex.Woman.Code() {
+		return Sex.Woman
+	}
+
+	panic("User.Sex.New: error")
 }
