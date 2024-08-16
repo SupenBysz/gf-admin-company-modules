@@ -28,7 +28,6 @@ gfcli:
                 co_fd_invoice_detail,
                 co_fd_account_detail,
 
-                co_audit,
                 co_license,
                 "
         removePrefix: "co_"
