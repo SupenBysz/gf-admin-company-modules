@@ -10,19 +10,19 @@ import (
 
 // FdAccountDetail is the golang structure for table fd_account_detail.
 type FdAccountDetail struct {
-	Id                int64       `json:"id"                description:"和财务账号 id保持一致"`
-	TodayAccountSum   int         `json:"todayAccountSum"   description:"今日金额"`
-	TodayUpdatedAt    *gtime.Time `json:"todayUpdatedAt"    description:"今日金额更新时间"`
-	WeekAccountSum    int         `json:"weekAccountSum"    description:"本周金额"`
-	WeekUpdatedAt     *gtime.Time `json:"weekUpdatedAt"     description:"本周金额更新时间"`
-	MonthAccountSum   int         `json:"monthAccountSum"   description:"本月金额"`
-	MonthUpdatedAt    *gtime.Time `json:"monthUpdatedAt"    description:"本月金额更新时间"`
-	QuarterAccountSum int         `json:"quarterAccountSum" description:"本季度金额统计"`
-	QuarterUpdatedAt  *gtime.Time `json:"quarterUpdatedAt"  description:"本季度金额更新时间"`
-	YearAccountSum    int64       `json:"yearAccountSum"    description:"本年度金额统计"`
-	YearUpdatedAt     *gtime.Time `json:"yearUpdatedAt"     description:"本年度金额更新时间"`
-	UnionMainId       int64       `json:"unionMainId"       description:"关联主体id"`
-	SysUserId         int64       `json:"sysUserId"         description:"关联用户id"`
-	Version           int         `json:"version"           description:"乐观锁所需数据版本字段"`
-	SceneType         int         `json:"sceneType"         description:"场景类型：0不限、1充电佣金收入"`
+	Id                int64       `json:"id"                orm:"id"                  description:"和财务账号 id保持一致"`
+	TodayAccountSum   int         `json:"todayAccountSum"   orm:"today_account_sum"   description:"今日金额"`
+	TodayUpdatedAt    *gtime.Time `json:"todayUpdatedAt"    orm:"today_updated_at"    description:"今日金额更新时间"`
+	WeekAccountSum    int         `json:"weekAccountSum"    orm:"week_account_sum"    description:"本周金额"`
+	WeekUpdatedAt     *gtime.Time `json:"weekUpdatedAt"     orm:"week_updated_at"     description:"本周金额更新时间"`
+	MonthAccountSum   int         `json:"monthAccountSum"   orm:"month_account_sum"   description:"本月金额"`
+	MonthUpdatedAt    *gtime.Time `json:"monthUpdatedAt"    orm:"month_updated_at"    description:"本月金额更新时间"`
+	QuarterAccountSum int         `json:"quarterAccountSum" orm:"quarter_account_sum" description:"本季度金额统计"`
+	QuarterUpdatedAt  *gtime.Time `json:"quarterUpdatedAt"  orm:"quarter_updated_at"  description:"本季度金额更新时间"`
+	YearAccountSum    int64       `json:"yearAccountSum"    orm:"year_account_sum"    description:"本年度金额统计"`
+	YearUpdatedAt     *gtime.Time `json:"yearUpdatedAt"     orm:"year_updated_at"     description:"本年度金额更新时间"`
+	UnionMainId       int64       `json:"unionMainId"       orm:"union_main_id"       description:"关联主体id"`
+	SysUserId         int64       `json:"sysUserId"         orm:"sys_user_id"         description:"关联用户id"`
+	Version           int         `json:"version"           orm:"version"             description:"乐观锁所需数据版本字段"`
+	SceneType         int         `json:"sceneType"         orm:"scene_type"          description:"场景类型：0不限、1充电佣金收入"`
 }

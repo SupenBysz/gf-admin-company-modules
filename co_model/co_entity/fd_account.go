@@ -10,25 +10,25 @@ import (
 
 // FdAccount is the golang structure for table fd_account.
 type FdAccount struct {
-	Id                 int64       `json:"id"                 description:"ID"`
-	Name               string      `json:"name"               description:"账户名称"`
-	UnionLicenseId     int64       `json:"unionLicenseId"     description:"关联资质ID，大于0时必须保值与 union_user_id 关联得上"`
-	UnionUserId        int64       `json:"unionUserId"        description:"关联用户ID"`
-	CurrencyCode       string      `json:"currencyCode"       description:"货币代码"`
-	IsEnabled          int         `json:"isEnabled"          description:"是否启用：1启用，0禁用"`
-	LimitState         int         `json:"limitState"         description:"限制状态：0不限制，1限制支出、2限制收入"`
-	PrecisionOfBalance int         `json:"precisionOfBalance" description:"货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……"`
-	Balance            int64       `json:"balance"            description:"当前余额，必须要与账单最后一笔交易余额对应得上"`
-	Version            int         `json:"version"            description:"乐观锁所需数据版本字段"`
-	CreatedAt          *gtime.Time `json:"createdAt"          description:""`
-	CreatedBy          int64       `json:"createdBy"          description:""`
-	UpdatedAt          *gtime.Time `json:"updatedAt"          description:""`
-	UpdatedBy          int64       `json:"updatedBy"          description:""`
-	DeletedAt          *gtime.Time `json:"deletedAt"          description:""`
-	DeletedBy          int64       `json:"deletedBy"          description:""`
-	SceneType          int         `json:"sceneType"          description:"场景类型：0不限、1充电佣金收入"`
-	AccountType        int         `json:"accountType"        description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
-	AccountNumber      string      `json:"accountNumber"      description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
-	UnionMainId        int64       `json:"unionMainId"        description:"关联主体ID，与union_license_id 中的union_main_id 一致"`
-	AllowExceed        int         `json:"allowExceed"        description:"是否允许存在负余额: 0禁止、1允许"`
+	Id                 int64       `json:"id"                 orm:"id"                   description:"ID"`
+	Name               string      `json:"name"               orm:"name"                 description:"账户名称"`
+	UnionLicenseId     int64       `json:"unionLicenseId"     orm:"union_license_id"     description:"关联资质ID，大于0时必须保值与 union_user_id 关联得上"`
+	UnionUserId        int64       `json:"unionUserId"        orm:"union_user_id"        description:"关联用户ID"`
+	CurrencyCode       string      `json:"currencyCode"       orm:"currency_code"        description:"货币代码"`
+	IsEnabled          int         `json:"isEnabled"          orm:"is_enabled"           description:"是否启用：1启用，0禁用"`
+	LimitState         int         `json:"limitState"         orm:"limit_state"          description:"限制状态：0不限制，1限制支出、2限制收入"`
+	PrecisionOfBalance int         `json:"precisionOfBalance" orm:"precision_of_balance" description:"货币单位精度：1:元，10:角，100:分，1000:厘，10000:毫，……"`
+	Balance            int64       `json:"balance"            orm:"balance"              description:"当前余额，必须要与账单最后一笔交易余额对应得上"`
+	Version            int         `json:"version"            orm:"version"              description:"乐观锁所需数据版本字段"`
+	CreatedAt          *gtime.Time `json:"createdAt"          orm:"created_at"           description:""`
+	CreatedBy          int64       `json:"createdBy"          orm:"created_by"           description:""`
+	UpdatedAt          *gtime.Time `json:"updatedAt"          orm:"updated_at"           description:""`
+	UpdatedBy          int64       `json:"updatedBy"          orm:"updated_by"           description:""`
+	DeletedAt          *gtime.Time `json:"deletedAt"          orm:"deleted_at"           description:""`
+	DeletedBy          int64       `json:"deletedBy"          orm:"deleted_by"           description:""`
+	SceneType          int         `json:"sceneType"          orm:"scene_type"           description:"场景类型：0不限、1充电佣金收入"`
+	AccountType        int         `json:"accountType"        orm:"account_type"         description:"账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付"`
+	AccountNumber      string      `json:"accountNumber"      orm:"account_number"       description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
+	UnionMainId        int64       `json:"unionMainId"        orm:"union_main_id"        description:"关联主体ID，与union_license_id 中的union_main_id 一致"`
+	AllowExceed        int         `json:"allowExceed"        orm:"allow_exceed"         description:"是否允许存在负余额: 0禁止、1允许"`
 }

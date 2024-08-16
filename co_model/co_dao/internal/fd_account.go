@@ -16,9 +16,13 @@ import (
 
 // FdAccountDao is the data access object for table co_fd_account.
 type FdAccountDao struct {
-	table   string           // table is the underlying table name of the DAO.
-	group   string           // group is the database configuration group name of current DAO.
-	columns FdAccountColumns // columns contains all the column names of Table for convenient usage.
+	dao_interface.IDao
+	table       string           // table is the underlying table name of the DAO.
+	group       string           // group is the database configuration group name of current DAO.
+	columns     FdAccountColumns // columns contains all the column names of Table for convenient usage.
+	daoConfig   *dao_interface.DaoConfig
+	ignoreCache bool
+	exWhereArr  []string
 }
 
 // FdAccountColumns defines and stores column names for table co_fd_account.
@@ -76,10 +80,15 @@ func NewFdAccountDao(proxy ...dao_interface.IDao) *FdAccountDao {
 	var dao *FdAccountDao
 	if len(proxy) > 0 {
 		dao = &FdAccountDao{
-			group:   proxy[0].Group(),
-			table:   proxy[0].Table(),
-			columns: fdAccountColumns,
+			group:       proxy[0].Group(),
+			table:       proxy[0].Table(),
+			columns:     fdAccountColumns,
+			daoConfig:   proxy[0].DaoConfig(context.Background()),
+			IDao:        proxy[0].DaoConfig(context.Background()).Dao,
+			ignoreCache: proxy[0].DaoConfig(context.Background()).IsIgnoreCache(),
+			exWhereArr:  proxy[0].DaoConfig(context.Background()).Dao.GetExtWhereKeys(),
 		}
+
 		return dao
 	}
 
@@ -115,28 +124,25 @@ func (dao *FdAccountDao) Ctx(ctx context.Context, cacheOption ...*gdb.CacheOptio
 	return dao.DaoConfig(ctx, cacheOption...).Model
 }
 
-func (dao *FdAccountDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.CacheOption) dao_interface.DaoConfig {
-	daoConfig := dao_interface.DaoConfig{
-		Dao:   dao,
-		DB:    dao.DB(),
-		Table: dao.table,
-		Group: dao.group,
-		Model: dao.DB().Model(dao.Table()).Safe().Ctx(ctx),
+func (dao *FdAccountDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.CacheOption) *dao_interface.DaoConfig {
+	//if dao.daoConfig != nil && len(dao.exWhereArr) == 0 {
+	//	return dao.daoConfig
+	//}
+
+	var daoConfig = daoctl.NewDaoConfig(ctx, dao, cacheOption...)
+	dao.daoConfig = &daoConfig
+
+	if len(dao.exWhereArr) > 0 {
+		daoConfig.IgnoreExtModel(dao.exWhereArr...)
+		dao.exWhereArr = []string{}
+
 	}
 
-	if len(cacheOption) == 0 {
-		daoConfig.CacheOption = daoctl.MakeDaoCache(dao.Table())
-		daoConfig.Model = daoConfig.Model.Cache(*daoConfig.CacheOption)
-	} else {
-		if cacheOption[0] != nil {
-			daoConfig.CacheOption = cacheOption[0]
-			daoConfig.Model = daoConfig.Model.Cache(*daoConfig.CacheOption)
-		}
+	if dao.ignoreCache {
+		daoConfig.IgnoreCache()
 	}
 
-	daoConfig.Model = daoctl.RegisterDaoHook(daoConfig.Model)
-
-	return daoConfig
+	return dao.daoConfig
 }
 
 // Transaction wraps the transaction logic using function f.
@@ -147,4 +153,21 @@ func (dao *FdAccountDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.Cach
 // as it is automatically handled by this function.
 func (dao *FdAccountDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
+}
+
+func (dao *FdAccountDao) GetExtWhereKeys() []string {
+	return dao.exWhereArr
+}
+
+func (dao *FdAccountDao) IsIgnoreCache() bool {
+	return dao.ignoreCache
+}
+
+func (dao *FdAccountDao) IgnoreCache() dao_interface.IDao {
+	dao.ignoreCache = true
+	return dao
+}
+func (dao *FdAccountDao) IgnoreExtModel(whereKey ...string) dao_interface.IDao {
+	dao.exWhereArr = append(dao.exWhereArr, whereKey...)
+	return dao
 }

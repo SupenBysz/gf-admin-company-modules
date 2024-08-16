@@ -10,21 +10,21 @@ import (
 
 // FdInvoice is the golang structure for table fd_invoice.
 type FdInvoice struct {
-	Id            int64       `json:"id"            description:""`
-	Name          string      `json:"name"          description:"发票抬头名称"`
-	TaxId         string      `json:"taxId"         description:"纳税识别号"`
-	Addr          string      `json:"addr"          description:"发票收件地址，限纸质"`
-	Email         string      `json:"email"         description:"发票收件邮箱，限电子发票"`
-	UserId        int64       `json:"userId"        description:"申请人UserID"`
-	AuditUserId   int64       `json:"auditUserId"   description:"审核人UserID"`
-	AuditReplyMsg string      `json:"auditReplyMsg" description:"审核回复，仅审核不通过时才有值"`
-	AuditAt       *gtime.Time `json:"auditAt"       description:"审核时间"`
-	State         int         `json:"state"         description:"状态：0待审核、1已通过、-1不通过"`
-	UnionMainId   int64       `json:"unionMainId"   description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
-	CreatedBy     int64       `json:"createdBy"     description:""`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
-	UpdatedBy     int64       `json:"updatedBy"     description:""`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
-	DeletedBy     int64       `json:"deletedBy"     description:""`
+	Id            int64       `json:"id"            orm:"id"              description:""`
+	Name          string      `json:"name"          orm:"name"            description:"发票抬头名称"`
+	TaxId         string      `json:"taxId"         orm:"tax_id"          description:"纳税识别号"`
+	Addr          string      `json:"addr"          orm:"addr"            description:"发票收件地址，限纸质"`
+	Email         string      `json:"email"         orm:"email"           description:"发票收件邮箱，限电子发票"`
+	UserId        int64       `json:"userId"        orm:"user_id"         description:"申请人UserID"`
+	AuditUserId   int64       `json:"auditUserId"   orm:"audit_user_id"   description:"审核人UserID"`
+	AuditReplyMsg string      `json:"auditReplyMsg" orm:"audit_reply_msg" description:"审核回复，仅审核不通过时才有值"`
+	AuditAt       *gtime.Time `json:"auditAt"       orm:"audit_at"        description:"审核时间"`
+	State         int         `json:"state"         orm:"state"           description:"状态：0待审核、1已通过、-1不通过"`
+	UnionMainId   int64       `json:"unionMainId"   orm:"union_main_id"   description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
+	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"      description:""`
+	CreatedBy     int64       `json:"createdBy"     orm:"created_by"      description:""`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     orm:"updated_at"      description:""`
+	UpdatedBy     int64       `json:"updatedBy"     orm:"updated_by"      description:""`
+	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"      description:""`
+	DeletedBy     int64       `json:"deletedBy"     orm:"deleted_by"      description:""`
 }
