@@ -10,20 +10,20 @@ import (
 
 // FdBankCard is the golang structure for table fd_bank_card.
 type FdBankCard struct {
-	Id            int64       `json:"id"            description:"ID"`
-	BankName      string      `json:"bankName"      description:"银行名称"`
-	CardType      int         `json:"cardType"      description:"银行卡类型：1借记卡，2储蓄卡"`
-	CardNumber    string      `json:"cardNumber"    description:"银行卡号"`
-	ExpiredAt     *gtime.Time `json:"expiredAt"     description:"有效期"`
-	HolderName    string      `json:"holderName"    description:"银行卡开户名"`
-	BankOfAccount string      `json:"bankOfAccount" description:"开户行"`
-	State         int         `json:"state"         description:"状态：0禁用，1正常"`
-	Remark        string      `json:"remark"        description:"备注信息"`
-	UserId        int64       `json:"userId"        description:"用户id，表示属于谁"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
-	CreatedBy     int64       `json:"createdBy"     description:""`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
-	UpdatedBy     int64       `json:"updatedBy"     description:""`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
-	DeletedBy     int64       `json:"deletedBy"     description:""`
+	Id            int64       `json:"id"            orm:"id"              description:"ID"`
+	BankName      string      `json:"bankName"      orm:"bank_name"       description:"银行名称"`
+	CardType      int         `json:"cardType"      orm:"card_type"       description:"银行卡类型：1借记卡，2储蓄卡"`
+	CardNumber    string      `json:"cardNumber"    orm:"card_number"     description:"银行卡号"`
+	ExpiredAt     *gtime.Time `json:"expiredAt"     orm:"expired_at"      description:"有效期"`
+	HolderName    string      `json:"holderName"    orm:"holder_name"     description:"银行卡开户名"`
+	BankOfAccount string      `json:"bankOfAccount" orm:"bank_of_account" description:"开户行"`
+	State         int         `json:"state"         orm:"state"           description:"状态：0禁用，1正常"`
+	Remark        string      `json:"remark"        orm:"remark"          description:"备注信息"`
+	UserId        int64       `json:"userId"        orm:"user_id"         description:"用户id，表示属于谁"`
+	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"      description:""`
+	CreatedBy     int64       `json:"createdBy"     orm:"created_by"      description:""`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     orm:"updated_at"      description:""`
+	UpdatedBy     int64       `json:"updatedBy"     orm:"updated_by"      description:""`
+	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"      description:""`
+	DeletedBy     int64       `json:"deletedBy"     orm:"deleted_by"      description:""`
 }

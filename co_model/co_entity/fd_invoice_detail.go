@@ -10,34 +10,34 @@ import (
 
 // FdInvoiceDetail is the golang structure for table fd_invoice_detail.
 type FdInvoiceDetail struct {
-	Id            int64       `json:"id"            description:"ID"`
-	TaxNumber     string      `json:"taxNumber"     description:"纳税识别号"`
-	TaxName       string      `json:"taxName"       description:"纳税人名称"`
-	BillIds       string      `json:"billIds"       description:"账单ID组"`
-	Amount        int64       `json:"amount"        description:"开票金额，单位精度：分"`
-	Rate          int         `json:"rate"          description:"税率，如3% 则填入3"`
-	RateMount     int64       `json:"rateMount"     description:"税额，单位精度：分"`
-	Remark        string      `json:"remark"        description:"发布内容描述"`
-	Type          int         `json:"type"          description:"发票类型：1电子发票，2纸质发票"`
-	State         int         `json:"state"         description:"状态：1待审核、2待开票、4开票失败、8已开票、16已撤销"`
-	AuditUserIds  int64       `json:"auditUserIds"  description:"审核者UserID，多个用逗号隔开"`
-	MakeType      int         `json:"makeType"      description:"出票类型：1普通发票、2增值税专用发票、3专业发票"`
-	MakeUserId    int64       `json:"makeUserId"    description:"出票人UserID，如果是系统出票则默认-1"`
-	MakeAt        *gtime.Time `json:"makeAt"        description:"出票时间"`
-	CourierName   string      `json:"courierName"   description:"快递名称，限纸质发票"`
-	CourierNumber string      `json:"courierNumber" description:"快递编号，限纸质发票"`
-	FdInvoiceId   int64       `json:"fdInvoiceId"   description:"发票抬头ID"`
-	AuditUserId   int64       `json:"auditUserId"   description:"审核者UserID"`
-	AuditReplyMsg string      `json:"auditReplyMsg" description:"审核回复，仅审核不通过时才有值"`
-	AuditAt       *gtime.Time `json:"auditAt"       description:"审核时间"`
-	UserId        int64       `json:"userId"        description:"申请者用户ID"`
-	UnionMainId   int64       `json:"unionMainId"   description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
-	Email         string      `json:"email"         description:"发票收件邮箱，限电子发票"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:""`
-	CreatedBy     int64       `json:"createdBy"     description:""`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:""`
-	UpdatedBy     int64       `json:"updatedBy"     description:""`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:""`
-	DeletedBy     int64       `json:"deletedBy"     description:""`
-	BelongTo      int         `json:"belongTo"      description:"发票拥有者类型：1个人  2主体"`
+	Id            int64       `json:"id"            orm:"id"              description:"ID"`
+	TaxNumber     string      `json:"taxNumber"     orm:"tax_number"      description:"纳税识别号"`
+	TaxName       string      `json:"taxName"       orm:"tax_name"        description:"纳税人名称"`
+	BillIds       string      `json:"billIds"       orm:"bill_ids"        description:"账单ID组"`
+	Amount        int64       `json:"amount"        orm:"amount"          description:"开票金额，单位精度：分"`
+	Rate          int         `json:"rate"          orm:"rate"            description:"税率，如3% 则填入3"`
+	RateMount     int64       `json:"rateMount"     orm:"rate_mount"      description:"税额，单位精度：分"`
+	Remark        string      `json:"remark"        orm:"remark"          description:"发布内容描述"`
+	Type          int         `json:"type"          orm:"type"            description:"发票类型：1电子发票，2纸质发票"`
+	State         int         `json:"state"         orm:"state"           description:"状态：1待审核、2待开票、4开票失败、8已开票、16已撤销"`
+	AuditUserIds  int64       `json:"auditUserIds"  orm:"audit_user_ids"  description:"审核者UserID，多个用逗号隔开"`
+	MakeType      int         `json:"makeType"      orm:"make_type"       description:"出票类型：1普通发票、2增值税专用发票、3专业发票"`
+	MakeUserId    int64       `json:"makeUserId"    orm:"make_user_id"    description:"出票人UserID，如果是系统出票则默认-1"`
+	MakeAt        *gtime.Time `json:"makeAt"        orm:"make_at"         description:"出票时间"`
+	CourierName   string      `json:"courierName"   orm:"courier_name"    description:"快递名称，限纸质发票"`
+	CourierNumber string      `json:"courierNumber" orm:"courier_number"  description:"快递编号，限纸质发票"`
+	FdInvoiceId   int64       `json:"fdInvoiceId"   orm:"fd_invoice_id"   description:"发票抬头ID"`
+	AuditUserId   int64       `json:"auditUserId"   orm:"audit_user_id"   description:"审核者UserID"`
+	AuditReplyMsg string      `json:"auditReplyMsg" orm:"audit_reply_msg" description:"审核回复，仅审核不通过时才有值"`
+	AuditAt       *gtime.Time `json:"auditAt"       orm:"audit_at"        description:"审核时间"`
+	UserId        int64       `json:"userId"        orm:"user_id"         description:"申请者用户ID"`
+	UnionMainId   int64       `json:"unionMainId"   orm:"union_main_id"   description:"主体ID：运营商ID、服务商ID、商户ID、消费者ID"`
+	Email         string      `json:"email"         orm:"email"           description:"发票收件邮箱，限电子发票"`
+	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"      description:""`
+	CreatedBy     int64       `json:"createdBy"     orm:"created_by"      description:""`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     orm:"updated_at"      description:""`
+	UpdatedBy     int64       `json:"updatedBy"     orm:"updated_by"      description:""`
+	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"      description:""`
+	DeletedBy     int64       `json:"deletedBy"     orm:"deleted_by"      description:""`
+	BelongTo      int         `json:"belongTo"      orm:"belong_to"       description:"发票拥有者类型：1个人  2主体"`
 }
