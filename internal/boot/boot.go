@@ -3,6 +3,8 @@ package boot
 import (
 	"context"
 	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
@@ -15,6 +17,15 @@ import (
 func InitCustomRules() {
 	// 注册资质自定义规则
 	co_rules.RequiredLicense()
+	InitializePermissionFactory()
+}
+
+func InitializePermissionFactory() {
+	base_permission.InitializePermissionFactory(func() base_permission.IPermission {
+		return &sys_model.SysPermissionTree{
+			SysPermission: &sys_entity.SysPermission{},
+		}
+	})
 }
 
 // InitPermission 初始化权限树
@@ -39,14 +50,14 @@ func InitPermission[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) []base_permission.IPermission {
+	InitializePermissionFactory()
+
 	var rr = module.T(context.TODO(), "{#CompanyName}")
 	fmt.Println(rr)
 	result := []base_permission.IPermission{
 		// 公司
-		base_permission.Factory().
-			SetId(idgen.NextId()). // 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
-			SetName(module.T(context.TODO(), "{#CompanyName}")).
-			SetIdentifier(module.GetConfig().Identifier.Company).
+		// 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
+		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Company, module.T(context.TODO(), "{#CompanyName}")).
 			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
@@ -63,11 +74,8 @@ func InitPermission[
 			}),
 
 		// 员工
-		base_permission.Factory().
-			// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
-			SetId(idgen.NextId()).
-			SetName(module.T(context.TODO(), "{#CompanyName}{#EmployeeName}")).
-			SetIdentifier(module.GetConfig().Identifier.Employee).
+		// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
+		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Employee, module.T(context.TODO(), "{#CompanyName}{#EmployeeName}")).
 			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
@@ -87,10 +95,7 @@ func InitPermission[
 			}),
 
 		// 团队
-		base_permission.Factory().
-			SetId(idgen.NextId()).
-			SetName(module.T(context.TODO(), "{#CompanyName}{#TeamName}")).
-			SetIdentifier(module.GetConfig().Identifier.Team).
+		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Team, module.T(context.TODO(), "{#CompanyName}{#TeamName}")).
 			SetType(1).
 			SetIsShow(1).
 			SetMatchMode(1).
@@ -139,19 +144,15 @@ func InitFinancialPermission[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) []base_permission.IPermission {
+	InitializePermissionFactory()
+
 	result := []base_permission.IPermission{
 		// 财务服务权限树
-		base_permission.Factory().
-			SetId(idgen.NextId()).
-			SetName("财务").
-			SetIdentifier("Financial").
+		base_permission.New(idgen.NextId(), "Financial", "财务").
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
-				base_permission.Factory().
-					SetId(idgen.NextId()).
-					SetName("发票").
-					SetIdentifier("Invoice").
+				base_permission.New(idgen.NextId(), "Invoice", "发票").
 					SetType(1).
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
@@ -173,10 +174,7 @@ func InitFinancialPermission[
 						co_permission.Financial.PermissionType(module).DeleteInvoice,
 					}),
 
-				base_permission.Factory().
-					SetId(idgen.NextId()).
-					SetName("银行卡").
-					SetIdentifier("BankCard").
+				base_permission.New(idgen.NextId(), "BankCard", "银行卡").
 					SetType(1).
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
@@ -191,10 +189,7 @@ func InitFinancialPermission[
 					},
 					),
 
-				base_permission.Factory().
-					SetId(idgen.NextId()).
-					SetName("财务账号").
-					SetIdentifier("Account").
+				base_permission.New(idgen.NextId(), "Account", "财务账号").
 					SetType(1).
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
@@ -210,10 +205,11 @@ func InitFinancialPermission[
 }
 
 func initAuditAndLicensePermission() []base_permission.IPermission {
-	result := []base_permission.IPermission{
+	InitializePermissionFactory()
 
+	result := []base_permission.IPermission{
 		// 资质权限树
-		base_permission.Factory().
+		base_permission.New(idgen.NextId(), "License", "资质").
 			SetId(idgen.NextId()).
 			SetName("资质").
 			SetIdentifier("License").
