@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.8.1
+	github.com/SupenBysz/gf-admin-community v0.8.2
 	github.com/gogf/gf/v2 v2.7.2
-	github.com/kysion/base-library v0.1.3
+	github.com/kysion/base-library v0.1.4
 )
 
 require (
@@ -43,8 +43,8 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kysion/oss-library v0.2.3 // indirect
-	github.com/kysion/sms-library v0.2.1 // indirect
+	github.com/kysion/oss-library v0.2.4 // indirect
+	github.com/kysion/sms-library v0.2.2 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20231013030745-3066d243cd04 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
