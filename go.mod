@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.8.2
+	github.com/SupenBysz/gf-admin-community v0.8.3
 	github.com/gogf/gf/v2 v2.7.2
 	github.com/kysion/base-library v0.1.4
 )
@@ -12,7 +12,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1 // indirect
-	github.com/alibabacloud-go/debug v1.0.0 // indirect
+	github.com/alibabacloud-go/debug v1.0.1 // indirect
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.18 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.1 // indirect
 	github.com/alibabacloud-go/openapi-util v0.1.1 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.6 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.0 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.7 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible // indirect
 	github.com/aliyun/credentials-go v1.3.7 // indirect
 	github.com/casbin/casbin/v2 v2.98.0 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/kysion/oss-library v0.2.4 // indirect
 	github.com/kysion/sms-library v0.2.2 // indirect
 	github.com/lib/pq v1.10.9 // indirect
-	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20231013030745-3066d243cd04 // indirect
+	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20240510055607-89e20ab7b6c6 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
