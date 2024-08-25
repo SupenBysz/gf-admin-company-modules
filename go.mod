@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.8.3
+	github.com/SupenBysz/gf-admin-community v0.8.4
 	github.com/gogf/gf/v2 v2.7.2
 	github.com/kysion/base-library v0.1.4
 )
@@ -57,7 +57,7 @@ require (
 	github.com/mozillazg/go-pinyin v0.20.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
-	github.com/redis/go-redis/v9 v9.3.1 // indirect
+	github.com/redis/go-redis/v9 v9.6.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.46.0 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.985 // indirect
