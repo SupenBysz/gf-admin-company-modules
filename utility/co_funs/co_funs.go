@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -84,8 +85,39 @@ func CheckLicenseFiles[T co_entity.License | co_do.License](ctx context.Context,
 		//	}
 		//	newData.BusinessLicenseLegalPath = fileInfo.Src
 		//}
+
+		// 门头照
+		if info.DoorPictures != nil && len(info.DoorPictures) > 0 {
+			pictures := make([]co_model.DoorPictures, 0)
+			//pictures = info.DoorPictures
+			for _, picture := range info.DoorPictures {
+				if !gfile.Exists(picture.Id) {
+					// 检测缓存文件
+					fileInfoCache, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(picture.Id), userId, "请上传门头照")
+					if err != nil {
+						return nil, err
+					}
+					// 保存门头照
+					fileInfo, err := sys_service.File().SaveFile(ctx, userFolder+"/doorPictures/"+fileAt+fileInfoCache.Ext, fileInfoCache)
+					if err != nil {
+						return nil, err
+					}
+					picture.Id = gconv.String(fileInfo.Id)
+					picture.Size = fileInfo.Size
+					picture.Ext = fileInfo.Ext
+
+					pictures = append(pictures, picture)
+
+					//  注意：实际存储的License 需要存储持久化后的文件ID，而不是路径
+				}
+			}
+			encodeString, _ := gjson.EncodeString(pictures)
+			newData.DoorPicturesJson = encodeString
+		}
+
 	}
 
-	gconv.Struct(newData, data)
+	_ = gconv.Struct(newData, data)
+
 	return data, err
 }

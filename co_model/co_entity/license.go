@@ -38,4 +38,5 @@ type License struct {
 	BrandName                  string      `json:"brandName"                  orm:"brand_name"                    description:"品牌名称"`
 	BusinessLicenseLegalMobile string      `json:"businessLicenseLegalMobile" orm:"business_license_legal_mobile" description:"法人联系电话"`
 	ServerMobile               string      `json:"serverMobile"               orm:"server_mobile"                 description:"服务电话"`
+	DoorPicturesJson           string      `json:"doorPicturesJson"           orm:"door_pictures_json"            description:"门头照"`
 }

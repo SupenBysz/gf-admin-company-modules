@@ -30,9 +30,29 @@ type License struct {
 	BrandName                  string `json:"brandName"                 dc:"品牌名称"`
 	ServerMobile               string `json:"serverMobile"               dc:"服务电话"`
 
-	State    int `json:"state"                      description:"状态：0失效、1正常" v:"in:0,1#状态错误"`
-	AuthType int `json:"authType"                   description:"主体资质认证类型："`
+	State        int            `json:"state"                      dc:"状态：0失效、1正常" v:"in:0,1#状态错误"`
+	AuthType     int            `json:"authType"                   dc:"主体资质认证类型："`
+	DoorPictures []DoorPictures `json:"doorPictures"           dc:"门头照列表"`
 }
+
+type DoorPictures struct {
+	Title string `json:"title" dc:"标题"`
+	Id    string `json:"id" dc:"id" v:"required#请输入门头照图片"`
+	Desc  string `json:"desc" dc:"描述"`
+	Url   string `json:"url" dc:"图片地址"`
+	Size  int64  `json:"size" dc:"图片大小"`
+	Ext   string `json:"ext" dc:"图片后缀"`
+}
+
+//
+//type DoorPicturesJson struct {
+//	Title string `json:"title" dc:"标题"`
+//	Desc  string `json:"desc" dc:"描述"`
+//	Id    int64  `json:"id" dc:"id"`
+//	Url   string `json:"url" dc:"图片地址"`
+//	Size  int64  `json:"size" dc:"图片大小"`
+//	Ext   string `json:"ext" dc:"图片后缀"`
+//}
 
 type LicenseRes co_entity.License
 type LicenseListRes base_model.CollectRes[co_entity.License]
