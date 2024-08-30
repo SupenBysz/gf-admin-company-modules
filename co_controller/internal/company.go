@@ -143,7 +143,7 @@ func (c *CompanyController[
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).List)
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[TIRes], error) {
-			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams)
+			return c.modules.Company().QueryCompanyList(c.makeMore(ctx), &req.SearchParams, req.IsExport)
 		},
 		permission,
 	)

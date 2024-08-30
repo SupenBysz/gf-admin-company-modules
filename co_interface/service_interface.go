@@ -22,7 +22,7 @@ type (
 		// HasCompanyByName 判断名称是否存在
 		HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool
 		// QueryCompanyList 查询公司列表
-		QueryCompanyList(ctx context.Context, filter *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+		QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error)
 		// CreateCompany 创建公司信息
 		CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		// UpdateCompany 更新公司信息
