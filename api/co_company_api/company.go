@@ -17,6 +17,7 @@ type HasCompanyByNameReq struct {
 type QueryCompanyListReq struct {
 	base_model.SearchParams
 	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
+	IsExport bool `json:"isExport" dc:"isExport为true的话，会输出列表所有数据"`
 }
 
 type CreateCompanyReq struct {
