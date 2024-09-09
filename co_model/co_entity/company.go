@@ -27,4 +27,6 @@ type Company struct {
 	Address       string      `json:"address"       orm:"address"        description:"地址"`
 	LicenseId     int64       `json:"licenseId"     orm:"license_id"     description:"主体资质id"`
 	LicenseState  int         `json:"licenseState"  orm:"license_state"  description:"主体状态,和主体资质状态保持一致"`
+	CountryCode   string      `json:"countryCode"   orm:"country_code"   description:"所属国家编码"`
+	Region        string      `json:"region"        orm:"region"         description:"所属地区"`
 }

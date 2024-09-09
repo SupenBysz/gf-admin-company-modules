@@ -44,6 +44,8 @@ type CompanyColumns struct {
 	Address       string // 地址
 	LicenseId     string // 主体资质id
 	LicenseState  string // 主体状态,和主体资质状态保持一致
+	CountryCode   string // 所属国家编码
+	Region        string // 所属地区
 }
 
 // companyColumns holds the columns for table co_company.
@@ -65,6 +67,8 @@ var companyColumns = CompanyColumns{
 	Address:       "address",
 	LicenseId:     "license_id",
 	LicenseState:  "license_state",
+	CountryCode:   "country_code",
+	Region:        "region",
 }
 
 // NewCompanyDao creates and returns a new DAO object for table data access.

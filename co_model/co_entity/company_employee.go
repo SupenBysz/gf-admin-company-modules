@@ -27,4 +27,6 @@ type CompanyEmployee struct {
 	DeletedAt    *gtime.Time `json:"deletedAt"    orm:"deleted_at"     description:""`
 	Sex          int         `json:"sex"          orm:"sex"            description:"性别：0未知、1男、2女"`
 	Remark       string      `json:"remark"       orm:"remark"         description:"备注"`
+	CountryCode  string      `json:"countryCode"  orm:"country_code"   description:"所属国家编码"`
+	Region       string      `json:"region"       orm:"region"         description:"所属地区"`
 }
