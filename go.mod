@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.8.5
+	github.com/SupenBysz/gf-admin-community v0.8.7
 	github.com/gogf/gf/v2 v2.7.2
 	github.com/kysion/base-library v0.1.4
 )
@@ -12,7 +12,7 @@ require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1 // indirect
-	github.com/alibabacloud-go/debug v1.0.1 // indirect
+	github.com/alibabacloud-go/debug v1.0.0 // indirect
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.18 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.1 // indirect
 	github.com/alibabacloud-go/openapi-util v0.1.1 // indirect

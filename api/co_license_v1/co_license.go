@@ -38,6 +38,3 @@ type DeleteLicenseReq struct {
 	g.Meta `path:"/deleteLicense" method:"post" summary:"设置主体神审核编号" tags:"主体资质"`
 	Id     int64 `json:"id" v:"required#主体ID校验失败" dc:"ID"`
 }
-
-type LicenseRes co_model.LicenseRes
-type LicenseListRes co_model.LicenseListRes

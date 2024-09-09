@@ -33,6 +33,7 @@ type License struct {
 	State        int            `json:"state"                      dc:"状态：0失效、1正常" v:"in:0,1#状态错误"`
 	AuthType     int            `json:"authType"                   dc:"主体资质认证类型："`
 	DoorPictures []DoorPictures `json:"doorPictures"           dc:"门头照列表"`
+	Summary      string         `json:"summary"        orm:"summary"         description:"概述"`
 }
 
 type DoorPictures struct {
@@ -61,5 +62,7 @@ type AuditLicense struct {
 	UnionMainId int64 `json:"unionMainId"             dc:"资质审核关联的业务主体ID"`
 	LicenseId   int64 `json:"licenseId"             dc:"资质ID"`
 	UserId      int64 `json:"userId" dc:"上传资质的userId"`
+	Summary        string      `json:"summary"        orm:"summary"         description:"概述"`
+
 	License
 }
