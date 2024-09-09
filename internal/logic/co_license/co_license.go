@@ -123,7 +123,7 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 						if gstr.IsNumeric(picture.Id) {
 							if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(picture.Id), auditData.UserId); err == nil && uploadFile != nil {
 								tempDoorPicturePath = uploadFile.Src
-                                picture.Size = uploadFile.Size
+								picture.Size = uploadFile.Size
 								picture.Ext = uploadFile.Ext
 							}
 						}
