@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.21
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.8.7
+	github.com/SupenBysz/gf-admin-community v0.8.8
 	github.com/gogf/gf/v2 v2.7.2
 	github.com/kysion/base-library v0.1.4
 )
