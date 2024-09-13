@@ -31,4 +31,5 @@ type CompanyEmployee struct {
 	Remark       interface{} // 备注
 	CountryCode  interface{} // 所属国家编码
 	Region       interface{} // 所属地区
+	Email        interface{} // 业务邮箱
 }

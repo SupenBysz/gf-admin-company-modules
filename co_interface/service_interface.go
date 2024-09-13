@@ -112,6 +112,8 @@ type (
 		GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error)
 		// SetMyMobile 设置我的手机号
 		SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error)
+		// SetMyMail 设置我的邮箱
+		SetMyMail(ctx context.Context, oldMail string, newMail string, captcha string, password string) (bool, error)
 		// SetMyAvatar 设置我的头像
 		SetMyAvatar(ctx context.Context, imageId int64) (bool, error)
 		// GetAccountBills 我的账单|列表
