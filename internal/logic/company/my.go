@@ -301,7 +301,7 @@ func (s *sMy[
 	// 判断密码是否正确
 	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, password)
 	if checkPassword != true {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetEmail_Failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMail_Failed"), s.dao.Employee.Table())
 	}
 
 	// 更新数据
@@ -310,7 +310,7 @@ func (s *sMy[
 		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))
 
 	if err != nil || affected == 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetEmail_Failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMail_Failed"), s.dao.Employee.Table())
 	}
 
 	return true, nil
