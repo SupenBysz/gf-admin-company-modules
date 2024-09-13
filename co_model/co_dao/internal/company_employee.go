@@ -46,6 +46,7 @@ type CompanyEmployeeColumns struct {
 	Remark       string // 备注
 	CountryCode  string // 所属国家编码
 	Region       string // 所属地区
+	Email        string // 业务邮箱
 }
 
 // companyEmployeeColumns holds the columns for table co_company_employee.
@@ -69,6 +70,7 @@ var companyEmployeeColumns = CompanyEmployeeColumns{
 	Remark:       "remark",
 	CountryCode:  "country_code",
 	Region:       "region",
+	Email:        "email",
 }
 
 // NewCompanyEmployeeDao creates and returns a new DAO object for table data access.

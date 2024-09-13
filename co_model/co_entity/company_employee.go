@@ -29,4 +29,5 @@ type CompanyEmployee struct {
 	Remark       string      `json:"remark"       orm:"remark"         description:"备注"`
 	CountryCode  string      `json:"countryCode"  orm:"country_code"   description:"所属国家编码"`
 	Region       string      `json:"region"       orm:"region"         description:"所属地区"`
+	Email        string      `json:"email"        orm:"email"          description:"业务邮箱"`
 }

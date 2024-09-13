@@ -14,6 +14,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/util/gconv"
 	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/base_model/base_enum"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 	"reflect"
@@ -235,19 +236,18 @@ func (s *sMy[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error) {
-	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha)
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	_, err := sys_service.SysSms().Verify(ctx, newMobile, captcha, base_enum.Captcha.Type.SetMobile)
 	if err != nil {
 		return false, err
 	}
-
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 如果原手机号码和新号码一致，直接返回true
 	userInfo, err := sys_service.SysUser().GetUserDetail(ctx, sessionUser.Id)
 	if err != nil {
 		return false, err
 	}
-
 	if newMobile == userInfo.Mobile {
 		return true, nil
 	}
@@ -265,6 +265,52 @@ func (s *sMy[
 
 	if err != nil || affected == 0 {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
+	}
+
+	return true, nil
+}
+
+// SetMyMail 设置我的邮箱
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetMyMail(ctx context.Context, oldMail string, newMail string, captcha string, password string) (bool, error) {
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	_, err := sys_service.SysMails().Verify(ctx, newMail, captcha, base_enum.Captcha.Type.SetMail)
+	if err != nil {
+		return false, err
+	}
+
+	// 如果原手机号码和新号码一致，直接返回true
+	userInfo, err := sys_service.SysUser().GetUserDetail(ctx, sessionUser.Id)
+	if err != nil {
+		return false, err
+	}
+	if newMail == userInfo.Email {
+		return true, nil
+	}
+
+	// 判断密码是否正确
+	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, password)
+	if checkPassword != true {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetEmail_Failed"), s.dao.Employee.Table())
+	}
+
+	// 更新数据
+	affected, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).
+		Data(co_do.CompanyEmployee{Email: newMail, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
+		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))
+
+	if err != nil || affected == 0 {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetEmail_Failed"), s.dao.Employee.Table())
 	}
 
 	return true, nil
@@ -307,7 +353,7 @@ func (s *sMy[
 		updateAvatar := s.modules.Employee().UpdateEmployeeAvatar(ctx, sessionUser.Id, gconv.String(fileInfo.Id))
 
 		if updateAvatar == false {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_Data_Save_Failed"), s.dao.Employee.Table())
 		}
 
 		return nil

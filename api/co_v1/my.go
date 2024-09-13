@@ -30,6 +30,11 @@ type SetMobileReq struct {
 	co_company_api.SetMobileReq
 }
 
+type SetMailReq struct {
+	g.Meta `method:"post" summary:"设置业务邮箱|信息" tags:"组织单位/我的" dc:"注意：此邮箱不是用于登陆的邮箱，通常属于工作的邮箱联系方式"`
+	co_company_api.SetMailReq
+}
+
 type GetAccountBillsReq struct {
 	g.Meta `method:"post" summary:"我的账单|列表" tags:"组织单位/我的财务"`
 	co_company_api.GetAccountBillsReq
