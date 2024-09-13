@@ -26,7 +26,7 @@ type SetAvatarReq struct {
 }
 
 type SetMobileReq struct {
-	g.Meta `method:"post" summary:"设置员工手机号|信息" tags:"组织单位/我的"`
+	g.Meta `method:"post" summary:"设置业务手机号|信息" tags:"组织单位/我的" dc:"注意：此手机号不是用于登陆的手机号，通常属于工作的手机号联系方式"`
 	co_company_api.SetMobileReq
 }
 

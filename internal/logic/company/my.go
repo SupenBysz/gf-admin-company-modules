@@ -252,16 +252,13 @@ func (s *sMy[
 		return true, nil
 	}
 
+	// 判断密码是否正确
 	checkPassword, _ := sys_service.SysUser().CheckPassword(ctx, sessionUser.Id, password)
 	if checkPassword != true {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_SetMobile_Failed"), s.dao.Employee.Table())
 	}
 
-	_, err = s.dao.Employee.Ctx(ctx).
-		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
-		Where(co_do.CompanyEmployee{Id: sessionUser.Id}).
-		Update()
-
+	// 更新数据
 	affected, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).
 		Data(co_do.CompanyEmployee{Mobile: newMobile, UpdatedBy: sessionUser.Id, UpdatedAt: gtime.Now()}).
 		Where(co_do.CompanyEmployee{Id: sessionUser.Id}))

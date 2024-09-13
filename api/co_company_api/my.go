@@ -20,9 +20,10 @@ type SetAvatarReq struct {
 }
 
 type SetMobileReq struct {
-	Mobile   string `json:"mobile" v:"required|phone#请数据手机号|手机号错误" dc:"手机号"`
+	Mobile   string `json:"mobile" v:"required|phone#请数据手机号|手机号错误" dc:"手机号，注意：此手机号不是用于登陆的手机号，通常属于工作的手机号联系方式"`
 	Captcha  string `json:"captcha" v:"required#请输入手机验证码"`
-	Password string `json:"password" v:"required#请输入账号密码" dc:"登录密码"`
+	Password string `json:"password" v:"required#请输入登陆账号密码" dc:"登录密码"`
+}
 }
 
 type GetAccountBillsReq struct {
