@@ -5,8 +5,8 @@ github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
-github.com/SupenBysz/gf-admin-community v0.8.13 h1:Z935X7ZpSyGMcYQksxQvOVnx1cOh5XL23N2q7U2Q0tY=
-github.com/SupenBysz/gf-admin-community v0.8.13/go.mod h1:ubxNqQgqsKNVOTucWAzHeaPmCCI8tKEGDijIdsliRx4=
+github.com/SupenBysz/gf-admin-community v0.8.16 h1:gDpOBxrGMHfksRUdd9W6xx/aN72nIsApr5CCzF4lubQ=
+github.com/SupenBysz/gf-admin-community v0.8.16/go.mod h1:ubxNqQgqsKNVOTucWAzHeaPmCCI8tKEGDijIdsliRx4=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4/go.mod h1:sCavSAvdzOjul4cEqeVtvlSaSScfNsTQ+46HwlTL1hc=
 github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 h1:zE8vH9C7JiZLNJJQ5OwjU9mSi4T9ef9u3BURT6LCLC8=
