@@ -359,6 +359,7 @@ func (s *sEmployee[
 		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
 	}
 
+	// 是否是管理员：用户类型=admin 或者 登录用户id = 主体的管理员ID
 	claims.IsAdmin = claims.Type == sys_enum.User.Type.Admin.Code() || claims.Id == company.UserId
 	claims.UnionMainId = company.Id
 	claims.ParentId = company.ParentId
