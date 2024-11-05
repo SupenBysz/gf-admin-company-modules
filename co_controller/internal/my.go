@@ -6,13 +6,10 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
-	"github.com/SupenBysz/gf-admin-community/sys_service"
-	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/utility/base_funs"
@@ -155,24 +152,24 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
-	permission := co_permission.Employee.PermissionType(c.modules).SetAvatar
-	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
-	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
-	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
-	if sqlPermission != nil {
-		//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
-		// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
-		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
-	}
-
-	//permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetAvatar)
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
-			return ret == true, err
-		},
-		permission,
-	)
+	//permission := co_permission.Employee.PermissionType(c.modules).SetAvatar
+	//identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
+	//// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
+	//sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
+	//if sqlPermission != nil {
+	//	//permission = co_permission.Team.PermissionType(c.modules).ViewDetail.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetName(sqlPermission.Name).SetDescription(sqlPermission.Description).SetIdentifier(sqlPermission.Identifier).SetType(sqlPermission.Type).SetMatchMode(sqlPermission.MatchMode).SetIsShow(sqlPermission.IsShow).SetSort(sqlPermission.Sort)
+	//	// CheckPermission 检验逻辑内部只用到了匹配模式 和 ID
+	//	permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
+	//}
+	//
+	////permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetAvatar)
+	//return funs.CheckPermission(ctx,
+	//	func() (api_v1.BoolRes, error) {
+	ret, err := c.modules.My().SetMyAvatar(ctx, req.ImageId)
+	return ret == true, err
+	//	},
+	//	permission,
+	//)
 }
 
 // SetMobile 设置手机号
@@ -187,21 +184,24 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
-	permission := co_permission.Employee.PermissionType(c.modules).SetMobile
-	identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
-	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
-	sqlPermission, _ := sys_service.SysPermission().GetPermissionByIdentifier(ctx, identifierStr)
-	if sqlPermission != nil {
-		permission.SetId(sqlPermission.Id).SetParentId(sqlPermission.ParentId).SetIdentifier(sqlPermission.Identifier).SetMatchMode(sqlPermission.MatchMode)
-	}
+	ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
+	return ret == true, err
+}
 
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
-			return ret == true, err
-		},
-		permission,
-	)
+// SetMail 设置邮箱
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetMail(ctx context.Context, req *co_company_api.SetMailReq) (api_v1.BoolRes, error) {
+	ret, err := c.modules.My().SetMyMail(ctx, req.OldMail, req.NewMail, req.Captcha, req.Password)
+	return ret == true, err
 }
 
 // GetAccountBills 我的账单|列表
@@ -216,13 +216,8 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (*co_model.MyAccountBillRes, error) {
-			ret, err := c.modules.My().GetAccountBills(ctx, &req.SearchParams)
-			return ret, err
-		},
-		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
-	)
+	ret, err := c.modules.My().GetAccountBills(ctx, &req.SearchParams)
+	return ret, err
 }
 
 // GetAccounts 获取我的财务账号|列表
@@ -237,13 +232,8 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (*co_model.FdAccountListRes, error) {
-			ret, err := c.modules.My().GetAccounts(c.makeMore(ctx))
-			return ret, err
-		},
-		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
-	)
+	ret, err := c.modules.My().GetAccounts(c.makeMore(ctx))
+	return ret, err
 }
 
 // GetBankCards 获取我的银行卡｜列表
@@ -258,13 +248,8 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetBankCards(ctx context.Context, _ *co_company_api.GetBankCardsReq) (*co_model.FdBankCardListRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (*co_model.FdBankCardListRes, error) {
-			ret, err := c.modules.My().GetBankCards(ctx)
-			return ret, err
-		},
-		co_permission.Financial.PermissionType(c.modules).BankCardList,
-	)
+	ret, err := c.modules.My().GetBankCards(ctx)
+	return ret, err
 }
 
 // GetInvoices 获取我的发票抬头｜列表
@@ -279,13 +264,8 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetInvoices(ctx context.Context, _ *co_company_api.GetInvoicesReq) (*co_model.FdInvoiceListRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (*co_model.FdInvoiceListRes, error) {
-			ret, err := c.modules.My().GetInvoices(ctx)
-			return ret, err
-		},
-		co_permission.Financial.PermissionType(c.modules).InvoiceList,
-	)
+	ret, err := c.modules.My().GetInvoices(ctx)
+	return ret, err
 }
 
 // UpdateAccount  修改我的财务账号
@@ -300,13 +280,8 @@ func (c *MyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccount(ctx context.Context, req *co_company_api.UpdateAccountReq) (api_v1.BoolRes, error) {
-	return funs.CheckPermission(ctx,
-		func() (api_v1.BoolRes, error) {
-			ret, err := c.modules.My().UpdateAccount(ctx, req.AccountId, &req.UpdateAccount)
-			return ret == true, err
-		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountDetail,
-	)
+	ret, err := c.modules.My().UpdateAccount(ctx, req.AccountId, &req.UpdateAccount)
+	return ret == true, err
 }
 
 func (c *MyController[

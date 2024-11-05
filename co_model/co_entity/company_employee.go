@@ -10,21 +10,24 @@ import (
 
 // CompanyEmployee is the golang structure for table company_employee.
 type CompanyEmployee struct {
-	Id           int64       `json:"id"           description:"ID，保持与USERID一致"`
-	No           string      `json:"no"           description:"工号"`
-	Avatar       string      `json:"avatar"       description:"头像"`
-	Name         string      `json:"name"         description:"姓名"`
-	Mobile       string      `json:"mobile"       description:"手机号"`
-	UnionMainId  int64       `json:"unionMainId"  description:"所属主体"`
-	State        int         `json:"state"        description:"状态： -1已离职，0待确认，1已入职"`
-	LastActiveIp string      `json:"lastActiveIp" description:"最后活跃IP"`
-	HiredAt      *gtime.Time `json:"hiredAt"      description:"入职时间"`
-	CreatedBy    int64       `json:"createdBy"    description:""`
-	CreatedAt    *gtime.Time `json:"createdAt"    description:""`
-	UpdatedBy    int64       `json:"updatedBy"    description:""`
-	UpdatedAt    *gtime.Time `json:"updatedAt"    description:""`
-	DeletedBy    int64       `json:"deletedBy"    description:""`
-	DeletedAt    *gtime.Time `json:"deletedAt"    description:""`
-	Sex          int         `json:"sex"          description:"性别：0未知、1男、2女"`
-	Remark       string      `json:"remark"       description:"备注"`
+	Id           int64       `json:"id"           orm:"id"             description:"ID，保持与USERID一致"`
+	No           string      `json:"no"           orm:"no"             description:"工号"`
+	Avatar       string      `json:"avatar"       orm:"avatar"         description:"头像"`
+	Name         string      `json:"name"         orm:"name"           description:"姓名"`
+	Mobile       string      `json:"mobile"       orm:"mobile"         description:"手机号"`
+	UnionMainId  int64       `json:"unionMainId"  orm:"union_main_id"  description:"所属主体"`
+	State        int         `json:"state"        orm:"state"          description:"状态： -1已离职，0待确认，1已入职"`
+	LastActiveIp string      `json:"lastActiveIp" orm:"last_active_ip" description:"最后活跃IP"`
+	HiredAt      *gtime.Time `json:"hiredAt"      orm:"hired_at"       description:"入职时间"`
+	CreatedBy    int64       `json:"createdBy"    orm:"created_by"     description:""`
+	CreatedAt    *gtime.Time `json:"createdAt"    orm:"created_at"     description:""`
+	UpdatedBy    int64       `json:"updatedBy"    orm:"updated_by"     description:""`
+	UpdatedAt    *gtime.Time `json:"updatedAt"    orm:"updated_at"     description:""`
+	DeletedBy    int64       `json:"deletedBy"    orm:"deleted_by"     description:""`
+	DeletedAt    *gtime.Time `json:"deletedAt"    orm:"deleted_at"     description:""`
+	Sex          int         `json:"sex"          orm:"sex"            description:"性别：0未知、1男、2女"`
+	Remark       string      `json:"remark"       orm:"remark"         description:"备注"`
+	CountryCode  string      `json:"countryCode"  orm:"country_code"   description:"所属国家编码"`
+	Region       string      `json:"region"       orm:"region"         description:"所属地区"`
+	Email        string      `json:"email"        orm:"email"          description:"业务邮箱"`
 }

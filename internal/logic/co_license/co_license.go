@@ -114,6 +114,31 @@ func (s *sLicense) GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEv
 
 			}
 
+			{
+
+				if auditData.DoorPictures != nil && len(auditData.DoorPictures) > 0 {
+					tempDoorPicturePath := ""
+					doorPictures := make([]co_model.DoorPictures, 0)
+					for _, picture := range auditData.DoorPictures {
+						if gstr.IsNumeric(picture.Id) {
+							if uploadFile, err := sys_service.File().GetUploadFile(ctx, gconv.Int64(picture.Id), auditData.UserId); err == nil && uploadFile != nil {
+								tempDoorPicturePath = uploadFile.Src
+								picture.Size = uploadFile.Size
+								picture.Ext = uploadFile.Ext
+							}
+						}
+						if tempDoorPicturePath != "" {
+							picture.Url = sys_service.File().MakeFileUrlByPath(ctx, tempDoorPicturePath)
+						}
+
+						doorPictures = append(doorPictures, picture)
+					}
+
+					auditData.DoorPictures = doorPictures
+				}
+
+			}
+
 			if auditData.IdcardNo != "" { // 说明是默认结构
 				// 重新赋值  将id转为可访问路径
 				info.AuditData = gjson.MustEncodeString(auditData)
@@ -400,6 +425,7 @@ func (s *sLicense) Masker(license *co_entity.License) *co_entity.License {
 	license.BusinessLicenseLegalPath = ""
 	license.IdcardFrontPath = ""
 	license.IdcardBackPath = ""
+	license.DoorPicturesJson = ""
 
 	return license
 }
@@ -428,6 +454,21 @@ func (s *sLicense) buildURL(ctx context.Context, data *co_entity.License) {
 	{
 		if gstr.IsNumeric(data.IdcardBackPath) {
 			data.IdcardBackPath = sys_service.File().MakeFileUrl(ctx, gconv.Int64(data.IdcardBackPath))
+		}
+
+	}
+	{
+		if data.DoorPicturesJson != "" {
+			doorPictures := make([]co_model.DoorPictures, 0)
+			_ = gjson.DecodeTo(data.DoorPicturesJson, &doorPictures)
+
+			newDoorPictures := make([]co_model.DoorPictures, 0)
+			for _, picture := range doorPictures {
+				picture.Url = sys_service.File().MakeFileUrl(ctx, gconv.Int64(picture.Id))
+				newDoorPictures = append(newDoorPictures, picture)
+			}
+
+			data.DoorPicturesJson = gjson.MustEncodeString(newDoorPictures)
 		}
 
 	}

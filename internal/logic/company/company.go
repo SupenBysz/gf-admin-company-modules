@@ -290,13 +290,17 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
+]) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	export := false
+	if len(isExport) > 0 && len(isExport) > 0 {
+		export = isExport[0]
+	}
 	data, err := daoctl.Query[TR](
 		s.dao.Company.Ctx(ctx).
 			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
 		filter,
-		false,
+		export,
 	)
 
 	if err != nil {

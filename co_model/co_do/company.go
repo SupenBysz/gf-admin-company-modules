@@ -29,4 +29,6 @@ type Company struct {
 	Address       interface{} // 地址
 	LicenseId     interface{} // 主体资质id
 	LicenseState  interface{} // 主体状态,和主体资质状态保持一致
+	CountryCode   interface{} // 所属国家编码
+	Region        interface{} // 所属地区
 }

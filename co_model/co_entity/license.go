@@ -10,32 +10,33 @@ import (
 
 // License is the golang structure for table license.
 type License struct {
-	Id                         int64       `json:"id"                         description:""`
-	IdcardFrontPath            string      `json:"idcardFrontPath"            description:"身份证头像面照片"`
-	IdcardBackPath             string      `json:"idcardBackPath"             description:"身份证国徽面照片"`
-	IdcardNo                   string      `json:"idcardNo"                   description:"身份证号"`
-	IdcardExpiredDate          *gtime.Time `json:"idcardExpiredDate"          description:"身份证有效期"`
-	IdcardAddress              string      `json:"idcardAddress"              description:"身份证户籍地址"`
-	PersonContactName          string      `json:"personContactName"          description:"负责人，必须是自然人"`
-	PersonContactMobile        string      `json:"personContactMobile"        description:"负责人，联系电话"`
-	BusinessLicenseName        string      `json:"businessLicenseName"        description:"公司全称"`
-	BusinessLicenseAddress     string      `json:"businessLicenseAddress"     description:"公司地址"`
-	BusinessLicensePath        string      `json:"businessLicensePath"        description:"营业执照图片地址"`
-	BusinessLicenseScope       string      `json:"businessLicenseScope"       description:"经营范围"`
-	BusinessLicenseRegCapital  string      `json:"businessLicenseRegCapital"  description:"注册资本"`
-	BusinessLicenseTermTime    string      `json:"businessLicenseTermTime"    description:"营业期限"`
-	BusinessLicenseOrgCode     string      `json:"businessLicenseOrgCode"     description:"组织机构代码"`
-	BusinessLicenseCreditCode  string      `json:"businessLicenseCreditCode"  description:"统一社会信用代码"`
-	BusinessLicenseLegal       string      `json:"businessLicenseLegal"       description:"法人"`
-	BusinessLicenseLegalPath   string      `json:"businessLicenseLegalPath"   description:"法人证照，如果法人不是自然人，则该项必填"`
-	LatestAuditLogId           int64       `json:"latestAuditLogId"           description:"最新的审核记录ID"`
-	State                      int         `json:"state"                      description:"状态：0失效、1正常"`
-	AuthType                   int         `json:"authType"                   description:"认证类型："`
-	Remark                     string      `json:"remark"                     description:"备注信息"`
-	UpdatedAt                  *gtime.Time `json:"updatedAt"                  description:""`
-	CreatedAt                  *gtime.Time `json:"createdAt"                  description:""`
-	DeletedAt                  *gtime.Time `json:"deletedAt"                  description:""`
-	BrandName                  string      `json:"brandName"                  description:"品牌名称"`
-	BusinessLicenseLegalMobile string      `json:"businessLicenseLegalMobile" description:"法人联系电话"`
-	ServerMobile               string      `json:"serverMobile"               description:"服务电话"`
+	Id                         int64       `json:"id"                         orm:"id"                            description:""`
+	IdcardFrontPath            string      `json:"idcardFrontPath"            orm:"idcard_front_path"             description:"身份证头像面照片"`
+	IdcardBackPath             string      `json:"idcardBackPath"             orm:"idcard_back_path"              description:"身份证国徽面照片"`
+	IdcardNo                   string      `json:"idcardNo"                   orm:"idcard_no"                     description:"身份证号"`
+	IdcardExpiredDate          *gtime.Time `json:"idcardExpiredDate"          orm:"idcard_expired_date"           description:"身份证有效期"`
+	IdcardAddress              string      `json:"idcardAddress"              orm:"idcard_address"                description:"身份证户籍地址"`
+	PersonContactName          string      `json:"personContactName"          orm:"person_contact_name"           description:"负责人，必须是自然人"`
+	PersonContactMobile        string      `json:"personContactMobile"        orm:"person_contact_mobile"         description:"负责人，联系电话"`
+	BusinessLicenseName        string      `json:"businessLicenseName"        orm:"business_license_name"         description:"公司全称"`
+	BusinessLicenseAddress     string      `json:"businessLicenseAddress"     orm:"business_license_address"      description:"公司地址"`
+	BusinessLicensePath        string      `json:"businessLicensePath"        orm:"business_license_path"         description:"营业执照图片地址"`
+	BusinessLicenseScope       string      `json:"businessLicenseScope"       orm:"business_license_scope"        description:"经营范围"`
+	BusinessLicenseRegCapital  string      `json:"businessLicenseRegCapital"  orm:"business_license_reg_capital"  description:"注册资本"`
+	BusinessLicenseTermTime    string      `json:"businessLicenseTermTime"    orm:"business_license_term_time"    description:"营业期限"`
+	BusinessLicenseOrgCode     string      `json:"businessLicenseOrgCode"     orm:"business_license_org_code"     description:"组织机构代码"`
+	BusinessLicenseCreditCode  string      `json:"businessLicenseCreditCode"  orm:"business_license_credit_code"  description:"统一社会信用代码"`
+	BusinessLicenseLegal       string      `json:"businessLicenseLegal"       orm:"business_license_legal"        description:"法人"`
+	BusinessLicenseLegalPath   string      `json:"businessLicenseLegalPath"   orm:"business_license_legal_path"   description:"法人证照，如果法人不是自然人，则该项必填"`
+	LatestAuditLogId           int64       `json:"latestAuditLogId"           orm:"latest_audit_log_id"           description:"最新的审核记录ID"`
+	State                      int         `json:"state"                      orm:"state"                         description:"状态：0失效、1正常"`
+	AuthType                   int         `json:"authType"                   orm:"auth_type"                     description:"认证类型："`
+	Remark                     string      `json:"remark"                     orm:"remark"                        description:"备注信息"`
+	UpdatedAt                  *gtime.Time `json:"updatedAt"                  orm:"updated_at"                    description:""`
+	CreatedAt                  *gtime.Time `json:"createdAt"                  orm:"created_at"                    description:""`
+	DeletedAt                  *gtime.Time `json:"deletedAt"                  orm:"deleted_at"                    description:""`
+	BrandName                  string      `json:"brandName"                  orm:"brand_name"                    description:"品牌名称"`
+	BusinessLicenseLegalMobile string      `json:"businessLicenseLegalMobile" orm:"business_license_legal_mobile" description:"法人联系电话"`
+	ServerMobile               string      `json:"serverMobile"               orm:"server_mobile"                 description:"服务电话"`
+	DoorPicturesJson           string      `json:"doorPicturesJson"           orm:"door_pictures_json"            description:"门头照"`
 }

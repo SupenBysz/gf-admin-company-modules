@@ -10,21 +10,23 @@ import (
 
 // Company is the golang structure for table company.
 type Company struct {
-	Id            int64       `json:"id"            description:"ID"`
-	Name          string      `json:"name"          description:"名称"`
-	ContactName   string      `json:"contactName"   description:"商务联系人"`
-	ContactMobile string      `json:"contactMobile" description:"商务联系电话"`
-	UserId        int64       `json:"userId"        description:"管理员ID"`
-	State         int         `json:"state"         description:"状态：0未启用，1正常"`
-	Remark        string      `json:"remark"        description:"备注"`
-	CreatedBy     int64       `json:"createdBy"     description:"创建者"`
-	CreatedAt     *gtime.Time `json:"createdAt"     description:"创建时间"`
-	UpdatedBy     int64       `json:"updatedBy"     description:"更新者"`
-	UpdatedAt     *gtime.Time `json:"updatedAt"     description:"更新时间"`
-	DeletedBy     int64       `json:"deletedBy"     description:"删除者"`
-	DeletedAt     *gtime.Time `json:"deletedAt"     description:"删除时间"`
-	ParentId      int64       `json:"parentId"      description:"父级ID"`
-	Address       string      `json:"address"       description:"地址"`
-	LicenseId     int64       `json:"licenseId"     description:"主体资质id"`
-	LicenseState  int         `json:"licenseState"  description:"主体状态,和主体资质状态保持一致"`
+	Id            int64       `json:"id"            orm:"id"             description:"ID"`
+	Name          string      `json:"name"          orm:"name"           description:"名称"`
+	ContactName   string      `json:"contactName"   orm:"contact_name"   description:"商务联系人"`
+	ContactMobile string      `json:"contactMobile" orm:"contact_mobile" description:"商务联系电话"`
+	UserId        int64       `json:"userId"        orm:"user_id"        description:"管理员ID"`
+	State         int         `json:"state"         orm:"state"          description:"状态：0未启用，1正常"`
+	Remark        string      `json:"remark"        orm:"remark"         description:"备注"`
+	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:"创建者"`
+	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:"创建时间"`
+	UpdatedBy     int64       `json:"updatedBy"     orm:"updated_by"     description:"更新者"`
+	UpdatedAt     *gtime.Time `json:"updatedAt"     orm:"updated_at"     description:"更新时间"`
+	DeletedBy     int64       `json:"deletedBy"     orm:"deleted_by"     description:"删除者"`
+	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"     description:"删除时间"`
+	ParentId      int64       `json:"parentId"      orm:"parent_id"      description:"父级ID"`
+	Address       string      `json:"address"       orm:"address"        description:"地址"`
+	LicenseId     int64       `json:"licenseId"     orm:"license_id"     description:"主体资质id"`
+	LicenseState  int         `json:"licenseState"  orm:"license_state"  description:"主体状态,和主体资质状态保持一致"`
+	CountryCode   string      `json:"countryCode"   orm:"country_code"   description:"所属国家编码"`
+	Region        string      `json:"region"        orm:"region"         description:"所属地区"`
 }

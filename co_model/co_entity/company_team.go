@@ -10,14 +10,14 @@ import (
 
 // CompanyTeam is the golang structure for table company_team.
 type CompanyTeam struct {
-	Id                int64       `json:"id"                description:"ID"`
-	Name              string      `json:"name"              description:"团队名称，公司维度下唯一"`
-	OwnerEmployeeId   int64       `json:"ownerEmployeeId"   description:"团队所有者/业务总监/业务经理/团队队长"`
-	CaptainEmployeeId int64       `json:"captainEmployeeId" description:"团队队长编号/小组组长"`
-	UnionMainId       int64       `json:"unionMainId"       description:"所属主体单位ID"`
-	ParentId          int64       `json:"parentId"          description:"父级ID"`
-	Remark            string      `json:"remark"            description:"备注"`
-	CreatedAt         *gtime.Time `json:"createdAt"         description:""`
-	UpdatedAt         *gtime.Time `json:"updatedAt"         description:""`
-	DeletedAt         *gtime.Time `json:"deletedAt"         description:""`
+	Id                int64       `json:"id"                orm:"id"                  description:"ID"`
+	Name              string      `json:"name"              orm:"name"                description:"团队名称，公司维度下唯一"`
+	OwnerEmployeeId   int64       `json:"ownerEmployeeId"   orm:"owner_employee_id"   description:"团队所有者/业务总监/业务经理/团队队长"`
+	CaptainEmployeeId int64       `json:"captainEmployeeId" orm:"captain_employee_id" description:"团队队长编号/小组组长"`
+	UnionMainId       int64       `json:"unionMainId"       orm:"union_main_id"       description:"所属主体单位ID"`
+	ParentId          int64       `json:"parentId"          orm:"parent_id"           description:"父级ID"`
+	Remark            string      `json:"remark"            orm:"remark"              description:"备注"`
+	CreatedAt         *gtime.Time `json:"createdAt"         orm:"created_at"          description:""`
+	UpdatedAt         *gtime.Time `json:"updatedAt"         orm:"updated_at"          description:""`
+	DeletedAt         *gtime.Time `json:"deletedAt"         orm:"deleted_at"          description:""`
 }

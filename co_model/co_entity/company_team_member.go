@@ -10,10 +10,10 @@ import (
 
 // CompanyTeamMember is the golang structure for table company_team_member.
 type CompanyTeamMember struct {
-	Id           int64       `json:"id"           description:"ID"`
-	TeamId       int64       `json:"teamId"       description:"团队ID"`
-	EmployeeId   int64       `json:"employeeId"   description:"成员ID"`
-	InviteUserId int64       `json:"inviteUserId" description:"邀约人ID"`
-	UnionMainId  int64       `json:"unionMainId"  description:"关联主体ID"`
-	JoinAt       *gtime.Time `json:"joinAt"       description:"加入时间"`
+	Id           int64       `json:"id"           orm:"id"             description:"ID"`
+	TeamId       int64       `json:"teamId"       orm:"team_id"        description:"团队ID"`
+	EmployeeId   int64       `json:"employeeId"   orm:"employee_id"    description:"成员ID"`
+	InviteUserId int64       `json:"inviteUserId" orm:"invite_user_id" description:"邀约人ID"`
+	UnionMainId  int64       `json:"unionMainId"  orm:"union_main_id"  description:"关联主体ID"`
+	JoinAt       *gtime.Time `json:"joinAt"       orm:"join_at"        description:"加入时间"`
 }

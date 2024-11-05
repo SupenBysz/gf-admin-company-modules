@@ -20,8 +20,10 @@ type Company struct {
 	ContactMobile *string                           `json:"contactMobile"  dc:"商务联系电话" v:"required-if:id,0|phone|max-length:32#请输入商务联系人电话|商务联系人电话格式错误|商务联系人电话最多支持16个字符"`
 	Remark        *string                           `json:"remark"         dc:"备注"`
 	Address       *string                           `json:"address"       dc:"地址，主体资质审核通过后，会通过实际地址覆盖掉该地址"`
-	LicenseId     *int64                            `json:"licenseId"     description:"主体资质id"`
-	LicenseState  *int                              `json:"licenseState"  description:"主体状态,和主体资质状态保持一致"`
+	LicenseId     *int64                            `json:"licenseId"     dc:"主体资质id"`
+	LicenseState  *int                              `json:"licenseState"  dc:"主体状态,和主体资质状态保持一致"`
+	CountryCode   *string                           `json:"countryCode"      dc:"所属国家编码" v:"max-length:16|in:AF,AX,AL,DZ,AS,AD,AO,AI,AG,AR,AM,AW,AU,AT,AZ,BS,BH,BD,BB,BY,BE,BZ,BJ,BM,BT,BO,BQ,BA,BW,BV,BR,IO,BN,BG,BF,BI,CV,KH,CM,CA,KY,CF,TD,CL,CN,CX,CC,CO,KM,CD,CG,CK,CR,CI,HR,CU,CW,CY,CZ,DK,DJ,DM,DO,EC,EG,SV,GQ,ER,EE,ET,FK,FO,FJ,FI,FR,GF,PF,TF,GA,GM,GE,DE,GH,GI,GR,GL,GD,GP,GU,GT,GG,GN,GW,GY,HT,HM,VA,GN,SV,GQ,HU,IS,IN,ID,IR,IQ,IE,IM,IL,IT,JM,JP,JE,JO,KZ,KE,KI,KP,KR,KW,KG,LA,LV,LB,LS,LR,LY,LI,LT,LU,MO,MK,MG,MW,MY,MV,ML,MT,MH,MQ,MR,MU,YT,MX,FM,MD,MC,MN,ME,MS,MA,MZ,MM,NA,NR,NP,NL,NC,NZ,NI,NE,NG,NU,NF,MP,NO,OM,PK,PW,PS,PA,PG,PY,PE,PH,PN,PL,PT,PR,QA,RE,RO,RU,RW,BL,SH,KN,LC,MF,PM,VC,WS,SM,ST,SA,SN,RS,SC,SL,SG,SX,SK,SI,SB,SO,ZA,GS,SS,ES,LK,SD,SR,SJ,SZ,SE,CH,SY,TJ,TZ,TH,TL,TG,TK,TO,TT,TN,TR,TM,TC,TV,UG,UA,AE,GB,US,UM,UY,UZ,VU,VE,VN,VG,VI,WF,EH,YE,ZM,ZW#所属国家编码最多支持16个字符|国家编码错误"`
+	Region        *string                           `json:"region"                 dc:"所属地区" v:"max-length:128#所属地区最多支持128个字符"`
 }
 
 type CompanyRes struct {

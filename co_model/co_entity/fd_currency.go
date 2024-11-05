@@ -6,14 +6,14 @@ package co_entity
 
 // FdCurrency is the golang structure for table fd_currency.
 type FdCurrency struct {
-	Code          string  `json:"code"          description:"国家编码"`
-	EnName        string  `json:"enName"        description:"国家英文名称"`
-	CnName        string  `json:"cnName"        description:"国家中文名称"`
-	CurrencyCode  string  `json:"currencyCode"  description:"货币编码"`
-	CurrencyCn    string  `json:"currencyCn"    description:"货币中文名称"`
-	CurrencyEn    string  `json:"currencyEn"    description:"货币英文名称"`
-	Symbol        string  `json:"symbol"        description:"货币符号"`
-	SymbolNative  string  `json:"symbolNative"  description:"货币原生符号"`
-	IsLegalTender int     `json:"isLegalTender" description:"是否法定货币：1是，0否"`
-	CurrencyRate  float64 `json:"currencyRate"  description:"货币汇率，本币为人民币"`
+	Code          string  `json:"code"          orm:"code"            description:"国家编码"`
+	EnName        string  `json:"enName"        orm:"en_name"         description:"国家英文名称"`
+	CnName        string  `json:"cnName"        orm:"cn_name"         description:"国家中文名称"`
+	CurrencyCode  string  `json:"currencyCode"  orm:"currency_code"   description:"货币编码"`
+	CurrencyCn    string  `json:"currencyCn"    orm:"currency_cn"     description:"货币中文名称"`
+	CurrencyEn    string  `json:"currencyEn"    orm:"currency_en"     description:"货币英文名称"`
+	Symbol        string  `json:"symbol"        orm:"symbol"          description:"货币符号"`
+	SymbolNative  string  `json:"symbolNative"  orm:"symbol_native"   description:"货币原生符号"`
+	IsLegalTender int     `json:"isLegalTender" orm:"is_legal_tender" description:"是否法定货币：1是，0否"`
+	CurrencyRate  float64 `json:"currencyRate"  orm:"currency_rate"   description:"货币汇率，本币为人民币"`
 }

@@ -65,6 +65,11 @@ func (c *MyController) SetMobile(ctx context.Context, req *co_v1.SetMobileReq) (
 	return c.IMy.SetMobile(ctx, &req.SetMobileReq)
 }
 
+// SetMail 设置邮箱
+func (c *MyController) SetMail(ctx context.Context, req *co_v1.SetMailReq) (api_v1.BoolRes, error) {
+	return c.IMy.SetMail(ctx, &req.SetMailReq)
+}
+
 // GetAccountBills 我的账单|列表
 func (c *MyController) GetAccountBills(ctx context.Context, req *co_v1.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
 	return c.IMy.GetAccountBills(ctx, &req.GetAccountBillsReq)

@@ -40,4 +40,5 @@ type License struct {
 	BrandName                  interface{} // 品牌名称
 	BusinessLicenseLegalMobile interface{} // 法人联系电话
 	ServerMobile               interface{} // 服务电话
+	DoorPicturesJson           interface{} // 门头照
 }

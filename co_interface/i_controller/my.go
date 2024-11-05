@@ -23,6 +23,9 @@ type IMy interface {
 	// SetMobile 设置手机号
 	SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error)
 
+	// SetMail 设置邮箱
+	SetMail(ctx context.Context, req *co_company_api.SetMailReq) (api_v1.BoolRes, error)
+
 	// GetAccountBills 我的账单
 	GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error)
 
