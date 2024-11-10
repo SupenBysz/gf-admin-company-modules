@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -738,7 +737,7 @@ func (s *sCompany[
 				ctx = base_funs.AttrBuilder[ITEmployeeRes, ITEmployeeRes](ctx, s.modules.Dao().Employee.Columns().Id)
 
 				// 追加订阅自定义类型的员工扩展数据
-				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 
 				employee, err := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
 				//if err != nil || reflect.ValueOf(employee.Data()).IsNil() {
