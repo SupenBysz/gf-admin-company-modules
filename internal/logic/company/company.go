@@ -600,6 +600,10 @@ func (s *sCompany[
 		unionMainId,
 	)
 
+	if company == nil || err != nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "主体不存在", s.dao.Company.Table())
+	}
+
 	// 是否是本主体员工
 	isCompanyEmployee := false
 
