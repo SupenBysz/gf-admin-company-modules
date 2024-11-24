@@ -393,6 +393,10 @@ func (s *sCompany[
 	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	if !sessionUser.IsSuperAdmin && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
+	}
+
 	// 构建公司ID
 	unionMainId := idgen.NextId()
 
