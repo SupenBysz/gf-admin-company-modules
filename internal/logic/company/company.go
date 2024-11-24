@@ -30,15 +30,15 @@ import (
 )
 
 type sCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -57,15 +57,15 @@ type sCompany[
 }
 
 func NewCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -185,11 +185,13 @@ func (s *sCompany[
 	if id == 0 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
 	}
+	m := s.dao.Company.Ctx(ctx)
 
-	data, err := daoctl.GetByIdWithError[TR](
-		s.dao.Company.Ctx(ctx),
-		id,
-	)
+	if !sessionUser.IsSuperAdmin {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -201,19 +203,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	//err == sql.ErrNoRows ||
-	//    !reflect.ValueOf(data).IsNil() && sessionUser != nil &&
-	//        sessionUser.Id != 0 &&
-	//        response.Data().UnionMainId != sessionUser.UnionMainId &&
-	//        response.Data().UnionMainId != sessionUser.ParentId &&
-	//        !sessionUser.IsAdmin
-
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
-		!reflect.ValueOf(response).IsNil() &&
-		response.Data().Id != sessionUser.UnionMainId &&
-		response.Data().ParentId != sessionUser.UnionMainId &&
-		!sessionUser.IsAdmin &&
-		!sessionUser.IsSuperAdmin {
+	if err == sql.ErrNoRows{
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -295,12 +285,14 @@ func (s *sCompany[
 	if len(isExport) > 0 && len(isExport) > 0 {
 		export = isExport[0]
 	}
-	data, err := daoctl.Query[TR](
-		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
-		filter,
-		export,
-	)
+
+	m := s.dao.Company.Ctx(ctx)
+
+	if !sessionUser.IsSuperAdmin {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.Query[TR](m, filter, export)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
@@ -554,10 +546,13 @@ func (s *sCompany[
 ]) GetCompanyDetail(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	data, err := daoctl.GetByIdWithError[TR](
-		s.dao.Company.Ctx(ctx),
-		id,
-	)
+	m := s.dao.Company.Ctx(ctx)
+
+	if !sessionUser.IsSuperAdmin {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -569,7 +564,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	if err == sql.ErrNoRows{
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -599,6 +594,10 @@ func (s *sCompany[
 		s.dao.Company.Ctx(ctx),
 		unionMainId,
 	)
+
+	if company == nil || err != nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "主体不存在", s.dao.Company.Table())
+	}
 
 	// 是否是本主体员工
 	isCompanyEmployee := false
