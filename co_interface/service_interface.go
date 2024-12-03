@@ -126,6 +126,8 @@ type (
 		GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error)
 		// UpdateAccount  修改我的财务账号
 		UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (api_v1.BoolRes, error)
+		// GetMyCompanyPermissionList 获取我的公司权限列表
+		GetMyCompanyPermissionList(ctx context.Context, permissionType *int) (*sys_model.MyPermissionListRes, error)
 	}
 
 	IFdAccount[TR co_model.IFdAccountRes] interface {

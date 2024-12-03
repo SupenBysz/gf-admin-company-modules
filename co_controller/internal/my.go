@@ -362,3 +362,17 @@ func (c *MyController[
 	// 拼装标识符
 	return c.modules.GetConfig().Identifier.Team + "::" + permission.GetIdentifier()
 }
+
+func (c *MyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetMyCompanyPermissionList(ctx context.Context, req *co_company_api.GetMyCompanyPermissionListReq) (*sys_model.MyPermissionListRes, error) {
+	return c.modules.My().GetMyCompanyPermissionList(ctx, req.PermissionType)
+}

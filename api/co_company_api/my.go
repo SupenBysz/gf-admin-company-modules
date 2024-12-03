@@ -46,3 +46,7 @@ type UpdateAccountReq struct {
 	AccountId int64 `json:"accountId" dc:"具体需要修改的财务账号id" v:"required#财务账号id不能为空"`
 	co_model.UpdateAccount
 }
+
+type GetMyCompanyPermissionListReq struct {
+	PermissionType *int `json:"permissionType" dc:"过滤权限类型：0不限，1API接口，2菜单"`
+}

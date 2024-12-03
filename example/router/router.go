@@ -68,6 +68,7 @@ func CompanyGroup[
 	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
 	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
 	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
+	group.POST(routePrefix+"/setCompanyState", controller.SetCompanyState)
 	return group
 }
 

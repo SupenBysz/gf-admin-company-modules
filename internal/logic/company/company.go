@@ -11,6 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -52,7 +53,8 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao co_dao.XDao
+	superAdminMainId int64
+	dao              co_dao.XDao
 	//makeMoreFunc func(ctx context.Context, data co_model.ICompanyRes, employeeModule co_interface.IEmployee[co_model.IEmployeeRes]) co_model.ICompanyRes
 }
 
@@ -92,6 +94,9 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 		dao:     *modules.Dao(),
 	}
 
+	userType := g.Cfg().MustGet(context.Background(), "service.superAdminMainId", 0)
+
+	result.superAdminMainId = userType.Int64()
 	//result.makeMoreFunc = MakeMore
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
@@ -187,8 +192,8 @@ func (s *sCompany[
 	}
 	m := s.dao.Company.Ctx(ctx)
 
-	if !sessionUser.IsSuperAdmin {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.UnionMainId != id {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
@@ -203,7 +208,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows{
+	if err == sql.ErrNoRows {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -288,8 +293,8 @@ func (s *sCompany[
 
 	m := s.dao.Company.Ctx(ctx)
 
-	if !sessionUser.IsSuperAdmin {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.Query[TR](m, filter, export)
@@ -385,7 +390,7 @@ func (s *sCompany[
 	// 获取登录用户
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	if !sessionUser.IsSuperAdmin && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
 	}
 
@@ -548,8 +553,8 @@ func (s *sCompany[
 
 	m := s.dao.Company.Ctx(ctx)
 
-	if !sessionUser.IsSuperAdmin {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{ParentId: sessionUser.UnionMainId})
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
@@ -564,7 +569,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows{
+	if err == sql.ErrNoRows {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -681,7 +686,7 @@ func (s *sCompany[
 		}
 	}
 
-	if !hasUnionMainId {
+	if !hasUnionMainId && sessionUser.UnionMainId != s.superAdminMainId {
 		search.Filter = append(search.Filter, base_model.FilterInfo{
 			Field:     "union_main_id",
 			Where:     "=",
