@@ -3,6 +3,8 @@ package company
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -498,4 +500,65 @@ func (s *sMy[
 	}
 
 	return ret == true, nil
+}
+
+func (s *sMy[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetMyCompanyPermissionList(ctx context.Context, permissionType *int) (*sys_model.MyPermissionListRes, error) {
+	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	unionMainAdminId := gconv.Int64(0)
+
+	if user.IsAdmin {
+		unionMainAdminId = user.Id
+	} else if user.UnionMainId > 0 {
+		response, err := s.modules.Company().GetCompanyById(ctx, user.UnionMainId)
+		if err != nil {
+			return nil, err
+		}
+		unionMainAdminId = response.Data().UserId
+	}
+
+	// 获取用户的权限ids
+	ids, err := sys_service.SysPermission().GetPermissionsByResource(ctx, gconv.String(unionMainAdminId))
+
+	if err != nil {
+		return nil, err
+	}
+
+	Filter := append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
+		Field: sys_dao.SysPermission.Columns().Id,
+		Where: "in",
+		Value: ids,
+	})
+
+	if permissionType != nil && *permissionType > 0 {
+		Filter = append(Filter, base_model.FilterInfo{
+			Field: sys_dao.SysPermission.Columns().Type,
+			Where: "=",
+			Value: *permissionType,
+		})
+	}
+
+	// 获取用户的权限list
+	result, err := sys_service.SysPermission().QueryPermissionList(ctx, base_model.SearchParams{
+		Filter: Filter,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	ret := sys_model.MyPermissionListRes{}
+	ret = result.Records
+
+	return &ret, err
 }
