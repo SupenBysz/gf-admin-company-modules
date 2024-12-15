@@ -141,7 +141,7 @@ func (s *sFdAccount[
 		}
 	}
 	// 判断货币代码是否符合标准
-	currency, err := s.modules.Currency().GetCurrencyByCurrencyCode(ctx, info.CurrencyCode)
+	currency, err := s.modules.Currency().GetCurrencyByCode(ctx, info.CurrencyCode)
 	if err != nil || reflect.ValueOf(currency).IsNil() {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
 	}
@@ -311,6 +311,29 @@ func (s *sFdAccount[
 	return true, nil
 }
 
+// SetAccountCurrencyCode 设置财务账号货币单位
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountCurrencyCode(ctx context.Context, accountId int64, currencyCode string, userId int64) (bool, error) {
+	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: accountId}).Update(co_do.FdAccount{
+		CurrencyCode: currencyCode,
+		UpdatedBy:    userId,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // QueryAccountListByUserId 获取指定用户的所有财务账号
 func (s *sFdAccount[
 	ITCompanyRes,
@@ -355,8 +378,28 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error) {
+]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinancialInOutType, sysSessionUserId int64) (int64, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	info, err := daoctl.GetByIdWithError[co_model.FdAccountRes](s.dao.FdAccount.Ctx(ctx), accountId)
+
+	if err != nil || info == nil {
+		return 0, gerror.New(s.modules.T(ctx, "error_Account_NotExist"))
+	}
+
+	if version < 0 {
+		version = info.Version
+	}
+
+	if inOutType.Code() == co_enum.Financial.InOutType.Auto.Code() {
+		if amount > 0 {
+			inOutType = co_enum.Financial.InOutType.In
+		} else if amount < 0 {
+			inOutType = co_enum.Financial.InOutType.Out
+		} else {
+			return info.Balance, nil
+		}
+	}
 
 	db := s.dao.FdAccount.Ctx(ctx)
 
@@ -364,12 +407,12 @@ func (s *sFdAccount[
 		Version: gdb.Raw(s.dao.FdAccount.Columns().Version + "+1"),
 	}
 
-	if inOutType == 1 { // 收入
+	if inOutType.Code() == co_enum.Financial.InOutType.In.Code() { // 收入
 		// 余额 = 之前的余额 + 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "+" + gconv.String(amount))
 		data.UpdatedBy = sysSessionUserId
 
-	} else if inOutType == 2 { // 支出
+	} else if inOutType.Code() == co_enum.Financial.InOutType.Out.Code() { // 支出
 		// 余额 = 之前的余额 - 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "-" + gconv.String(amount))
 		data.UpdatedBy = sysSessionUserId

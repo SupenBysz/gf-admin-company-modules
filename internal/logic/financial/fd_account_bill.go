@@ -256,7 +256,7 @@ func (s *sFdAccountBill[
 
 		// 2.修改财务账号的余额
 		// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType, info.FromUserId)
+		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Financial.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -353,7 +353,7 @@ func (s *sFdAccountBill[
 
 			// 2.修改财务账号的余额
 			// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, info.InOutType, info.FromUserId)
+			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Financial.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -424,7 +424,7 @@ func (s *sFdAccountBill[
 
 	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx).
 		Where(s.dao.FdAccountBill.Columns().FdAccountId, accountId).
-		OrderAsc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
+		OrderDesc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())

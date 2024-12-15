@@ -11,6 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
@@ -388,6 +389,50 @@ func (c *FinancialController[
 	)
 }
 
+// SetAccountCurrencyCode 设置财务账号货币单位
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) SetAccountCurrencyCode(ctx context.Context, req *co_company_api.SetAccountCurrencyCodeReq) (api_v1.BoolRes, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().SetAccountCurrencyCode(ctx, req.AccountId, req.CurrencyCode, user.Id)
+			return ret == true, err
+		},
+		co_permission.Financial.PermissionType(c.modules).SetAccountCurrencyCode,
+	)
+}
+
+// UpdateAccountBalance 财务账号金额冲正
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
+	return funs.CheckPermission(ctx,
+		func() (api_v1.Int64Res, error) {
+			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Account().UpdateAccountBalance(ctx, req.AccountId, req.Amount, -1, co_enum.Financial.InOutType.Auto, user.Id)
+			return api_v1.Int64Res(ret), err
+		},
+		co_permission.Financial.PermissionType(c.modules).UpdateAccountBalance,
+	)
+}
+
 // GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
 func (c *FinancialController[
 	ITCompanyRes,
@@ -470,6 +515,51 @@ func (c *FinancialController[
 		},
 		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
 	)
+}
+
+// GetCurrencyByCode 根据货币代码查找货币(主键)
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (ITFdCurrencyRes, error) {
+	return c.modules.Currency().GetCurrencyByCode(ctx, req.CurrencyCode)
+}
+
+// QueryCurrencyList 获取币种列表
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryCurrencyList(ctx context.Context, req *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error) {
+	return c.modules.Currency().QueryCurrencyList(ctx, &req.SearchParams)
+}
+
+// QueryAccountBillsReq  根据财务账号id查询账单
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryAccountBillsReq(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
+	return c.modules.AccountBill().GetAccountBillByAccountId(ctx, req.AccountId, &req.SearchParams)
 }
 
 func (c *FinancialController[

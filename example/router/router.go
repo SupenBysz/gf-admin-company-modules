@@ -214,29 +214,31 @@ func FinancialGroup[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	controller := controller.Financial(modules)
+	ctrl := controller.Financial(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/financial"
 
-	group.POST(routePrefix+"/registerBankCard", controller.BankCardRegister)
-	group.POST(routePrefix+"/deleteBankCard", controller.DeleteBankCard)
-	group.POST(routePrefix+"/queryBankCardList", controller.QueryBankCardList)
-	group.POST(routePrefix+"/getAccountBalance", controller.GetAccountBalance)
-	group.POST(routePrefix+"/invoiceRegister", controller.InvoiceRegister)
-	group.POST(routePrefix+"/queryInvoice", controller.QueryInvoice)
-	group.POST(routePrefix+"/deleteInvoiceById", controller.DeletesFdInvoiceById)
-	group.POST(routePrefix+"/invoiceDetailRegister", controller.InvoiceDetailRegister)
-	group.POST(routePrefix+"/queryInvoiceDetailList", controller.QueryInvoiceDetailList)
-	group.POST(routePrefix+"/makeInvoiceDetail", controller.MakeInvoiceDetailReq)
-	group.POST(routePrefix+"/auditInvoiceDetail", controller.AuditInvoiceDetail)
+	group.POST(routePrefix+"/registerBankCard", ctrl.BankCardRegister)
+	group.POST(routePrefix+"/deleteBankCard", ctrl.DeleteBankCard)
+	group.POST(routePrefix+"/queryBankCardList", ctrl.QueryBankCardList)
+	group.POST(routePrefix+"/getAccountBalance", ctrl.GetAccountBalance)
+	group.POST(routePrefix+"/invoiceRegister", ctrl.InvoiceRegister)
+	group.POST(routePrefix+"/queryInvoice", ctrl.QueryInvoice)
+	group.POST(routePrefix+"/deleteInvoiceById", ctrl.DeletesFdInvoiceById)
+	group.POST(routePrefix+"/invoiceDetailRegister", ctrl.InvoiceDetailRegister)
+	group.POST(routePrefix+"/queryInvoiceDetailList", ctrl.QueryInvoiceDetailList)
+	group.POST(routePrefix+"/makeInvoiceDetail", ctrl.MakeInvoiceDetailReq)
+	group.POST(routePrefix+"/auditInvoiceDetail", ctrl.AuditInvoiceDetail)
 
-	group.POST(routePrefix+"/getAccountDetail", controller.GetAccountDetail)
-	group.POST(routePrefix+"/updateAccountIsEnabled", controller.UpdateAccountIsEnabled)
-	group.POST(routePrefix+"/updateAccountLimitState", controller.UpdateAccountLimitState)
+	group.POST(routePrefix+"/getAccountDetail", ctrl.GetAccountDetail)
+	group.POST(routePrefix+"/updateAccountIsEnabled", ctrl.UpdateAccountIsEnabled)
+	group.POST(routePrefix+"/updateAccountLimitState", ctrl.UpdateAccountLimitState)
+	group.POST(routePrefix+"/setAccountCurrencyCode", ctrl.SetAccountCurrencyCode)
+	group.POST(routePrefix+"/getCurrencyByCode", ctrl.GetCurrencyByCode)
 
-	group.POST(routePrefix+"/getAccountDetailByAccountId", controller.GetAccountDetailById)
-	//group.POST(routePrefix+"/increment", controller.Increment)
-	//group.POST(routePrefix+"/decrement", controller.Decrement)
-	group.POST(routePrefix+"/setAccountAllowExceed", controller.SetAccountAllowExceed)
+	group.POST(routePrefix+"/getAccountDetailByAccountId", ctrl.GetAccountDetailById)
+	//group.POST(routePrefix+"/increment", ctrl.Increment)
+	//group.POST(routePrefix+"/decrement", ctrl.Decrement)
+	group.POST(routePrefix+"/setAccountAllowExceed", ctrl.SetAccountAllowExceed)
 
 	return group
 }

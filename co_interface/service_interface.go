@@ -143,10 +143,12 @@ type (
 		HasAccountByName(ctx context.Context, name string) (response TR, err error)
 		// UpdateAccountLimitState 修改财务账号的限制状态 （0不限制，1限制支出、2限制收入）
 		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
+		// SetAccountCurrencyCode 设置财务账号货币单位
+		SetAccountCurrencyCode(ctx context.Context, accountId int64, currencyCode string, userId int64) (bool, error)
 		// QueryAccountListByUserId 获取指定用户的所有财务账号
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		// UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
-		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType int, sysSessionUserId int64) (int64, error)
+		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinancialInOutType, sysSessionUserId int64) (int64, error)
 		// GetAccountByUnionUserIdAndCurrencyCode 根据用户union_user_id和货币代码currency_code获取财务账号
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
 		// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，
@@ -179,8 +181,10 @@ type (
 		QueryBankCardListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 	}
 	IFdCurrency[TR co_model.IFdCurrencyRes] interface {
-		// GetCurrencyByCurrencyCode 根据货币代码查找货币(主键)
-		GetCurrencyByCurrencyCode(ctx context.Context, currencyCode string) (response TR, err error)
+		// QueryCurrencyList 获取币种列表
+		QueryCurrencyList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+		// GetCurrencyByCode 根据货币代码查找货币(主键)
+		GetCurrencyByCode(ctx context.Context, currencyCode string) (response TR, err error)
 		// GetCurrencyByCnName 根据国家查找货币信息
 		GetCurrencyByCnName(ctx context.Context, cnName string) (response TR, err error)
 	}

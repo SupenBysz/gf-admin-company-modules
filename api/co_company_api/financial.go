@@ -70,17 +70,22 @@ type UpdateAccountLimitStateReq struct {
 	LimitState int   `json:"limitState" dc:"限制状态：0不限制，1限制支出、2限制收入"`
 }
 
+type SetAccountCurrencyCodeReq struct {
+	AccountId    int64  `json:"accountId" dc:"财务账号id"`
+	CurrencyCode string `json:"currencyCode" dc:"货币代码"`
+}
+
 type GetAccountDetailByAccountIdReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 }
 
-// TODO 这两个接口只是用于测试，后续需要去除
+// IncrementReq TODO 这两个接口只是用于测试，后续需要去除
 type IncrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"收入金额"`
 }
 
-// TODO 这两个接口只是用于测试，后续需要去除
+// DecrementReq TODO 这两个接口只是用于测试，后续需要去除
 type DecrementReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id"`
 	Amount    int   `json:"amount" dc:"支出金额"`
@@ -89,4 +94,22 @@ type DecrementReq struct {
 type SetAccountAllowExceedReq struct {
 	AccountId   int64 `json:"accountId" dc:"财务账号ID"  v:"required#财务账号不允许为空"`
 	AllowExceed int   `json:"allowExceed" dc:"是否允许存在负余额: 0禁止、1允许，主体默认财务账号是允许超出" v:"required|in:0,1#请正确填写是否允许"`
+}
+
+type UpdateAccountBalanceReq struct {
+	AccountId int64 `json:"accountId" dc:"财务账号id" v:"required#请输入财务账号id"`
+	Amount    int64 `json:"amount" dc:"冲正金额"`
+}
+
+type GetCurrencyByCodeReq struct {
+	CurrencyCode string `json:"currencyCode" dc:"货币代码"`
+}
+
+type QueryCurrencyListReq struct {
+	base_model.SearchParams
+}
+
+type QueryAccountBillsReq struct {
+	AccountId int64 `json:"accountId" dc:"财务账号id" v:"required#请输入财务账号id"`
+	base_model.SearchParams
 }

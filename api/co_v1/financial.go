@@ -84,3 +84,23 @@ type SetAccountAllowExceedReq struct {
 	g.Meta ` method:"post" summary:"设置财务账号是否允许存在负余额" tags:"组织单位/财务服务"`
 	co_company_api.SetAccountAllowExceedReq
 }
+
+type UpdateAccountBalanceReq struct {
+	g.Meta ` method:"post" summary:"财务账号金额冲正" tags:"组织单位/财务服务"`
+	co_company_api.UpdateAccountBalanceReq
+}
+
+type GetCurrencyByCodeReq struct {
+	g.Meta ` method:"post" summary:"根据货币代码获取货币详情" tags:"组织单位/财务服务"`
+	co_company_api.GetCurrencyByCodeReq
+}
+
+type QueryCurrencyListReq struct {
+	g.Meta ` method:"post" summary:"获取货币列表" tags:"组织单位/财务服务"`
+	co_company_api.QueryCurrencyListReq
+}
+
+type QueryAccountBillsReq struct {
+	g.Meta ` method:"post" summary:"查询财务账号账单明细" tags:"组织单位/财务服务"`
+	co_company_api.QueryAccountBillsReq
+}

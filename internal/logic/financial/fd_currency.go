@@ -8,6 +8,8 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
 )
 
 // 货币类型管理
@@ -95,7 +97,7 @@ func (s *sFdCurrency[
 	return ret.(TR)
 }
 
-// GetCurrencyByCurrencyCode 根据货币代码查找货币(主键)
+// GetCurrencyByCode 根据货币代码查找货币(主键)
 func (s *sFdCurrency[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -106,7 +108,7 @@ func (s *sFdCurrency[
 	TR,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetCurrencyByCurrencyCode(ctx context.Context, currencyCode string) (response TR, err error) {
+]) GetCurrencyByCode(ctx context.Context, currencyCode string) (response TR, err error) {
 	if currencyCode == "" {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CurrencyCode_NotNull"), s.dao.FdCurrency.Table())
 	}
@@ -120,6 +122,21 @@ func (s *sFdCurrency[
 	}
 
 	return result, nil
+}
+
+// QueryCurrencyList 获取币种列表
+func (s *sFdCurrency[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	TR,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryCurrencyList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
+	return daoctl.Query[TR](s.dao.FdCurrency.Ctx(ctx), search, true)
 }
 
 // GetCurrencyByCnName 根据国家查找货币信息
