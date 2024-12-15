@@ -16,7 +16,7 @@ import (
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
-	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
