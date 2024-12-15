@@ -16,15 +16,15 @@ import (
 )
 
 type FinancialController[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	i_controller.IFinancial[
 		ITFdAccountRes,
@@ -37,15 +37,15 @@ type FinancialController[
 }
 
 func Financial[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -372,7 +372,7 @@ func (c *FinancialController[
 	return &resp, nil
 }
 
-// QueryAccountBillsReq  根据财务账号id查询账单
+// QueryAccountBills  根据财务账号id查询账单
 func (c *FinancialController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -383,8 +383,8 @@ func (c *FinancialController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryAccountBillsReq(ctx context.Context, req *co_v1.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
-	return c.IFinancial.QueryAccountBillsReq(ctx, &req.QueryAccountBillsReq)
+]) QueryAccountBills(ctx context.Context, req *co_v1.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
+	return c.IFinancial.QueryAccountBills(ctx, &req.QueryAccountBillsReq)
 }
 
 //

@@ -558,7 +558,7 @@ func (c *FinancialController[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryAccountBillsReq(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
+]) QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
 	return c.modules.AccountBill().GetAccountBillByAccountId(ctx, req.AccountId, &req.SearchParams)
 }
 

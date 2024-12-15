@@ -77,7 +77,7 @@ type IFinancial[
 	QueryCurrencyList(ctx context.Context, search *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error)
 
 	// QueryAccountBillsReq 根据财务账号id查询账单
-	QueryAccountBillsReq(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error)
+	QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error)
 
 	// Increment 收入
 	//Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error)
