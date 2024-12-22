@@ -11,25 +11,27 @@ import (
 
 // CompanyEmployee is the golang structure of table co_company_employee for DAO operations like Where/Data.
 type CompanyEmployee struct {
-	g.Meta       `orm:"table:co_company_employee, do:true"`
-	Id           interface{} // ID，保持与USERID一致
-	No           interface{} // 工号
-	Avatar       interface{} // 头像
-	Name         interface{} // 姓名
-	Mobile       interface{} // 手机号
-	UnionMainId  interface{} // 所属主体
-	State        interface{} // 状态： -1已离职，0待确认，1已入职
-	LastActiveIp interface{} // 最后活跃IP
-	HiredAt      *gtime.Time // 入职时间
-	CreatedBy    interface{} //
-	CreatedAt    *gtime.Time //
-	UpdatedBy    interface{} //
-	UpdatedAt    *gtime.Time //
-	DeletedBy    interface{} //
-	DeletedAt    *gtime.Time //
-	Sex          interface{} // 性别：0未知、1男、2女
-	Remark       interface{} // 备注
-	CountryCode  interface{} // 所属国家编码
-	Region       interface{} // 所属地区
-	Email        interface{} // 业务邮箱
+	g.Meta        `orm:"table:co_company_employee, do:true"`
+	Id            interface{} // ID，保持与USERID一致
+	No            interface{} // 工号
+	Avatar        interface{} // 头像
+	Name          interface{} // 姓名
+	Mobile        interface{} // 手机号
+	UnionMainId   interface{} // 所属主体
+	State         interface{} // 状态： -1已离职，0待确认，1已入职
+	LastActiveIp  interface{} // 最后活跃IP
+	HiredAt       *gtime.Time // 入职时间
+	CreatedBy     interface{} //
+	CreatedAt     *gtime.Time //
+	UpdatedBy     interface{} //
+	UpdatedAt     *gtime.Time //
+	DeletedBy     interface{} //
+	DeletedAt     *gtime.Time //
+	Sex           interface{} // 性别：0未知、1男、2女
+	Remark        interface{} // 备注
+	CountryCode   interface{} // 所属国家编码
+	Region        interface{} // 所属地区
+	Email         interface{} // 业务邮箱
+	WeixinAccount interface{} // 微信号
+	Address       interface{} // 地址
 }
