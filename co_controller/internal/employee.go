@@ -208,7 +208,7 @@ func (c *EmployeeController[
 	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Create)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee)
+			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee, nil)
 			return ret, err
 		},
 		permission,

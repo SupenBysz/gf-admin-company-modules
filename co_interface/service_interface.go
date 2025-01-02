@@ -24,7 +24,7 @@ type (
 		// QueryCompanyList 查询公司列表
 		QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error)
 		// CreateCompany 创建公司信息
-		CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
+		CreateCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error)
 		// UpdateCompany 更新公司信息
 		UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
@@ -51,7 +51,7 @@ type (
 		// QueryEmployeeList 获取员工列表
 		QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 		// CreateEmployee 创建员工信息
-		CreateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error)
+		CreateEmployee(ctx context.Context, info *co_model.Employee, bindUser *sys_model.SysUser) (response TR, err error)
 		// UpdateEmployee 更新员工信息
 		UpdateEmployee(ctx context.Context, info *co_model.UpdateEmployee) (response TR, err error)
 		// UpdateEmployeeAvatar 更新员工头像

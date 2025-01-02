@@ -3,6 +3,7 @@ package company
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
@@ -31,15 +32,15 @@ import (
 )
 
 type sCompany[
-TR co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TR co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -59,15 +60,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func NewCompany[
-TR co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	TR co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -199,7 +200,7 @@ func (s *sCompany[
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
@@ -208,7 +209,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -326,9 +327,9 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
+]) CreateCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	info.Id = 0
-	return s.saveCompany(ctx, info)
+	return s.saveCompany(ctx, info, bindUser)
 }
 
 // UpdateCompany 更新公司信息
@@ -346,7 +347,7 @@ func (s *sCompany[
 	if info.Id <= 0 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
-	return s.saveCompany(ctx, info)
+	return s.saveCompany(ctx, info, nil)
 }
 
 func (s *sCompany[
@@ -380,24 +381,19 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
+]) saveCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	// 名称重名检测
 	if info.Name != nil {
 		if s.HasCompanyByName(ctx, *info.Name, info.Id) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 		}
 	}
-	// 获取登录用户
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
-	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
-	}
 
 	// 构建公司ID
 	unionMainId := idgen.NextId()
 
 	data := kconv.Struct(info, &co_do.Company{})
+
 	//data := co_do.Company{
 	//	Id:            info.Id,
 	//	Name:          info.Name,
@@ -409,10 +405,24 @@ func (s *sCompany[
 	//	LicenseState:  info.LicenseState,
 	//}
 
+	// 获取登录用户
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	if bindUser == nil && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
+	}
+
 	// 启用事务
 	err = s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee co_model.IEmployeeRes
 		if info.Id == 0 {
+			if bindUser != nil {
+				ok, err := sys_service.SysUser().SetUserType(ctx, bindUser.Id, s.modules.GetConfig().UserType)
+				if !ok || err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, nil, "保存失败，无法更新关联用户信息", s.dao.Company.Table())
+				}
+			}
+
 			// 是否创建默认员工和角色
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
 				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
@@ -426,7 +436,7 @@ func (s *sCompany[
 				employeeData := employeeDoData.(*co_model.Employee)
 
 				// 1.构建员工信息 + user登录信息
-				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData)
+				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData, bindUser)
 				if err != nil {
 					return err
 				}
@@ -458,7 +468,9 @@ func (s *sCompany[
 			// 3.构建公司信息
 			data.Id = unionMainId
 			info.Id = unionMainId
-			data.ParentId = sessionUser.UnionMainId
+			if sessionUser.Type > 4 {
+				data.ParentId = sessionUser.UnionMainId
+			}
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			//data.LicenseId = 0 // 首次创建没有主体id
@@ -479,7 +491,7 @@ func (s *sCompany[
 
 			// 4.创建主财务账号  通用账户
 			accountData := co_do.FdAccount{}
-			gconv.Struct(info, &accountData)
+			_ = gconv.Struct(info, &accountData)
 
 			account := &co_model.FdAccountRegister{
 				Name: *info.Name,
@@ -560,7 +572,7 @@ func (s *sCompany[
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
@@ -569,7 +581,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 

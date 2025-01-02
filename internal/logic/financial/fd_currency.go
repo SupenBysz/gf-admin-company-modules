@@ -10,6 +10,7 @@ import (
 	"github.com/kysion/base-library/base_hook"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
+	"reflect"
 )
 
 // 货币类型管理
@@ -92,9 +93,14 @@ func (s *sFdCurrency[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IFdCurrencyRes
-	ret = &co_model.FdCurrencyRes{}
-	return ret.(TR)
+	//var ret co_model.IFdCurrencyRes
+	var result TR
+	curType := reflect.TypeOf(result).Elem()
+	// 根据 TR 类型通过反射构建TR对象
+	data := reflect.New(curType).Interface()
+
+	//ret = &co_model.FdCurrencyRes{}
+	return data.(TR)
 }
 
 // GetCurrencyByCode 根据货币代码查找货币(主键)
@@ -115,7 +121,7 @@ func (s *sFdCurrency[
 
 	result := s.FactoryMakeResponseInstance()
 
-	err = s.dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(result.Data())
+	err = s.dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(result)
 
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency}{#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
