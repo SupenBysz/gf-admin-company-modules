@@ -24,7 +24,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
@@ -633,10 +632,10 @@ func (s *sEmployee[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error) {
+]) CreateEmployee(ctx context.Context, info *co_model.Employee, bindUser *sys_model.SysUser) (response TR, err error) {
 	info.Id = 0
 
-	return s.saveEmployee(ctx, info)
+	return s.saveEmployee(ctx, info, bindUser)
 }
 
 // UpdateEmployee 更新员工信息
@@ -750,7 +749,7 @@ func (s *sEmployee[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) saveEmployee(ctx context.Context, info *co_model.Employee) (response TR, err error) {
+]) saveEmployee(ctx context.Context, info *co_model.Employee, bindUser *sys_model.SysUser) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 除匿名用户外，其它用户在有权限的情况下均可以创建或更新员工信息，001 代表默认管理员工号
@@ -797,18 +796,12 @@ func (s *sEmployee[
 		}
 
 		if info.Id == 0 {
-			// 创建员工信息
-			data.Id = idgen.NextId()
-			data.CreatedBy = sessionUser.Id
-			data.CreatedAt = gtime.Now()
-			data.UnionMainId = info.UnionMainId
-
-			{
+			if bindUser == nil {
 				// 创建登录信息
 				passwordLen := len(gconv.String(data.Id))
 				password := gstr.SubStr(gconv.String(data.Id), passwordLen-6, 6)
 
-				newUser, err := sys_service.SysUser().CreateUser(ctx, sys_model.UserInnerRegister{
+				bindUser, err = sys_service.SysUser().CreateUser(ctx, sys_model.UserInnerRegister{
 					Username:        strconv.FormatInt(gconv.Int64(data.Id), 36),
 					Password:        password,
 					ConfirmPassword: password,
@@ -821,9 +814,13 @@ func (s *sEmployee[
 				if err != nil {
 					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_User_Save_Failed"), s.dao.Employee.Table())
 				}
-
-				data.Id = newUser.Id
 			}
+
+			// 创建员工信息
+			data.Id = bindUser.Id
+			data.CreatedBy = sessionUser.Id
+			data.CreatedAt = gtime.Now()
+			data.UnionMainId = info.UnionMainId
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(*data)
@@ -832,6 +829,10 @@ func (s *sEmployee[
 			}
 
 			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(doData))
+
+			if sessionUser.Id == data.Id {
+				sessionUser.UnionMainId = info.UnionMainId
+			}
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())

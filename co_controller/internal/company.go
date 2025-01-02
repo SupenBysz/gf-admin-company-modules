@@ -164,7 +164,7 @@ func (c *CompanyController[
 
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
+			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company, nil)
 		},
 		permission,
 	)
