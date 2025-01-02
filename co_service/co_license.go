@@ -8,7 +8,7 @@ package co_service
 import (
 	"context"
 
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
@@ -18,9 +18,9 @@ import (
 type (
 	ILicense interface {
 		// GetAuditData 订阅审核数据获取Hook, 将审核数据渲染成主体资质然后进行输出  (数据处理渲染)
-		GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_entity.SysAudit) error
+		GetAuditData(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_model.AuditRes) error
 		// AuditChange 审核成功的处理逻辑 Hook （数据存储）
-		AuditChange(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_entity.SysAudit) error
+		AuditChange(ctx context.Context, auditEvent sys_enum.AuditEvent, info *sys_model.AuditRes) error
 		// GetLicenseById 根据ID获取主体认证|信息
 		GetLicenseById(ctx context.Context, id int64) (*co_entity.License, error)
 		// QueryLicenseList 查询主体认证|列表

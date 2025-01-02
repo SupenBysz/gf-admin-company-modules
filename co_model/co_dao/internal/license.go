@@ -56,6 +56,8 @@ type LicenseColumns struct {
 	BusinessLicenseLegalMobile string // 法人联系电话
 	ServerMobile               string // 服务电话
 	DoorPicturesJson           string // 门头照
+	OtherPicturesJson          string // 其它照片
+	IdcardIssuingAuthority     string // 签发机关
 }
 
 // licenseColumns holds the columns for table co_license.
@@ -89,6 +91,8 @@ var licenseColumns = LicenseColumns{
 	BusinessLicenseLegalMobile: "business_license_legal_mobile",
 	ServerMobile:               "server_mobile",
 	DoorPicturesJson:           "door_pictures_json",
+	OtherPicturesJson:          "other_pictures_json",
+	IdcardIssuingAuthority:     "idcard_issuing_authority",
 }
 
 // NewLicenseDao creates and returns a new DAO object for table data access.
