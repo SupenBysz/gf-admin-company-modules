@@ -3,8 +3,8 @@ package company
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -12,6 +12,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gogf/gf/v2/text/gstr"
 	"github.com/gogf/gf/v2/util/gconv"
@@ -53,7 +54,8 @@ type sCompany[
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]
-	dao co_dao.XDao
+	superAdminMainId int64
+	dao              co_dao.XDao
 	//makeMoreFunc func(ctx context.Context, data co_model.ICompanyRes, employeeModule co_interface.IEmployee[co_model.IEmployeeRes]) co_model.ICompanyRes
 }
 
@@ -93,6 +95,9 @@ func NewCompany[
 		dao:     *modules.Dao(),
 	}
 
+	userType := g.Cfg().MustGet(context.Background(), "service.superAdminMainId", 0)
+
+	result.superAdminMainId = userType.Int64()
 	//result.makeMoreFunc = MakeMore
 
 	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
@@ -186,14 +191,16 @@ func (s *sCompany[
 	if id == 0 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
 	}
+	m := s.dao.Company.Ctx(ctx)
 
-	data, err := daoctl.GetByIdWithError[TR](
-		s.dao.Company.Ctx(ctx),
-		id,
-	)
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.UnionMainId != id {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
@@ -202,19 +209,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	//err == sql.ErrNoRows ||
-	//    !reflect.ValueOf(data).IsNil() && sessionUser != nil &&
-	//        sessionUser.Id != 0 &&
-	//        response.Data().UnionMainId != sessionUser.UnionMainId &&
-	//        response.Data().UnionMainId != sessionUser.ParentId &&
-	//        !sessionUser.IsAdmin
-
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
-		!reflect.ValueOf(response).IsNil() &&
-		response.Data().Id != sessionUser.UnionMainId &&
-		response.Data().ParentId != sessionUser.UnionMainId &&
-		!sessionUser.IsAdmin &&
-		!sessionUser.IsSuperAdmin {
+	if errors.Is(err, sql.ErrNoRows) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -296,12 +291,14 @@ func (s *sCompany[
 	if len(isExport) > 0 && len(isExport) > 0 {
 		export = isExport[0]
 	}
-	data, err := daoctl.Query[TR](
-		s.dao.Company.Ctx(ctx).
-			Where(co_do.Company{ParentId: sessionUser.UnionMainId}),
-		filter,
-		export,
-	)
+
+	m := s.dao.Company.Ctx(ctx)
+
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.Query[TR](m, filter, export)
 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
@@ -330,9 +327,9 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
+]) CreateCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	info.Id = 0
-	return s.saveCompany(ctx, info)
+	return s.saveCompany(ctx, info, bindUser)
 }
 
 // UpdateCompany 更新公司信息
@@ -350,7 +347,7 @@ func (s *sCompany[
 	if info.Id <= 0 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
-	return s.saveCompany(ctx, info)
+	return s.saveCompany(ctx, info, nil)
 }
 
 func (s *sCompany[
@@ -384,20 +381,19 @@ func (s *sCompany[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) saveCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
+]) saveCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	// 名称重名检测
 	if info.Name != nil {
 		if s.HasCompanyByName(ctx, *info.Name, info.Id) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 		}
 	}
-	// 获取登录用户
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 构建公司ID
 	unionMainId := idgen.NextId()
 
 	data := kconv.Struct(info, &co_do.Company{})
+
 	//data := co_do.Company{
 	//	Id:            info.Id,
 	//	Name:          info.Name,
@@ -409,10 +405,24 @@ func (s *sCompany[
 	//	LicenseState:  info.LicenseState,
 	//}
 
+	// 获取登录用户
+	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
+	if bindUser == nil && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
+	}
+
 	// 启用事务
 	err = s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
 		var employee co_model.IEmployeeRes
 		if info.Id == 0 {
+			if bindUser != nil {
+				ok, err := sys_service.SysUser().SetUserType(ctx, bindUser.Id, s.modules.GetConfig().UserType)
+				if !ok || err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, nil, "保存失败，无法更新关联用户信息", s.dao.Company.Table())
+				}
+			}
+
 			// 是否创建默认员工和角色
 			if s.modules.GetConfig().IsCreateDefaultEmployeeAndRole {
 				employeeDoData, err := info.Employee.DoFactory(&co_model.Employee{
@@ -426,7 +436,7 @@ func (s *sCompany[
 				employeeData := employeeDoData.(*co_model.Employee)
 
 				// 1.构建员工信息 + user登录信息
-				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData)
+				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData, bindUser)
 				if err != nil {
 					return err
 				}
@@ -458,7 +468,9 @@ func (s *sCompany[
 			// 3.构建公司信息
 			data.Id = unionMainId
 			info.Id = unionMainId
-			data.ParentId = sessionUser.UnionMainId
+			if sessionUser.Type > 4 {
+				data.ParentId = sessionUser.UnionMainId
+			}
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			//data.LicenseId = 0 // 首次创建没有主体id
@@ -479,7 +491,7 @@ func (s *sCompany[
 
 			// 4.创建主财务账号  通用账户
 			accountData := co_do.FdAccount{}
-			gconv.Struct(info, &accountData)
+			_ = gconv.Struct(info, &accountData)
 
 			account := &co_model.FdAccountRegister{
 				Name: *info.Name,
@@ -551,13 +563,16 @@ func (s *sCompany[
 ]) GetCompanyDetail(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	data, err := daoctl.GetByIdWithError[TR](
-		s.dao.Company.Ctx(ctx),
-		id,
-	)
+	m := s.dao.Company.Ctx(ctx)
+
+	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+	}
+
+	data, err := daoctl.GetByIdWithError[TR](m, id)
 
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Get_Failed}"), s.dao.Company.Table())
 		}
 	}
@@ -566,7 +581,7 @@ func (s *sCompany[
 		response = *data
 	}
 
-	if err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() && response.Data().Id != sessionUser.UnionMainId && response.Data().ParentId != sessionUser.UnionMainId {
+	if errors.Is(err, sql.ErrNoRows) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
@@ -596,6 +611,10 @@ func (s *sCompany[
 		s.dao.Company.Ctx(ctx),
 		unionMainId,
 	)
+
+	if company == nil || err != nil {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "主体不存在", s.dao.Company.Table())
+	}
 
 	// 是否是本主体员工
 	isCompanyEmployee := false
@@ -679,7 +698,7 @@ func (s *sCompany[
 		}
 	}
 
-	if !hasUnionMainId {
+	if !hasUnionMainId && sessionUser.UnionMainId != s.superAdminMainId {
 		search.Filter = append(search.Filter, base_model.FilterInfo{
 			Field:     "union_main_id",
 			Where:     "=",
@@ -738,7 +757,7 @@ func (s *sCompany[
 				ctx = base_funs.AttrBuilder[ITEmployeeRes, ITEmployeeRes](ctx, s.modules.Dao().Employee.Columns().Id)
 
 				// 追加订阅自定义类型的员工扩展数据
-				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+				ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 
 				employee, err := s.modules.Employee().GetEmployeeById(ctx, data.Data().UserId)
 				//if err != nil || reflect.ValueOf(employee.Data()).IsNil() {

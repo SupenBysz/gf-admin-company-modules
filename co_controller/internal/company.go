@@ -5,7 +5,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
@@ -18,7 +17,7 @@ import (
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
-	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
@@ -165,7 +164,7 @@ func (c *CompanyController[
 
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company)
+			return c.modules.Company().CreateCompany(c.makeMore(ctx), &req.Company, nil)
 		},
 		permission,
 	)
@@ -261,7 +260,7 @@ func (c *CompanyController[
 
 	if include.Contains("*") {
 		ctx = base_funs.AttrBuilder[TIRes, ITEmployeeRes](ctx, c.dao.Company.Columns().UserId)
-		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	}
 
 	if include.Contains("adminUser") {
@@ -269,7 +268,7 @@ func (c *CompanyController[
 	}
 
 	if include.Contains("user") {
-		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	}
 
 	return ctx

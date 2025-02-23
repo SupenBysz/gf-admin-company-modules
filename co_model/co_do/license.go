@@ -41,4 +41,6 @@ type License struct {
 	BusinessLicenseLegalMobile interface{} // 法人联系电话
 	ServerMobile               interface{} // 服务电话
 	DoorPicturesJson           interface{} // 门头照
+	OtherPicturesJson          interface{} // 其它照片
+	IdcardIssuingAuthority     interface{} // 签发机关
 }

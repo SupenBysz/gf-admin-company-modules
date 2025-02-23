@@ -59,10 +59,25 @@ type IFinancial[
 	// UpdateAccountLimitState 修改财务账号限制状态
 	UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error)
 
+	// SetAccountCurrencyCode 设置财务账号币种
+	SetAccountCurrencyCode(ctx context.Context, req *co_company_api.SetAccountCurrencyCodeReq) (api_v1.BoolRes, error)
+
+	// UpdateAccountBalance 财务账号金额冲正
+	UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error)
+
+	// GetCurrencyByCode 获取币种信息
+	GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (ITFdCurrencyRes, error)
+
 	// CreateAccountDetail 创建财务账单金额明细统计记录  只能被动创建
 
 	// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
 	GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error)
+
+	// QueryCurrencyList 获取货币列表
+	QueryCurrencyList(ctx context.Context, search *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error)
+
+	// QueryAccountBillsReq 根据财务账号id查询账单
+	QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error)
 
 	// Increment 收入
 	//Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error)

@@ -3,6 +3,7 @@ package i_controller
 import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 )
@@ -40,4 +41,7 @@ type IMy interface {
 
 	// UpdateAccount  修改我的财务账号
 	UpdateAccount(ctx context.Context, req *co_company_api.UpdateAccountReq) (api_v1.BoolRes, error)
+
+	// GetMyCompanyPermissionList 获取我的公司权限列表
+	GetMyCompanyPermissionList(ctx context.Context, req *co_company_api.GetMyCompanyPermissionListReq) (*sys_model.MyPermissionListRes, error)
 }

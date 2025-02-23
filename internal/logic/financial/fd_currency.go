@@ -8,6 +8,9 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/kysion/base-library/base_hook"
+	"github.com/kysion/base-library/base_model"
+	"github.com/kysion/base-library/utility/daoctl"
+	"reflect"
 )
 
 // 货币类型管理
@@ -90,12 +93,17 @@ func (s *sFdCurrency[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IFdCurrencyRes
-	ret = &co_model.FdCurrencyRes{}
-	return ret.(TR)
+	//var ret co_model.IFdCurrencyRes
+	var result TR
+	curType := reflect.TypeOf(result).Elem()
+	// 根据 TR 类型通过反射构建TR对象
+	data := reflect.New(curType).Interface()
+
+	//ret = &co_model.FdCurrencyRes{}
+	return data.(TR)
 }
 
-// GetCurrencyByCurrencyCode 根据货币代码查找货币(主键)
+// GetCurrencyByCode 根据货币代码查找货币(主键)
 func (s *sFdCurrency[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -106,20 +114,35 @@ func (s *sFdCurrency[
 	TR,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetCurrencyByCurrencyCode(ctx context.Context, currencyCode string) (response TR, err error) {
+]) GetCurrencyByCode(ctx context.Context, currencyCode string) (response TR, err error) {
 	if currencyCode == "" {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CurrencyCode_NotNull"), s.dao.FdCurrency.Table())
 	}
 
 	result := s.FactoryMakeResponseInstance()
 
-	err = s.dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(result.Data())
+	err = s.dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(result)
 
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Currency}{#error_Data_Get_Failed}"), s.dao.FdCurrency.Table())
 	}
 
 	return result, nil
+}
+
+// QueryCurrencyList 获取币种列表
+func (s *sFdCurrency[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	TR,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryCurrencyList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
+	return daoctl.Query[TR](s.dao.FdCurrency.Ctx(ctx), search, true)
 }
 
 // GetCurrencyByCnName 根据国家查找货币信息

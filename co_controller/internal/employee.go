@@ -5,7 +5,6 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
@@ -17,7 +16,7 @@ import (
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
-	base_funs "github.com/kysion/base-library/utility/base_funs"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/base_permission"
 	"github.com/kysion/base-library/utility/kconv"
 )
@@ -209,7 +208,7 @@ func (c *EmployeeController[
 	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Create)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee)
+			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee, nil)
 			return ret, err
 		},
 		permission,
@@ -356,7 +355,7 @@ func (c *EmployeeController[
 	if include.Contains("*") {
 		ctx = base_funs.AttrBuilder[TIRes, []ITTeamRes](ctx, c.dao.Employee.Columns().UnionMainId)
 		ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Employee.Columns().Id)
-		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	}
 
 	// 最新附加数据规范：前端有需求，通过请求参数传递，后端在控制层才进行订阅数据，然后在service逻辑层进行数据附加
@@ -367,7 +366,7 @@ func (c *EmployeeController[
 	// 因为需要附加公共模块user的数据，所以也要添加有关sys_user的附加数据订阅
 	if include.Contains("user") {
 		ctx = base_funs.AttrBuilder[TIRes, TIRes](ctx, c.dao.Employee.Columns().Id)
-		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_entity.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
+		ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 	}
 	return ctx
 }

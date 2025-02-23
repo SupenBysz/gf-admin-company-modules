@@ -2,25 +2,29 @@ package controller
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
+	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/kconv"
 )
 
 type FinancialController[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	i_controller.IFinancial[
 		ITFdAccountRes,
@@ -33,15 +37,15 @@ type FinancialController[
 }
 
 func Financial[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -306,6 +310,81 @@ func (c *FinancialController[
 	ret, err := c.IFinancial.GetAccountDetailById(ctx, &req.GetAccountDetailByAccountIdReq)
 
 	return ret, err
+}
+
+// UpdateAccountBalance 财务账号金额冲正
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) UpdateAccountBalance(ctx context.Context, req *co_v1.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
+	ret, err := c.IFinancial.UpdateAccountBalance(ctx, &req.UpdateAccountBalanceReq)
+
+	return ret, err
+}
+
+// GetCurrencyByCode 财务账号金额冲正
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) GetCurrencyByCode(ctx context.Context, req *co_v1.GetCurrencyByCodeReq) (ITFdCurrencyRes, error) {
+	return c.IFinancial.GetCurrencyByCode(ctx, &req.GetCurrencyByCodeReq)
+}
+
+// QueryCurrencyList 获取币种列表
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryCurrencyList(ctx context.Context, req *co_v1.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
+	ret, err := c.IFinancial.QueryCurrencyList(ctx, &req.QueryCurrencyListReq)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, err
+	}
+
+	resp := co_model.FdCurrencyListRes{}
+
+	if ret == nil {
+		return &resp, nil
+	}
+
+	_ = gconv.Struct(ret, &resp)
+	return &resp, nil
+}
+
+// QueryAccountBills  根据财务账号id查询账单
+func (c *FinancialController[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) QueryAccountBills(ctx context.Context, req *co_v1.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
+	return c.IFinancial.QueryAccountBills(ctx, &req.QueryAccountBillsReq)
 }
 
 //

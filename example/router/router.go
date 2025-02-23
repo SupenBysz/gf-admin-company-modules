@@ -60,14 +60,15 @@ func CompanyGroup[
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
-	controller := controller.Company(modules)
+	ctrl := controller.Company(modules)
 
-	group.POST(routePrefix+"/createCompany", controller.CreateCompany)
-	group.POST(routePrefix+"/updateCompany", controller.UpdateCompany)
-	group.POST(routePrefix+"/hasCompanyByName", controller.HasCompanyByName)
-	group.POST(routePrefix+"/getCompanyById", controller.GetCompanyById)
-	group.POST(routePrefix+"/queryCompanyList", controller.QueryCompanyList)
-	group.POST(routePrefix+"/getCompanyDetail", controller.GetCompanyDetail)
+	group.POST(routePrefix+"/createCompany", ctrl.CreateCompany)
+	group.POST(routePrefix+"/updateCompany", ctrl.UpdateCompany)
+	group.POST(routePrefix+"/hasCompanyByName", ctrl.HasCompanyByName)
+	group.POST(routePrefix+"/getCompanyById", ctrl.GetCompanyById)
+	group.POST(routePrefix+"/queryCompanyList", ctrl.QueryCompanyList)
+	group.POST(routePrefix+"/getCompanyDetail", ctrl.GetCompanyDetail)
+	group.POST(routePrefix+"/setCompanyState", ctrl.SetCompanyState)
 	return group
 }
 
@@ -93,19 +94,19 @@ func EmployeeGroup[
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Employee)
-	controller := controller.Employee(modules)
+	ctrl := controller.Employee(modules)
 
-	group.POST(routePrefix+"/getEmployeeById", controller.GetEmployeeById)
-	group.POST(routePrefix+"/getEmployeeDetailById", controller.GetEmployeeDetailById)
-	group.POST(routePrefix+"/hasEmployeeByName", controller.HasEmployeeByName)
-	group.POST(routePrefix+"/hasEmployeeByNo", controller.HasEmployeeByNo)
-	group.POST(routePrefix+"/queryEmployeeList", controller.QueryEmployeeList)
-	group.POST(routePrefix+"/createEmployee", controller.CreateEmployee)
-	group.POST(routePrefix+"/updateEmployee", controller.UpdateEmployee)
-	group.POST(routePrefix+"/deleteEmployee", controller.DeleteEmployee)
-	group.POST(routePrefix+"/getEmployeeListByRoleId", controller.GetEmployeeListByRoleId)
-	group.POST(routePrefix+"/setEmployeeRoles", controller.SetEmployeeRoles)
-	group.POST(routePrefix+"/setEmployeeState", controller.SetEmployeeState)
+	group.POST(routePrefix+"/getEmployeeById", ctrl.GetEmployeeById)
+	group.POST(routePrefix+"/getEmployeeDetailById", ctrl.GetEmployeeDetailById)
+	group.POST(routePrefix+"/hasEmployeeByName", ctrl.HasEmployeeByName)
+	group.POST(routePrefix+"/hasEmployeeByNo", ctrl.HasEmployeeByNo)
+	group.POST(routePrefix+"/queryEmployeeList", ctrl.QueryEmployeeList)
+	group.POST(routePrefix+"/createEmployee", ctrl.CreateEmployee)
+	group.POST(routePrefix+"/updateEmployee", ctrl.UpdateEmployee)
+	group.POST(routePrefix+"/deleteEmployee", ctrl.DeleteEmployee)
+	group.POST(routePrefix+"/getEmployeeListByRoleId", ctrl.GetEmployeeListByRoleId)
+	group.POST(routePrefix+"/setEmployeeRoles", ctrl.SetEmployeeRoles)
+	group.POST(routePrefix+"/setEmployeeState", ctrl.SetEmployeeState)
 
 	return group
 }
@@ -132,22 +133,22 @@ func TeamGroup[
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Team)
-	controller := controller.Team(modules)
+	ctrl := controller.Team(modules)
 
-	group.POST(routePrefix+"/getTeamById", controller.GetTeamById)
-	group.POST(routePrefix+"/hasTeamByName", controller.HasTeamByName)
-	group.POST(routePrefix+"/queryTeamList", controller.QueryTeamList)
-	group.POST(routePrefix+"/createTeam", controller.CreateTeam)
-	group.POST(routePrefix+"/updateTeam", controller.UpdateTeam)
-	// group.POST(routePrefix+"/queryTeamListByEmployee", controller.QueryTeamListByEmployee)
-	group.POST(routePrefix+"/setTeamMember", controller.SetTeamMember)
-	group.POST(routePrefix+"/removeTeamMember", controller.RemoveTeamMember)
-	group.POST(routePrefix+"/setTeamOwner", controller.SetTeamOwner)
-	group.POST(routePrefix+"/setTeamCaptain", controller.SetTeamCaptain)
-	group.POST(routePrefix+"/deleteTeam", controller.DeleteTeam)
-	group.POST(routePrefix+"/getEmployeeListByTeamId", controller.GetEmployeeListByTeamId)
-	group.POST(routePrefix+"/getTeamInviteCode", controller.GetTeamInviteCode)
-	group.POST(routePrefix+"/joinTeamByInviteCode", controller.JoinTeamByInviteCode)
+	group.POST(routePrefix+"/getTeamById", ctrl.GetTeamById)
+	group.POST(routePrefix+"/hasTeamByName", ctrl.HasTeamByName)
+	group.POST(routePrefix+"/queryTeamList", ctrl.QueryTeamList)
+	group.POST(routePrefix+"/createTeam", ctrl.CreateTeam)
+	group.POST(routePrefix+"/updateTeam", ctrl.UpdateTeam)
+	// group.POST(routePrefix+"/queryTeamListByEmployee", ctrl.QueryTeamListByEmployee)
+	group.POST(routePrefix+"/setTeamMember", ctrl.SetTeamMember)
+	group.POST(routePrefix+"/removeTeamMember", ctrl.RemoveTeamMember)
+	group.POST(routePrefix+"/setTeamOwner", ctrl.SetTeamOwner)
+	group.POST(routePrefix+"/setTeamCaptain", ctrl.SetTeamCaptain)
+	group.POST(routePrefix+"/deleteTeam", ctrl.DeleteTeam)
+	group.POST(routePrefix+"/getEmployeeListByTeamId", ctrl.GetEmployeeListByTeamId)
+	group.POST(routePrefix+"/getTeamInviteCode", ctrl.GetTeamInviteCode)
+	group.POST(routePrefix+"/joinTeamByInviteCode", ctrl.JoinTeamByInviteCode)
 
 	return group
 }
@@ -173,21 +174,21 @@ func MyGroup[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	controller := controller.My(modules)
+	ctrl := controller.My(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/my"
-	group.POST(routePrefix+"/getProfile", controller.GetProfile)
-	group.POST(routePrefix+"/getCompany", controller.GetCompany)
-	group.POST(routePrefix+"/getTeams", controller.GetTeams)
-	group.POST(routePrefix+"/setAvatar", controller.SetAvatar)
-	group.POST(routePrefix+"/setEmployeeMobile", controller.SetMobile)
-	group.POST(routePrefix+"/setEmployeeMail", controller.SetMail)
+	group.POST(routePrefix+"/getProfile", ctrl.GetProfile)
+	group.POST(routePrefix+"/getCompany", ctrl.GetCompany)
+	group.POST(routePrefix+"/getTeams", ctrl.GetTeams)
+	group.POST(routePrefix+"/setAvatar", ctrl.SetAvatar)
+	group.POST(routePrefix+"/setEmployeeMobile", ctrl.SetMobile)
+	group.POST(routePrefix+"/setEmployeeMail", ctrl.SetMail)
 
 	// 我的财务相关
-	group.POST(routePrefix+"/getAccountBills", controller.GetAccountBills)
-	group.POST(routePrefix+"/getAccounts", controller.GetAccounts)
-	group.POST(routePrefix+"/getBankCards", controller.GetBankCards)
-	group.POST(routePrefix+"/getInvoices", controller.GetInvoices)
-	group.POST(routePrefix+"/updateAccount", controller.UpdateAccount)
+	group.POST(routePrefix+"/getAccountBills", ctrl.GetAccountBills)
+	group.POST(routePrefix+"/getAccounts", ctrl.GetAccounts)
+	group.POST(routePrefix+"/getBankCards", ctrl.GetBankCards)
+	group.POST(routePrefix+"/getInvoices", ctrl.GetInvoices)
+	group.POST(routePrefix+"/updateAccount", ctrl.UpdateAccount)
 
 	return group
 }
@@ -213,29 +214,31 @@ func FinancialGroup[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
-	controller := controller.Financial(modules)
+	ctrl := controller.Financial(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/financial"
 
-	group.POST(routePrefix+"/registerBankCard", controller.BankCardRegister)
-	group.POST(routePrefix+"/deleteBankCard", controller.DeleteBankCard)
-	group.POST(routePrefix+"/queryBankCardList", controller.QueryBankCardList)
-	group.POST(routePrefix+"/getAccountBalance", controller.GetAccountBalance)
-	group.POST(routePrefix+"/invoiceRegister", controller.InvoiceRegister)
-	group.POST(routePrefix+"/queryInvoice", controller.QueryInvoice)
-	group.POST(routePrefix+"/deleteInvoiceById", controller.DeletesFdInvoiceById)
-	group.POST(routePrefix+"/invoiceDetailRegister", controller.InvoiceDetailRegister)
-	group.POST(routePrefix+"/queryInvoiceDetailList", controller.QueryInvoiceDetailList)
-	group.POST(routePrefix+"/makeInvoiceDetail", controller.MakeInvoiceDetailReq)
-	group.POST(routePrefix+"/auditInvoiceDetail", controller.AuditInvoiceDetail)
+	group.POST(routePrefix+"/registerBankCard", ctrl.BankCardRegister)
+	group.POST(routePrefix+"/deleteBankCard", ctrl.DeleteBankCard)
+	group.POST(routePrefix+"/queryBankCardList", ctrl.QueryBankCardList)
+	group.POST(routePrefix+"/getAccountBalance", ctrl.GetAccountBalance)
+	group.POST(routePrefix+"/invoiceRegister", ctrl.InvoiceRegister)
+	group.POST(routePrefix+"/queryInvoice", ctrl.QueryInvoice)
+	group.POST(routePrefix+"/deleteInvoiceById", ctrl.DeletesFdInvoiceById)
+	group.POST(routePrefix+"/invoiceDetailRegister", ctrl.InvoiceDetailRegister)
+	group.POST(routePrefix+"/queryInvoiceDetailList", ctrl.QueryInvoiceDetailList)
+	group.POST(routePrefix+"/makeInvoiceDetail", ctrl.MakeInvoiceDetailReq)
+	group.POST(routePrefix+"/auditInvoiceDetail", ctrl.AuditInvoiceDetail)
 
-	group.POST(routePrefix+"/getAccountDetail", controller.GetAccountDetail)
-	group.POST(routePrefix+"/updateAccountIsEnabled", controller.UpdateAccountIsEnabled)
-	group.POST(routePrefix+"/updateAccountLimitState", controller.UpdateAccountLimitState)
+	group.POST(routePrefix+"/getAccountDetail", ctrl.GetAccountDetail)
+	group.POST(routePrefix+"/updateAccountIsEnabled", ctrl.UpdateAccountIsEnabled)
+	group.POST(routePrefix+"/updateAccountLimitState", ctrl.UpdateAccountLimitState)
+	group.POST(routePrefix+"/setAccountCurrencyCode", ctrl.SetAccountCurrencyCode)
+	group.POST(routePrefix+"/getCurrencyByCode", ctrl.GetCurrencyByCode)
 
-	group.POST(routePrefix+"/getAccountDetailByAccountId", controller.GetAccountDetailById)
-	//group.POST(routePrefix+"/increment", controller.Increment)
-	//group.POST(routePrefix+"/decrement", controller.Decrement)
-	group.POST(routePrefix+"/setAccountAllowExceed", controller.SetAccountAllowExceed)
+	group.POST(routePrefix+"/getAccountDetailByAccountId", ctrl.GetAccountDetailById)
+	//group.POST(routePrefix+"/increment", ctrl.Increment)
+	//group.POST(routePrefix+"/decrement", ctrl.Decrement)
+	group.POST(routePrefix+"/setAccountAllowExceed", ctrl.SetAccountAllowExceed)
 
 	return group
 }
