@@ -3,6 +3,11 @@ package company
 import (
 	"context"
 	"database/sql"
+	"math"
+	"reflect"
+	"strconv"
+	"time"
+
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
@@ -19,10 +24,6 @@ import (
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
-	"math"
-	"reflect"
-	"strconv"
-	"time"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -223,7 +224,7 @@ func (s *sEmployee[
 
 	// 不能将系统管理员移除出默认的管理员角色
 	if (event.Code() & sys_enum.Role.Change.Remove.Code()) == sys_enum.Role.Change.Remove.Code() {
-		if role.IsSystem && role.Name == "管理员" {
+		if role.IsSystem && role.Name == s.modules.T(ctx, "admin_role_name") {
 			employee, err := s.modules.Employee().GetEmployeeById(ctx, sysUser.Id)
 			if err != nil {
 				return false, err
@@ -235,7 +236,7 @@ func (s *sEmployee[
 			}
 
 			if company.Data().UserId == sysUser.Id {
-				return false, sys_service.SysLogs().ErrorSimple(ctx, err, "不能将主体的管理员移除出系统默认的管理员角色", s.dao.Company.Table())
+				return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_cannot_remove_admin_role"), s.dao.Company.Table())
 			}
 
 			return true, nil
@@ -266,7 +267,7 @@ func (s *sEmployee[
 		user.Id,
 	)
 	if err != nil && err == sql.ErrNoRows {
-		return sys_service.SysLogs().ErrorSimple(ctx, err, "用户不存在", s.dao.Employee.Table())
+		return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_user_not_exist"), s.dao.Employee.Table())
 	}
 
 	var employee TR
@@ -355,7 +356,7 @@ func (s *sEmployee[
 		employee.UnionMainId,
 	)
 	if company == nil || err != nil {
-		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, "主体id获取失败", s.dao.Company.Table())
+		return claims, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_company_id_fetch_failed"), s.dao.Company.Table())
 	}
 
 	// 是否是管理员：用户类型=admin 或者 登录用户id = 主体的管理员ID
@@ -931,7 +932,7 @@ func (s *sEmployee[
 
 				if gtime.Now().Before(employee.Data().DeletedAt.Add(HardDeleteWaitAt)) {
 					hours := gtime.Now().Sub(employee.Data().DeletedAt.Add(HardDeleteWaitAt)).Hours()
-					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + "数据延期保护中，请于 " + gconv.String(math.Abs(hours)) + " 小时后操作"
+					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + s.modules.Tf(ctx, "data_protection_wait_hours", math.Abs(hours))
 					return sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
 				}
 			}
@@ -1161,7 +1162,7 @@ func (s *sEmployee[
 	result, err := s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Update(co_do.CompanyEmployee{State: state})
 	affected, err := result.RowsAffected()
 	if err != nil || affected == 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, "修改员工状态失败", s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_update_employee_state_failed"), s.dao.Employee.Table())
 	}
 
 	return true, nil

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"reflect"
+
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
@@ -22,7 +24,6 @@ import (
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
 	"github.com/kysion/base-library/utility/masker"
-	"reflect"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -95,7 +96,7 @@ func NewCompany[
 		dao:     *modules.Dao(),
 	}
 
-	userType := g.Cfg().MustGet(context.Background(), "service.superAdminMainId", 0)
+	userType := g.Cfg().MustGet(context.Background(), "service.superAdminMainId", 1)
 
 	result.superAdminMainId = userType.Int64()
 	//result.makeMoreFunc = MakeMore
@@ -409,7 +410,7 @@ func (s *sCompany[
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if bindUser == nil && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "权限不足，请联系管理员", s.dao.Company.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_insufficient_permissions"), s.dao.Company.Table())
 	}
 
 	// 启用事务
@@ -419,7 +420,7 @@ func (s *sCompany[
 			if bindUser != nil {
 				ok, err := sys_service.SysUser().SetUserType(ctx, bindUser.Id, s.modules.GetConfig().UserType)
 				if !ok || err != nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, nil, "保存失败，无法更新关联用户信息", s.dao.Company.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_save_failed_cannot_update_related_user"), s.dao.Company.Table())
 				}
 			}
 
@@ -443,7 +444,7 @@ func (s *sCompany[
 
 				// 2.构建角色信息
 				roleData := sys_model.SysRole{
-					Name:        "管理员",
+					Name:        s.modules.T(ctx, "admin_role_name"),
 					UnionMainId: unionMainId,
 					IsSystem:    true,
 				}
@@ -613,7 +614,7 @@ func (s *sCompany[
 	)
 
 	if company == nil || err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "主体不存在", s.dao.Company.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_company_not_exist"), s.dao.Company.Table())
 	}
 
 	// 是否是本主体员工
@@ -623,7 +624,7 @@ func (s *sCompany[
 	employee, _ := s.modules.Employee().GetEmployeeById(ctx, sysUser.Id)
 	if !reflect.ValueOf(employee).IsNil() && employee.Data().UnionMainId != 0 {
 		if employee.Data().UnionMainId != unionMainId {
-			return false, sys_service.SysLogs().ErrorSimple(ctx, err, "该用户已经存在于别的主体，不能设置为管理员", s.dao.Company.Table())
+			return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_user_belongs_to_other_company"), s.dao.Company.Table())
 		} else {
 			isCompanyEmployee = true
 		}
@@ -655,7 +656,7 @@ func (s *sCompany[
 	// 3、修改主体的UserId
 	affected, err := daoctl.UpdateWithError(s.dao.Company.Ctx(ctx).Where(s.dao.Company.Columns().Id, company.Id).Data(s.dao.Company.Columns().UserId, sysUser.Id))
 	if affected == 0 || err != nil {
-		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "主体的管理员用户设置失败"), s.dao.Company.Table())
+		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_company_admin_user_set_failed"), s.dao.Company.Table())
 	}
 
 	// TODO 4、是否需要创建管理员角色、并设置为该用户...
