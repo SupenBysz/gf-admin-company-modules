@@ -2,6 +2,7 @@ package co_module
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
@@ -237,11 +238,12 @@ func (m *Modules[
 	if i18n == nil {
 		i18n = gi18n.New()
 		i18n.SetLanguage("zh-CN")
+
 		//err := i18n.SetPath("i18n/" + gstr.ToLower(m.conf.KeyIndex))
-		err := i18n.SetPath("i18n/" + m.conf.I18nName)
-		if err != nil {
-			return err
-		}
+		//err := i18n.SetPath("i18n/" + m.conf.I18nName)
+		//if err != nil {
+		//	return err
+		//}
 	}
 
 	m.i18n = i18n

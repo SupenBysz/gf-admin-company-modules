@@ -2,6 +2,8 @@ package company
 
 import (
 	"context"
+	"reflect"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
@@ -19,7 +21,6 @@ import (
 	"github.com/kysion/base-library/base_model/base_enum"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
-	"reflect"
 )
 
 type sMy[
@@ -154,7 +155,7 @@ func (s *sMy[
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, session.SysUser.Id)
 	if err != nil || reflect.ValueOf(employee).IsNil() {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, "员工信息未找到", co_dao.CompanyEmployee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_employee_not_found"), co_dao.CompanyEmployee.Table())
 	}
 
 	// 公司信息
@@ -335,7 +336,7 @@ func (s *sMy[
 	// 上传 --> 保存
 
 	// 校验员工头像并保存
-	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, "头像"+s.modules.T(ctx, "error_File_FileVoid"))
+	fileInfo, err := sys_service.File().GetFileById(ctx, imageId, s.modules.T(ctx, "avatar")+s.modules.T(ctx, "error_File_FileVoid"))
 
 	if err != nil {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
@@ -348,14 +349,14 @@ func (s *sMy[
 		_, err = sys_service.File().SaveFile(ctx, storageAddr, fileInfo)
 
 		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "avatar")+s.modules.T(ctx, "error_File_Save_Failed"), s.dao.Employee.Table())
 		}
 
 		//avatar := s.modules.Employee().UpdateEmployeeAvatar(ctx, sessionUser.Id, fileInfo.Url)
 		updateAvatar := s.modules.Employee().UpdateEmployeeAvatar(ctx, sessionUser.Id, gconv.String(fileInfo.Id))
 
 		if updateAvatar == false {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, "头像"+s.modules.T(ctx, "error_Data_Save_Failed"), s.dao.Employee.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "avatar")+s.modules.T(ctx, "error_Data_Save_Failed"), s.dao.Employee.Table())
 		}
 
 		return nil
