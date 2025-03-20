@@ -2,6 +2,7 @@ package co_module
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gfile"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -237,13 +238,14 @@ func (m *Modules[
 ]) SetI18n(i18n *gi18n.Manager) error {
 	if i18n == nil {
 		i18n = gi18n.New()
-		i18n.SetLanguage("zh-CN")
+		//i18n.SetLanguage("zh-CN")
 
-		//err := i18n.SetPath("i18n/" + gstr.ToLower(m.conf.KeyIndex))
-		//err := i18n.SetPath("i18n/" + m.conf.I18nName)
-		//if err != nil {
-		//	return err
-		//}
+		if gfile.IsDir("i18n/" + m.conf.I18nName) {
+			err := i18n.SetPath("i18n/" + m.conf.I18nName)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	m.i18n = i18n

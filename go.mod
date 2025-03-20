@@ -3,13 +3,13 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.24.0
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.10.3
-	github.com/gogf/gf/v2 v2.8.3
+	github.com/SupenBysz/gf-admin-community v0.10.4
+	github.com/gogf/gf/v2 v2.9.0
 	github.com/kysion/base-library v0.2.1
 )
 
 require (
-	github.com/BurntSushi/toml v1.4.0 // indirect
+	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.2.1 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
@@ -20,12 +20,12 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.98 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.99 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible // indirect
 	github.com/aliyun/credentials-go v1.4.5 // indirect
 	github.com/baidubce/app-builder/go/appbuilder v1.0.3 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
-	github.com/casbin/casbin/v2 v2.103.0 // indirect
+	github.com/casbin/casbin/v2 v2.104.0 // indirect
 	github.com/casbin/govaluate v1.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
@@ -35,8 +35,8 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.8.3 // indirect
-	github.com/gogf/gf/contrib/nosql/redis/v2 v2.8.3 // indirect
+	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.9.0 // indirect
+	github.com/gogf/gf/contrib/nosql/redis/v2 v2.9.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -62,8 +62,8 @@ require (
 	github.com/redis/go-redis/v9 v9.7.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1123 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1122 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1127 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1126 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.1115 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/yitter/idgenerator-go v1.3.3 // indirect
