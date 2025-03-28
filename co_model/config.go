@@ -31,6 +31,8 @@ type Identifier struct {
 	FdInvoiceDetail string `p:"fdInvoiceDetail" dc:"财务发票明细标识符"`
 }
 
+var ModulesConfigArr = []*Config{}
+
 type Config struct {
 	DB                             gdb.DB            `p:"-" dc:"数据库连接"`
 	AllowEmptyNo                   bool              `p:"allowEmptyNo" dc:"允许员工工号为空" default:"false"`

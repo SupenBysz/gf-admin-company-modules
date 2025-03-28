@@ -6,6 +6,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
+	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller/lincense"
 	_ "github.com/SupenBysz/gf-admin-company-modules/example/internal/boot/internal"
 
@@ -102,6 +103,11 @@ var (
 					group.Middleware(
 						sys_service.Middleware().Auth,
 					)
+
+					// 注册公共模块路由
+					group.Group("/common", func(group *ghttp.RouterGroup) {
+						group.Bind(co_controller.ModuleConf)
+					})
 
 					// 注册公司模块路由 （包含：公司、团队、员工）
 					router.ModulesGroup(consts.Global.IModules, group)

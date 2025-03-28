@@ -2,6 +2,7 @@ package co_module
 
 import (
 	"context"
+
 	"github.com/gogf/gf/v2/os/gfile"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
@@ -304,6 +305,8 @@ func NewModules[
 		conf: conf,
 		xDao: xDao,
 	}
+
+	co_model.ModulesConfigArr = append(co_model.ModulesConfigArr, conf)
 
 	response = module
 
