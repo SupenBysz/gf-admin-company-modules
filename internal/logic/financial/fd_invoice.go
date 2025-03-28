@@ -3,6 +3,8 @@ package financial
 import (
 	"context"
 	"database/sql"
+	"reflect"
+
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -18,7 +20,6 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
-	"reflect"
 )
 
 type sFdInvoice[

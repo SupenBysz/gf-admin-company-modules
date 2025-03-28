@@ -3,6 +3,8 @@ package company
 import (
 	"context"
 	"database/sql"
+	"reflect"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_consts"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
@@ -27,7 +29,6 @@ import (
 	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/kconv"
-	"reflect"
 )
 
 type sTeam[
@@ -59,48 +60,6 @@ type sTeam[
 	]
 	dao co_dao.XDao
 }
-
-//
-//func NewTeam[
-//	ITCompanyRes co_model.ICompanyRes,
-//	ITEmployeeRes co_model.IEmployeeRes,
-//	TR co_model.ITeamRes,
-//	ITFdAccountRes co_model.IFdAccountRes,
-//	ITFdAccountBillRes co_model.IFdAccountBillRes,
-//	ITFdBankCardRes co_model.IFdBankCardRes,
-//	ITFdCurrencyRes co_model.IFdCurrencyRes,
-//	ITFdInvoiceRes co_model.IFdInvoiceRes,
-//	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-//](modules co_interface.IModules[
-//	ITCompanyRes,
-//	ITEmployeeRes,
-//	TR,
-//	ITFdAccountRes,
-//	ITFdAccountBillRes,
-//	ITFdBankCardRes,
-//	ITFdCurrencyRes,
-//	ITFdInvoiceRes,
-//	ITFdInvoiceDetailRes,
-//]) co_interface.ITeam[TR] {
-//	result := &sTeam[
-//		ITCompanyRes,
-//		ITEmployeeRes,
-//		TR,
-//		ITFdAccountRes,
-//		ITFdAccountBillRes,
-//		ITFdBankCardRes,
-//		ITFdCurrencyRes,
-//		ITFdInvoiceRes,
-//		ITFdInvoiceDetailRes,
-//	]{
-//		modules: modules,
-//		dao:     *modules.Dao(),
-//	}
-//
-//	result.ResponseFactoryHook.RegisterResponseFactory(result.FactoryMakeResponseInstance)
-//
-//	return result
-//}
 
 func NewTeam[
 	ITCompanyRes co_model.ICompanyRes,
