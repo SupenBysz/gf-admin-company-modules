@@ -16,14 +16,14 @@ require (
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.18 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.1 // indirect
 	github.com/alibabacloud-go/openapi-util v0.1.1 // indirect
-	github.com/alibabacloud-go/tea v1.3.4 // indirect
+	github.com/alibabacloud-go/tea v1.3.6 // indirect
 	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.100 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.10300 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible // indirect
 	github.com/aliyun/credentials-go v1.4.5 // indirect
-	github.com/baidubce/app-builder/go/appbuilder v1.0.3 // indirect
+	github.com/baidubce/app-builder/go/appbuilder v1.0.4 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
 	github.com/casbin/casbin/v2 v2.104.0 // indirect
 	github.com/casbin/govaluate v1.3.0 // indirect
@@ -62,8 +62,8 @@ require (
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1129 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1128 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1133 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1133 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.1115 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/yitter/idgenerator-go v1.3.3 // indirect
@@ -74,7 +74,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/image v0.25.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
@@ -86,9 +86,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
-	github.com/kysion/base-library => ../kysion/base-library
-	github.com/kysion/oss-library => ../kysion/oss-library
-	github.com/kysion/sms-library => ../kysion/sms-library
-)
+// replace (
+// 	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
+// 	github.com/kysion/base-library => ../kysion/base-library
+// 	github.com/kysion/oss-library => ../kysion/oss-library
+// 	github.com/kysion/sms-library => ../kysion/sms-library
+// )
