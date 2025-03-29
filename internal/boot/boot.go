@@ -2,7 +2,6 @@ package boot
 
 import (
 	"context"
-	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/utility/idgen"
@@ -30,15 +29,15 @@ func InitializePermissionFactory() {
 
 // InitPermission 初始化权限树
 func InitPermission[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -52,12 +51,10 @@ func InitPermission[
 ]) []base_permission.IPermission {
 	InitializePermissionFactory()
 
-	var rr = module.T(context.TODO(), "{#CompanyName}")
-	fmt.Println(rr)
 	result := []base_permission.IPermission{
 		// 公司
 		// 导入权限的时候判断的是标识符号，所以不用担心下一次启动导入id不同的相同权限
-		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Company, module.T(context.TODO(), "{#CompanyName}")).
+		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Company, module.T(context.Background(), "CompanyName")).
 			SetMatchMode(1).
 			SetType(1).
 			SetIsShow(1).
@@ -71,44 +68,44 @@ func InitPermission[
 				co_permission.Company.PermissionType(module).SetAdminUser,
 				co_permission.Company.PermissionType(module).ViewLicense,
 				co_permission.Company.PermissionType(module).AuditLicense,
-			}),
 
-		// 员工
-		// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
-		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Employee, module.T(context.TODO(), "{#CompanyName}{#EmployeeName}")).
-			SetMatchMode(1).
-			SetType(1).
-			SetIsShow(1).
-			SetItems([]base_permission.IPermission{
-				co_permission.Employee.PermissionType(module).ViewDetail,
-				co_permission.Employee.PermissionType(module).MoreDetail,
-				co_permission.Employee.PermissionType(module).List,
-				co_permission.Employee.PermissionType(module).Create,
-				co_permission.Employee.PermissionType(module).Update,
-				co_permission.Employee.PermissionType(module).Delete,
-				co_permission.Employee.PermissionType(module).SetMobile,
-				co_permission.Employee.PermissionType(module).SetAvatar,
-				co_permission.Employee.PermissionType(module).SetState,
-				co_permission.Employee.PermissionType(module).ViewLicense,
-				co_permission.Employee.PermissionType(module).AuditLicense,
-				co_permission.Employee.PermissionType(module).UpdateLicense,
-			}),
+				// 员工
+				// 之前都是固定ID，后面换成了随机ID，所以避免获取的时候ID不固定，所以根据标识符进行匹配1 （是否固定ID，看构建权限信息是用的base_permission.New，还是base_permission.NewInIdentifier ）
+				base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Employee, "员工管理").
+					SetMatchMode(1).
+					SetType(1).
+					SetIsShow(1).
+					SetItems([]base_permission.IPermission{
+						co_permission.Employee.PermissionType(module).ViewDetail,
+						co_permission.Employee.PermissionType(module).MoreDetail,
+						co_permission.Employee.PermissionType(module).List,
+						co_permission.Employee.PermissionType(module).Create,
+						co_permission.Employee.PermissionType(module).Update,
+						co_permission.Employee.PermissionType(module).Delete,
+						co_permission.Employee.PermissionType(module).SetMobile,
+						co_permission.Employee.PermissionType(module).SetAvatar,
+						co_permission.Employee.PermissionType(module).SetState,
+						co_permission.Employee.PermissionType(module).ViewLicense,
+						co_permission.Employee.PermissionType(module).AuditLicense,
+						co_permission.Employee.PermissionType(module).UpdateLicense,
+					}),
 
-		// 团队
-		base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Team, module.T(context.TODO(), "{#CompanyName}{#TeamName}")).
-			SetType(1).
-			SetIsShow(1).
-			SetMatchMode(1).
-			SetItems([]base_permission.IPermission{
-				co_permission.Team.PermissionType(module).Create,
-				co_permission.Team.PermissionType(module).ViewDetail,
-				co_permission.Team.PermissionType(module).List,
-				co_permission.Team.PermissionType(module).Update,
-				co_permission.Team.PermissionType(module).Delete,
-				co_permission.Team.PermissionType(module).MemberDetail,
-				co_permission.Team.PermissionType(module).SetMember,
-				co_permission.Team.PermissionType(module).SetOwner,
-				co_permission.Team.PermissionType(module).SetCaptain,
+				// 团队
+				base_permission.New(idgen.NextId(), module.GetConfig().Identifier.Team, "团队管理").
+					SetType(1).
+					SetIsShow(1).
+					SetMatchMode(1).
+					SetItems([]base_permission.IPermission{
+						co_permission.Team.PermissionType(module).Create,
+						co_permission.Team.PermissionType(module).ViewDetail,
+						co_permission.Team.PermissionType(module).List,
+						co_permission.Team.PermissionType(module).Update,
+						co_permission.Team.PermissionType(module).Delete,
+						co_permission.Team.PermissionType(module).MemberDetail,
+						co_permission.Team.PermissionType(module).SetMember,
+						co_permission.Team.PermissionType(module).SetOwner,
+						co_permission.Team.PermissionType(module).SetCaptain,
+					}),
 			}),
 	}
 	// sms短信
@@ -124,15 +121,15 @@ func InitPermission[
 
 // InitFinancialPermission 初始化财务服务权限树
 func InitFinancialPermission[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
