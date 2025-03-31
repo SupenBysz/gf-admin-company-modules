@@ -3,9 +3,9 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.24.0
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.10.4
+	github.com/SupenBysz/gf-admin-community v0.10.5
 	github.com/gogf/gf/v2 v2.9.0
-	github.com/kysion/base-library v0.2.4
+	github.com/kysion/base-library v0.3.1
 )
 
 require (
@@ -45,8 +45,8 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kysion/oss-library v0.2.8 // indirect
-	github.com/kysion/sms-library v0.2.7 // indirect
+	github.com/kysion/oss-library v0.2.9 // indirect
+	github.com/kysion/sms-library v0.2.8 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20241220152942-06eb5c6e8230 // indirect
 	github.com/magiconair/properties v1.8.9 // indirect
@@ -62,7 +62,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1133 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1134 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1133 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.1115 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
@@ -84,11 +84,4 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
-	github.com/kysion/base-library => ../kysion/base-library
-	github.com/kysion/oss-library => ../kysion/oss-library
-	github.com/kysion/sms-library => ../kysion/sms-library
 )
