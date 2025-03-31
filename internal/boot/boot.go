@@ -206,9 +206,9 @@ func initAuditAndLicensePermission() []base_permission.IPermission {
 
 	result := []base_permission.IPermission{
 		// 资质权限树
-		base_permission.New(idgen.NextId(), "License", "资质").
+		base_permission.New(idgen.NextId(), "License", "公资质管理").
 			SetId(idgen.NextId()).
-			SetName("资质").
+			SetName("公资质管理").
 			SetIdentifier("License").
 			SetType(1).
 			SetIsShow(1).
