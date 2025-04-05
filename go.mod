@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.10.7
+	github.com/SupenBysz/gf-admin-community v0.10.8
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/kysion/base-library v0.3.1
 )
@@ -64,8 +64,8 @@ require (
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1134 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1133 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1138 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.1135 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/faceid v1.0.1115 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/yitter/idgenerator-go v1.3.3 // indirect
@@ -77,19 +77,12 @@ require (
 	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/image v0.25.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
-	github.com/kysion/base-library => ../kysion/base-library
-	github.com/kysion/oss-library => ../kysion/oss-library
-	github.com/kysion/sms-library => ../kysion/sms-library
 )
