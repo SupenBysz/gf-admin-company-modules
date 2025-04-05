@@ -3,7 +3,7 @@ module github.com/SupenBysz/gf-admin-company-modules
 go 1.24.0
 
 require (
-	github.com/SupenBysz/gf-admin-community v0.10.5
+	github.com/SupenBysz/gf-admin-community v0.10.2
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/kysion/base-library v0.3.1
 )
@@ -82,6 +82,12 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
+
+replace (
+	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
+	github.com/kysion/base-library => ../kysion/base-library
+	github.com/kysion/oss-library => ../kysion/oss-library
+	github.com/kysion/sms-library => ../kysion/sms-library
 )
