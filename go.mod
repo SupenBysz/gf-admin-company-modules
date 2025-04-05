@@ -2,8 +2,10 @@ module github.com/SupenBysz/gf-admin-company-modules
 
 go 1.24.0
 
+toolchain go1.24.1
+
 require (
-	github.com/SupenBysz/gf-admin-community v0.10.5
+	github.com/SupenBysz/gf-admin-community v0.10.7
 	github.com/gogf/gf/v2 v2.9.0
 	github.com/kysion/base-library v0.3.1
 )
@@ -16,7 +18,7 @@ require (
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.18 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.1 // indirect
 	github.com/alibabacloud-go/openapi-util v0.1.1 // indirect
-	github.com/alibabacloud-go/tea v1.3.6 // indirect
+	github.com/alibabacloud-go/tea v1.3.7 // indirect
 	github.com/alibabacloud-go/tea-utils v1.4.5 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
@@ -32,7 +34,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.9.0 // indirect
@@ -82,6 +84,12 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
+
+replace (
+	github.com/SupenBysz/gf-admin-community => ../gf-admin-community
+	github.com/kysion/base-library => ../kysion/base-library
+	github.com/kysion/oss-library => ../kysion/oss-library
+	github.com/kysion/sms-library => ../kysion/sms-library
 )
