@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
@@ -537,9 +538,27 @@ func (s *sCompany[
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 		}
-		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+
+		// 保存LOGO
+		if info.LogoId != nil {
+			logoInfo, err := sys_service.File().GetFileById(ctx, *info.LogoId, "")
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+			}
+
+			if logoInfo != nil {
+				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+				if strings.HasPrefix(logoInfo.Src, tempPath) {
+					targetFilePath := uploadPath + "/" + gconv.String(info.Id) + "/logo" + logoInfo.Ext
+					_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+					if err != nil {
+						return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+					}
+				}
+			}
 		}
+
 		return nil
 	})
 
