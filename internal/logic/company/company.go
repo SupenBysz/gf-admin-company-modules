@@ -169,8 +169,7 @@ func (s *sCompany[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.ICompanyRes
-	ret = &co_model.CompanyRes{
+	var ret co_model.ICompanyRes = &co_model.CompanyRes{
 		Company:   &co_entity.Company{},
 		AdminUser: nil,
 	}
@@ -196,7 +195,7 @@ func (s *sCompany[
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.UnionMainId != id {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
@@ -290,14 +289,15 @@ func (s *sCompany[
 ]) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	export := false
-	if len(isExport) > 0 && len(isExport) > 0 {
+
+	if len(isExport) > 0 {
 		export = isExport[0]
 	}
 
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.Query[TR](m, filter, export)
@@ -586,7 +586,7 @@ func (s *sCompany[
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
