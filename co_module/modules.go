@@ -208,7 +208,9 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 ]) T(ctx context.Context, content string) string {
-	return m.i18n.Translate(ctx, content)
+	data := m.i18n.Translate(gi18n.WithLanguage(context.TODO(), "zh-CN"), content)
+
+	return data
 }
 
 // Tf is alias of TranslateFormat for convenience.
@@ -239,10 +241,9 @@ func (m *Modules[
 ]) SetI18n(i18n *gi18n.Manager) error {
 	if i18n == nil {
 		i18n = gi18n.New()
-		//i18n.SetLanguage("zh-CN")
 
-		if gfile.IsDir("i18n/" + m.conf.I18nName) {
-			err := i18n.SetPath("i18n/" + m.conf.I18nName)
+		if gfile.IsDir("./i18n/" + m.conf.I18nName) {
+			err := i18n.SetPath("./i18n/" + m.conf.I18nName)
 			if err != nil {
 				return err
 			}

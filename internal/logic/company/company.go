@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
@@ -168,8 +169,7 @@ func (s *sCompany[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.ICompanyRes
-	ret = &co_model.CompanyRes{
+	var ret co_model.ICompanyRes = &co_model.CompanyRes{
 		Company:   &co_entity.Company{},
 		AdminUser: nil,
 	}
@@ -195,7 +195,7 @@ func (s *sCompany[
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.UnionMainId != id {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
@@ -289,14 +289,15 @@ func (s *sCompany[
 ]) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	export := false
-	if len(isExport) > 0 && len(isExport) > 0 {
+
+	if len(isExport) > 0 {
 		export = isExport[0]
 	}
 
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.Query[TR](m, filter, export)
@@ -537,9 +538,27 @@ func (s *sCompany[
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 		}
-		if err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+
+		// 保存LOGO
+		if info.LogoId != nil {
+			logoInfo, err := sys_service.File().GetFileById(ctx, *info.LogoId, "")
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+			}
+
+			if logoInfo != nil {
+				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+				if strings.HasPrefix(logoInfo.Src, tempPath) {
+					targetFilePath := uploadPath + "/" + gconv.String(info.Id) + "/logo" + logoInfo.Ext
+					_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+					if err != nil {
+						return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
+					}
+				}
+			}
 		}
+
 		return nil
 	})
 
@@ -567,7 +586,7 @@ func (s *sCompany[
 	m := s.dao.Company.Ctx(ctx)
 
 	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId})
+		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)

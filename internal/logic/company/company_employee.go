@@ -11,6 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-community/utility/idgen"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -798,6 +799,7 @@ func (s *sEmployee[
 
 		if info.Id == 0 {
 			if bindUser == nil {
+				data.Id = idgen.NextId()
 				// 创建登录信息
 				passwordLen := len(gconv.String(data.Id))
 				password := gstr.SubStr(gconv.String(data.Id), passwordLen-6, 6)
