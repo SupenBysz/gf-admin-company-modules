@@ -557,7 +557,6 @@ func (s *sEmployee[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryEmployeeList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) { // 跨主体查询条件过滤
-
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
@@ -654,7 +653,7 @@ func (s *sEmployee[
 ]) UpdateEmployee(ctx context.Context, info *co_model.UpdateEmployee) (response TR, err error) {
 	//data := kconv.Struct(info, &co_model.Employee{})
 	//
-	//return s.saveEmployee(ctx, data)'
+	//return s.saveEmployee(ctx, data)
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	employee, err := s.GetEmployeeById(ctx, info.Id)
 	if err != nil {
@@ -689,6 +688,25 @@ func (s *sEmployee[
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		if employee.Data() != nil {
+
+			var avatarFile *sys_model.FileInfo
+			storageSrc := ""
+			if info.Avatar != "" {
+				// 校验员工头像并保存
+				fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(data.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
+
+				if err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
+				}
+				avatarFile = fileInfo
+
+				storageSrc = s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
+
+				//avatarFile.Src = s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(data.Id) + "/avatar." + avatarFile.Ext
+
+				info.Avatar = gconv.String(fileInfo.Id)
+			}
+
 			// 更新员工信息
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
@@ -706,6 +724,15 @@ func (s *sEmployee[
 			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: id}))
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+			}
+
+			// 保存文件
+			if avatarFile != nil {
+				avatarFile, err = sys_service.File().SaveFile(ctx, storageSrc, avatarFile)
+				//_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
+				if err != nil || avatarFile == nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
+				}
 			}
 		}
 
