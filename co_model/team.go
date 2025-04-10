@@ -1,31 +1,32 @@
 package co_model
 
 import (
+	"reflect"
+
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/base_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/kysion/base-library/utility/kconv"
-	"reflect"
 )
 
 type Team struct {
 	OverrideDo        base_interface.DoModel[co_do.CompanyTeam]       `json:"-"`
 	TeamMemberDo      base_interface.DoModel[co_do.CompanyTeamMember] `json:"-"`
 	Id                int64                                           `json:"id"                dc:"ID"`
-	Name              string                                          `json:"name"              v:"required|max-length:128#名称不能为空|名称长度超128字符出限定范围" dc:"团队名称，公司维度下唯一"`
-	OwnerEmployeeId   int64                                           `json:"ownerEmployeeId"   dc:"团队所有者/业务总监/业务经理/团队队长"`
-	CaptainEmployeeId int64                                           `json:"captainEmployeeId" dc:"团队队长编号/小组组长"`
+	Name              string                                          `json:"name"              v:"required|max-length:128#名称不能为空|名称长度超128字符出限定范围" dc:"部门/团队/小组名称，公司维度下唯一"`
+	OwnerEmployeeId   int64                                           `json:"ownerEmployeeId"   dc:"部门/团队所有者/业务总监/业务经理/团队队长"`
+	CaptainEmployeeId int64                                           `json:"captainEmployeeId" dc:"部门/团队队长编号/小组组长"`
 	ParentId          int64                                           `json:"parentId" dc:"团队或小组父级ID"`
 	Remark            string                                          `json:"remark"            dc:"备注"`
 }
 
 type TeamRes struct {
 	co_entity.CompanyTeam
-	Owner     *EmployeeRes `json:"owner" dc:"团队所有者/业务总监/业务经理/团队队长"`
-	Captain   *EmployeeRes `json:"captain" dc:"团队队长编号/小组组长"`
+	Owner     *EmployeeRes `json:"owner" dc:"部门/团队所有者/业务总监/业务经理/团队队长"`
+	Captain   *EmployeeRes `json:"captain" dc:"部门/团队队长编号/小组组长"`
 	UnionMain *CompanyRes  `json:"unionMain" dc:"关联主体"`
-	Parent    *TeamRes     `json:"parent" dc:"团队或小组父级ID"`
+	Parent    *TeamRes     `json:"parent" dc:"部门/团队/小组父级ID"`
 }
 
 // 这些从配置加载
