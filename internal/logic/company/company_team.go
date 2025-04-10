@@ -357,9 +357,6 @@ func (s *sTeam[
 		if reflect.ValueOf(team).IsNil() {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_ParentTeamNotFound"), s.dao.Team.Table())
 		}
-		if team.Data().ParentId > 0 {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Group_ParentMustIsTeam"), s.dao.Team.Table())
-		}
 	}
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -465,38 +462,47 @@ func (s *sTeam[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateTeam(ctx context.Context, id int64, name string, remark string) (response TR, err error) {
-	team, err := s.GetTeamById(ctx, id)
+]) UpdateTeam(ctx context.Context, info *co_model.Team) (response TR, err error) {
+	team, err := s.GetTeamById(ctx, info.Id)
 	if err != nil {
 		return response, err
 	}
 
-	if name != "" {
-		if s.HasTeamByName(ctx, name, id, team.Data().ParentId) == true {
+	if info.Name != "" {
+		if s.HasTeamByName(ctx, info.Name, info.Id, team.Data().ParentId) == true {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 		}
 	}
 
 	data := co_do.CompanyTeam{
-		//Name:      name,
-		Remark:    remark,
 		UpdatedAt: gtime.Now(),
 	}
-	if name != "" {
-		data.Name = name
-	}
 
-	rowsAffected, err := daoctl.UpdateWithError(
-		s.dao.Team.Ctx(ctx).
-			Data(data).
-			Where(co_do.CompanyTeam{Id: id}),
-	)
+	_ = gconv.Struct(info, &data)
 
-	if rowsAffected == 0 || err != nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
-	}
+	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 重载Do模型
+		doData, err := info.OverrideDo.DoFactory(data)
+		if err != nil {
+			return err
+		}
 
-	result, err := s.GetTeamById(ctx, id)
+		rowsAffected, err := daoctl.UpdateWithError(
+			s.dao.Team.Ctx(ctx).
+				Data(doData).
+				Where(co_do.CompanyTeam{Id: info.Id}),
+		)
+
+		if rowsAffected == 0 || err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
+		}
+
+		err = info.OverrideDo.DoSaved(data, doData)
+
+		return err
+	})
+
+	result, err := s.GetTeamById(ctx, info.Id)
 	return s.makeMore(ctx, result), err
 }
 

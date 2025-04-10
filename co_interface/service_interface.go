@@ -80,7 +80,7 @@ type (
 		// CreateTeam 创建团队或小组|信息
 		CreateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		// UpdateTeam 更新团队或小组|信息
-		UpdateTeam(ctx context.Context, id int64, name string, remark string) (TR, error)
+		UpdateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		// QueryTeamListByEmployee 根据员工查询团队
 		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 		// SetTeamMember 设置团队队员或小组组员

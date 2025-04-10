@@ -22,15 +22,15 @@ import (
 )
 
 type TeamController[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TIRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TIRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -50,15 +50,15 @@ type TeamController[
 }
 
 func Team[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TIRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TIRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdCurrencyRes co_model.IFdCurrencyRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -189,7 +189,7 @@ func (c *TeamController[
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).Update)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.team.UpdateTeam(c.makeMore(ctx), req.Id, req.Name, req.Remark)
+			ret, err := c.team.UpdateTeam(c.makeMore(ctx), &req.Team)
 			return ret, err
 		},
 		permission,
