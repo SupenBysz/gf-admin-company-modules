@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"reflect"
+	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_consts"
@@ -362,7 +363,7 @@ func (s *sTeam[
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断团队名称是否存在 && 同一主体下的不同团队下的小组名称是否能重复
-	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) == true { // 1组  1组
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) { // 1组  1组
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -440,7 +441,28 @@ func (s *sTeam[
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Team_Save_Failed}{#error_Team_TeamCaptainEmployee_NotSave}"), s.dao.Team.Table())
 			}
+
+			if info.LogoId > 0 {
+				logoInfo, err := sys_service.File().GetFileById(ctx, info.LogoId, "")
+				if err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+				}
+				if logoInfo != nil && logoInfo.Id != info.LogoId {
+					uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+					tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+					if strings.HasPrefix(logoInfo.Src, tempPath) {
+						targetFilePath := uploadPath + "/" + gconv.String(data.UnionMainId) + "/" + gconv.String(data.Id) + "/logo" + logoInfo.Ext
+						_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+						if err != nil {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+						}
+					}
+				}
+			}
+
+			info.OverrideDo.DoSaved(data, doData)
 		}
+
 		return nil
 	})
 	if err != nil {
@@ -469,7 +491,7 @@ func (s *sTeam[
 	}
 
 	if info.Name != "" {
-		if s.HasTeamByName(ctx, info.Name, info.Id, team.Data().ParentId) == true {
+		if s.HasTeamByName(ctx, info.Name, info.Id, team.Data().ParentId) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 		}
 	}
@@ -497,10 +519,32 @@ func (s *sTeam[
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
 		}
 
+		if info.LogoId > 0 {
+			logoInfo, err := sys_service.File().GetFileById(ctx, info.LogoId, "")
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+			}
+			if logoInfo != nil && logoInfo.Id != info.LogoId {
+				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+				if strings.HasPrefix(logoInfo.Src, tempPath) {
+					targetFilePath := uploadPath + "/" + gconv.String(data.UnionMainId) + "/" + gconv.String(data.Id) + "/logo" + logoInfo.Ext
+					_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+					if err != nil {
+						return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+					}
+				}
+			}
+		}
+
 		err = info.OverrideDo.DoSaved(data, doData)
 
 		return err
 	})
+
+	if err != nil {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Transaction_Failed"), s.dao.Team.Table())
+	}
 
 	result, err := s.GetTeamById(ctx, info.Id)
 	return s.makeMore(ctx, result), err

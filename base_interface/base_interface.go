@@ -29,7 +29,7 @@ func (d *DoModel[TDO]) DoFactory(data TDO) (response interface{},err error) {
 		//}
 		response, err = d.BuildDo(data)
 	}
-	return response, err
+	return data, err
 }
 
 // DoCommit Do数据对象

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
@@ -22,15 +23,15 @@ import (
 )
 
 type TeamController[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-TIRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	TIRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -50,15 +51,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 }
 
 func Team[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-TIRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	TIRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,

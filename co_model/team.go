@@ -19,6 +19,10 @@ type Team struct {
 	CaptainEmployeeId int64                                           `json:"captainEmployeeId" dc:"部门/团队队长编号/小组组长"`
 	ParentId          int64                                           `json:"parentId" dc:"团队或小组父级ID"`
 	Remark            string                                          `json:"remark"            dc:"备注"`
+	Type              int                                             `json:"type"              orm:"type"                description:"类型：保留字段"`
+	Slogan            string                                          `json:"slogan"            orm:"slogan"              description:"口号"`
+	Title             string                                          `json:"title"             orm:"title"               description:"称号"`
+	LogoId            int64                                           `json:"logoId"            orm:"logo_id"             description:"LOGO"`
 }
 
 type TeamRes struct {

@@ -29,4 +29,6 @@ type Company struct {
 	LicenseState  int         `json:"licenseState"  orm:"license_state"  description:"主体状态,和主体资质状态保持一致"`
 	CountryCode   string      `json:"countryCode"   orm:"country_code"   description:"所属国家编码"`
 	Region        string      `json:"region"        orm:"region"         description:"所属地区"`
+	LogoId        int         `json:"logoId"        orm:"logo_id"        description:"LOGO"`
+	StartLevel    int         `json:"startLevel"    orm:"start_level"    description:"服务星级"`
 }

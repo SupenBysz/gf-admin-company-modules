@@ -22,4 +22,8 @@ type CompanyTeam struct {
 	CreatedAt         *gtime.Time //
 	UpdatedAt         *gtime.Time //
 	DeletedAt         *gtime.Time //
+	Type              interface{} // 类型：0部门，1团队，2小组
+	Slogan            interface{} // 口号
+	Title             interface{} // 称号
+	LogoId            interface{} // LOGO
 }
