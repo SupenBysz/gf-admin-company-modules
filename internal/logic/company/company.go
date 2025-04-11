@@ -540,13 +540,13 @@ func (s *sCompany[
 		}
 
 		// 保存LOGO
-		if info.LogoId != nil {
+		if info.LogoId != nil && *info.LogoId > 0 {
 			logoInfo, err := sys_service.File().GetFileById(ctx, *info.LogoId, "")
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 
-			if logoInfo != nil {
+			if logoInfo != nil && logoInfo.Id != *info.LogoId {
 				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
 				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
 				if strings.HasPrefix(logoInfo.Src, tempPath) {
