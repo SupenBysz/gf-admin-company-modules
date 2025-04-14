@@ -1293,11 +1293,14 @@ func (s *sEmployee[
 						s.dao.Team.Ctx(ctx).
 							WhereIn(s.dao.Team.Columns().Id, temIds).Scan(&data.Data().TeamList)
 					}
+					TeamList := data.Data().TeamList
+
+					data.Data().TeamList = nil
 					// 添加附加数据
-					data.Data().SetTeamList(data.Data().TeamList)
+					data.Data().SetTeamList(TeamList)
 
 					// 业务层添加附加数据
-					data.SetTeamList(data)
+					data.SetTeamList(data.Data().TeamList)
 				})
 
 				return kconv.Struct(data.Data().TeamList, []ITTeamRes{})

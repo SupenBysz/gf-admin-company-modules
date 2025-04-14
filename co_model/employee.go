@@ -68,7 +68,7 @@ func (m *EmployeeRes) SetUser(user interface{}) {
 }
 
 func (m *EmployeeRes) SetTeamList(data interface{}) {
-	if data == nil || reflect.ValueOf(data).Type() != reflect.ValueOf(m).Type() {
+	if data == nil || reflect.ValueOf(data).Type() != reflect.ValueOf(m.TeamList).Type() {
 		return
 	}
 
