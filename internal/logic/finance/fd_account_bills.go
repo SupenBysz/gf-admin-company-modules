@@ -25,8 +25,8 @@ import (
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
-// 财务账单
-type sFdAccountBill[
+// sFdAccountBills 财务账单
+type sFdAccountBills[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
@@ -53,7 +53,7 @@ type sFdAccountBill[
 	hookArr base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
 }
 
-func NewFdAccountBill[
+func NewFdAccountBills[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
@@ -73,8 +73,8 @@ func NewFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) co_interface.IFdAccountBill[TR] {
-	result := &sFdAccountBill[
+]) co_interface.IFdAccountBills[TR] {
+	result := &sFdAccountBills[
 		ITCompanyRes,
 		ITEmployeeRes,
 		ITTeamRes,
@@ -95,7 +95,7 @@ func NewFdAccountBill[
 }
 
 // InstallTradeHook 订阅Hook
-func (s *sFdAccountBill[
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -110,7 +110,7 @@ func (s *sFdAccountBill[
 }
 
 // GetTradeHook 获取Hook
-func (s *sFdAccountBill[
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -125,7 +125,7 @@ func (s *sFdAccountBill[
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
-func (s *sFdAccountBill[
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -141,8 +141,8 @@ func (s *sFdAccountBill[
 	return ret.(TR)
 }
 
-// CreateAccountBill 创建财务账单
-func (s *sFdAccountBill[
+// CreateAccountBills 创建财务账单
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -152,7 +152,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateAccountBill(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
+]) CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	// 判断交易时间是否大于当前系统时间
 	now := gtime.Now()
 
@@ -196,7 +196,7 @@ func (s *sFdAccountBill[
 // HOOK (Hook)
 
 // income 收入
-func (s *sFdAccountBill[
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -303,7 +303,7 @@ func (s *sFdAccountBill[
 }
 
 // spending 支出
-func (s *sFdAccountBill[
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -400,8 +400,8 @@ func (s *sFdAccountBill[
 	return true, nil
 }
 
-// GetAccountBillByAccountId  根据财务账号id获取账单
-func (s *sFdAccountBill[
+// GetAccountBillsByAccountId  根据财务账号id获取账单
+func (s *sFdAccountBills[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -411,7 +411,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetAccountBillByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
+]) GetAccountBillsByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))
 	}

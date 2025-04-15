@@ -87,10 +87,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/kysion/base-library => ../kysion/base-library
-
-replace github.com/kysion/oss-library => ../kysion/oss-library
-
-replace github.com/kysion/sms-library => ../kysion/sms-library
-
-replace github.com/SupenBysz/gf-admin-community => ../gf-admin-community
+//replace github.com/kysion/base-library => ../kysion/base-library
+//
+//replace github.com/kysion/oss-library => ../kysion/oss-library
+//
+//replace github.com/kysion/sms-library => ../kysion/sms-library
+//
+//replace github.com/SupenBysz/gf-admin-community => ../gf-admin-community

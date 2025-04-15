@@ -20,7 +20,7 @@ type Modules[
 	TEmployeeRes co_model.IEmployeeRes,
 	TTeamRes co_model.ITeamRes,
 	TFdAccountRes co_model.IFdAccountRes,
-	TFdAccountBillRes co_model.IFdAccountBillsRes,
+	TFdAccountBillsRes co_model.IFdAccountBillsRes,
 	TFdBankCardRes co_model.IFdBankCardRes,
 	TFdCurrencyRes co_model.IFdCurrencyRes,
 	TFdInvoiceRes co_model.IFdInvoiceRes,
@@ -33,7 +33,7 @@ type Modules[
 	team          co_interface.ITeam[TTeamRes]
 	my            co_interface.IMy
 	account       co_interface.IFdAccount[TFdAccountRes]
-	accountBill   co_interface.IFdAccountBill[TFdAccountBillRes]
+	accountBills  co_interface.IFdAccountBills[TFdAccountBillsRes]
 	bankCard      co_interface.IFdBankCard[TFdBankCardRes]
 	currency      co_interface.IFdCurrency[TFdCurrencyRes]
 	invoice       co_interface.IFdInvoice[TFdInvoiceRes]
@@ -48,7 +48,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -62,7 +62,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -76,7 +76,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -90,7 +90,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -104,7 +104,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -118,13 +118,13 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
-]) AccountBill() co_interface.IFdAccountBill[TFdAccountBillRes] {
-	return m.accountBill
+]) AccountBills() co_interface.IFdAccountBills[TFdAccountBillsRes] {
+	return m.accountBills
 }
 
 func (m *Modules[
@@ -132,7 +132,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -146,7 +146,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -160,7 +160,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -174,7 +174,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -188,7 +188,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -202,7 +202,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -219,7 +219,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -233,7 +233,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -259,7 +259,7 @@ func (m *Modules[
 	TEmployeeRes,
 	TTeamRes,
 	TFdAccountRes,
-	TFdAccountBillRes,
+	TFdAccountBillsRes,
 	TFdBankCardRes,
 	TFdCurrencyRes,
 	TFdInvoiceRes,
@@ -273,7 +273,7 @@ func NewModules[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -286,7 +286,7 @@ func NewModules[
 	ITEmployeeRes,
 	ITTeamRes,
 	ITFdAccountRes,
-	ITFdAccountBillRes,
+	ITFdAccountBillsRes,
 	ITFdBankCardRes,
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
@@ -297,7 +297,7 @@ func NewModules[
 		ITEmployeeRes,
 		ITTeamRes,
 		ITFdAccountRes,
-		ITFdAccountBillRes,
+		ITFdAccountBillsRes,
 		ITFdBankCardRes,
 		ITFdCurrencyRes,
 		ITFdInvoiceRes,
@@ -319,7 +319,7 @@ func NewModules[
 	module.team = company.NewTeam(response)
 	module.my = company.NewMy(response)
 	module.account = finance.NewFdAccount(response)
-	module.accountBill = finance.NewFdAccountBill(response)
+	module.accountBills = finance.NewFdAccountBills(response)
 	module.bankCard = finance.NewFdBankCard(response)
 	module.currency = finance.NewFdCurrency(response)
 	module.invoice = finance.NewFdInvoice(response)

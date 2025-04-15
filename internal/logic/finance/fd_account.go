@@ -796,9 +796,24 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) AccountRecharge(ctx context.Context, accountId int64, info *co_model.FdRecharge, createUser *sys_model.SysUser) (bool, error) {
-	if accountId == 0 && info.CurrencyCode == "" {
+	if accountId == 0 {
 		return false, gerror.New(s.modules.T(ctx, "error_Finance_AccountId_Failed"))
 	}
+
+	if info.Amount <= 0 {
+		return false, gerror.New(s.modules.T(ctx, "error_Finance_Amount_Failed"))
+	}
+
+	daoctl.GetById[co_entity.FdAccount](s.modules.Dao().FdAccount.Ctx(ctx).Where(co_do.FdAccount{CurrencyCode: info.CurrencyCode}), accountId)
+
+	if err := s.dao.FdAccount.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		var err error
+
+		return err
+	}); err != nil {
+		return false, err
+	}
+
 	return false, nil
 }
 

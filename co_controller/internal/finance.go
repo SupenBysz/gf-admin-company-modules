@@ -547,7 +547,7 @@ func (c *FinanceController[
 	return c.modules.Currency().QueryCurrencyList(ctx, &req.SearchParams)
 }
 
-// QueryAccountBillsReq  根据财务账号id查询账单
+// QueryAccountBills  根据财务账号id查询账单
 func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -559,7 +559,7 @@ func (c *FinanceController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
-	return c.modules.AccountBill().GetAccountBillByAccountId(ctx, req.AccountId, &req.SearchParams)
+	return c.modules.AccountBills().GetAccountBillsByAccountId(ctx, req.AccountId, &req.SearchParams)
 }
 
 func (c *FinanceController[

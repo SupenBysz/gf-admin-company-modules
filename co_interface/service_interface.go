@@ -165,6 +165,8 @@ type (
 		SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error)
 		// QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
+		// AccountRecharge 充值
+		AccountRecharge(ctx context.Context, accountId int64, info *co_model.FdRecharge, createUser *sys_model.SysUser) (bool, error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
 		// CreateBankCard 添加银行卡账号
@@ -216,15 +218,15 @@ type (
 		// QueryInvoiceDetail 根据限定的条件查询发票列表
 		QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 	}
-	IFdAccountBill[TR co_model.IFdAccountBillsRes] interface {
+	IFdAccountBills[TR co_model.IFdAccountBillsRes] interface {
 		// InstallTradeHook 订阅Hook
 		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
-		// CreateAccountBill 创建财务账单
-		CreateAccountBill(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
-		// GetAccountBillByAccountId  根据财务账号id获取账单
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+		// CreateAccountBills 创建财务账单
+		CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
+		// GetAccountBillsByAccountId  根据财务账号id获取账单
+		GetAccountBillsByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
 )
 
@@ -237,7 +239,7 @@ type IConfig interface {
 //	ITEmployeeRes co_model.IEmployeeRes,
 //	ITTeamRes co_model.ITeamRes,
 //	ITFdAccountRes co_model.IFdAccountRes,
-//	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+//	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 //	ITFdBankCardRes co_model.IFdBankCardRes,
 //	ITFdCurrencyRes co_model.IFdCurrencyRes,
 //	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -248,7 +250,7 @@ type IConfig interface {
 //		ITEmployeeRes,
 //		ITTeamRes,
 //		ITFdAccountRes,
-//		ITFdAccountBillRes,
+//		ITFdAccountBillsRes,
 //		ITFdBankCardRes,
 //		ITFdCurrencyRes,
 //		ITFdInvoiceRes,
@@ -260,7 +262,7 @@ type IConfig interface {
 //		ITEmployeeRes,
 //		ITTeamRes,
 //		ITFdAccountRes,
-//		ITFdAccountBillRes,
+//		ITFdAccountBillsRes,
 //		ITFdBankCardRes,
 //		ITFdCurrencyRes,
 //		ITFdInvoiceRes,
@@ -285,7 +287,7 @@ type IModules[
 	Employee() IEmployee[ITEmployeeRes]
 	My() IMy
 	Account() IFdAccount[ITFdAccountRes]
-	AccountBill() IFdAccountBill[ITFdAccountBillRes]
+	AccountBills() IFdAccountBills[ITFdAccountBillRes]
 	BankCard() IFdBankCard[ITFdBankCardRes]
 	Currency() IFdCurrency[ITFdCurrencyRes]
 	Invoice() IFdInvoice[ITFdInvoiceRes]

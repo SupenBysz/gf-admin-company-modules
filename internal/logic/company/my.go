@@ -394,7 +394,7 @@ func (s *sMy[
 
 	// 3、遍历每一个账号，把账单统计出来
 	for _, account := range accounts.Records {
-		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, searchParams)
+		bills, err := s.modules.AccountBills().GetAccountBillsByAccountId(ctx, account.Data().Id, searchParams)
 		// base_model.call[co_model.IFdAccountBillsRes]
 		if err != nil {
 			return nil, err

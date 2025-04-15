@@ -61,7 +61,7 @@ func Modules() *Global {
 					Employee:        "employee",
 					Team:            "team",
 					FdAccount:       "fdAccount",
-					FdAccountBill:   "fdAccountBill",
+					FdAccountBills:  "fdAccountBills",
 					FdInvoice:       "fdInvoice",
 					FdInvoiceDetail: "fdInvoiceDetail",
 					FdBankCard:      "fdBankCard",

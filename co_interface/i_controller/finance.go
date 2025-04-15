@@ -11,7 +11,7 @@ import (
 type IFinance[
 
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -76,8 +76,8 @@ type IFinance[
 	// QueryCurrencyList 获取货币列表
 	QueryCurrencyList(ctx context.Context, search *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error)
 
-	// QueryAccountBillsReq 根据财务账号id查询账单
-	QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error)
+	// QueryAccountBills 根据财务账号id查询账单
+	QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillsRes], error)
 
 	// Increment 收入
 	//Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error)
