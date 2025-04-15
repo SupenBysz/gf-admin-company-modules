@@ -7,9 +7,9 @@ import (
 )
 
 type AccountBillHookKey struct {
-	InOutType     co_enum.FinancialInOutType // 收支类型
-	TradeType     co_enum.FinancialTradeType // 交易类型
-	InTransaction bool                       // 是否在事务中
+	InOutType     co_enum.FinanceInOutType // 收支类型
+	TradeType     co_enum.FinanceTradeType // 交易类型
+	InTransaction bool                     // 是否在事务中
 }
 
-type AccountBillHookFunc sys_model.HookFunc[AccountBillHookKey, co_model.IFdAccountBillRes]
+type AccountBillHookFunc sys_model.HookFunc[AccountBillHookKey, co_model.IFdAccountBillsRes]

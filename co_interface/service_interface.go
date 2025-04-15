@@ -148,7 +148,7 @@ type (
 		// QueryAccountListByUserId 获取指定用户的所有财务账号
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		// UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
-		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinancialInOutType, sysSessionUserId int64) (int64, error)
+		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (int64, error)
 		// GetAccountByUnionUserIdAndCurrencyCode 根据用户union_user_id和货币代码currency_code获取财务账号
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
 		// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，
@@ -216,13 +216,13 @@ type (
 		// QueryInvoiceDetail 根据限定的条件查询发票列表
 		QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 	}
-	IFdAccountBill[TR co_model.IFdAccountBillRes] interface {
+	IFdAccountBill[TR co_model.IFdAccountBillsRes] interface {
 		// InstallTradeHook 订阅Hook
 		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
 		// CreateAccountBill 创建财务账单
-		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
+		CreateAccountBill(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
 		// GetAccountBillByAccountId  根据财务账号id获取账单
 		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
@@ -237,7 +237,7 @@ type IConfig interface {
 //	ITEmployeeRes co_model.IEmployeeRes,
 //	ITTeamRes co_model.ITeamRes,
 //	ITFdAccountRes co_model.IFdAccountRes,
-//	ITFdAccountBillRes co_model.IFdAccountBillRes,
+//	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 //	ITFdBankCardRes co_model.IFdBankCardRes,
 //	ITFdCurrencyRes co_model.IFdCurrencyRes,
 //	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -273,7 +273,7 @@ type IModules[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,

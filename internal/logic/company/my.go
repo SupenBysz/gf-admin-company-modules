@@ -28,7 +28,7 @@ type sMy[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -53,7 +53,7 @@ func NewMy[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -395,7 +395,7 @@ func (s *sMy[
 	// 3、遍历每一个账号，把账单统计出来
 	for _, account := range accounts.Records {
 		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, searchParams)
-		// base_model.call[co_model.IFdAccountBillRes]
+		// base_model.call[co_model.IFdAccountBillsRes]
 		if err != nil {
 			return nil, err
 		}
@@ -407,7 +407,7 @@ func (s *sMy[
 		// 账单信息
 		accountBillDetailList = append(accountBillDetailList, co_model.AccountBillRes{
 			Account: accountInfo,
-			Bill:    kconv.Struct(bills, &co_model.FdAccountBillListRes{}),
+			Bill:    kconv.Struct(bills, &co_model.FdAccountBillsListRes{}),
 		})
 	}
 

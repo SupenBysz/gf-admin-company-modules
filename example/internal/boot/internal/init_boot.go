@@ -20,7 +20,7 @@ func init() {
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
 		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
+		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
 		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
@@ -28,12 +28,12 @@ func init() {
 	]))
 
 	// 导入财务服务权限树
-	consts.Global.FinancialPermissionTree = boot.InitFinancialPermission(consts.Global.IModules.(co_interface.IModules[
+	consts.Global.FinancePermissionTree = boot.InitFinancePermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
 		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
+		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
 		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,

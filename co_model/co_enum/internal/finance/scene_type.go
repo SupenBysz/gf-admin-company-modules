@@ -1,4 +1,4 @@
-package financial
+package finance
 
 import "github.com/kysion/base-library/utility/enum"
 
@@ -6,18 +6,18 @@ import "github.com/kysion/base-library/utility/enum"
 type SceneTypeEnum enum.IEnumCode[int]
 
 type sceneType struct {
-    UnLimit SceneTypeEnum
+	UnLimit SceneTypeEnum
 }
 
 var SceneType = sceneType{
-    UnLimit: enum.New[SceneTypeEnum](0, "不限制"),
+	UnLimit: enum.New[SceneTypeEnum](0, "不限制"),
 }
 
 func (e sceneType) New(code int, description string) SceneTypeEnum {
-    if code == SceneType.UnLimit.Code() {
-        return SceneType.UnLimit
-    }
+	if code == SceneType.UnLimit.Code() {
+		return SceneType.UnLimit
+	}
 
-    // 可扩展
-    return enum.New[SceneTypeEnum](code, description)
+	// 可扩展
+	return enum.New[SceneTypeEnum](code, description)
 }

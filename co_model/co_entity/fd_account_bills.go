@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// FdAccountBill is the golang structure for table fd_account_bill.
-type FdAccountBill struct {
+// FdAccountBills is the golang structure for table fd_account_bills.
+type FdAccountBills struct {
 	Id            int64       `json:"id"            orm:"id"             description:"ID"`
 	FromUserId    int64       `json:"fromUserId"    orm:"from_user_id"   description:"交易发起方UserID，如果是系统则固定为-1"`
 	ToUserId      int64       `json:"toUserId"      orm:"to_user_id"     description:"交易对象UserID"`
@@ -26,4 +26,5 @@ type FdAccountBill struct {
 	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"     description:""`
 	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:""`
 	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:""`
+	HandlingFee   int64       `json:"handlingFee"   orm:"handling_fee"   description:"手续费，当前记录产生的手续费，如果有的话"`
 }

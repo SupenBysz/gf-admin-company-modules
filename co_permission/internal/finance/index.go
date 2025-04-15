@@ -1,11 +1,11 @@
-package financial
+package finance
 
 import "github.com/SupenBysz/gf-admin-company-modules/co_interface"
 
-type financial struct {
+type finance struct {
 	PermissionType func(modules co_interface.IConfig) *permissionType[co_interface.IConfig]
 }
 
-var Financial = financial{
+var Finance = finance{
 	PermissionType: PermissionType,
 }

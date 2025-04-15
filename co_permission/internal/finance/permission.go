@@ -1,4 +1,4 @@
-package financial
+package finance
 
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"

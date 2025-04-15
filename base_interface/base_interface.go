@@ -11,12 +11,12 @@ package base_interface
 //      4、DoSaved 方法，在数据保存后执行，返回错误时，数据会回滚
 
 type DoModel[TDO interface{}] struct {
-	BuildDo func(data TDO) (interface{}, error)
-	OnSavedDo func(data TDO, data2 interface{}) (error)
+	BuildDo   func(data TDO) (interface{}, error)
+	OnSavedDo func(data TDO, data2 interface{}) error
 }
 
 // DoFactory 构建待写入数据库的Do数据对象
-func (d *DoModel[TDO]) DoFactory(data TDO) (response interface{},err error) {
+func (d *DoModel[TDO]) DoFactory(data TDO) (response interface{}, err error) {
 	if d.BuildDo != nil {
 		//makeDo, err := d.BuildDo(do)
 		//if err != nil {
@@ -32,7 +32,7 @@ func (d *DoModel[TDO]) DoFactory(data TDO) (response interface{},err error) {
 	return data, err
 }
 
-// DoCommit Do数据对象
+// DoSaved Do数据对象
 func (d DoModel[TDO]) DoSaved(data TDO, data2 interface{}) error {
 	if d.OnSavedDo != nil {
 		return d.OnSavedDo(data, data2)

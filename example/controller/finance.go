@@ -15,18 +15,18 @@ import (
 	"github.com/kysion/base-library/utility/kconv"
 )
 
-type FinancialController[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+type FinanceController[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ] struct {
-	i_controller.IFinancial[
+	i_controller.IFinance[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
@@ -36,16 +36,16 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	]
 }
 
-func Financial[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+func Finance[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdCurrencyRes co_model.IFdCurrencyRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -56,7 +56,7 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) *FinancialController[
+]) *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -67,7 +67,7 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ] {
-	return &FinancialController[
+	return &FinanceController[
 		ITCompanyRes,
 		ITEmployeeRes,
 		ITTeamRes,
@@ -78,11 +78,11 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
 	]{
-		IFinancial: co_controller.Financial(modules),
+		IFinance: co_controller.Finance(modules),
 	}
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -93,10 +93,10 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetAccountBalance(ctx context.Context, req *co_v1.GetAccountBalanceReq) (api_v1.Int64Res, error) {
-	return c.IFinancial.GetAccountBalance(ctx, &req.GetAccountBalanceReq)
+	return c.IFinance.GetAccountBalance(ctx, &req.GetAccountBalanceReq)
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -107,11 +107,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) InvoiceRegister(ctx context.Context, req *co_v1.CreateInvoiceReq) (*co_model.FdInvoiceRes, error) {
-	ret, err := c.IFinancial.InvoiceRegister(ctx, &req.CreateInvoiceReq)
+	ret, err := c.IFinance.InvoiceRegister(ctx, &req.CreateInvoiceReq)
 	return ret.Data(), err
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -122,11 +122,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryInvoice(ctx context.Context, req *co_v1.QueryInvoiceReq) (*co_model.FdInvoiceListRes, error) {
-	ret, err := c.IFinancial.QueryInvoice(ctx, &req.QueryInvoiceReq)
+	ret, err := c.IFinance.QueryInvoice(ctx, &req.QueryInvoiceReq)
 	return kconv.Struct(ret, &co_model.FdInvoiceListRes{}), err
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -137,10 +137,10 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) DeletesFdInvoiceById(ctx context.Context, req *co_v1.DeleteInvoiceByIdReq) (api_v1.BoolRes, error) {
-	return c.IFinancial.DeletesFdInvoiceById(ctx, &req.DeleteInvoiceByIdReq)
+	return c.IFinance.DeletesFdInvoiceById(ctx, &req.DeleteInvoiceByIdReq)
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -151,11 +151,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) InvoiceDetailRegister(ctx context.Context, req *co_v1.CreateInvoiceDetailReq) (*co_model.FdInvoiceDetailRes, error) {
-	ret, err := c.IFinancial.InvoiceDetailRegister(ctx, &req.CreateInvoiceDetailReq)
+	ret, err := c.IFinance.InvoiceDetailRegister(ctx, &req.CreateInvoiceDetailReq)
 	return ret.Data(), err
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -166,11 +166,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryInvoiceDetailList(ctx context.Context, req *co_v1.QueryInvoiceDetailListReq) (*co_model.FdInvoiceDetailListRes, error) {
-	ret, err := c.IFinancial.QueryInvoiceDetailList(ctx, &req.QueryInvoiceDetailListReq)
+	ret, err := c.IFinance.QueryInvoiceDetailList(ctx, &req.QueryInvoiceDetailListReq)
 	return kconv.Struct(ret, &co_model.FdInvoiceDetailListRes{}), err
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -181,10 +181,10 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) MakeInvoiceDetailReq(ctx context.Context, req *co_v1.MakeInvoiceDetailReq) (api_v1.BoolRes, error) {
-	return c.IFinancial.MakeInvoiceDetailReq(ctx, &req.MakeInvoiceDetailReq)
+	return c.IFinance.MakeInvoiceDetailReq(ctx, &req.MakeInvoiceDetailReq)
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -195,11 +195,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) AuditInvoiceDetail(ctx context.Context, req *co_v1.AuditInvoiceDetailReq) (api_v1.BoolRes, error) {
-	return c.IFinancial.AuditInvoiceDetail(ctx, &req.AuditInvoiceDetailReq)
+	return c.IFinance.AuditInvoiceDetail(ctx, &req.AuditInvoiceDetailReq)
 
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -210,11 +210,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) BankCardRegister(ctx context.Context, req *co_v1.BankCardRegisterReq) (*co_model.FdBankCardRes, error) {
-	ret, err := c.IFinancial.BankCardRegister(ctx, &req.BankCardRegisterReq)
+	ret, err := c.IFinance.BankCardRegister(ctx, &req.BankCardRegisterReq)
 	return ret.Data(), err
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -225,10 +225,10 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) DeleteBankCard(ctx context.Context, req *co_v1.DeleteBankCardReq) (api_v1.BoolRes, error) {
-	return c.IFinancial.DeleteBankCard(ctx, &req.DeleteBankCardReq)
+	return c.IFinance.DeleteBankCard(ctx, &req.DeleteBankCardReq)
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -239,13 +239,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryBankCardList(ctx context.Context, req *co_v1.QueryBankCardListReq) (*co_model.FdBankCardListRes, error) {
-	ret, err := c.IFinancial.QueryBankCardList(ctx, &req.QueryBankCardListReq)
+	ret, err := c.IFinance.QueryBankCardList(ctx, &req.QueryBankCardListReq)
 
 	return kconv.Struct(ret, &co_model.FdBankCardListRes{}), err
 }
 
 // GetAccountDetail 查看财务账号明细
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -256,13 +256,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetAccountDetail(ctx context.Context, req *co_v1.GetAccountDetailReq) (ITFdAccountRes, error) {
-	ret, err := c.IFinancial.GetAccountDetail(ctx, &req.GetAccountDetailReq)
+	ret, err := c.IFinance.GetAccountDetail(ctx, &req.GetAccountDetailReq)
 
 	return ret, err
 }
 
 // UpdateAccountIsEnabled 修改财务账号启用状态
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -273,13 +273,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_v1.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
-	ret, err := c.IFinancial.UpdateAccountIsEnabled(ctx, &req.UpdateAccountIsEnabledReq)
+	ret, err := c.IFinance.UpdateAccountIsEnabled(ctx, &req.UpdateAccountIsEnabledReq)
 
 	return ret, err
 }
 
 // UpdateAccountLimitState 修改财务账号限制状态
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -290,13 +290,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccountLimitState(ctx context.Context, req *co_v1.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
-	ret, err := c.IFinancial.UpdateAccountLimitState(ctx, &req.UpdateAccountLimitStateReq)
+	ret, err := c.IFinance.UpdateAccountLimitState(ctx, &req.UpdateAccountLimitStateReq)
 
 	return ret, err
 }
 
 // GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -307,13 +307,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetAccountDetailById(ctx context.Context, req *co_v1.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
-	ret, err := c.IFinancial.GetAccountDetailById(ctx, &req.GetAccountDetailByAccountIdReq)
+	ret, err := c.IFinance.GetAccountDetailById(ctx, &req.GetAccountDetailByAccountIdReq)
 
 	return ret, err
 }
 
 // UpdateAccountBalance 财务账号金额冲正
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -324,13 +324,13 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) UpdateAccountBalance(ctx context.Context, req *co_v1.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
-	ret, err := c.IFinancial.UpdateAccountBalance(ctx, &req.UpdateAccountBalanceReq)
+	ret, err := c.IFinance.UpdateAccountBalance(ctx, &req.UpdateAccountBalanceReq)
 
 	return ret, err
 }
 
 // GetCurrencyByCode 财务账号金额冲正
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -341,11 +341,11 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) GetCurrencyByCode(ctx context.Context, req *co_v1.GetCurrencyByCodeReq) (ITFdCurrencyRes, error) {
-	return c.IFinancial.GetCurrencyByCode(ctx, &req.GetCurrencyByCodeReq)
+	return c.IFinance.GetCurrencyByCode(ctx, &req.GetCurrencyByCodeReq)
 }
 
 // QueryCurrencyList 获取币种列表
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -356,7 +356,7 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryCurrencyList(ctx context.Context, req *co_v1.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
-	ret, err := c.IFinancial.QueryCurrencyList(ctx, &req.QueryCurrencyListReq)
+	ret, err := c.IFinance.QueryCurrencyList(ctx, &req.QueryCurrencyListReq)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
@@ -373,7 +373,7 @@ func (c *FinancialController[
 }
 
 // QueryAccountBills  根据财务账号id查询账单
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -384,12 +384,12 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) QueryAccountBills(ctx context.Context, req *co_v1.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
-	return c.IFinancial.QueryAccountBills(ctx, &req.QueryAccountBillsReq)
+	return c.IFinance.QueryAccountBills(ctx, &req.QueryAccountBillsReq)
 }
 
 //
 //// Increment 收入
-//func (c *FinancialController[
+//func (c *FinanceController[
 //	ITCompanyRes,
 //	ITEmployeeRes,
 //	ITTeamRes,
@@ -400,13 +400,13 @@ func (c *FinancialController[
 //	ITFdInvoiceRes,
 //	ITFdInvoiceDetailRes,
 //]) Increment(ctx context.Context, req *co_v1.IncrementReq) (api_v1.BoolRes, error) {
-//	ret, err := c.IFinancial.Increment(ctx, &req.IncrementReq)
+//	ret, err := c.IFinance.Increment(ctx, &req.IncrementReq)
 //
 //	return ret, err
 //}
 //
 //// Decrement 支出
-//func (c *FinancialController[
+//func (c *FinanceController[
 //	ITCompanyRes,
 //	ITEmployeeRes,
 //	ITTeamRes,
@@ -417,13 +417,13 @@ func (c *FinancialController[
 //	ITFdInvoiceRes,
 //	ITFdInvoiceDetailRes,
 //]) Decrement(ctx context.Context, req *co_v1.DecrementReq) (api_v1.BoolRes, error) {
-//	ret, err := c.IFinancial.Decrement(ctx, &req.DecrementReq)
+//	ret, err := c.IFinance.Decrement(ctx, &req.DecrementReq)
 //
 //	return ret, err
 //}
 
 // SetAccountAllowExceed 设置财务账号是否允许存在负余额
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -434,7 +434,7 @@ func (c *FinancialController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) SetAccountAllowExceed(ctx context.Context, req *co_v1.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
-	ret, err := c.IFinancial.SetAccountAllowExceed(ctx, &req.SetAccountAllowExceedReq)
+	ret, err := c.IFinance.SetAccountAllowExceed(ctx, &req.SetAccountAllowExceedReq)
 
 	return ret, err
 }

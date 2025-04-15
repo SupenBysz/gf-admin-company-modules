@@ -1,7 +1,8 @@
-package financial
+package finance
 
 import (
 	"context"
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
@@ -36,7 +37,7 @@ type sFdAccount[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -62,7 +63,7 @@ func NewFdAccount[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -138,13 +139,13 @@ func (s *sFdAccount[
 	if info.UnionUserId != 0 {
 		user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.UnionUserId)
 		if user == nil || err != nil {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_UnionUserId_Failed"), sys_dao.SysUser.Table())
 		}
 	}
 	// 判断货币代码是否符合标准
 	currency, err := s.modules.Currency().GetCurrencyByCode(ctx, info.CurrencyCode)
 	if err != nil || reflect.ValueOf(currency).IsNil() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
 	}
 	if currency.Data().IsLegalTender != 1 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
@@ -379,7 +380,7 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinancialInOutType, sysSessionUserId int64) (int64, error) {
+]) UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (int64, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	info, err := daoctl.GetByIdWithError[co_model.FdAccountRes](s.dao.FdAccount.Ctx(ctx), accountId)
@@ -392,11 +393,11 @@ func (s *sFdAccount[
 		version = info.Version
 	}
 
-	if inOutType.Code() == co_enum.Financial.InOutType.Auto.Code() {
+	if inOutType.Code() == co_enum.Finance.InOutType.Auto.Code() {
 		if amount > 0 {
-			inOutType = co_enum.Financial.InOutType.In
+			inOutType = co_enum.Finance.InOutType.In
 		} else if amount < 0 {
-			inOutType = co_enum.Financial.InOutType.Out
+			inOutType = co_enum.Finance.InOutType.Out
 		} else {
 			return info.Balance, nil
 		}
@@ -408,12 +409,12 @@ func (s *sFdAccount[
 		Version: gdb.Raw(s.dao.FdAccount.Columns().Version + "+1"),
 	}
 
-	if inOutType.Code() == co_enum.Financial.InOutType.In.Code() { // 收入
+	if inOutType.Code() == co_enum.Finance.InOutType.In.Code() { // 收入
 		// 余额 = 之前的余额 + 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "+" + gconv.String(amount))
 		data.UpdatedBy = sysSessionUserId
 
-	} else if inOutType.Code() == co_enum.Financial.InOutType.Out.Code() { // 支出
+	} else if inOutType.Code() == co_enum.Finance.InOutType.Out.Code() { // 支出
 		// 余额 = 之前的余额 - 本次交易的余额
 		data.Balance = gdb.Raw(s.dao.FdAccount.Columns().Balance + "-" + gconv.String(amount))
 		data.UpdatedBy = sysSessionUserId
@@ -563,7 +564,7 @@ func (s *sFdAccount[
 	// 关联用户id是否正确
 	user, err := daoctl.GetByIdWithError[sys_entity.SysUser](sys_dao.SysUser.Ctx(ctx), info.SysUserId)
 	if user == nil || err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Financial_UnionUserId_Failed"), sys_dao.SysUser.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_UnionUserId_Failed"), sys_dao.SysUser.Table())
 	}
 
 	// 生产随机id
@@ -591,7 +592,7 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) Increment(ctx context.Context, id int64, amount int) (bool, error) {
-	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Financial.InOutType.In)
+	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Finance.InOutType.In)
 
 	return ret > 0, err
 }
@@ -608,7 +609,7 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) Decrement(ctx context.Context, id int64, amount int) (bool, error) {
-	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Financial.InOutType.Out)
+	ret, err := s.updateAccountDetailAmount(ctx, id, amount, co_enum.Finance.InOutType.Out)
 
 	return ret > 0, err
 }
@@ -660,7 +661,7 @@ func (s *sFdAccount[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) updateAccountDetailAmount(ctx context.Context, id int64, amount int, inOutType co_enum.FinancialInOutType) (int64, error) {
+]) updateAccountDetailAmount(ctx context.Context, id int64, amount int, inOutType co_enum.FinanceInOutType) (int64, error) {
 	// 先通过财务账号id查询账号出来，然后查询出来的当前财务账号版本为修改条件
 	account, err := s.GetAccountDetailById(ctx, id) // 如果不存在，会创建
 	if err != nil {
@@ -686,7 +687,7 @@ func (s *sFdAccount[
 		YearUpdatedAt:    now,
 	}
 	operator := " + "
-	if (inOutType.Code() & co_enum.Financial.InOutType.Out.Code()) == co_enum.Financial.InOutType.Out.Code() { // 支出
+	if (inOutType.Code() & co_enum.Finance.InOutType.Out.Code()) == co_enum.Finance.InOutType.Out.Code() { // 支出
 		operator = " - "
 	}
 
@@ -753,7 +754,7 @@ func (s *sFdAccount[
 	ITFdInvoiceDetailRes,
 ]) QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error) {
 	if unionUserId == 0 {
-		return nil, gerror.New(s.modules.T(ctx, "error_Financial_UnionUserId_Failed"))
+		return nil, gerror.New(s.modules.T(ctx, "error_Finance_UnionUserId_Failed"))
 	}
 
 	// 这是有缓存的情况，但是实际不能缓存
@@ -782,6 +783,23 @@ func (s *sFdAccount[
 	}
 
 	return result, nil
+}
+
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdCurrencyRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+]) AccountRecharge(ctx context.Context, accountId int64, info *co_model.FdRecharge, createUser *sys_model.SysUser) (bool, error) {
+	if accountId == 0 && info.CurrencyCode == "" {
+		return false, gerror.New(s.modules.T(ctx, "error_Finance_AccountId_Failed"))
+	}
+	return false, nil
 }
 
 // makeMore 按需加载附加数据

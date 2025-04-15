@@ -13,7 +13,7 @@ func ModulesGroup(modules co_interface.IModules[
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -23,7 +23,7 @@ func ModulesGroup(modules co_interface.IModules[
 	EmployeeGroup(modules, group)
 	TeamGroup(modules, group)
 	MyGroup(modules, group)
-	// FinancialGroup(modules, group)
+	// FinanceGroup(modules, group)
 
 	return group
 }
@@ -33,7 +33,7 @@ func CompanyGroup(modules co_interface.IModules[
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -57,7 +57,7 @@ func EmployeeGroup(modules co_interface.IModules[
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -85,7 +85,7 @@ func TeamGroup(modules co_interface.IModules[
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -116,7 +116,7 @@ func MyGroup(modules co_interface.IModules[
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -140,12 +140,12 @@ func MyGroup(modules co_interface.IModules[
 	return group
 }
 
-func FinancialGroup(modules co_interface.IModules[
+func FinanceGroup(modules co_interface.IModules[
 	co_model.ICompanyRes,
 	co_model.IEmployeeRes,
 	co_model.ITeamRes,
 	co_model.IFdAccountRes,
-	co_model.IFdAccountBillRes,
+	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
 	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
@@ -153,8 +153,8 @@ func FinancialGroup(modules co_interface.IModules[
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	// routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
 
-	controller := co_controller.Financial(modules)
-	routePrefix := modules.GetConfig().RoutePrefix + "/financial"
+	controller := co_controller.Finance(modules)
+	routePrefix := modules.GetConfig().RoutePrefix + "/finance"
 	group.POST(routePrefix+"/registerBankCard", controller.BankCardRegister)
 	group.POST(routePrefix+"/deleteBankCard", controller.DeleteBankCard)
 	group.POST(routePrefix+"/queryBankCardList", controller.QueryBankCardList)

@@ -38,7 +38,7 @@ type sCompany[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -66,7 +66,7 @@ func NewCompany[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -503,10 +503,10 @@ func (s *sCompany[
 				UnionMainId:        unionMainId,
 				CurrencyCode:       "CNY",
 				PrecisionOfBalance: 100,
-				SceneType:          0,                                           // 不限
-				AccountType:        co_enum.Financial.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
-				AccountNumber:      "",                                          // 账户编号
-				AllowExceed:        1,                                           // 系统账号默认是可以存在负余额
+				SceneType:          0,                                         // 不限
+				AccountType:        co_enum.Finance.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
+				AccountNumber:      "",                                        // 账户编号
+				AllowExceed:        1,                                         // 系统账号默认是可以存在负余额
 			}
 
 			createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)

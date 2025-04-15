@@ -1,4 +1,4 @@
-package financial
+package finance
 
 import (
 	"context"
@@ -31,7 +31,7 @@ type sFdAccountBill[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	TR co_model.IFdAccountBillRes,
+	TR co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -58,7 +58,7 @@ func NewFdAccountBill[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	TR co_model.IFdAccountBillRes,
+	TR co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -136,8 +136,8 @@ func (s *sFdAccountBill[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IFdAccountBillRes
-	ret = &co_model.FdAccountBillRes{}
+	var ret co_model.IFdAccountBillsRes
+	ret = &co_model.FdAccountBillsRes{}
 	return ret.(TR)
 }
 
@@ -152,7 +152,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
+]) CreateAccountBill(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	// 判断交易时间是否大于当前系统时间
 	now := gtime.Now()
 
@@ -206,7 +206,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) income(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
+]) income(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断接受者是否存在
@@ -241,7 +241,7 @@ func (s *sFdAccountBill[
 		//bill.Data().CreatedBy = sessionUser.Id
 		bill.Data().CreatedBy = info.ToUserId
 
-		data := kconv.Struct(bill.Data(), &co_do.FdAccountBill{})
+		data := kconv.Struct(bill.Data(), &co_do.FdAccountBills{})
 
 		// 重载Do模型
 		doData, err := info.OverrideDo.DoFactory(*data)
@@ -257,7 +257,7 @@ func (s *sFdAccountBill[
 
 		// 2.修改财务账号的余额
 		// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Financial.InOutType.New(info.InOutType, ""), info.FromUserId)
+		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Finance.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 		if affected == 0 || err != nil {
 			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -271,7 +271,7 @@ func (s *sFdAccountBill[
 		}
 		g.Try(ctx, func(ctx context.Context) {
 			s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
-				if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+				if key.InTransaction && key.InOutType == co_enum.Finance.InOutType.In {
 					if key.TradeType.Code()&info.TradeType == info.TradeType {
 						value(ctx, key, bill)
 					}
@@ -289,7 +289,7 @@ func (s *sFdAccountBill[
 	g.Try(ctx, func(ctx context.Context) {
 		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 			// 在事务中 && 订阅key是收入类型的
-			if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.In {
+			if !key.InTransaction && key.InOutType == co_enum.Finance.InOutType.In {
 				// 订阅的交易类型一致
 				if key.TradeType.Code()&info.TradeType == info.TradeType {
 					value(ctx, key, bill)
@@ -313,7 +313,7 @@ func (s *sFdAccountBill[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) spending(ctx context.Context, info co_model.AccountBillRegister) (bool, error) {
+]) spending(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 先通过财务账号id查询账号出来
@@ -333,9 +333,9 @@ func (s *sFdAccountBill[
 		// 判断余额是否足够
 		// 检验机制：余额足够 ||  账号类型是系统账户&&场景不限&&允许存在负数余额 || 允许存在负数余额  （相当于只校验了Allow参数，条件2直接忽略了）
 		if account.Data().Balance >= info.Amount ||
-			(((account.Data().AccountType & co_enum.Financial.AccountType.System.Code()) == account.Data().AccountType&co_enum.Financial.AccountType.System.Code()) &&
-				(account.Data().SceneType&co_enum.Financial.SceneType.UnLimit.Code()) == co_enum.Financial.SceneType.UnLimit.Code() && account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code()) ||
-			account.Data().AllowExceed == co_enum.Financial.AllowExceed.Allow.Code() {
+			(((account.Data().AccountType & co_enum.Finance.AccountType.System.Code()) == account.Data().AccountType&co_enum.Finance.AccountType.System.Code()) &&
+				(account.Data().SceneType&co_enum.Finance.SceneType.UnLimit.Code()) == co_enum.Finance.SceneType.UnLimit.Code() && account.Data().AllowExceed == co_enum.Finance.AllowExceed.Allow.Code()) ||
+			account.Data().AllowExceed == co_enum.Finance.AllowExceed.Allow.Code() {
 			// 1. 添加一条财务账单流水
 			info.BeforeBalance = account.Data().Balance
 			info.AfterBalance = afterBalance
@@ -354,7 +354,7 @@ func (s *sFdAccountBill[
 
 			// 2.修改财务账号的余额
 			// 参数：上下文, 财务账号id, 需要修改的钱数目, 查询到的版本, 收支类型
-			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Financial.InOutType.New(info.InOutType, ""), info.FromUserId)
+			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Finance.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
@@ -368,7 +368,7 @@ func (s *sFdAccountBill[
 			g.Try(ctx, func(ctx context.Context) {
 				s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 					// 在事务中 && 订阅key是收入类型的
-					if key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+					if key.InTransaction && key.InOutType == co_enum.Finance.InOutType.Out {
 						// 订阅的交易类型一致
 						if key.TradeType.Code()&info.TradeType == info.TradeType {
 							value(ctx, key, bill)
@@ -389,7 +389,7 @@ func (s *sFdAccountBill[
 
 	g.Try(ctx, func(ctx context.Context) {
 		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
-			if !key.InTransaction && key.InOutType == co_enum.Financial.InOutType.Out {
+			if !key.InTransaction && key.InOutType == co_enum.Finance.InOutType.Out {
 				if key.TradeType.Code()&info.TradeType == info.TradeType {
 					value(ctx, key, bill)
 				}

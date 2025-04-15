@@ -28,7 +28,7 @@ type CompanyController[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -54,7 +54,7 @@ func Company[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -287,7 +287,7 @@ func (c *CompanyController[
 	ITFdInvoiceDetailRes,
 ]) getPermission(ctx context.Context, permission base_permission.IPermission) base_permission.IPermission {
 	// 这种只满足两级edu_school_class::Create，
-	// 还需要兼容这样子的Financial::BankCard::ViewBankCardDetail （先不考虑）
+	// 还需要兼容这样子的Finance::BankCard::ViewBankCardDetail （先不考虑）
 
 	//identifierStr := c.getPermissionIdentifier(permission)
 	identifierStr := c.modules.GetConfig().Identifier.Company + "::" + permission.GetIdentifier()

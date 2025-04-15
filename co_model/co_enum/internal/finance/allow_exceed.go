@@ -1,4 +1,4 @@
-package financial
+package finance
 
 import "github.com/kysion/base-library/utility/enum"
 

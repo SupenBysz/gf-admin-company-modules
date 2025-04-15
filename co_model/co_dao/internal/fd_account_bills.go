@@ -14,19 +14,19 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// FdAccountBillDao is the data access object for table co_fd_account_bill.
-type FdAccountBillDao struct {
+// FdAccountBillsDao is the data access object for table co_fd_account_bills.
+type FdAccountBillsDao struct {
 	dao_interface.IDao
-	table       string               // table is the underlying table name of the DAO.
-	group       string               // group is the database configuration group name of current DAO.
-	columns     FdAccountBillColumns // columns contains all the column names of Table for convenient usage.
+	table       string                // table is the underlying table name of the DAO.
+	group       string                // group is the database configuration group name of current DAO.
+	columns     FdAccountBillsColumns // columns contains all the column names of Table for convenient usage.
 	daoConfig   *dao_interface.DaoConfig
 	ignoreCache bool
 	exWhereArr  []string
 }
 
-// FdAccountBillColumns defines and stores column names for table co_fd_account_bill.
-type FdAccountBillColumns struct {
+// FdAccountBillsColumns defines and stores column names for table co_fd_account_bills.
+type FdAccountBillsColumns struct {
 	Id            string // ID
 	FromUserId    string // 交易发起方UserID，如果是系统则固定为-1
 	ToUserId      string // 交易对象UserID
@@ -43,10 +43,11 @@ type FdAccountBillColumns struct {
 	DeletedAt     string //
 	CreatedAt     string //
 	CreatedBy     string //
+	HandlingFee   string // 手续费，当前记录产生的手续费，如果有的话
 }
 
-// fdAccountBillColumns holds the columns for table co_fd_account_bill.
-var fdAccountBillColumns = FdAccountBillColumns{
+// fdAccountBillsColumns holds the columns for table co_fd_account_bills.
+var fdAccountBillsColumns = FdAccountBillsColumns{
 	Id:            "id",
 	FromUserId:    "from_user_id",
 	ToUserId:      "to_user_id",
@@ -63,16 +64,17 @@ var fdAccountBillColumns = FdAccountBillColumns{
 	DeletedAt:     "deleted_at",
 	CreatedAt:     "created_at",
 	CreatedBy:     "created_by",
+	HandlingFee:   "handling_fee",
 }
 
-// NewFdAccountBillDao creates and returns a new DAO object for table data access.
-func NewFdAccountBillDao(proxy ...dao_interface.IDao) *FdAccountBillDao {
-	var dao *FdAccountBillDao
+// NewFdAccountBillsDao creates and returns a new DAO object for table data access.
+func NewFdAccountBillsDao(proxy ...dao_interface.IDao) *FdAccountBillsDao {
+	var dao *FdAccountBillsDao
 	if len(proxy) > 0 {
-		dao = &FdAccountBillDao{
+		dao = &FdAccountBillsDao{
 			group:       proxy[0].Group(),
 			table:       proxy[0].Table(),
-			columns:     fdAccountBillColumns,
+			columns:     fdAccountBillsColumns,
 			daoConfig:   proxy[0].DaoConfig(context.Background()),
 			IDao:        proxy[0].DaoConfig(context.Background()).Dao,
 			ignoreCache: proxy[0].DaoConfig(context.Background()).IsIgnoreCache(),
@@ -82,39 +84,39 @@ func NewFdAccountBillDao(proxy ...dao_interface.IDao) *FdAccountBillDao {
 		return dao
 	}
 
-	return &FdAccountBillDao{
+	return &FdAccountBillsDao{
 		group:   "default",
-		table:   "co_fd_account_bill",
-		columns: fdAccountBillColumns,
+		table:   "co_fd_account_bills",
+		columns: fdAccountBillsColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *FdAccountBillDao) DB() gdb.DB {
+func (dao *FdAccountBillsDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *FdAccountBillDao) Table() string {
+func (dao *FdAccountBillsDao) Table() string {
 	return dao.table
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *FdAccountBillDao) Group() string {
+func (dao *FdAccountBillsDao) Group() string {
 	return dao.group
 }
 
 // Columns returns all column names of current dao.
-func (dao *FdAccountBillDao) Columns() FdAccountBillColumns {
+func (dao *FdAccountBillsDao) Columns() FdAccountBillsColumns {
 	return dao.columns
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *FdAccountBillDao) Ctx(ctx context.Context, cacheOption ...*gdb.CacheOption) *gdb.Model {
+func (dao *FdAccountBillsDao) Ctx(ctx context.Context, cacheOption ...*gdb.CacheOption) *gdb.Model {
 	return dao.DaoConfig(ctx, cacheOption...).Model
 }
 
-func (dao *FdAccountBillDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.CacheOption) *dao_interface.DaoConfig {
+func (dao *FdAccountBillsDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.CacheOption) *dao_interface.DaoConfig {
 	//if dao.daoConfig != nil && len(dao.exWhereArr) == 0 {
 	//	return dao.daoConfig
 	//}
@@ -141,23 +143,23 @@ func (dao *FdAccountBillDao) DaoConfig(ctx context.Context, cacheOption ...*gdb.
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *FdAccountBillDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *FdAccountBillsDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }
 
-func (dao *FdAccountBillDao) GetExtWhereKeys() []string {
+func (dao *FdAccountBillsDao) GetExtWhereKeys() []string {
 	return dao.exWhereArr
 }
 
-func (dao *FdAccountBillDao) IsIgnoreCache() bool {
+func (dao *FdAccountBillsDao) IsIgnoreCache() bool {
 	return dao.ignoreCache
 }
 
-func (dao *FdAccountBillDao) IgnoreCache() dao_interface.IDao {
+func (dao *FdAccountBillsDao) IgnoreCache() dao_interface.IDao {
 	dao.ignoreCache = true
 	return dao
 }
-func (dao *FdAccountBillDao) IgnoreExtModel(whereKey ...string) dao_interface.IDao {
+func (dao *FdAccountBillsDao) IgnoreExtModel(whereKey ...string) dao_interface.IDao {
 	dao.exWhereArr = append(dao.exWhereArr, whereKey...)
 	return dao
 }

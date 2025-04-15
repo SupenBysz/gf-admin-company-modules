@@ -20,13 +20,13 @@ import (
 	"github.com/kysion/base-library/utility/kconv"
 )
 
-// FinancialController 财务服务控制器
-type FinancialController[
+// FinanceController 财务服务控制器
+type FinanceController[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -46,13 +46,13 @@ type FinancialController[
 	dao co_dao.XDao
 }
 
-// Financial 财务服务
-func Financial[
+// Finance 财务服务
+func Finance[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -67,7 +67,7 @@ func Financial[
 	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) i_controller.IFinancial[
+]) i_controller.IFinance[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
@@ -75,7 +75,7 @@ func Financial[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 ] {
-	return &FinancialController[
+	return &FinanceController[
 		ITCompanyRes,
 		ITEmployeeRes,
 		ITTeamRes,
@@ -92,7 +92,7 @@ func Financial[
 }
 
 // GetAccountBalance 查看账户余额
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -112,12 +112,12 @@ func (c *FinancialController[
 			}
 			return (api_v1.Int64Res)(ret.Data().Balance), err
 		},
-		co_permission.Financial.PermissionType(c.modules).GetAccountBalance,
+		co_permission.Finance.PermissionType(c.modules).GetAccountBalance,
 	)
 }
 
 // InvoiceRegister 添加发票抬头
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -138,12 +138,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Invoice().CreateInvoice(ctx, req.FdInvoiceRegister)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).CreateInvoice,
+		co_permission.Finance.PermissionType(c.modules).CreateInvoice,
 	)
 }
 
 // QueryInvoice 获取我的发票抬头列表
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -159,13 +159,13 @@ func (c *FinancialController[
 		func() (*base_model.CollectRes[ITFdInvoiceRes], error) {
 			return c.modules.Invoice().QueryInvoiceList(ctx, &req.SearchParams, req.UserId)
 		},
-		co_permission.Financial.PermissionType(c.modules).ViewInvoice,
+		co_permission.Finance.PermissionType(c.modules).ViewInvoice,
 	)
 
 }
 
 // DeletesFdInvoiceById 删除发票抬头
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -181,12 +181,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Invoice().DeletesFdInvoiceById(ctx, req.InvoiceId)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).DeleteInvoice,
+		co_permission.Finance.PermissionType(c.modules).DeleteInvoice,
 	)
 }
 
 // InvoiceDetailRegister 申请开发票
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -202,7 +202,7 @@ func (c *FinancialController[
 }
 
 // QueryInvoiceDetailList 获取发票详情列表
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -218,12 +218,12 @@ func (c *FinancialController[
 			ret, err := c.modules.InvoiceDetail().QueryInvoiceDetail(ctx, &req.SearchParams, req.UserId, req.UnionMainId)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).ViewInvoiceDetail,
+		co_permission.Finance.PermissionType(c.modules).ViewInvoiceDetail,
 	)
 }
 
 // MakeInvoiceDetailReq 开发票
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -239,7 +239,7 @@ func (c *FinancialController[
 }
 
 // AuditInvoiceDetail 审核发票
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -255,12 +255,12 @@ func (c *FinancialController[
 			ret, err := c.modules.InvoiceDetail().AuditInvoiceDetail(ctx, req.InvoiceDetailId, req.AuditInfo)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).AuditInvoiceDetail,
+		co_permission.Finance.PermissionType(c.modules).AuditInvoiceDetail,
 	)
 }
 
 // BankCardRegister 申请提现账号
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -278,12 +278,12 @@ func (c *FinancialController[
 			ret, err := c.modules.BankCard().CreateBankCard(ctx, req.BankCardRegister, &user.SysUser)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).CreateBankCard,
+		co_permission.Finance.PermissionType(c.modules).CreateBankCard,
 	)
 }
 
 // DeleteBankCard 删除提现账号
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -299,12 +299,12 @@ func (c *FinancialController[
 			ret, err := c.modules.BankCard().DeleteBankCardById(ctx, req.BankCardId)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).DeleteBankCard,
+		co_permission.Finance.PermissionType(c.modules).DeleteBankCard,
 	)
 }
 
 // QueryBankCardList 获取用户的银行卡列表
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -320,12 +320,12 @@ func (c *FinancialController[
 			ret, err := c.modules.BankCard().QueryBankCardListByUserId(ctx, req.UserId)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).ViewBankCardDetail,
+		co_permission.Finance.PermissionType(c.modules).ViewBankCardDetail,
 	)
 }
 
 // GetAccountDetail 查看财务账号明细
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -341,12 +341,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().GetAccountById(c.makeMore(ctx), req.AccountId)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+		co_permission.Finance.PermissionType(c.modules).GetAccountDetail,
 	)
 }
 
 // UpdateAccountIsEnabled 修改财务账号启用状态
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -363,12 +363,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().UpdateAccountIsEnable(ctx, req.AccountId, req.IsEnabled, user.Id)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountState,
 	)
 }
 
 // UpdateAccountLimitState 修改财务账号限制状态
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -385,12 +385,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().UpdateAccountLimitState(ctx, req.AccountId, req.LimitState, user.Id)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountState,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountState,
 	)
 }
 
 // SetAccountCurrencyCode 设置财务账号货币单位
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -407,12 +407,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().SetAccountCurrencyCode(ctx, req.AccountId, req.CurrencyCode, user.Id)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).SetAccountCurrencyCode,
+		co_permission.Finance.PermissionType(c.modules).SetAccountCurrencyCode,
 	)
 }
 
 // UpdateAccountBalance 财务账号金额冲正
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -426,15 +426,15 @@ func (c *FinancialController[
 	return funs.CheckPermission(ctx,
 		func() (api_v1.Int64Res, error) {
 			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
-			ret, err := c.modules.Account().UpdateAccountBalance(ctx, req.AccountId, req.Amount, -1, co_enum.Financial.InOutType.Auto, user.Id)
+			ret, err := c.modules.Account().UpdateAccountBalance(ctx, req.AccountId, req.Amount, -1, co_enum.Finance.InOutType.Auto, user.Id)
 			return api_v1.Int64Res(ret), err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountBalance,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountBalance,
 	)
 }
 
 // GetAccountDetailById 根据财务账号id查询账单金额明细统计记录
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -450,12 +450,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().GetAccountDetailById(ctx, req.AccountId)
 			return ret, err
 		},
-		co_permission.Financial.PermissionType(c.modules).GetAccountDetail,
+		co_permission.Finance.PermissionType(c.modules).GetAccountDetail,
 	)
 }
 
 // Increment 收入
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -471,12 +471,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().Increment(ctx, req.AccountId, req.Amount)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountAmount,
 	)
 }
 
 // Decrement 支出
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -492,12 +492,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().Decrement(ctx, req.AccountId, req.Amount)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountAmount,
 	)
 }
 
 // SetAccountAllowExceed 设置财务账号是否允许存在负余额
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -513,12 +513,12 @@ func (c *FinancialController[
 			ret, err := c.modules.Account().SetAccountAllowExceed(ctx, req.AccountId, req.AllowExceed)
 			return ret == true, err
 		},
-		co_permission.Financial.PermissionType(c.modules).UpdateAccountAmount,
+		co_permission.Finance.PermissionType(c.modules).UpdateAccountAmount,
 	)
 }
 
 // GetCurrencyByCode 根据货币代码查找货币(主键)
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -533,7 +533,7 @@ func (c *FinancialController[
 }
 
 // QueryCurrencyList 获取币种列表
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -548,7 +548,7 @@ func (c *FinancialController[
 }
 
 // QueryAccountBillsReq  根据财务账号id查询账单
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,
@@ -562,7 +562,7 @@ func (c *FinancialController[
 	return c.modules.AccountBill().GetAccountBillByAccountId(ctx, req.AccountId, &req.SearchParams)
 }
 
-func (c *FinancialController[
+func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
 	ITTeamRes,

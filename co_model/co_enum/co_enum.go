@@ -3,7 +3,7 @@ package co_enum
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/company"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/employee"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/financial"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/finance"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/invoice"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/license"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum/internal/team"
@@ -18,16 +18,16 @@ type (
 	// Sex 性别
 	Sex = employee.SexEnum
 
-	// FinancialInOutType 财务收/支 类型
-	FinancialInOutType = financial.InOutTypeEnum
-	// FinancialTradeType 交易类型
-	FinancialTradeType = financial.TradeTypeEnum
+	// FinanceInOutType 财务收/支 类型
+	FinanceInOutType = finance.InOutTypeEnum
+	// FinanceTradeType 交易类型
+	FinanceTradeType = finance.TradeTypeEnum
 	// AccountType 财务账号类型
-	AccountType = financial.AccountTypeEnum
+	AccountType = finance.AccountTypeEnum
 	// SceneType 场景类型
-	SceneType = financial.SceneTypeEnum
+	SceneType = finance.SceneTypeEnum
 	// AllowExceed 是否允许存在负数余额
-	AllowExceed = financial.AllowExceedEnum
+	AllowExceed = finance.AllowExceedEnum
 
 	// InvoiceAuditType 发票审核状态
 	InvoiceAuditType = invoice.AuditTypeEnum
@@ -52,8 +52,8 @@ var (
 	// Team 团队
 	Team = team.Team
 
-	// Financial 财务
-	Financial = financial.Financial
+	// Finance 财务
+	Finance = finance.Finance
 
 	// Invoice 发票
 	Invoice = invoice.Invoice

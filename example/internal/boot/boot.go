@@ -64,7 +64,7 @@ var (
 				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.PermissionTree, nil)
 
 				// 导入财务服务权限结构 (可选)
-				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.FinancialPermissionTree, nil)
+				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.FinancePermissionTree, nil)
 
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()
@@ -113,7 +113,7 @@ var (
 					router.ModulesGroup(consts.Global.IModules, group)
 
 					// 注册财务模块路由 (可选)
-					router.FinancialGroup(consts.Global.IModules, group)
+					router.FinanceGroup(consts.Global.IModules, group)
 
 					// 审核管理
 					group.Group("/audit", func(group *ghttp.RouterGroup) { group.Bind(sys_controller.SysAudit) })

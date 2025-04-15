@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// FdAccountBill is the golang structure of table co_fd_account_bill for DAO operations like Where/Data.
-type FdAccountBill struct {
-	g.Meta        `orm:"table:co_fd_account_bill, do:true"`
+// FdAccountBills is the golang structure of table co_fd_account_bills for DAO operations like Where/Data.
+type FdAccountBills struct {
+	g.Meta        `orm:"table:co_fd_account_bills, do:true"`
 	Id            interface{} // ID
 	FromUserId    interface{} // 交易发起方UserID，如果是系统则固定为-1
 	ToUserId      interface{} // 交易对象UserID
@@ -28,4 +28,5 @@ type FdAccountBill struct {
 	DeletedAt     *gtime.Time //
 	CreatedAt     *gtime.Time //
 	CreatedBy     interface{} //
+	HandlingFee   interface{} // 手续费，当前记录产生的手续费，如果有的话
 }

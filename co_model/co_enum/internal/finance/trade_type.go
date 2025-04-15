@@ -1,4 +1,4 @@
-package financial
+package finance
 
 import "github.com/kysion/base-library/utility/enum"
 
@@ -49,5 +49,5 @@ func (e tradeType) New(code int, description string) TradeTypeEnum {
 
 	return enum.New[TradeTypeEnum](code, description)
 
-	//panic("kyFinancial.TradeType.New: error")
+	//panic("kyFinance.TradeType.New: error")
 }

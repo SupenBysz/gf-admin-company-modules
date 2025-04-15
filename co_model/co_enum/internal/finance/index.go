@@ -1,6 +1,6 @@
-package financial
+package finance
 
-type financial struct {
+type finance struct {
 	InOutType inOutType
 	TradeType tradeType
 
@@ -10,7 +10,7 @@ type financial struct {
 	AllowExceed allowExceed
 }
 
-var Financial = financial{
+var Finance = finance{
 	InOutType:   InOutType,
 	TradeType:   TradeType,
 	AccountType: AccountType,

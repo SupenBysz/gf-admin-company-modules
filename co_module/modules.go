@@ -11,7 +11,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/boot"
 	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
-	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/financial"
+	"github.com/SupenBysz/gf-admin-company-modules/internal/logic/finance"
 	"github.com/gogf/gf/v2/i18n/gi18n"
 )
 
@@ -20,7 +20,7 @@ type Modules[
 	TEmployeeRes co_model.IEmployeeRes,
 	TTeamRes co_model.ITeamRes,
 	TFdAccountRes co_model.IFdAccountRes,
-	TFdAccountBillRes co_model.IFdAccountBillRes,
+	TFdAccountBillRes co_model.IFdAccountBillsRes,
 	TFdBankCardRes co_model.IFdBankCardRes,
 	TFdCurrencyRes co_model.IFdCurrencyRes,
 	TFdInvoiceRes co_model.IFdInvoiceRes,
@@ -273,7 +273,7 @@ func NewModules[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
 	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -312,22 +312,22 @@ func NewModules[
 	response = module
 
 	// 初始化默认多语言对象
-	module.SetI18n(nil)
+	_ = module.SetI18n(nil)
 
 	module.company = company.NewCompany(response)
 	module.employee = company.NewEmployee(response)
 	module.team = company.NewTeam(response)
 	module.my = company.NewMy(response)
-	module.account = financial.NewFdAccount(response)
-	module.accountBill = financial.NewFdAccountBill(response)
-	module.bankCard = financial.NewFdBankCard(response)
-	module.currency = financial.NewFdCurrency(response)
-	module.invoice = financial.NewFdInvoice(response)
-	module.invoiceDetail = financial.NewFdInvoiceDetail(response)
+	module.account = finance.NewFdAccount(response)
+	module.accountBill = finance.NewFdAccountBill(response)
+	module.bankCard = finance.NewFdBankCard(response)
+	module.currency = finance.NewFdCurrency(response)
+	module.invoice = finance.NewFdInvoice(response)
+	module.invoiceDetail = finance.NewFdInvoiceDetail(response)
 
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)
-	co_consts.FinancialPermissionTree = append(co_consts.FinancialPermissionTree, boot.InitFinancialPermission(response)...)
+	co_consts.FinancePermissionTree = append(co_consts.FinancePermissionTree, boot.InitFinancePermission(response)...)
 
 	return module
 }
