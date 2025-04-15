@@ -112,9 +112,7 @@ func InitPermission[
 
 	// oss
 
-	// 添加资质和审核权限树
-	licensePermission := initAuditAndLicensePermission()
-	result = append(result, licensePermission...)
+	//result = append(result, licensePermission...)
 
 	return result
 }
@@ -201,14 +199,14 @@ func InitFinancePermission[
 	return result
 }
 
-func initAuditAndLicensePermission() []base_permission.IPermission {
+func InitAuditAndLicensePermission() []base_permission.IPermission {
 	InitializePermissionFactory()
 
 	result := []base_permission.IPermission{
 		// 资质权限树
-		base_permission.New(idgen.NextId(), "License", "公资质管理").
+		base_permission.New(idgen.NextId(), "License", "公司资质管理").
 			SetId(idgen.NextId()).
-			SetName("公资质管理").
+			SetName("公司资质管理").
 			SetIdentifier("License").
 			SetType(1).
 			SetIsShow(1).

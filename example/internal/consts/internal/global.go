@@ -75,7 +75,7 @@ func Modules() *Global {
 				TeamMember: co_dao.NewCompanyTeamMember(),
 
 				FdAccount:       co_dao.NewFdAccount(),
-				FdAccountBill:   co_dao.NewFdAccountBills(),
+				FdAccountBills:  co_dao.NewFdAccountBills(),
 				FdInvoice:       co_dao.NewFdInvoice(),
 				FdInvoiceDetail: co_dao.NewFdInvoiceDetail(),
 				FdCurrency:      co_dao.NewFdCurrency(),

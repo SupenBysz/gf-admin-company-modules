@@ -6,9 +6,9 @@ type XDao struct {
 	Team       CompanyTeamDao
 	TeamMember CompanyTeamMemberDao
 
-	FdAccount       FdAccountDao
-	FdAccountBill   FdAccountBillsDao
-	FdInvoice       FdInvoiceDao
+	FdAccount      FdAccountDao
+	FdAccountBills FdAccountBillsDao
+	FdInvoice      FdInvoiceDao
 	FdInvoiceDetail FdInvoiceDetailDao
 	FdCurrency      FdCurrencyDao
 	FdBankCard      FdBankCardDao

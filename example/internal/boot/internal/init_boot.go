@@ -15,7 +15,7 @@ func init() {
 	_ = consts.Global.SetI18n(nil)
 
 	// 初始化权限树
-	consts.Global.PermissionTree = boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
+	consts.Global.PermissionTree = append(boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
@@ -25,7 +25,7 @@ func init() {
 		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
-	]))
+	])), boot.InitAuditAndLicensePermission()...)
 
 	// 导入财务服务权限树
 	consts.Global.FinancePermissionTree = boot.InitFinancePermission(consts.Global.IModules.(co_interface.IModules[

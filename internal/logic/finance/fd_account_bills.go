@@ -179,7 +179,7 @@ func (s *sFdAccountBills[
 	}
 
 	if success == false {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
 	}
 
 	return success == true, err
@@ -212,7 +212,7 @@ func (s *sFdAccountBills[
 	// 判断接受者是否存在
 	toUser, err := sys_service.SysUser().GetSysUserById(ctx, info.ToUserId)
 	if err != nil || toUser == nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_Transaction_ToUser_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_Transaction_ToUser_NoExist}"), s.dao.FdAccountBills.Table())
 	}
 
 	// 先通过财务账号id查询账号出来
@@ -220,13 +220,13 @@ func (s *sFdAccountBills[
 
 	// 判断需要收款的用户是否存在
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBills.Table())
 	}
 
 	bill := s.FactoryMakeResponseInstance()
 
 	// 使用乐观锁校验余额，和更新余额
-	err = s.dao.FdAccountBill.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.dao.FdAccountBills.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 版本
 		version := account.Data().Version
 		// 余额 = 之前的余额 + 本次交易的金额
@@ -249,10 +249,10 @@ func (s *sFdAccountBills[
 			return err
 		}
 
-		result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(doData)
+		result, err := s.dao.FdAccountBills.Ctx(ctx).Insert(doData)
 
 		if result == nil || err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Create_Failed}"), s.dao.FdAccountBill.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Create_Failed}"), s.dao.FdAccountBills.Table())
 		}
 
 		// 2.修改财务账号的余额
@@ -260,7 +260,7 @@ func (s *sFdAccountBills[
 		affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Finance.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 		if affected == 0 || err != nil {
-			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBills.Table())
 		}
 
 		// 3.修改财务账号金额明细统计
@@ -283,7 +283,7 @@ func (s *sFdAccountBills[
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
 	}
 
 	g.Try(ctx, func(ctx context.Context) {
@@ -319,13 +319,13 @@ func (s *sFdAccountBills[
 	// 先通过财务账号id查询账号出来
 	account, err := s.modules.Account().GetAccountById(ctx, info.FdAccountId)
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBills.Table())
 	}
 
 	bill := s.FactoryMakeResponseInstance()
 
 	// 使用乐观锁校验余额，和更新余额
-	err = s.dao.FdAccountBill.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.dao.FdAccountBills.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 版本
 		version := account.Data().Version
 		// 余额 = 之前的余额 - 本次交易的金额
@@ -346,10 +346,10 @@ func (s *sFdAccountBills[
 			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
 			bill.Data().CreatedBy = info.FromUserId
 
-			result, err := s.dao.FdAccountBill.Ctx(ctx).Insert(bill)
+			result, err := s.dao.FdAccountBills.Ctx(ctx).Insert(bill)
 
 			if result == nil || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBills.Table())
 			}
 
 			// 2.修改财务账号的余额
@@ -357,7 +357,7 @@ func (s *sFdAccountBills[
 			affected, err := s.modules.Account().UpdateAccountBalance(ctx, account.Data().Id, info.Amount, version, co_enum.Finance.InOutType.New(info.InOutType, ""), info.FromUserId)
 
 			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBill.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBills.Table())
 			}
 			// 3.修改财务账号金额明细统计
 			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
@@ -384,7 +384,7 @@ func (s *sFdAccountBills[
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBill.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
 	}
 
 	g.Try(ctx, func(ctx context.Context) {
@@ -423,12 +423,12 @@ func (s *sFdAccountBills[
 	//	}
 	//}
 
-	result, err := daoctl.Query[TR](s.dao.FdAccountBill.Ctx(ctx).
-		Where(s.dao.FdAccountBill.Columns().FdAccountId, accountId).
-		OrderDesc(s.dao.FdAccountBill.Columns().CreatedAt), searchParams, false)
+	result, err := daoctl.Query[TR](s.dao.FdAccountBills.Ctx(ctx).
+		Where(s.dao.FdAccountBills.Columns().FdAccountId, accountId).
+		OrderDesc(s.dao.FdAccountBills.Columns().CreatedAt), searchParams, false)
 
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBill.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#AccountBill}{#error_Data_Get_Failed}"), s.dao.FdAccountBills.Table())
 	}
 
 	return result, nil
