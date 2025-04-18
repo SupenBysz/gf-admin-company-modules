@@ -2,8 +2,9 @@ package controller
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
+	"github.com/SupenBysz/gf-admin-company-modules/api/co_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
@@ -81,8 +82,8 @@ func (c *RechargeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	TR,
-]) GetAccountRechargeById(ctx context.Context, id int64) (TR, error) {
-	return c.IFdRecharge.GetAccountRechargeById(ctx, id)
+]) GetAccountRechargeById(ctx context.Context, req *co_v1.GetAccountRechargeByIdReq) (TR, error) {
+	return c.IFdRecharge.GetAccountRechargeById(ctx, &req.GetAccountRechargeByIdReq)
 }
 
 func (c *RechargeController[
@@ -95,8 +96,8 @@ func (c *RechargeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	TR,
-]) SetAccountRechargeAudit(ctx context.Context, id int64, state sys_enum.AuditAction, reply string) (api_v1.BoolRes, error) {
-	audit, err := c.IFdRecharge.SetAccountRechargeAudit(ctx, id, state, reply)
+]) SetAccountRechargeAudit(ctx context.Context, req *co_v1.SetAccountRechargeAuditReq) (api_v1.BoolRes, error) {
+	audit, err := c.IFdRecharge.SetAccountRechargeAudit(ctx, &req.SetAccountRechargeAuditReq)
 
 	return audit == true, err
 }
@@ -111,8 +112,8 @@ func (c *RechargeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	TR,
-]) QueryAccountRecharge(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
-	return c.IFdRecharge.QueryAccountRecharge(ctx, search)
+]) QueryAccountRecharge(ctx context.Context, req *co_v1.QueryAccountRechargeReq) (*base_model.CollectRes[TR], error) {
+	return c.IFdRecharge.QueryAccountRecharge(ctx, &req.QueryAccountRechargeReq)
 }
 
 func (c *RechargeController[
@@ -125,6 +126,6 @@ func (c *RechargeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	TR,
-]) AccountRecharge(ctx context.Context, info *co_model.FdRecharge) (TR, error) {
-	return c.IFdRecharge.AccountRecharge(ctx, info)
+]) AccountRecharge(ctx context.Context, req *co_v1.AccountRecharge) (TR, error) {
+	return c.IFdRecharge.AccountRecharge(ctx, &req.AccountRecharge)
 }

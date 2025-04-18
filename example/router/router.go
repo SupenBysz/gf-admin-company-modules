@@ -240,5 +240,9 @@ func FinanceGroup[
 	//group.POST(routePrefix+"/decrement", ctrl.Decrement)
 	group.POST(routePrefix+"/setAccountAllowExceed", ctrl.SetAccountAllowExceed)
 
+	group.Group(routePrefix+"/recharge", func(group *ghttp.RouterGroup) {
+		group.Bind(controller.Recharge(modules))
+	})
+
 	return group
 }
