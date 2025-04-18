@@ -35,9 +35,9 @@ func InitPermission[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -45,9 +45,9 @@ func InitPermission[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) []base_permission.IPermission {
 	InitializePermissionFactory()
 
@@ -125,9 +125,9 @@ func InitFinancePermission[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -135,9 +135,9 @@ func InitFinancePermission[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) []base_permission.IPermission {
 	InitializePermissionFactory()
 

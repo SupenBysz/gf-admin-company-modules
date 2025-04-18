@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -165,8 +166,6 @@ type (
 		SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error)
 		// QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
-		// AccountRecharge 充值
-		AccountRecharge(ctx context.Context, accountId int64, info *co_model.FdRecharge, createUser *sys_model.SysUser) (bool, error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
 		// CreateBankCard 添加银行卡账号
@@ -228,6 +227,17 @@ type (
 		// GetAccountBillsByAccountId  根据财务账号id获取账单
 		GetAccountBillsByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
+
+	IFdRecharge[TR co_model.IFdRechargeRes] interface {
+		// AccountRecharge 充值
+		AccountRecharge(ctx context.Context, info *co_model.FdRecharge, createUser *sys_model.SysUser) (TR, error)
+		// SetAccountRechargeAudit 设置充值记录审核
+		SetAccountRechargeAudit(ctx context.Context, id int64, state sys_enum.AuditAction, reply string) (bool, error)
+		// GetAccountRechargeById 根据充值记录id获取充值记录
+		GetAccountRechargeById(ctx context.Context, id int64) (TR, error)
+		// QueryAccountRecharge 获取财务账号充值记录|列表
+		QueryAccountRecharge(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+	}
 )
 
 type IConfig interface {
@@ -277,9 +287,9 @@ type IModules[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] interface {
 	IConfig
 	Company() ICompany[ITCompanyRes]
@@ -289,9 +299,9 @@ type IModules[
 	Account() IFdAccount[ITFdAccountRes]
 	AccountBills() IFdAccountBills[ITFdAccountBillRes]
 	BankCard() IFdBankCard[ITFdBankCardRes]
-	Currency() IFdCurrency[ITFdCurrencyRes]
 	Invoice() IFdInvoice[ITFdInvoiceRes]
 	InvoiceDetail() IFdInvoiceDetail[ITFdInvoiceDetailRes]
+	Recharge() IFdRecharge[ITFdRechargeRes]
 
 	SetI18n(i18n *gi18n.Manager) error
 	T(ctx context.Context, content string) string

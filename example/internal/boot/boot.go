@@ -2,7 +2,6 @@ package boot
 
 import (
 	"context"
-
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_controller"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -61,10 +60,10 @@ var (
 
 			{
 				// ImportPermissionTree 导入权限结构
-				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.PermissionTree, nil)
+				_ = sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.PermissionTree, nil)
 
 				// 导入财务服务权限结构 (可选)
-				sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.FinancePermissionTree, nil)
+				_ = sys_service.SysPermission().ImportPermissionTree(ctx, consts.Global.FinancePermissionTree, nil)
 
 				// CASBIN 初始化
 				sys_service.Casbin().Enforcer()

@@ -33,9 +33,9 @@ type sFdAccountBills[
 	ITFdAccountRes co_model.IFdAccountRes,
 	TR co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -45,9 +45,9 @@ type sFdAccountBills[
 		ITFdAccountRes,
 		TR,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao     *co_dao.XDao
 	hookArr base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
@@ -60,9 +60,9 @@ func NewFdAccountBills[
 	ITFdAccountRes co_model.IFdAccountRes,
 	TR co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -70,9 +70,9 @@ func NewFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.IFdAccountBills[TR] {
 	result := &sFdAccountBills[
 		ITCompanyRes,
@@ -81,9 +81,9 @@ func NewFdAccountBills[
 		ITFdAccountRes,
 		TR,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     modules.Dao(),
@@ -102,9 +102,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc) {
 	s.hookArr.InstallHook(hookKey, hookFunc)
 }
@@ -117,9 +117,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc] {
 	return s.hookArr
 }
@@ -132,9 +132,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.IFdAccountBillsRes
 	ret = &co_model.FdAccountBillsRes{}
@@ -149,9 +149,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	// 判断交易时间是否大于当前系统时间
 	now := gtime.Now()
@@ -203,9 +203,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) income(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -269,11 +269,11 @@ func (s *sFdAccountBills[
 		if increment == false || err != nil {
 			return err
 		}
-		g.Try(ctx, func(ctx context.Context) {
+		_ = g.Try(ctx, func(ctx context.Context) {
 			s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 				if key.InTransaction && key.InOutType == co_enum.Finance.InOutType.In {
 					if key.TradeType.Code()&info.TradeType == info.TradeType {
-						value(ctx, key, bill)
+						_ = value(ctx, key, bill)
 					}
 				}
 			})
@@ -286,13 +286,13 @@ func (s *sFdAccountBills[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
 	}
 
-	g.Try(ctx, func(ctx context.Context) {
+	_ = g.Try(ctx, func(ctx context.Context) {
 		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 			// 在事务中 && 订阅key是收入类型的
 			if !key.InTransaction && key.InOutType == co_enum.Finance.InOutType.In {
 				// 订阅的交易类型一致
 				if key.TradeType.Code()&info.TradeType == info.TradeType {
-					value(ctx, key, bill)
+					_ = value(ctx, key, bill)
 				}
 
 			}
@@ -310,9 +310,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) spending(ctx context.Context, info co_model.AccountBillsRegister) (bool, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -408,9 +408,9 @@ func (s *sFdAccountBills[
 	ITFdAccountRes,
 	TR,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountBillsByAccountId(ctx context.Context, accountId int64, searchParams *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	if accountId == 0 {
 		return nil, gerror.New(s.modules.T(ctx, "error_AccountId_NonZero"))

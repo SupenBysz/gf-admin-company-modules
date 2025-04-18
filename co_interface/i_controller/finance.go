@@ -9,13 +9,12 @@ import (
 )
 
 type IFinance[
-
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] interface {
 	// GetAccountBalance 查看账户余额
 	GetAccountBalance(ctx context.Context, req *co_company_api.GetAccountBalanceReq) (api_v1.Int64Res, error)
@@ -66,7 +65,7 @@ type IFinance[
 	UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error)
 
 	// GetCurrencyByCode 获取币种信息
-	GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (ITFdCurrencyRes, error)
+	GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error)
 
 	// CreateAccountDetail 创建财务账单金额明细统计记录  只能被动创建
 
@@ -74,7 +73,7 @@ type IFinance[
 	GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error)
 
 	// QueryCurrencyList 获取货币列表
-	QueryCurrencyList(ctx context.Context, search *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error)
+	QueryCurrencyList(ctx context.Context, search *co_company_api.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error)
 
 	// QueryAccountBills 根据财务账号id查询账单
 	QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillsRes], error)

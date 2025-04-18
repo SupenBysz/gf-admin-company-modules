@@ -22,9 +22,9 @@ type Modules[
 	TFdAccountRes co_model.IFdAccountRes,
 	TFdAccountBillsRes co_model.IFdAccountBillsRes,
 	TFdBankCardRes co_model.IFdBankCardRes,
-	TFdCurrencyRes co_model.IFdCurrencyRes,
 	TFdInvoiceRes co_model.IFdInvoiceRes,
 	TFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	co_interface.IConfig
 	conf          *co_model.Config
@@ -35,9 +35,9 @@ type Modules[
 	account       co_interface.IFdAccount[TFdAccountRes]
 	accountBills  co_interface.IFdAccountBills[TFdAccountBillsRes]
 	bankCard      co_interface.IFdBankCard[TFdBankCardRes]
-	currency      co_interface.IFdCurrency[TFdCurrencyRes]
 	invoice       co_interface.IFdInvoice[TFdInvoiceRes]
 	invoiceDetail co_interface.IFdInvoiceDetail[TFdInvoiceDetailRes]
+	rechargeRes   co_interface.IFdRecharge[ITFdRechargeRes]
 
 	i18n *gi18n.Manager
 	xDao *co_dao.XDao
@@ -50,9 +50,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) My() co_interface.IMy {
 	return m.my
 }
@@ -64,9 +64,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Company() co_interface.ICompany[TCompanyRes] {
 	return m.company
 }
@@ -78,9 +78,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Employee() co_interface.IEmployee[TEmployeeRes] {
 	return m.employee
 }
@@ -92,9 +92,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Team() co_interface.ITeam[TTeamRes] {
 	return m.team
 }
@@ -106,9 +106,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Account() co_interface.IFdAccount[TFdAccountRes] {
 	return m.account
 }
@@ -120,9 +120,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) AccountBills() co_interface.IFdAccountBills[TFdAccountBillsRes] {
 	return m.accountBills
 }
@@ -134,9 +134,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) BankCard() co_interface.IFdBankCard[TFdBankCardRes] {
 	return m.bankCard
 }
@@ -148,23 +148,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
-]) Currency() co_interface.IFdCurrency[TFdCurrencyRes] {
-	return m.currency
-}
-
-func (m *Modules[
-	TCompanyRes,
-	TEmployeeRes,
-	TTeamRes,
-	TFdAccountRes,
-	TFdAccountBillsRes,
-	TFdBankCardRes,
-	TFdCurrencyRes,
-	TFdInvoiceRes,
-	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Invoice() co_interface.IFdInvoice[TFdInvoiceRes] {
 	return m.invoice
 }
@@ -176,9 +162,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceDetail() co_interface.IFdInvoiceDetail[TFdInvoiceDetailRes] {
 	return m.invoiceDetail
 }
@@ -190,9 +176,23 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) Recharge() co_interface.IFdRecharge[ITFdRechargeRes] {
+	return m.rechargeRes
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetConfig() *co_model.Config {
 	return m.conf
 }
@@ -204,9 +204,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) T(ctx context.Context, content string) string {
 	data := m.i18n.Translate(gi18n.WithLanguage(context.TODO(), "zh-CN"), content)
 
@@ -221,9 +221,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Tf(ctx context.Context, format string, values ...interface{}) string {
 	return m.i18n.TranslateFormat(ctx, format, values...)
 }
@@ -235,9 +235,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetI18n(i18n *gi18n.Manager) error {
 	if i18n == nil {
 		i18n = gi18n.New()
@@ -261,9 +261,9 @@ func (m *Modules[
 	TFdAccountRes,
 	TFdAccountBillsRes,
 	TFdBankCardRes,
-	TFdCurrencyRes,
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Dao() *co_dao.XDao {
 	return m.xDao
 }
@@ -275,9 +275,9 @@ func NewModules[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](
 	conf *co_model.Config,
 	xDao *co_dao.XDao,
@@ -288,9 +288,9 @@ func NewModules[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) {
 	module := &Modules[
 		ITCompanyRes,
@@ -299,9 +299,9 @@ func NewModules[
 		ITFdAccountRes,
 		ITFdAccountBillsRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		conf: conf,
 		xDao: xDao,
@@ -321,9 +321,9 @@ func NewModules[
 	module.account = finance.NewFdAccount(response)
 	module.accountBills = finance.NewFdAccountBills(response)
 	module.bankCard = finance.NewFdBankCard(response)
-	module.currency = finance.NewFdCurrency(response)
 	module.invoice = finance.NewFdInvoice(response)
 	module.invoiceDetail = finance.NewFdInvoiceDetail(response)
+	module.rechargeRes = finance.NewFdRecharge(response)
 
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)

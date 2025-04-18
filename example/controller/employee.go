@@ -22,9 +22,9 @@ func Employee[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TIRes,
@@ -32,9 +32,9 @@ func Employee[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) *EmployeeController[TIRes] {
 	return &EmployeeController[TIRes]{
 		IEmployee: co_controller.Employee(modules),

@@ -13,6 +13,7 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
+	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
@@ -28,9 +29,9 @@ type FinanceController[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -39,9 +40,9 @@ type FinanceController[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao co_dao.XDao
 }
@@ -54,9 +55,9 @@ func Finance[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -64,16 +65,16 @@ func Finance[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) i_controller.IFinance[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ] {
 	return &FinanceController[
 		ITCompanyRes,
@@ -82,9 +83,9 @@ func Finance[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -99,9 +100,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountBalance(ctx context.Context, req *co_company_api.GetAccountBalanceReq) (api_v1.Int64Res, error) {
 
 	return funs.CheckPermission(ctx,
@@ -124,9 +125,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceRegister(ctx context.Context, req *co_company_api.CreateInvoiceReq) (ITFdInvoiceRes, error) {
 	// 给userID和UnionMainId赋值
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -150,9 +151,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryInvoice(ctx context.Context, req *co_company_api.QueryInvoiceReq) (*base_model.CollectRes[ITFdInvoiceRes], error) {
 	// 权限判断
 	return funs.CheckPermission(ctx,
@@ -172,9 +173,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeletesFdInvoiceById(ctx context.Context, req *co_company_api.DeleteInvoiceByIdReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -193,9 +194,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceDetailRegister(ctx context.Context, req *co_company_api.CreateInvoiceDetailReq) (ITFdInvoiceDetailRes, error) {
 	ret, err := c.modules.InvoiceDetail().CreateInvoiceDetail(ctx, req.FdInvoiceDetailRegister)
 	return ret, err
@@ -209,9 +210,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryInvoiceDetailList(ctx context.Context, req *co_company_api.QueryInvoiceDetailListReq) (*base_model.CollectRes[ITFdInvoiceDetailRes], error) {
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[ITFdInvoiceDetailRes], error) {
@@ -230,9 +231,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) MakeInvoiceDetailReq(ctx context.Context, req *co_company_api.MakeInvoiceDetailReq) (api_v1.BoolRes, error) {
 	ret, err := c.modules.InvoiceDetail().MakeInvoiceDetail(ctx, req.InvoiceDetailId, req.FdMakeInvoiceDetail)
 	return ret == true, err
@@ -246,9 +247,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) AuditInvoiceDetail(ctx context.Context, req *co_company_api.AuditInvoiceDetailReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -267,9 +268,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) BankCardRegister(ctx context.Context, req *co_company_api.BankCardRegisterReq) (ITFdBankCardRes, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -290,9 +291,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteBankCard(ctx context.Context, req *co_company_api.DeleteBankCardReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -311,9 +312,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryBankCardList(ctx context.Context, req *co_company_api.QueryBankCardListReq) (*base_model.CollectRes[ITFdBankCardRes], error) {
 	return funs.CheckPermission(ctx,
 		func() (*base_model.CollectRes[ITFdBankCardRes], error) {
@@ -332,9 +333,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountDetail(ctx context.Context, req *co_company_api.GetAccountDetailReq) (ITFdAccountRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (ITFdAccountRes, error) {
@@ -353,9 +354,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_company_api.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -375,9 +376,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountLimitState(ctx context.Context, req *co_company_api.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -397,9 +398,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetAccountCurrencyCode(ctx context.Context, req *co_company_api.SetAccountCurrencyCodeReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -419,9 +420,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.Int64Res, error) {
@@ -441,9 +442,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountDetailById(ctx context.Context, req *co_company_api.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.FdAccountDetailRes, error) {
@@ -462,9 +463,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Increment(ctx context.Context, req *co_company_api.IncrementReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -483,9 +484,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Decrement(ctx context.Context, req *co_company_api.DecrementReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -504,9 +505,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetAccountAllowExceed(ctx context.Context, req *co_company_api.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -525,11 +526,11 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (ITFdCurrencyRes, error) {
-	return c.modules.Currency().GetCurrencyByCode(ctx, req.CurrencyCode)
+	ITFdRechargeRes,
+]) GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error) {
+	return co_service.FdCurrency().GetCurrencyByCode(ctx, req.CurrencyCode)
 }
 
 // QueryCurrencyList 获取币种列表
@@ -540,11 +541,11 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) QueryCurrencyList(ctx context.Context, req *co_company_api.QueryCurrencyListReq) (*base_model.CollectRes[ITFdCurrencyRes], error) {
-	return c.modules.Currency().QueryCurrencyList(ctx, &req.SearchParams)
+	ITFdRechargeRes,
+]) QueryCurrencyList(ctx context.Context, req *co_company_api.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
+	return co_service.FdCurrency().QueryCurrencyList(ctx, &req.SearchParams)
 }
 
 // QueryAccountBills  根据财务账号id查询账单
@@ -555,9 +556,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryAccountBills(ctx context.Context, req *co_company_api.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
 	return c.modules.AccountBills().GetAccountBillsByAccountId(ctx, req.AccountId, &req.SearchParams)
 }
@@ -569,9 +570,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context) context.Context {
 	include := &garray.StrArray{}
 	if ctx.Value("include") == nil {

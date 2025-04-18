@@ -8,12 +8,17 @@ type finance struct {
 	SceneType   sceneType
 
 	AllowExceed allowExceed
+
+	RechargeState  rechargeState
+	RechargeMethod rechargeMethod
 }
 
 var Finance = finance{
-	InOutType:   InOutType,
-	TradeType:   TradeType,
-	AccountType: AccountType,
-	SceneType:   SceneType,
-	AllowExceed: AllowExceed,
+	InOutType:      InOutType,
+	TradeType:      TradeType,
+	AccountType:    AccountType,
+	SceneType:      SceneType,
+	AllowExceed:    AllowExceed,
+	RechargeState:  RechargeState,
+	RechargeMethod: RechargeMethod,
 }

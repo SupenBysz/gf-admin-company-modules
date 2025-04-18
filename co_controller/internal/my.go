@@ -23,9 +23,9 @@ type MyController[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	i_controller.IMy
 	modules co_interface.IModules[
@@ -35,9 +35,9 @@ type MyController[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 }
 
@@ -48,9 +48,9 @@ func My[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	TIRes,
 	ITEmployeeRes,
@@ -58,9 +58,9 @@ func My[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) i_controller.IMy {
 	return &MyController[
 		TIRes,
@@ -69,9 +69,9 @@ func My[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 	}
@@ -85,9 +85,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetProfile(ctx context.Context, _ *co_company_api.GetProfileReq) (*co_model.MyProfileRes, error) {
 	result, err := c.modules.My().GetProfile(c.makeMore(ctx))
 	if err != nil {
@@ -105,9 +105,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompany(ctx context.Context, _ *co_company_api.GetCompanyReq) (*co_model.MyCompanyRes, error) {
 	result, err := c.modules.My().GetCompany(ctx)
 	if err != nil {
@@ -126,9 +126,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error) {
 
 	result, err := c.modules.My().GetTeams(c.makeMore(ctx))
@@ -147,9 +147,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error) {
 	//permission := co_permission.Employee.PermissionType(c.modules).SetAvatar
 	//identifierStr := c.modules.GetConfig().Identifier.Employee + "::" + permission.GetIdentifier()
@@ -179,9 +179,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetMobile(ctx context.Context, req *co_company_api.SetMobileReq) (api_v1.BoolRes, error) {
 	ret, err := c.modules.My().SetMyMobile(ctx, req.Mobile, req.Captcha, req.Password)
 	return ret == true, err
@@ -195,9 +195,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetMail(ctx context.Context, req *co_company_api.SetMailReq) (api_v1.BoolRes, error) {
 	ret, err := c.modules.My().SetMyMail(ctx, req.OldMail, req.NewMail, req.Captcha, req.Password)
 	return ret == true, err
@@ -211,9 +211,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountBills(ctx context.Context, req *co_company_api.GetAccountBillsReq) (*co_model.MyAccountBillRes, error) {
 	ret, err := c.modules.My().GetAccountBills(ctx, &req.SearchParams)
 	return ret, err
@@ -227,9 +227,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccounts(ctx context.Context, _ *co_company_api.GetAccountsReq) (*co_model.FdAccountListRes, error) {
 	ret, err := c.modules.My().GetAccounts(c.makeMore(ctx))
 	return ret, err
@@ -243,9 +243,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetBankCards(ctx context.Context, _ *co_company_api.GetBankCardsReq) (*co_model.FdBankCardListRes, error) {
 	ret, err := c.modules.My().GetBankCards(ctx)
 	return ret, err
@@ -259,9 +259,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetInvoices(ctx context.Context, _ *co_company_api.GetInvoicesReq) (*co_model.FdInvoiceListRes, error) {
 	ret, err := c.modules.My().GetInvoices(ctx)
 	return ret, err
@@ -275,9 +275,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccount(ctx context.Context, req *co_company_api.UpdateAccountReq) (api_v1.BoolRes, error) {
 	ret, err := c.modules.My().UpdateAccount(ctx, req.AccountId, &req.UpdateAccount)
 	return ret == true, err
@@ -290,9 +290,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context) context.Context {
 
 	include := &garray.StrArray{}
@@ -355,9 +355,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) getPermissionIdentifier(permission base_permission.IPermission) (identifierStr string) {
 	// 拼装标识符
 	return c.modules.GetConfig().Identifier.Team + "::" + permission.GetIdentifier()
@@ -370,9 +370,9 @@ func (c *MyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetMyCompanyPermissionList(ctx context.Context, req *co_company_api.GetMyCompanyPermissionListReq) (*sys_model.MyPermissionListRes, error) {
 	return c.modules.My().GetMyCompanyPermissionList(ctx, req.PermissionType)
 }

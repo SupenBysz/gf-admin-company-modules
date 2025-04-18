@@ -10,6 +10,8 @@ import (
 )
 
 type (
+	// Audit
+
 	// CompanyState 主体状态
 	CompanyState = company.StateEnum
 	// EmployeeState 员工状态
@@ -28,6 +30,10 @@ type (
 	SceneType = finance.SceneTypeEnum
 	// AllowExceed 是否允许存在负数余额
 	AllowExceed = finance.AllowExceedEnum
+	// RechargeMethod 充值方式
+	RechargeMethod = finance.RechargeMethodEnum
+	// RechargeState 充值状态
+	RechargeState = finance.RechargeStateEnum
 
 	// InvoiceAuditType 发票审核状态
 	InvoiceAuditType = invoice.AuditTypeEnum

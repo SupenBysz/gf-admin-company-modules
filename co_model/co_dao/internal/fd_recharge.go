@@ -27,34 +27,46 @@ type FdRechargeDao struct {
 
 // FdRechargeColumns defines and stores column names for table co_fd_recharge.
 type FdRechargeColumns struct {
-	Id             string //
-	UserId         string // 用户ID
-	CurrencyCode   string // 币种
-	Amount         string // 金额
-	RechargeMethod string // 方式：1手动冲正、2银行卡、3支付宝、4微信、5云闪付、6翼支付
-	RechargeTime   string // 充值时间
-	Status         string // 状态:0待处理、1已完成、2已取消、4失败
-	PaymentOrderId string // 外部支付订单，即一般为第三方支付平台生成的订单号
-	BillsId        string // 交易流水号，一般用于后续的队长和查询
-	AuditState     string // 审核状态：0待审核，1通过、2不通过
-	Remark         string // 备注
-	CreatedAt      string //
-	UpdatedAt      string //
-	DeletedAt      string //
+	Id             string // 唯一标识每一条充值记录
+	UserId         string // 用户ID，关联用户表主键，用于标识充值所属用户
+	Username       string // 用户账号，冗余存储方便快速查询用户相关充值记录，无需每次都关联用户表
+	CurrencyCode   string // 货币代码，如CNY（人民币）、USD（美元）等
+	Amount         string // 充值金额，小数点后保留2位，且金额需大于0
+	RechargeMethod string // 充值方式：1 - 银行卡；2 - 支付宝；3 - 微信；4 - 云闪付；5 - 线下现金（若有对应业务）；6 - 其他（可进一步在备注说明）
+	PaymentAt      string // 充值支付时间，记录用户实际支付成功的时间
+	PaymentOrderNo string // 外部支付订单号，第三方支付平台生成的订单编号
+	TransactionNo  string // 交易流水号，系统内部生成，用于后续对账和查询
+	State          string // 充值状态：0 - 待处理；1 - 处理中；2 - 已支付；3 - 部分成功；4 - 失败；5 - 已取消；6 - 待确认
+	AuditState     string // 审核状态：0 - 待审核；1 - 审核通过；2 - 审核不通过；3 - 审核中（人工复审）；4 - 补充资料待审核
+	AuditReply     string // 审核意见，审核人员填写审核通过或不通过的原因等
+	IpAddress      string // 用户发起充值请求时的IP地址
+	UserAgent      string // 用户使用的设备和浏览器信息
+	UnionMainId    string //
+	AccountId      string // 财务账户
+	Remark         string // 备注，可记录一些特殊情况或额外信息
+	CreatedAt      string // 记录创建时间，即充值请求提交时间
+	UpdatedAt      string // 记录最后更新时间，每次记录状态等信息变更时更新
+	DeletedAt      string // 逻辑删除时间，用于软删除，非真正物理删除，便于数据追溯和恢复
 }
 
 // fdRechargeColumns holds the columns for table co_fd_recharge.
 var fdRechargeColumns = FdRechargeColumns{
 	Id:             "id",
 	UserId:         "user_id",
+	Username:       "username",
 	CurrencyCode:   "currency_code",
 	Amount:         "amount",
 	RechargeMethod: "recharge_method",
-	RechargeTime:   "recharge_time",
-	Status:         "status",
-	PaymentOrderId: "payment_order_id",
-	BillsId:        "bills_id",
+	PaymentAt:      "payment_at",
+	PaymentOrderNo: "payment_order_no",
+	TransactionNo:  "transaction_no",
+	State:          "state",
 	AuditState:     "audit_state",
+	AuditReply:     "audit_reply",
+	IpAddress:      "ip_address",
+	UserAgent:      "user_agent",
+	UnionMainId:    "union_main_id",
+	AccountId:      "account_id",
 	Remark:         "remark",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",

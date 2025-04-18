@@ -30,9 +30,9 @@ type sFdInvoiceDetail[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	TR co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -42,9 +42,9 @@ type sFdInvoiceDetail[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		TR,
+		ITFdRechargeRes,
 	]
 	dao *co_dao.XDao
 }
@@ -56,9 +56,9 @@ func NewFdInvoiceDetail[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	TR co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -66,9 +66,9 @@ func NewFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) co_interface.IFdInvoiceDetail[TR] {
 	result := &sFdInvoiceDetail[
 		ITCompanyRes,
@@ -77,9 +77,9 @@ func NewFdInvoiceDetail[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		TR,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     modules.Dao(),
@@ -98,9 +98,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.IFdInvoiceDetailRes
 	ret = &co_model.FdInvoiceDetailRes{}
@@ -115,9 +115,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) CreateInvoiceDetail(ctx context.Context, info co_model.FdInvoiceDetailRegister) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -162,9 +162,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) GetInvoiceDetailById(ctx context.Context, id int64) (response TR, err error) {
 	if id == 0 {
 		return response, gerror.New(s.modules.T(ctx, "{#InvoiceDetail}{#error_Id_NotNull}"))
@@ -187,9 +187,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) MakeInvoiceDetail(ctx context.Context, invoiceDetailId int64, makeInvoiceDetail co_model.FdMakeInvoiceDetail) (res bool, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -248,9 +248,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) AuditInvoiceDetail(ctx context.Context, invoiceDetailId int64, auditInfo co_model.FdInvoiceAuditInfo) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -299,9 +299,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) QueryInvoiceDetailListByInvoiceId(ctx context.Context, invoiceId int64) (*base_model.CollectRes[TR], error) {
 	result, err := daoctl.Query[TR](s.dao.FdInvoiceDetail.Ctx(ctx), &base_model.SearchParams{
 		Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
@@ -326,9 +326,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) DeleteInvoiceDetail(ctx context.Context, id int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -377,9 +377,9 @@ func (s *sFdInvoiceDetail[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	TR,
+	ITFdRechargeRes,
 ]) QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error) {
 	newFields := make([]base_model.FilterInfo, 0)
 	// 筛选条件强制指定所属用户

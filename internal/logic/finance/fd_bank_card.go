@@ -33,9 +33,9 @@ type sFdBankCard[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	TR co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -45,9 +45,9 @@ type sFdBankCard[
 		ITFdAccountRes,
 		ITFdAccountBillsRes,
 		TR,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao *co_dao.XDao
 }
@@ -59,9 +59,9 @@ func NewFdBankCard[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 	TR co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -69,9 +69,9 @@ func NewFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.IFdBankCard[TR] {
 	result := &sFdBankCard[
 		ITCompanyRes,
@@ -80,9 +80,9 @@ func NewFdBankCard[
 		ITFdAccountRes,
 		ITFdAccountBillsRes,
 		TR,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     modules.Dao(),
@@ -101,9 +101,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.IFdBankCardRes
 	ret = &co_model.FdBankCardRes{}
@@ -118,9 +118,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateBankCard(ctx context.Context, info co_model.BankCardRegister, createUser *sys_model.SysUser) (response TR, err error) {
 
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -177,9 +177,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetBankCardById(ctx context.Context, id int64) (response TR, err error) {
 	if id == 0 {
 		return response, gerror.New(s.modules.T(ctx, "{#BankCard}{#error_Id_NotNull}"))
@@ -201,9 +201,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetBankCardByCardNumber(ctx context.Context, cardNumber string) (response TR, err error) {
 	if cardNumber == "" {
 		return response, gerror.New(s.modules.T(ctx, "error_BankCardNumber_NonNull"))
@@ -229,9 +229,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateBankCardState(ctx context.Context, bankCardId int64, state int) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -262,9 +262,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteBankCardById(ctx context.Context, bankCardId int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -314,9 +314,9 @@ func (s *sFdBankCard[
 	ITFdAccountRes,
 	ITFdAccountBillsRes,
 	TR,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryBankCardListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error) {
 	if userId == 0 {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#User}{#error_Id_NotNull}"), sys_dao.SysUser.Table())

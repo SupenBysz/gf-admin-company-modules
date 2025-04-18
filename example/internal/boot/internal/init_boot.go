@@ -22,9 +22,9 @@ func init() {
 		*co_model.FdAccountRes,
 		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
+		*co_model.FdRechargeRes,
 	])), boot.InitAuditAndLicensePermission()...)
 
 	// 导入财务服务权限树
@@ -35,8 +35,8 @@ func init() {
 		*co_model.FdAccountRes,
 		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
+		*co_model.FdRechargeRes,
 	]))
 }

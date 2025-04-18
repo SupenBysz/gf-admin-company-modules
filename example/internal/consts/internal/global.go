@@ -17,9 +17,9 @@ type Global struct {
 		*co_model.FdAccountRes,
 		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
+		*co_model.FdRechargeRes,
 	]
 
 	PermissionTree []base_permission.IPermission
@@ -43,9 +43,9 @@ func Modules() *Global {
 			*co_model.FdAccountRes,
 			*co_model.FdAccountBillsRes,
 			*co_model.FdBankCardRes,
-			*co_model.FdCurrencyRes,
 			*co_model.FdInvoiceRes,
 			*co_model.FdInvoiceDetailRes,
+			*co_model.FdRechargeRes,
 		](
 			&co_model.Config{
 				AllowEmptyNo:                   true,

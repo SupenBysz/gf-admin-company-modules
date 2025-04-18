@@ -22,17 +22,17 @@ type FinanceController[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	i_controller.IFinance[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 }
 
@@ -43,9 +43,9 @@ func Finance[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -53,9 +53,9 @@ func Finance[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -63,9 +63,9 @@ func Finance[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ] {
 	return &FinanceController[
 		ITCompanyRes,
@@ -74,9 +74,9 @@ func Finance[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		IFinance: co_controller.Finance(modules),
 	}
@@ -89,9 +89,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountBalance(ctx context.Context, req *co_v1.GetAccountBalanceReq) (api_v1.Int64Res, error) {
 	return c.IFinance.GetAccountBalance(ctx, &req.GetAccountBalanceReq)
 }
@@ -103,9 +103,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceRegister(ctx context.Context, req *co_v1.CreateInvoiceReq) (*co_model.FdInvoiceRes, error) {
 	ret, err := c.IFinance.InvoiceRegister(ctx, &req.CreateInvoiceReq)
 	return ret.Data(), err
@@ -118,9 +118,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryInvoice(ctx context.Context, req *co_v1.QueryInvoiceReq) (*co_model.FdInvoiceListRes, error) {
 	ret, err := c.IFinance.QueryInvoice(ctx, &req.QueryInvoiceReq)
 	return kconv.Struct(ret, &co_model.FdInvoiceListRes{}), err
@@ -133,9 +133,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeletesFdInvoiceById(ctx context.Context, req *co_v1.DeleteInvoiceByIdReq) (api_v1.BoolRes, error) {
 	return c.IFinance.DeletesFdInvoiceById(ctx, &req.DeleteInvoiceByIdReq)
 }
@@ -147,9 +147,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceDetailRegister(ctx context.Context, req *co_v1.CreateInvoiceDetailReq) (*co_model.FdInvoiceDetailRes, error) {
 	ret, err := c.IFinance.InvoiceDetailRegister(ctx, &req.CreateInvoiceDetailReq)
 	return ret.Data(), err
@@ -162,9 +162,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryInvoiceDetailList(ctx context.Context, req *co_v1.QueryInvoiceDetailListReq) (*co_model.FdInvoiceDetailListRes, error) {
 	ret, err := c.IFinance.QueryInvoiceDetailList(ctx, &req.QueryInvoiceDetailListReq)
 	return kconv.Struct(ret, &co_model.FdInvoiceDetailListRes{}), err
@@ -177,9 +177,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) MakeInvoiceDetailReq(ctx context.Context, req *co_v1.MakeInvoiceDetailReq) (api_v1.BoolRes, error) {
 	return c.IFinance.MakeInvoiceDetailReq(ctx, &req.MakeInvoiceDetailReq)
 }
@@ -191,9 +191,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) AuditInvoiceDetail(ctx context.Context, req *co_v1.AuditInvoiceDetailReq) (api_v1.BoolRes, error) {
 	return c.IFinance.AuditInvoiceDetail(ctx, &req.AuditInvoiceDetailReq)
 
@@ -206,9 +206,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) BankCardRegister(ctx context.Context, req *co_v1.BankCardRegisterReq) (*co_model.FdBankCardRes, error) {
 	ret, err := c.IFinance.BankCardRegister(ctx, &req.BankCardRegisterReq)
 	return ret.Data(), err
@@ -221,9 +221,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteBankCard(ctx context.Context, req *co_v1.DeleteBankCardReq) (api_v1.BoolRes, error) {
 	return c.IFinance.DeleteBankCard(ctx, &req.DeleteBankCardReq)
 }
@@ -235,9 +235,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryBankCardList(ctx context.Context, req *co_v1.QueryBankCardListReq) (*co_model.FdBankCardListRes, error) {
 	ret, err := c.IFinance.QueryBankCardList(ctx, &req.QueryBankCardListReq)
 
@@ -252,9 +252,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountDetail(ctx context.Context, req *co_v1.GetAccountDetailReq) (ITFdAccountRes, error) {
 	ret, err := c.IFinance.GetAccountDetail(ctx, &req.GetAccountDetailReq)
 
@@ -269,9 +269,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountIsEnabled(ctx context.Context, req *co_v1.UpdateAccountIsEnabledReq) (api_v1.BoolRes, error) {
 	ret, err := c.IFinance.UpdateAccountIsEnabled(ctx, &req.UpdateAccountIsEnabledReq)
 
@@ -286,9 +286,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountLimitState(ctx context.Context, req *co_v1.UpdateAccountLimitStateReq) (api_v1.BoolRes, error) {
 	ret, err := c.IFinance.UpdateAccountLimitState(ctx, &req.UpdateAccountLimitStateReq)
 
@@ -303,9 +303,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountDetailById(ctx context.Context, req *co_v1.GetAccountDetailByAccountIdReq) (*co_model.FdAccountDetailRes, error) {
 	ret, err := c.IFinance.GetAccountDetailById(ctx, &req.GetAccountDetailByAccountIdReq)
 
@@ -320,9 +320,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccountBalance(ctx context.Context, req *co_v1.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
 	ret, err := c.IFinance.UpdateAccountBalance(ctx, &req.UpdateAccountBalanceReq)
 
@@ -337,10 +337,10 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) GetCurrencyByCode(ctx context.Context, req *co_v1.GetCurrencyByCodeReq) (ITFdCurrencyRes, error) {
+	ITFdRechargeRes,
+]) GetCurrencyByCode(ctx context.Context, req *co_v1.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error) {
 	return c.IFinance.GetCurrencyByCode(ctx, &req.GetCurrencyByCodeReq)
 }
 
@@ -352,9 +352,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryCurrencyList(ctx context.Context, req *co_v1.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
 	ret, err := c.IFinance.QueryCurrencyList(ctx, &req.QueryCurrencyListReq)
 
@@ -380,9 +380,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryAccountBills(ctx context.Context, req *co_v1.QueryAccountBillsReq) (*base_model.CollectRes[ITFdAccountBillRes], error) {
 	return c.IFinance.QueryAccountBills(ctx, &req.QueryAccountBillsReq)
 }
@@ -430,9 +430,9 @@ func (c *FinanceController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetAccountAllowExceed(ctx context.Context, req *co_v1.SetAccountAllowExceedReq) (api_v1.BoolRes, error) {
 	ret, err := c.IFinance.SetAccountAllowExceed(ctx, &req.SetAccountAllowExceedReq)
 

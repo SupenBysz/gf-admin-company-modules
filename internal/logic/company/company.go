@@ -40,9 +40,9 @@ type sCompany[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -52,9 +52,9 @@ type sCompany[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	superAdminMainId int64
 	dao              co_dao.XDao
@@ -68,9 +68,9 @@ func NewCompany[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -78,9 +78,9 @@ func NewCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.ICompany[TR] {
 	result := &sCompany[
 		TR,
@@ -89,9 +89,9 @@ func NewCompany[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -118,9 +118,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
 	// 如下的逻辑：符合邀约的情况，为xx主体邀请新用户，下列逻辑只是将新用户设置为该主体的员工
 
@@ -165,9 +165,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ICompanyRes = &co_model.CompanyRes{
 		Company:   &co_entity.Company{},
@@ -184,9 +184,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompanyById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	if id == 0 {
@@ -225,9 +225,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompanyByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
 		s.dao.Company.Ctx(ctx).
@@ -253,9 +253,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) HasCompanyByName(ctx context.Context, name string, excludeIds ...int64) bool {
 	model := s.dao.Company.Ctx(ctx)
 
@@ -283,9 +283,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryCompanyList(ctx context.Context, filter *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	export := false
@@ -326,9 +326,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	info.Id = 0
 	return s.saveCompany(ctx, info, bindUser)
@@ -342,9 +342,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	if info.Id <= 0 {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
@@ -359,9 +359,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetCompanyState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error) {
 	if companyId <= 0 {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
@@ -380,9 +380,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) saveCompany(ctx context.Context, info *co_model.Company, bindUser *sys_model.SysUser) (response TR, err error) {
 	// 名称重名检测
 	if info.Name != nil {
@@ -577,9 +577,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompanyDetail(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -616,9 +616,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetCompanyAdminUser(ctx context.Context, sysUserId, unionMainId int64) (bool, error) {
 	// 用户是否存在
 	sysUser, err := sys_service.SysUser().GetSysUserById(ctx, sysUserId)
@@ -691,9 +691,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -759,9 +759,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 
 // ]) MakeMore(ctx context.Context, data TR, employeeModule co_interface.IEmployee[ITEmployeeRes]) TR {
 ]) MakeMore(ctx context.Context, data TR) TR {
@@ -809,9 +809,9 @@ func (s *sCompany[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) masker(data TR) TR {
 	if reflect.ValueOf(data).IsNil() {
 		return data

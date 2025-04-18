@@ -39,9 +39,9 @@ type sTeam[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 
@@ -55,9 +55,9 @@ type sTeam[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao co_dao.XDao
 }
@@ -69,9 +69,9 @@ func NewTeam[
 	ITFdAccountRes co_model.IFdAccountRes,
 	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -79,9 +79,9 @@ func NewTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.ITeam[TR] {
 	result := &sTeam[
 		ITCompanyRes,
@@ -90,9 +90,9 @@ func NewTeam[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -110,9 +110,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetXDao(dao co_dao.XDao) {
 	s.dao = dao
 }
@@ -125,9 +125,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ITeamRes
 	ret = &co_model.TeamRes{
@@ -148,9 +148,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -190,9 +190,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
 		s.dao.Team.Ctx(ctx).
@@ -218,9 +218,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool {
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
@@ -259,9 +259,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
@@ -295,9 +295,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
@@ -349,9 +349,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateTeam(ctx context.Context, info *co_model.Team) (response TR, err error) {
 	if info.ParentId > 0 {
 		team, _ := s.GetTeamById(ctx, info.ParentId)
@@ -481,9 +481,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateTeam(ctx context.Context, info *co_model.Team) (response TR, err error) {
 	team, err := s.GetTeamById(ctx, info.Id)
 	if err != nil {
@@ -558,9 +558,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -611,9 +611,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -743,9 +743,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) RemoveTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
 	err := s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		for _, employeeId := range employeeIds {
@@ -811,9 +811,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -866,9 +866,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -948,9 +948,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -990,9 +990,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error) {
 	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
 
@@ -1007,9 +1007,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) {
 	team, err := s.modules.Team().GetTeamById(ctx, teamId)
 	if err != nil {
@@ -1062,9 +1062,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error) {
 	// 1.获取团队信息
 	team, err := s.modules.Team().GetTeamById(ctx, teamId)
@@ -1101,9 +1101,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error) {
 	// 1.解析邀约码，获取团队信息
 	//id := invite_id.CodeToInviteId(inviteCode)
@@ -1172,9 +1172,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context, data TR) TR {
 	if reflect.ValueOf(data).IsNil() {
 		return data
