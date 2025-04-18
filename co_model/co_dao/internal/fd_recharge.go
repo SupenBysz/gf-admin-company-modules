@@ -44,6 +44,7 @@ type FdRechargeColumns struct {
 	UnionMainId    string //
 	AccountId      string // 财务账户
 	Remark         string // 备注，可记录一些特殊情况或额外信息
+	ScreenshotId   string // 充值截图
 	CreatedAt      string // 记录创建时间，即充值请求提交时间
 	UpdatedAt      string // 记录最后更新时间，每次记录状态等信息变更时更新
 	DeletedAt      string // 逻辑删除时间，用于软删除，非真正物理删除，便于数据追溯和恢复
@@ -68,6 +69,7 @@ var fdRechargeColumns = FdRechargeColumns{
 	UnionMainId:    "union_main_id",
 	AccountId:      "account_id",
 	Remark:         "remark",
+	ScreenshotId:   "screenshot_id",
 	CreatedAt:      "created_at",
 	UpdatedAt:      "updated_at",
 	DeletedAt:      "deleted_at",

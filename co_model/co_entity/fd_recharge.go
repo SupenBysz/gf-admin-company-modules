@@ -27,6 +27,7 @@ type FdRecharge struct {
 	UnionMainId    int64       `json:"unionMainId"    orm:"union_main_id"    description:""`
 	AccountId      int64       `json:"accountId"      orm:"account_id"       description:"财务账户"`
 	Remark         string      `json:"remark"         orm:"remark"           description:"备注，可记录一些特殊情况或额外信息"`
+	ScreenshotId   int64       `json:"screenshotId"   orm:"screenshot_id"    description:"充值截图"`
 	CreatedAt      *gtime.Time `json:"createdAt"      orm:"created_at"       description:"记录创建时间，即充值请求提交时间"`
 	UpdatedAt      *gtime.Time `json:"updatedAt"      orm:"updated_at"       description:"记录最后更新时间，每次记录状态等信息变更时更新"`
 	DeletedAt      *gtime.Time `json:"deletedAt"      orm:"deleted_at"       description:"逻辑删除时间，用于软删除，非真正物理删除，便于数据追溯和恢复"`

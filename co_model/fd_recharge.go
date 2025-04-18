@@ -21,6 +21,7 @@ type FdRecharge struct {
 	BillsId        string                                   `json:"billsId"        orm:"bills_id"         description:"交易流水号，一般用于后续的队长和查询"`
 	AuditState     int                                      `json:"auditState"     orm:"audit_state"      description:"审核状态：0待审核，1通过、2不通过"`
 	AccountId      int64                                    `json:"accountId"      orm:"account_id"       description:"财务账户"`
+	ScreenshotId   int64                                    `json:"screenshotId"   orm:"screenshot_id"    description:"充值截图"`
 	Remark         string                                   `json:"remark"         orm:"remark"           description:"备注"`
 }
 

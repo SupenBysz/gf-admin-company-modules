@@ -29,6 +29,7 @@ type FdRecharge struct {
 	UnionMainId    interface{} //
 	AccountId      interface{} // 财务账户
 	Remark         interface{} // 备注，可记录一些特殊情况或额外信息
+	ScreenshotId   interface{} // 充值截图
 	CreatedAt      *gtime.Time // 记录创建时间，即充值请求提交时间
 	UpdatedAt      *gtime.Time // 记录最后更新时间，每次记录状态等信息变更时更新
 	DeletedAt      *gtime.Time // 逻辑删除时间，用于软删除，非真正物理删除，便于数据追溯和恢复
