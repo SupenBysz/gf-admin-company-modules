@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
@@ -13,7 +14,6 @@ import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_permission"
-	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"github.com/gogf/gf/v2/container/garray"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/kysion/base-library/base_model"
@@ -516,36 +516,6 @@ func (c *FinanceController[
 		},
 		co_permission.Finance.PermissionType(c.modules).UpdateAccountAmount,
 	)
-}
-
-// GetCurrencyByCode 根据货币代码查找货币(主键)
-func (c *FinanceController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-	ITFdRechargeRes,
-]) GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error) {
-	return co_service.FdCurrency().GetCurrencyByCode(ctx, req.CurrencyCode)
-}
-
-// QueryCurrencyList 获取币种列表
-func (c *FinanceController[
-	ITCompanyRes,
-	ITEmployeeRes,
-	ITTeamRes,
-	ITFdAccountRes,
-	ITFdAccountBillRes,
-	ITFdBankCardRes,
-	ITFdInvoiceRes,
-	ITFdInvoiceDetailRes,
-	ITFdRechargeRes,
-]) QueryCurrencyList(ctx context.Context, req *co_company_api.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
-	return co_service.FdCurrency().QueryCurrencyList(ctx, &req.SearchParams)
 }
 
 // QueryAccountBills  根据财务账号id查询账单

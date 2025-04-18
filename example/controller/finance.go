@@ -2,15 +2,14 @@ package controller
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_v1"
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface/i_controller"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
-	"github.com/gogf/gf/v2/util/gconv"
+	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/kconv"
 )
@@ -341,7 +340,7 @@ func (c *FinanceController[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) GetCurrencyByCode(ctx context.Context, req *co_v1.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error) {
-	return c.IFinance.GetCurrencyByCode(ctx, &req.GetCurrencyByCodeReq)
+	return co_service.FdCurrency().GetCurrencyByCode(ctx, req.CurrencyCode)
 }
 
 // QueryCurrencyList 获取币种列表
@@ -356,20 +355,7 @@ func (c *FinanceController[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) QueryCurrencyList(ctx context.Context, req *co_v1.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
-	ret, err := c.IFinance.QueryCurrencyList(ctx, &req.QueryCurrencyListReq)
-
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return nil, err
-	}
-
-	resp := co_model.FdCurrencyListRes{}
-
-	if ret == nil {
-		return &resp, nil
-	}
-
-	_ = gconv.Struct(ret, &resp)
-	return &resp, nil
+	return co_service.FdCurrency().QueryCurrencyList(ctx, &req.SearchParams)
 }
 
 // QueryAccountBills  根据财务账号id查询账单

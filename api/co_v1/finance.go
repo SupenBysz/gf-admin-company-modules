@@ -2,6 +2,7 @@ package co_v1
 
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
+	"github.com/SupenBysz/gf-admin-company-modules/api/co_system_v1"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
@@ -92,12 +93,12 @@ type UpdateAccountBalanceReq struct {
 
 type GetCurrencyByCodeReq struct {
 	g.Meta ` method:"post" summary:"根据货币代码获取货币详情" tags:"组织单位/财务服务"`
-	co_company_api.GetCurrencyByCodeReq
+	co_system_v1.GetCurrencyByCodeReq
 }
 
 type QueryCurrencyListReq struct {
 	g.Meta ` method:"post" summary:"获取货币列表" tags:"组织单位/财务服务"`
-	co_company_api.QueryCurrencyListReq
+	co_system_v1.QueryCurrencyListReq
 }
 
 type QueryAccountBillsReq struct {

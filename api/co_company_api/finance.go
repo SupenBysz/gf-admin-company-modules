@@ -101,14 +101,6 @@ type UpdateAccountBalanceReq struct {
 	Amount    int64 `json:"amount" dc:"冲正金额"`
 }
 
-type GetCurrencyByCodeReq struct {
-	CurrencyCode string `json:"currencyCode" dc:"货币代码"`
-}
-
-type QueryCurrencyListReq struct {
-	base_model.SearchParams
-}
-
 type QueryAccountBillsReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id" v:"required#请输入财务账号id"`
 	base_model.SearchParams

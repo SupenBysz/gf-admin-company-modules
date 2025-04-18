@@ -2,11 +2,18 @@ package co_router
 
 import (
 	"github.com/SupenBysz/gf-admin-company-modules/co_controller"
+	"github.com/SupenBysz/gf-admin-company-modules/co_controller/system"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/text/gstr"
 )
+
+func SystemGroup(group *ghttp.RouterGroup) {
+	group.Group("/system", func(group *ghttp.RouterGroup) {
+		group.Bind(system.SystemFinance)
+	})
+}
 
 func ModulesGroup(modules co_interface.IModules[
 	co_model.ICompanyRes,
@@ -23,7 +30,7 @@ func ModulesGroup(modules co_interface.IModules[
 	EmployeeGroup(modules, group)
 	TeamGroup(modules, group)
 	MyGroup(modules, group)
-	// FinanceGroup(modules, group)
+	FinanceGroup(modules, group)
 
 	return group
 }
@@ -171,7 +178,6 @@ func FinanceGroup(modules co_interface.IModules[
 	group.POST(routePrefix+"/updateAccountIsEnabled", controller.UpdateAccountIsEnabled)
 	group.POST(routePrefix+"/updateAccountLimitState", controller.UpdateAccountLimitState)
 	group.POST(routePrefix+"/updateAccountBalance", controller.UpdateAccountBalance)
-	group.POST(routePrefix+"/queryCurrencyList", controller.QueryCurrencyList)
 
 	group.POST(routePrefix+"/getAccountDetailByAccountId", controller.GetAccountDetailById)
 	//group.POST(routePrefix+"/increment", controller.Increment)
