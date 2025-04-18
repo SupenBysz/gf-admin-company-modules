@@ -15,9 +15,9 @@ func ModulesGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	CompanyGroup(modules, group)
 	EmployeeGroup(modules, group)
@@ -35,9 +35,9 @@ func CompanyGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
 	controller := co_controller.Company(modules)
@@ -59,9 +59,9 @@ func EmployeeGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Employee)
 	controller := co_controller.Employee(modules)
@@ -87,9 +87,9 @@ func TeamGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Team)
 	controller := co_controller.Team(modules)
@@ -118,9 +118,9 @@ func MyGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	controller := co_controller.My(modules)
 	routePrefix := modules.GetConfig().RoutePrefix + "/my"
@@ -147,9 +147,9 @@ func FinanceGroup(modules co_interface.IModules[
 	co_model.IFdAccountRes,
 	co_model.IFdAccountBillsRes,
 	co_model.IFdBankCardRes,
-	co_model.IFdCurrencyRes,
 	co_model.IFdInvoiceRes,
 	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
 ], group *ghttp.RouterGroup) *ghttp.RouterGroup {
 	// routePrefix := modules.GetConfig().RoutePrefix + "/" + gstr.LcFirst(modules.GetConfig().Identifier.Company)
 

@@ -144,10 +144,10 @@ func (s *sFdAccount[
 	// 判断货币代码是否符合标准
 	currency, err := co_service.FdCurrency().GetCurrencyByCode(ctx, info.CurrencyCode)
 	if err != nil || reflect.ValueOf(currency).IsNil() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_CurrencyCode_Failed"), s.dao.FdCurrency.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_CurrencyCode_Failed"), co_dao.FdCurrency.Table())
 	}
 	if currency.Data().IsLegalTender != 1 {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), s.dao.FdCurrency.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), co_dao.FdCurrency.Table())
 	}
 
 	// 生产随机id

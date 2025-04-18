@@ -65,6 +65,7 @@ func Modules() *Global {
 					FdInvoice:       "fdInvoice",
 					FdInvoiceDetail: "fdInvoiceDetail",
 					FdBankCard:      "fdBankCard",
+					FdRecharge:      "fdRecharge",
 				},
 			},
 			&co_dao.XDao{ // 以下为业务层实例化dao模型，如果不是使用默认模型时需要将自定义dao模型作为参数传进去，相同属性前缀需要配合使用不能拆开应用
@@ -78,8 +79,8 @@ func Modules() *Global {
 				FdAccountBills:  co_dao.NewFdAccountBills(),
 				FdInvoice:       co_dao.NewFdInvoice(),
 				FdInvoiceDetail: co_dao.NewFdInvoiceDetail(),
-				FdCurrency:      co_dao.NewFdCurrency(),
 				FdBankCard:      co_dao.NewFdBankCard(),
+				FdRecharge:      co_dao.NewFdRecharge(),
 			},
 		),
 	}

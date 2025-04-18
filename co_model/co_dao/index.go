@@ -10,7 +10,6 @@ type XDao struct {
 	FdAccountBills  FdAccountBillsDao
 	FdInvoice       FdInvoiceDao
 	FdInvoiceDetail FdInvoiceDetailDao
-	FdCurrency      FdCurrencyDao
 	FdBankCard      FdBankCardDao
 	FdAccountDetail FdAccountDetailDao
 	FdRecharge      FdRechargeDao
