@@ -819,8 +819,6 @@ func (s *sEmployee[
 
 			storageSrc = s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(sessionUser.Id) + "/avatar." + fileInfo.Ext
 
-			//avatarFile.Src = s.modules.GetConfig().StoragePath + "/employee/" + gconv.String(data.Id) + "/avatar." + avatarFile.Ext
-
 			info.Avatar = gconv.String(fileInfo.Id)
 		}
 

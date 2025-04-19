@@ -38,3 +38,9 @@ func (m *FdRechargeRes) Data() *FdRechargeRes {
 type IFdRechargeRes interface {
 	Data() *FdRechargeRes
 }
+
+type FdRechargeViewRes struct {
+	co_entity.FdRechargeView
+}
+
+type FdRechargeViewListRes base_model.CollectRes[FdRechargeViewRes]

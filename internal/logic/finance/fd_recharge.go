@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -279,10 +280,30 @@ func (s *sFdRecharge[
 
 		newData, err := info.OverrideDo.DoFactory(data)
 
+		if err != nil {
+			return err
+		}
+
 		affected, err := daoctl.InsertWithError(s.dao.FdRecharge.Ctx(ctx), newData)
 
 		if affected == 0 || err != nil {
 			return err
+		}
+
+		if info.ScreenshotId > 0 {
+			// 从数据库中获取
+			file, _ := sys_service.File().GetAnyFileById(ctx, gconv.Int64(info.ScreenshotId), "")
+
+			// 如果文件不存在，则代表文件还在缓存中
+			if file == nil {
+				file, _ = sys_service.File().GetFileById(ctx, gconv.Int64(info.ScreenshotId), "")
+
+				if file != nil {
+					uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+					fileRecord, _ := sys_service.File().SaveFile(ctx, uploadPath+"/recharge/screenshot/"+gconv.String(info.UserId)+"/"+gconv.String(info.ScreenshotId)+file.Ext, file)
+					data.ScreenshotId = fileRecord.Id
+				}
+			}
 		}
 
 		err = info.OverrideDo.DoSaved(data, newData)

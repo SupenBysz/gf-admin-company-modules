@@ -22,3 +22,13 @@ func (c *cSystemFinance) GetCurrencyByCode(ctx context.Context, req *co_system_v
 func (c *cSystemFinance) QueryCurrencyList(ctx context.Context, req *co_system_v1.QueryCurrencyListReq) (*co_model.FdCurrencyListRes, error) {
 	return co_service.FdCurrency().QueryCurrencyList(ctx, &req.SearchParams)
 }
+
+// 查询财务账户充值记录
+func (c *cSystemFinance) QueryAccountRechargeView(ctx context.Context, req *co_system_v1.QueryAccountRechargeViewReq) (*co_model.FdRechargeViewListRes, error) {
+	return co_service.FdRechargeView().QueryAccountRecharge(ctx, &req.SearchParams)
+}
+
+// 根据ID查询财务账户充值记录
+func (c *cSystemFinance) GetAccountRechargeViewById(ctx context.Context, req *co_system_v1.GetAccountRechargeViewByIdReq) (*co_model.FdRechargeViewRes, error) {
+	return co_service.FdRechargeView().GetAccountRechargeById(ctx, req.Id)
+}
