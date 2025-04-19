@@ -172,7 +172,7 @@ func (s *sFdRecharge[
 	}
 
 	data := co_do.FdRecharge{
-		State:      base_funs.Ternary(state == sys_enum.Audit.Action.Approve, sys_enum.Audit.AuditState.Reject, sys_enum.Audit.AuditState.Approve),
+		State:      base_funs.If(state == sys_enum.Audit.Action.Approve, sys_enum.Audit.AuditState.Reject, sys_enum.Audit.AuditState.Approve),
 		AuditState: state,
 		AuditReply: reply,
 		UpdatedAt:  gtime.Now(),
