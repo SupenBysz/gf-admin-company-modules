@@ -11,7 +11,9 @@ import (
 
 func SystemGroup(group *ghttp.RouterGroup) {
 	group.Group("/system", func(group *ghttp.RouterGroup) {
-		group.Bind(system.SystemFinance)
+		group.Group("/finance", func(group *ghttp.RouterGroup) {
+			group.Bind(system.SystemFinance)
+		})
 	})
 }
 

@@ -524,7 +524,7 @@ func (s *sTeam[
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
 			}
-			if logoInfo != nil && logoInfo.Id != info.LogoId {
+			if logoInfo != nil && logoInfo.Id != team.Data().LogoId {
 				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
 				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
 				if strings.HasPrefix(logoInfo.Src, tempPath) {
