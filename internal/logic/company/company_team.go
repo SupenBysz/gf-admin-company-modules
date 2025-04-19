@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"reflect"
+	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_consts"
@@ -36,11 +37,11 @@ type sTeam[
 	ITEmployeeRes co_model.IEmployeeRes,
 	TR co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 
@@ -54,9 +55,9 @@ type sTeam[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao co_dao.XDao
 }
@@ -66,11 +67,11 @@ func NewTeam[
 	ITEmployeeRes co_model.IEmployeeRes,
 	TR co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -78,9 +79,9 @@ func NewTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.ITeam[TR] {
 	result := &sTeam[
 		ITCompanyRes,
@@ -89,9 +90,9 @@ func NewTeam[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -109,9 +110,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetXDao(dao co_dao.XDao) {
 	s.dao = dao
 }
@@ -124,9 +125,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ITeamRes
 	ret = &co_model.TeamRes{
@@ -147,9 +148,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -189,9 +190,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
 		s.dao.Team.Ctx(ctx).
@@ -217,9 +218,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) HasTeamByName(ctx context.Context, name string, unionMainId int64, parentId int64, excludeIds ...int64) bool {
 	if unionMainId == 0 {
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
@@ -258,9 +259,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamList(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
@@ -294,9 +295,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamMemberList(ctx context.Context, search *base_model.SearchParams, isExport ...bool) (*base_model.CollectRes[*co_model.TeamMemberRes], error) {
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
@@ -348,24 +349,21 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateTeam(ctx context.Context, info *co_model.Team) (response TR, err error) {
 	if info.ParentId > 0 {
 		team, _ := s.GetTeamById(ctx, info.ParentId)
 		if reflect.ValueOf(team).IsNil() {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_ParentTeamNotFound"), s.dao.Team.Table())
 		}
-		if team.Data().ParentId > 0 {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Group_ParentMustIsTeam"), s.dao.Team.Table())
-		}
 	}
 
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	// 判断团队名称是否存在 && 同一主体下的不同团队下的小组名称是否能重复
-	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) == true { // 1组  1组
+	if s.HasTeamByName(ctx, info.Name, sessionUser.UnionMainId, info.ParentId) { // 1组  1组
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 	}
 
@@ -443,7 +441,28 @@ func (s *sTeam[
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Team_Save_Failed}{#error_Team_TeamCaptainEmployee_NotSave}"), s.dao.Team.Table())
 			}
+
+			if info.LogoId > 0 {
+				logoInfo, err := sys_service.File().GetFileById(ctx, info.LogoId, "")
+				if err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+				}
+				if logoInfo != nil && logoInfo.Id != info.LogoId {
+					uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+					tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+					if strings.HasPrefix(logoInfo.Src, tempPath) {
+						targetFilePath := uploadPath + "/" + gconv.String(data.UnionMainId) + "/" + gconv.String(data.Id) + "/logo" + logoInfo.Ext
+						_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+						if err != nil {
+							return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+						}
+					}
+				}
+			}
+
+			info.OverrideDo.DoSaved(data, doData)
 		}
+
 		return nil
 	})
 	if err != nil {
@@ -462,41 +481,72 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
-]) UpdateTeam(ctx context.Context, id int64, name string, remark string) (response TR, err error) {
-	team, err := s.GetTeamById(ctx, id)
+	ITFdRechargeRes,
+]) UpdateTeam(ctx context.Context, info *co_model.Team) (response TR, err error) {
+	team, err := s.GetTeamById(ctx, info.Id)
 	if err != nil {
 		return response, err
 	}
 
-	if name != "" {
-		if s.HasTeamByName(ctx, name, id, team.Data().ParentId) == true {
+	if info.Name != "" {
+		if s.HasTeamByName(ctx, info.Name, info.Id, team.Data().ParentId) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_Team_TeamNameExist"), s.dao.Team.Table())
 		}
 	}
 
 	data := co_do.CompanyTeam{
-		//Name:      name,
-		Remark:    remark,
 		UpdatedAt: gtime.Now(),
 	}
-	if name != "" {
-		data.Name = name
+
+	_ = gconv.Struct(info, &data)
+
+	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 重载Do模型
+		doData, err := info.OverrideDo.DoFactory(data)
+		if err != nil {
+			return err
+		}
+
+		rowsAffected, err := daoctl.UpdateWithError(
+			s.dao.Team.Ctx(ctx).
+				Data(doData).
+				Where(co_do.CompanyTeam{Id: info.Id}),
+		)
+
+		if rowsAffected == 0 || err != nil {
+			return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
+		}
+
+		if info.LogoId > 0 {
+			logoInfo, err := sys_service.File().GetFileById(ctx, info.LogoId, "")
+			if err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+			}
+			if logoInfo != nil && logoInfo.Id != info.LogoId {
+				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
+				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+				if strings.HasPrefix(logoInfo.Src, tempPath) {
+					targetFilePath := uploadPath + "/" + gconv.String(data.UnionMainId) + "/" + gconv.String(data.Id) + "/logo" + logoInfo.Ext
+					_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
+					if err != nil {
+						return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
+					}
+				}
+			}
+		}
+
+		err = info.OverrideDo.DoSaved(data, doData)
+
+		return err
+	})
+
+	if err != nil {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Transaction_Failed"), s.dao.Team.Table())
 	}
 
-	rowsAffected, err := daoctl.UpdateWithError(
-		s.dao.Team.Ctx(ctx).
-			Data(data).
-			Where(co_do.CompanyTeam{Id: id}),
-	)
-
-	if rowsAffected == 0 || err != nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_Save_Failed"), s.dao.Team.Table())
-	}
-
-	result, err := s.GetTeamById(ctx, id)
+	result, err := s.GetTeamById(ctx, info.Id)
 	return s.makeMore(ctx, result), err
 }
 
@@ -508,9 +558,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -561,9 +611,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -693,9 +743,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) RemoveTeamMember(ctx context.Context, teamId int64, employeeIds []int64) (api_v1.BoolRes, error) {
 	err := s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		for _, employeeId := range employeeIds {
@@ -761,9 +811,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamOwner(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -816,9 +866,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamCaptain(ctx context.Context, teamId int64, employeeId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -898,9 +948,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteTeam(ctx context.Context, teamId int64) (api_v1.BoolRes, error) {
 	team, err := s.GetTeamById(ctx, teamId)
 	if err != nil {
@@ -940,9 +990,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteTeamMemberByEmployee(ctx context.Context, employeeId int64) (bool, error) {
 	affected, err := daoctl.DeleteWithError(s.dao.TeamMember.Ctx(ctx).Where(co_do.CompanyTeamMember{EmployeeId: employeeId}))
 
@@ -957,9 +1007,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, teamId int64) (*base_model.CollectRes[co_model.IEmployeeRes], error) {
 	team, err := s.modules.Team().GetTeamById(ctx, teamId)
 	if err != nil {
@@ -1012,9 +1062,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamInviteCode(ctx context.Context, teamId, userId int64) (*co_model.TeamInviteCodeRes, error) {
 	// 1.获取团队信息
 	team, err := s.modules.Team().GetTeamById(ctx, teamId)
@@ -1051,9 +1101,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) JoinTeamByInviteCode(ctx context.Context, inviteCode string, userId int64) (bool, error) {
 	// 1.解析邀约码，获取团队信息
 	//id := invite_id.CodeToInviteId(inviteCode)
@@ -1122,9 +1172,9 @@ func (s *sTeam[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context, data TR) TR {
 	if reflect.ValueOf(data).IsNil() {
 		return data

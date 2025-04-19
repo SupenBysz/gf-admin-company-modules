@@ -11,11 +11,11 @@ type TableName struct {
 	Team            string `p:"team" dc:"团队表名"`
 	TeamMember      string `p:"teamMember" dc:"团队成员表名"`
 	FdAccount       string `p:"fdAccount" dc:"财务账户表名"`
-	FdAccountBill   string `p:"fdAccountBill" dc:"财务账单表名"`
+	FdAccountBills  string `p:"fdAccountBills" dc:"财务账单表名"`
 	FdBankCard      string `p:"fdBankCard" dc:"财务银行卡表名"`
-	FdCurrency      string `p:"fdCurrency" dc:"财务结算货币单位表名"`
 	FdInvoice       string `p:"fdInvoice" dc:"财务发票抬头表名"`
 	FdInvoiceDetail string `p:"fdInvoiceDetail" dc:"财务发票明细表名"`
+	FdRecharge      string `p:"fdRecharge" dc:"财务充值记录表名"`
 }
 
 type Identifier struct {
@@ -24,11 +24,11 @@ type Identifier struct {
 	Team            string `p:"team" dc:"团队标识符"`
 	TeamMember      string `p:"teamMember" dc:"团队成员标识符"`
 	FdAccount       string `p:"fdAccount" dc:"财务账户标识符"`
-	FdAccountBill   string `p:"fdAccountBill" dc:"财务账单标识符"`
+	FdAccountBills  string `p:"fdAccountBills" dc:"财务账单标识符"`
 	FdBankCard      string `p:"fdBankCard" dc:"财务银行卡标识符"`
-	FdCurrency      string `p:"fdCurrency" dc:"财务结算货币单位标识符"`
 	FdInvoice       string `p:"fdInvoice" dc:"财务发票抬头标识符"`
 	FdInvoiceDetail string `p:"fdInvoiceDetail" dc:"财务发票明细标识符"`
+	FdRecharge      string `p:"fdRecharge" dc:"财务充值记录标识符"`
 }
 
 var ModulesConfigArr = []*Config{}

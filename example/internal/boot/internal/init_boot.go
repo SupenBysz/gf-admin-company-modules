@@ -15,28 +15,28 @@ func init() {
 	_ = consts.Global.SetI18n(nil)
 
 	// 初始化权限树
-	consts.Global.PermissionTree = boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
+	consts.Global.PermissionTree = append(boot.InitPermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
 		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
+		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
-	]))
+		*co_model.FdRechargeRes,
+	])), boot.InitAuditAndLicensePermission()...)
 
 	// 导入财务服务权限树
-	consts.Global.FinancialPermissionTree = boot.InitFinancialPermission(consts.Global.IModules.(co_interface.IModules[
+	consts.Global.FinancePermissionTree = boot.InitFinancePermission(consts.Global.IModules.(co_interface.IModules[
 		*co_model.CompanyRes,
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
 		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
+		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
+		*co_model.FdRechargeRes,
 	]))
 }

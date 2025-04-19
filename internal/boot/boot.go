@@ -29,15 +29,15 @@ func InitializePermissionFactory() {
 
 // InitPermission 初始化权限树
 func InitPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -45,9 +45,9 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) []base_permission.IPermission {
 	InitializePermissionFactory()
 
@@ -112,24 +112,22 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 
 	// oss
 
-	// 添加资质和审核权限树
-	licensePermission := initAuditAndLicensePermission()
-	result = append(result, licensePermission...)
+	//result = append(result, licensePermission...)
 
 	return result
 }
 
-// InitFinancialPermission 初始化财务服务权限树
-func InitFinancialPermission[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdCurrencyRes co_model.IFdCurrencyRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+// InitFinancePermission 初始化财务服务权限树
+func InitFinancePermission[
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](module co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -137,15 +135,15 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) []base_permission.IPermission {
 	InitializePermissionFactory()
 
 	result := []base_permission.IPermission{
 		// 财务服务权限树
-		base_permission.New(idgen.NextId(), "Financial", "财务").
+		base_permission.New(idgen.NextId(), "Finance", "财务").
 			SetType(1).
 			SetIsShow(1).
 			SetItems([]base_permission.IPermission{
@@ -154,21 +152,21 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
 						// 查看发票详情，查看发票详情信息
-						co_permission.Financial.PermissionType(module).ViewInvoiceDetail,
+						co_permission.Finance.PermissionType(module).ViewInvoiceDetail,
 						// 查看发票抬头信息，查看发票抬头信息
-						co_permission.Financial.PermissionType(module).ViewInvoice,
+						co_permission.Finance.PermissionType(module).ViewInvoice,
 						// 发票抬头列表，查看所有发票抬头
-						co_permission.Financial.PermissionType(module).InvoiceList,
+						co_permission.Finance.PermissionType(module).InvoiceList,
 						// 发票详情列表，查看所有发票详情
-						co_permission.Financial.PermissionType(module).InvoiceDetailList,
+						co_permission.Finance.PermissionType(module).InvoiceDetailList,
 						// 审核发票，审核发票申请
-						co_permission.Financial.PermissionType(module).AuditInvoiceDetail,
+						co_permission.Finance.PermissionType(module).AuditInvoiceDetail,
 						// 开发票，添加发票详情记录
-						co_permission.Financial.PermissionType(module).MakeInvoiceDetail,
+						co_permission.Finance.PermissionType(module).MakeInvoiceDetail,
 						// 添加发票抬头，添加发票抬头信息
-						co_permission.Financial.PermissionType(module).CreateInvoice,
+						co_permission.Finance.PermissionType(module).CreateInvoice,
 						// 删除发票抬头，删除发票抬头信息
-						co_permission.Financial.PermissionType(module).DeleteInvoice,
+						co_permission.Finance.PermissionType(module).DeleteInvoice,
 					}),
 
 				base_permission.New(idgen.NextId(), "BankCard", "银行卡").
@@ -176,13 +174,13 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
 						// 查看提现账号，查看银行卡账号信息
-						co_permission.Financial.PermissionType(module).ViewBankCardDetail,
+						co_permission.Finance.PermissionType(module).ViewBankCardDetail,
 						// 提现账号列表，查看所有银行卡
-						co_permission.Financial.PermissionType(module).BankCardList,
+						co_permission.Finance.PermissionType(module).BankCardList,
 						// 申请提现账号，添加银行卡信息
-						co_permission.Financial.PermissionType(module).CreateBankCard,
+						co_permission.Finance.PermissionType(module).CreateBankCard,
 						//  删除提现账号，删除银行卡信息
-						co_permission.Financial.PermissionType(module).DeleteBankCard,
+						co_permission.Finance.PermissionType(module).DeleteBankCard,
 					},
 					),
 
@@ -191,24 +189,24 @@ ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 					SetIsShow(1).
 					SetItems([]base_permission.IPermission{
 						// 查看余额，查看账号余额
-						co_permission.Financial.PermissionType(module).GetAccountBalance,
+						co_permission.Finance.PermissionType(module).GetAccountBalance,
 
 						// 查看财务账号金额明细
-						co_permission.Financial.PermissionType(module).GetAccountDetail,
+						co_permission.Finance.PermissionType(module).GetAccountDetail,
 					}),
 			}),
 	}
 	return result
 }
 
-func initAuditAndLicensePermission() []base_permission.IPermission {
+func InitAuditAndLicensePermission() []base_permission.IPermission {
 	InitializePermissionFactory()
 
 	result := []base_permission.IPermission{
 		// 资质权限树
-		base_permission.New(idgen.NextId(), "License", "公资质管理").
+		base_permission.New(idgen.NextId(), "License", "公司资质管理").
 			SetId(idgen.NextId()).
-			SetName("公资质管理").
+			SetName("公司资质管理").
 			SetIdentifier("License").
 			SetType(1).
 			SetIsShow(1).

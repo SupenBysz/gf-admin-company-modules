@@ -20,4 +20,8 @@ type CompanyTeam struct {
 	CreatedAt         *gtime.Time `json:"createdAt"         orm:"created_at"          description:""`
 	UpdatedAt         *gtime.Time `json:"updatedAt"         orm:"updated_at"          description:""`
 	DeletedAt         *gtime.Time `json:"deletedAt"         orm:"deleted_at"          description:""`
+	Type              int         `json:"type"              orm:"type"                description:"类型：0部门，1团队，2小组"`
+	Slogan            string      `json:"slogan"            orm:"slogan"              description:"口号"`
+	Title             string      `json:"title"             orm:"title"               description:"称号"`
+	LogoId            int64       `json:"logoId"            orm:"logo_id"             description:"LOGO"`
 }

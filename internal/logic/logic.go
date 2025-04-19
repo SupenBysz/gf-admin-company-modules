@@ -7,5 +7,6 @@ package logic
 import (
 	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/co_license"
 	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/company"
-	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/financial"
+	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/finance"
+	_ "github.com/SupenBysz/gf-admin-company-modules/internal/logic/table_view"
 )

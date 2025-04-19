@@ -3,12 +3,29 @@ package controller
 import "github.com/SupenBysz/gf-admin-company-modules/co_model"
 
 type ModuleController[
-	TICompanyRes co_model.ICompanyRes,
-	TIEmployeeRes co_model.IEmployeeRes,
-	TITeamRes co_model.ITeamRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
-	Company  *CompanyController[TICompanyRes]
-	Employee *EmployeeController[TIEmployeeRes]
-	Team     *TeamController[TITeamRes]
+	Company  *CompanyController[ITCompanyRes]
+	Employee *EmployeeController[ITEmployeeRes]
+	Team     *TeamController[ITTeamRes]
 	My       *MyController
+	Recharge *RechargeController[
+		ITCompanyRes,
+		ITEmployeeRes,
+		ITTeamRes,
+		ITFdAccountRes,
+		ITFdAccountBillRes,
+		ITFdBankCardRes,
+		ITFdInvoiceRes,
+		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
+	]
 }

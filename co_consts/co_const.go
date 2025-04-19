@@ -22,7 +22,7 @@ var (
 
 	PermissionTree []base_permission.IPermission
 
-	FinancialPermissionTree []base_permission.IPermission
+	FinancePermissionTree []base_permission.IPermission
 )
 
 func init() {

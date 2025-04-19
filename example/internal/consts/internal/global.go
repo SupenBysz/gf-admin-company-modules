@@ -15,17 +15,17 @@ type Global struct {
 		*co_model.EmployeeRes,
 		*co_model.TeamRes,
 		*co_model.FdAccountRes,
-		*co_model.FdAccountBillRes,
+		*co_model.FdAccountBillsRes,
 		*co_model.FdBankCardRes,
-		*co_model.FdCurrencyRes,
 		*co_model.FdInvoiceRes,
 		*co_model.FdInvoiceDetailRes,
+		*co_model.FdRechargeRes,
 	]
 
 	PermissionTree []base_permission.IPermission
 
-	// FinancialPermissionTree 财务服务权限树 (可选)
-	FinancialPermissionTree []base_permission.IPermission
+	// FinancePermissionTree 财务服务权限树 (可选)
+	FinancePermissionTree []base_permission.IPermission
 }
 
 var global *Global
@@ -41,11 +41,11 @@ func Modules() *Global {
 			*co_model.EmployeeRes,
 			*co_model.TeamRes,
 			*co_model.FdAccountRes,
-			*co_model.FdAccountBillRes,
+			*co_model.FdAccountBillsRes,
 			*co_model.FdBankCardRes,
-			*co_model.FdCurrencyRes,
 			*co_model.FdInvoiceRes,
 			*co_model.FdInvoiceDetailRes,
+			*co_model.FdRechargeRes,
 		](
 			&co_model.Config{
 				AllowEmptyNo:                   true,
@@ -61,10 +61,11 @@ func Modules() *Global {
 					Employee:        "employee",
 					Team:            "team",
 					FdAccount:       "fdAccount",
-					FdAccountBill:   "fdAccountBill",
+					FdAccountBills:  "fdAccountBills",
 					FdInvoice:       "fdInvoice",
 					FdInvoiceDetail: "fdInvoiceDetail",
 					FdBankCard:      "fdBankCard",
+					FdRecharge:      "fdRecharge",
 				},
 			},
 			&co_dao.XDao{ // 以下为业务层实例化dao模型，如果不是使用默认模型时需要将自定义dao模型作为参数传进去，相同属性前缀需要配合使用不能拆开应用
@@ -75,11 +76,11 @@ func Modules() *Global {
 				TeamMember: co_dao.NewCompanyTeamMember(),
 
 				FdAccount:       co_dao.NewFdAccount(),
-				FdAccountBill:   co_dao.NewFdAccountBill(),
+				FdAccountBills:  co_dao.NewFdAccountBills(),
 				FdInvoice:       co_dao.NewFdInvoice(),
 				FdInvoiceDetail: co_dao.NewFdInvoiceDetail(),
-				FdCurrency:      co_dao.NewFdCurrency(),
 				FdBankCard:      co_dao.NewFdBankCard(),
+				FdRecharge:      co_dao.NewFdRecharge(),
 			},
 		),
 	}

@@ -33,6 +33,7 @@ type UpdateEmployee struct {
 	OverrideDo  base_interface.DoModel[co_do.CompanyEmployee] `json:"-"`
 	Id          int64                                         `json:"id"           dc:"ID，保持与USERID一致" v:"required#请输入员工ID"`
 	No          *string                                       `json:"no"           v:"max-length:16#工号长度超出限定16字符" dc:"工号"`
+	Avatar      string                                        `json:"avatar"       dc:"头像"`
 	Name        *string                                       `json:"name"         v:"required|max-length:32#姓名不能为空|姓名长度超出限定32字符" dc:"姓名"`
 	Mobile      *string                                       `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
 	State       *int                                          `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
@@ -67,7 +68,7 @@ func (m *EmployeeRes) SetUser(user interface{}) {
 }
 
 func (m *EmployeeRes) SetTeamList(data interface{}) {
-	if data == nil || reflect.ValueOf(data).Type() != reflect.ValueOf(m).Type() {
+	if data == nil || reflect.ValueOf(data).Type() != reflect.ValueOf(m.TeamList).Type() {
 		return
 	}
 

@@ -7,8 +7,8 @@ import (
 )
 
 type EmployeeHookFilter struct {
-	InOutType     co_enum.FinancialInOutType
-	TradeType     co_enum.FinancialTradeType
+	InOutType     co_enum.FinanceInOutType
+	TradeType     co_enum.FinanceTradeType
 	InTransaction bool
 }
 

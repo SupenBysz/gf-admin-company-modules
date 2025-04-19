@@ -37,6 +37,10 @@ type CompanyTeamColumns struct {
 	CreatedAt         string //
 	UpdatedAt         string //
 	DeletedAt         string //
+	Type              string // 类型：0部门，1团队，2小组
+	Slogan            string // 口号
+	Title             string // 称号
+	LogoId            string // LOGO
 }
 
 // companyTeamColumns holds the columns for table co_company_team.
@@ -51,6 +55,10 @@ var companyTeamColumns = CompanyTeamColumns{
 	CreatedAt:         "created_at",
 	UpdatedAt:         "updated_at",
 	DeletedAt:         "deleted_at",
+	Type:              "type",
+	Slogan:            "slogan",
+	Title:             "title",
+	LogoId:            "logo_id",
 }
 
 // NewCompanyTeamDao creates and returns a new DAO object for table data access.

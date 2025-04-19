@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_enum"
@@ -80,7 +81,7 @@ type (
 		// CreateTeam 创建团队或小组|信息
 		CreateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		// UpdateTeam 更新团队或小组|信息
-		UpdateTeam(ctx context.Context, id int64, name string, remark string) (TR, error)
+		UpdateTeam(ctx context.Context, info *co_model.Team) (TR, error)
 		// QueryTeamListByEmployee 根据员工查询团队
 		QueryTeamListByEmployee(ctx context.Context, employeeId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 		// SetTeamMember 设置团队队员或小组组员
@@ -148,7 +149,7 @@ type (
 		// QueryAccountListByUserId 获取指定用户的所有财务账号
 		QueryAccountListByUserId(ctx context.Context, userId int64) (*base_model.CollectRes[TR], error)
 		// UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
-		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinancialInOutType, sysSessionUserId int64) (int64, error)
+		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (int64, error)
 		// GetAccountByUnionUserIdAndCurrencyCode 根据用户union_user_id和货币代码currency_code获取财务账号
 		GetAccountByUnionUserIdAndCurrencyCode(ctx context.Context, unionUserId int64, currencyCode string) (response TR, err error)
 		// GetAccountByUnionUserIdAndScene 根据union_user_id和业务类型找出财务账号，
@@ -216,15 +217,26 @@ type (
 		// QueryInvoiceDetail 根据限定的条件查询发票列表
 		QueryInvoiceDetail(ctx context.Context, info *base_model.SearchParams, userId int64, unionMainId int64) (*base_model.CollectRes[TR], error)
 	}
-	IFdAccountBill[TR co_model.IFdAccountBillRes] interface {
+	IFdAccountBills[TR co_model.IFdAccountBillsRes] interface {
 		// InstallTradeHook 订阅Hook
 		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
-		// CreateAccountBill 创建财务账单
-		CreateAccountBill(ctx context.Context, info co_model.AccountBillRegister) (bool, error)
-		// GetAccountBillByAccountId  根据财务账号id获取账单
-		GetAccountBillByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+		// CreateAccountBills 创建财务账单
+		CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
+		// GetAccountBillsByAccountId  根据财务账号id获取账单
+		GetAccountBillsByAccountId(ctx context.Context, accountId int64, pagination *base_model.SearchParams) (*base_model.CollectRes[TR], error)
+	}
+
+	IFdRecharge[TR co_model.IFdRechargeRes] interface {
+		// AccountRecharge 充值
+		AccountRecharge(ctx context.Context, info *co_model.FdRecharge, createUser *sys_model.SysUser) (TR, error)
+		// SetAccountRechargeAudit 设置充值记录审核
+		SetAccountRechargeAudit(ctx context.Context, id int64, state sys_enum.AuditAction, reply string) (bool, error)
+		// GetAccountRechargeById 根据充值记录id获取充值记录
+		GetAccountRechargeById(ctx context.Context, id int64) (TR, error)
+		// QueryAccountRecharge 获取财务账号充值记录|列表
+		QueryAccountRecharge(ctx context.Context, search *base_model.SearchParams) (*base_model.CollectRes[TR], error)
 	}
 )
 
@@ -237,7 +249,7 @@ type IConfig interface {
 //	ITEmployeeRes co_model.IEmployeeRes,
 //	ITTeamRes co_model.ITeamRes,
 //	ITFdAccountRes co_model.IFdAccountRes,
-//	ITFdAccountBillRes co_model.IFdAccountBillRes,
+//	ITFdAccountBillsRes co_model.IFdAccountBillsRes,
 //	ITFdBankCardRes co_model.IFdBankCardRes,
 //	ITFdCurrencyRes co_model.IFdCurrencyRes,
 //	ITFdInvoiceRes co_model.IFdInvoiceRes,
@@ -248,7 +260,7 @@ type IConfig interface {
 //		ITEmployeeRes,
 //		ITTeamRes,
 //		ITFdAccountRes,
-//		ITFdAccountBillRes,
+//		ITFdAccountBillsRes,
 //		ITFdBankCardRes,
 //		ITFdCurrencyRes,
 //		ITFdInvoiceRes,
@@ -260,7 +272,7 @@ type IConfig interface {
 //		ITEmployeeRes,
 //		ITTeamRes,
 //		ITFdAccountRes,
-//		ITFdAccountBillRes,
+//		ITFdAccountBillsRes,
 //		ITFdBankCardRes,
 //		ITFdCurrencyRes,
 //		ITFdInvoiceRes,
@@ -273,11 +285,11 @@ type IModules[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] interface {
 	IConfig
 	Company() ICompany[ITCompanyRes]
@@ -285,11 +297,11 @@ type IModules[
 	Employee() IEmployee[ITEmployeeRes]
 	My() IMy
 	Account() IFdAccount[ITFdAccountRes]
-	AccountBill() IFdAccountBill[ITFdAccountBillRes]
+	AccountBills() IFdAccountBills[ITFdAccountBillRes]
 	BankCard() IFdBankCard[ITFdBankCardRes]
-	Currency() IFdCurrency[ITFdCurrencyRes]
 	Invoice() IFdInvoice[ITFdInvoiceRes]
 	InvoiceDetail() IFdInvoiceDetail[ITFdInvoiceDetailRes]
+	Recharge() IFdRecharge[ITFdRechargeRes]
 
 	SetI18n(i18n *gi18n.Manager) error
 	T(ctx context.Context, content string) string

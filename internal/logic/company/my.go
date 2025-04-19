@@ -28,11 +28,11 @@ type sMy[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -41,9 +41,9 @@ type sMy[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao co_dao.XDao
 }
@@ -53,11 +53,11 @@ func NewMy[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -65,9 +65,9 @@ func NewMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) co_interface.IMy {
 	return &sMy[
 		ITCompanyRes,
@@ -76,9 +76,9 @@ func NewMy[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -93,9 +93,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetProfile(ctx context.Context) (*co_model.MyProfileRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -143,9 +143,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompany(ctx context.Context) (*co_model.MyCompanyRes, error) {
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -177,9 +177,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeams(ctx context.Context) (res co_model.MyTeamListRes, err error) {
 	res = co_model.MyTeamListRes{}
 	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -235,9 +235,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetMyMobile(ctx context.Context, newMobile string, captcha string, password string) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -281,9 +281,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetMyMail(ctx context.Context, oldMail string, newMail string, captcha string, password string) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -327,9 +327,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetMyAvatar(ctx context.Context, imageId int64) (bool, error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -377,9 +377,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccountBills(ctx context.Context, searchParams *base_model.SearchParams) (*co_model.MyAccountBillRes, error) {
 	// 1、获取到当前登录用户
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
@@ -394,8 +394,8 @@ func (s *sMy[
 
 	// 3、遍历每一个账号，把账单统计出来
 	for _, account := range accounts.Records {
-		bills, err := s.modules.AccountBill().GetAccountBillByAccountId(ctx, account.Data().Id, searchParams)
-		// base_model.call[co_model.IFdAccountBillRes]
+		bills, err := s.modules.AccountBills().GetAccountBillsByAccountId(ctx, account.Data().Id, searchParams)
+		// base_model.call[co_model.IFdAccountBillsRes]
 		if err != nil {
 			return nil, err
 		}
@@ -407,7 +407,7 @@ func (s *sMy[
 		// 账单信息
 		accountBillDetailList = append(accountBillDetailList, co_model.AccountBillRes{
 			Account: accountInfo,
-			Bill:    kconv.Struct(bills, &co_model.FdAccountBillListRes{}),
+			Bill:    kconv.Struct(bills, &co_model.FdAccountBillsListRes{}),
 		})
 	}
 
@@ -422,9 +422,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetAccounts(ctx context.Context) (*co_model.FdAccountListRes, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -444,9 +444,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetBankCards(ctx context.Context) (*co_model.FdBankCardListRes, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -466,9 +466,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetInvoices(ctx context.Context) (*co_model.FdInvoiceListRes, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -489,9 +489,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateAccount(ctx context.Context, accountId int64, info *co_model.UpdateAccount) (api_v1.BoolRes, error) {
 	//user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
@@ -510,9 +510,9 @@ func (s *sMy[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetMyCompanyPermissionList(ctx context.Context, permissionType *int) (*sys_model.MyPermissionListRes, error) {
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 

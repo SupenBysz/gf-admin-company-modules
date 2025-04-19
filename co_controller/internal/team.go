@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
@@ -26,11 +27,11 @@ type TeamController[
 	ITEmployeeRes co_model.IEmployeeRes,
 	TIRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -39,9 +40,9 @@ type TeamController[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	team     co_interface.ITeam[TIRes]
 	employee co_interface.IEmployee[ITEmployeeRes]
@@ -54,11 +55,11 @@ func Team[
 	ITEmployeeRes co_model.IEmployeeRes,
 	TIRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -66,9 +67,9 @@ func Team[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) i_controller.ITeam[TIRes] {
 	return &TeamController[
 		ITCompanyRes,
@@ -77,9 +78,9 @@ func Team[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules:  modules,
 		dao:      *modules.Dao(),
@@ -95,12 +96,12 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamById(ctx context.Context, req *co_company_api.GetTeamByIdReq) (TIRes, error) {
 	// 这种只满足两级edu_school_class::Create，
-	// 还需要兼容这样子的Financial::BankCard::ViewBankCardDetail （先不考虑）
+	// 还需要兼容这样子的Finance::BankCard::ViewBankCardDetail （先不考虑）
 
 	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).ViewDetail)
 
@@ -121,9 +122,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) HasTeamByName(ctx context.Context, req *co_company_api.HasTeamByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -139,9 +140,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamList(ctx context.Context, req *co_company_api.QueryTeamListReq) (*base_model.CollectRes[TIRes], error) {
 
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).List)
@@ -160,9 +161,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateTeam(ctx context.Context, req *co_company_api.CreateTeamReq) (TIRes, error) {
 
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).Create)
@@ -182,14 +183,14 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateTeam(ctx context.Context, req *co_company_api.UpdateTeamReq) (TIRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).Update)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.team.UpdateTeam(c.makeMore(ctx), req.Id, req.Name, req.Remark)
+			ret, err := c.team.UpdateTeam(c.makeMore(ctx), &req.Team)
 			return ret, err
 		},
 		permission,
@@ -203,9 +204,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) DeleteTeam(ctx context.Context, req *co_company_api.DeleteTeamReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).Delete)
 	return funs.CheckPermission(ctx,
@@ -223,9 +224,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryTeamListByEmployee(ctx context.Context, req *co_company_api.QueryTeamListByEmployeeReq) (*base_model.CollectRes[TIRes], error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).List)
 	return funs.CheckPermission(ctx,
@@ -244,9 +245,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamMember(ctx context.Context, req *co_company_api.SetTeamMemberReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).SetMember)
 	return funs.CheckPermission(ctx,
@@ -264,9 +265,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) RemoveTeamMember(ctx context.Context, req *co_company_api.RemoveTeamMemberReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).SetMember)
 	return funs.CheckPermission(ctx,
@@ -283,9 +284,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamOwner(ctx context.Context, req *co_company_api.SetTeamOwnerReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).SetCaptain)
 	return funs.CheckPermission(ctx,
@@ -302,9 +303,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetTeamCaptain(ctx context.Context, req *co_company_api.SetTeamCaptainReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).SetCaptain)
 	return funs.CheckPermission(ctx,
@@ -321,9 +322,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetEmployeeListByTeamId(ctx context.Context, req *co_company_api.GetEmployeeListByTeamIdReq) (*base_model.CollectRes[co_model.IEmployeeRes], error) {
 	permission := c.getPermission(ctx, co_permission.Team.PermissionType(c.modules).MemberDetail)
 	return funs.CheckPermission(ctx,
@@ -356,9 +357,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetTeamInviteCode(ctx context.Context, req *co_company_api.GetTeamInviteCodeReq) (*co_model.TeamInviteCodeRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (*co_model.TeamInviteCodeRes, error) {
@@ -378,9 +379,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) JoinTeamByInviteCode(ctx context.Context, req *co_company_api.JoinTeamByInviteCodeReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -401,9 +402,9 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context) context.Context {
 	include := &garray.StrArray{}
 	if ctx.Value("include") == nil {
@@ -471,12 +472,12 @@ func (c *TeamController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) getPermission(ctx context.Context, permission base_permission.IPermission) base_permission.IPermission {
 	// 这种只满足两级edu_school_class::Create，
-	// 还需要兼容这样子的Financial::BankCard::ViewBankCardDetail （先不考虑）
+	// 还需要兼容这样子的Finance::BankCard::ViewBankCardDetail （先不考虑）
 
 	//identifierStr := c.getPermissionIdentifier(permission)
 	identifierStr := c.modules.GetConfig().Identifier.Team + "::" + permission.GetIdentifier()

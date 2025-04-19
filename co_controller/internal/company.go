@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
@@ -27,11 +28,11 @@ type CompanyController[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	i_controller.ICompany[TIRes]
 	modules co_interface.IModules[
@@ -41,9 +42,9 @@ type CompanyController[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]
 	dao co_dao.XDao
 }
@@ -53,11 +54,11 @@ func Company[
 	ITEmployeeRes co_model.IEmployeeRes,
 	ITTeamRes co_model.ITeamRes,
 	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
 	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdCurrencyRes co_model.IFdCurrencyRes,
 	ITFdInvoiceRes co_model.IFdInvoiceRes,
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	TIRes,
 	ITEmployeeRes,
@@ -65,9 +66,9 @@ func Company[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) i_controller.ICompany[TIRes] {
 	return &CompanyController[
 		TIRes,
@@ -76,9 +77,9 @@ func Company[
 		ITFdAccountRes,
 		ITFdAccountBillRes,
 		ITFdBankCardRes,
-		ITFdCurrencyRes,
 		ITFdInvoiceRes,
 		ITFdInvoiceDetailRes,
+		ITFdRechargeRes,
 	]{
 		modules: modules,
 		dao:     *modules.Dao(),
@@ -93,9 +94,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompanyById(ctx context.Context, req *co_company_api.GetCompanyByIdReq) (TIRes, error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).ViewDetail)
 	return funs.CheckPermission(ctx,
@@ -116,9 +117,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) HasCompanyByName(ctx context.Context, req *co_company_api.HasCompanyByNameReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
 		func() (api_v1.BoolRes, error) {
@@ -135,9 +136,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) QueryCompanyList(ctx context.Context, req *co_company_api.QueryCompanyListReq) (*base_model.CollectRes[TIRes], error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).List)
 	return funs.CheckPermission(ctx,
@@ -156,9 +157,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) CreateCompany(ctx context.Context, req *co_company_api.CreateCompanyReq) (TIRes, error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).Create)
 
@@ -178,9 +179,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) UpdateCompany(ctx context.Context, req *co_company_api.UpdateCompanyReq) (TIRes, error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).Update)
 
@@ -200,9 +201,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) GetCompanyDetail(ctx context.Context, req *co_company_api.GetCompanyDetailReq) (TIRes, error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).ViewMobile)
 
@@ -221,9 +222,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetCompanyState(ctx context.Context, req *co_company_api.SetCompanyStateReq) (api_v1.BoolRes, error) {
 	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).SetState)
 	return funs.CheckPermission(ctx,
@@ -242,9 +243,9 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context) context.Context {
 	include := &garray.StrArray{}
 	if ctx.Value("include") == nil {
@@ -281,12 +282,12 @@ func (c *CompanyController[
 	ITFdAccountRes,
 	ITFdAccountBillRes,
 	ITFdBankCardRes,
-	ITFdCurrencyRes,
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) getPermission(ctx context.Context, permission base_permission.IPermission) base_permission.IPermission {
 	// 这种只满足两级edu_school_class::Create，
-	// 还需要兼容这样子的Financial::BankCard::ViewBankCardDetail （先不考虑）
+	// 还需要兼容这样子的Finance::BankCard::ViewBankCardDetail （先不考虑）
 
 	//identifierStr := c.getPermissionIdentifier(permission)
 	identifierStr := c.modules.GetConfig().Identifier.Company + "::" + permission.GetIdentifier()
