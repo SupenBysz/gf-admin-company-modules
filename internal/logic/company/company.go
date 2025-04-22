@@ -546,9 +546,10 @@ func (s *sCompany[
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 
-			if logoInfo != nil && logoInfo.Id != *info.LogoId {
-				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
-				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+			uploadPath := s.modules.GetConfig().StoragePath
+			tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
+
+			if logoInfo != nil && !strings.HasPrefix(logoInfo.Src, uploadPath) {
 				if strings.HasPrefix(logoInfo.Src, tempPath) {
 					targetFilePath := uploadPath + "/" + gconv.String(info.Id) + "/logo" + logoInfo.Ext
 					_, err := sys_service.File().SaveFile(ctx, targetFilePath, logoInfo, true)
