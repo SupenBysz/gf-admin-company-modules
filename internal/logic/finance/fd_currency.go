@@ -22,6 +22,10 @@ func NewFdCurrency() co_service.IFdCurrency {
 	return &sFdCurrency{}
 }
 
+func init() {
+	co_service.RegisterFdCurrency(NewFdCurrency())
+}
+
 // GetCurrencyByCode 根据货币代码查找货币(主键)
 func (s *sFdCurrency) GetCurrencyByCode(ctx context.Context, currencyCode string) (response *co_model.FdCurrencyRes, err error) {
 	if currencyCode == "" {
