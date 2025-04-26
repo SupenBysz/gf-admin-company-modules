@@ -301,15 +301,16 @@ func (s *sFdAccount[
 ]) UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error) {
 	//sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	_, err := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}).Update(co_do.FdAccount{
+	affected, err := daoctl.UpdateWithError(s.modules.Dao().FdAccount.Ctx(ctx).Where(co_do.FdAccount{Id: id}), co_do.FdAccount{
 		LimitState: limitState,
 		UpdatedBy:  userId,
 	})
+
 	if err != nil {
 		return false, err
 	}
 
-	return true, nil
+	return affected == 1, nil
 }
 
 // SetAccountCurrencyCode 设置财务账号货币单位
