@@ -415,10 +415,10 @@ func (s *sCompany[
 	}
 
 	// 启用事务
-	err = s.dao.Company.Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var employee co_model.IEmployeeRes
 		if info.Id == 0 {
-			if bindUser != nil {
+			if bindUser != nil && bindUser.Type != s.modules.GetConfig().UserType.Code() {
 				ok, err := sys_service.SysUser().SetUserType(ctx, bindUser.Id, s.modules.GetConfig().UserType)
 				if !ok || err != nil {
 					return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_save_failed_cannot_update_related_user"), s.dao.Company.Table())
@@ -435,6 +435,9 @@ func (s *sCompany[
 					State:       co_enum.Employee.State.Normal.Code(),
 					HiredAt:     gtime.Now(),
 				})
+				if err != nil {
+					return err
+				}
 				employeeData := employeeDoData.(*co_model.Employee)
 
 				// 1.构建员工信息 + user登录信息

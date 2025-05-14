@@ -179,13 +179,12 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IEmployeeRes
-	ret = &co_model.EmployeeRes{
+	ret := (co_model.IEmployeeRes)(&co_model.EmployeeRes{
 		CompanyEmployee: co_entity.CompanyEmployee{},
 		User:            &co_model.EmployeeUser{},
 		Detail:          &sys_entity.SysUserDetail{},
 		TeamList:        []co_model.Team{},
-	}
+	})
 	return ret.(TR)
 }
 
@@ -491,7 +490,7 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) HasEmployeeByNo(ctx context.Context, no string, unionMainId int64, excludeIds ...int64) bool { // 如果工号为空则直接返回
 	// 工号为空，且允许工号为空则不做校验
-	if no == "" && s.modules.GetConfig().AllowEmptyNo == true {
+	if no == "" && s.modules.GetConfig().AllowEmptyNo {
 		return false
 	}
 
@@ -664,27 +663,22 @@ func (s *sEmployee[
 	// 校验员工名称是否已存在
 	if info.Name != nil {
 		// 重名 & 系统不允许员工重名
-		if true == s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
+		if s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 		}
 	}
 	// 校验工号是否允许为空
 	if info.No != nil {
-		if *info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
+		if *info.No == "" && !s.modules.GetConfig().AllowEmptyNo {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
 		}
 	}
-	if info.No != nil {
-		// 校验工号是否已存在
-		if true == s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
-		}
+	// 校验工号是否已存在
+	if s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	data := kconv.Struct(info, &co_do.CompanyEmployee{})
-	if err != nil {
-		return response, err
-	}
 
 	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		if employee.Data() != nil {
@@ -781,31 +775,35 @@ func (s *sEmployee[
 ]) saveEmployee(ctx context.Context, info *co_model.Employee, bindUser *sys_model.SysUser) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
+	if sessionUser != nil && sessionUser.SysUser.SysUser == nil {
+		sessionUser.SysUser = *bindUser
+	}
+
 	// 除匿名用户外，其它用户在有权限的情况下均可以创建或更新员工信息，001 代表默认管理员工号
 	// info.Id == 0 仅单纯新建员工时需要初始化用户归属为当前操作员所在 UnionMainId
-	if sessionUser.Type > 0 && info.Id == 0 && info.No != "001" {
+	if sessionUser != nil && sessionUser.Type > 0 && info.Id == 0 && info.No != "001" {
 		info.UnionMainId = sessionUser.UnionMainId
 	}
 
 	// 校验员工名称是否已存在
-	if true == s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
+	if s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否允许为空
-	if info.No == "" && s.modules.GetConfig().AllowEmptyNo == false {
+	if info.No == "" && !s.modules.GetConfig().AllowEmptyNo {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
 	}
 
 	// 校验工号是否已存在
-	if true == s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
+	if s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
 	gconv.Struct(info, data)
 
-	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
 		storageSrc := ""
 		if info.Avatar != "" {
@@ -1005,7 +1003,7 @@ func (s *sEmployee[
 ]) deleteEmployeeTeam(ctx context.Context, employeeId int64) (bool, error) {
 	// 直接删除属于员工的团队成员记录
 	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
-	if err != nil && isSuccess == false {
+	if err != nil && !isSuccess {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
 	}
 
@@ -1024,19 +1022,23 @@ func (s *sEmployee[
 		}),
 	})
 
+	if err != nil {
+		return false, err
+	}
+
 	// 假如是队长或者组长，需要将团队表的队长或者组长设置为0
 	if len(teamList.Records) > 0 {
 		for _, item := range teamList.Records {
 			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
 				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
-				if err != nil || ret == false {
+				if err != nil || !ret {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
 
 			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
 				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
-				if err != nil || ret == false {
+				if err != nil || !ret {
 					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
 				}
 			}
@@ -1061,10 +1063,10 @@ func (s *sEmployee[
 
 	model := s.dao.Employee.Ctx(ctx)
 
-	if sessionUser.IsAdmin == false {
+	if !sessionUser.IsAdmin {
 		// 判断用户是否有权限
 		can, _ := sys_service.SysPermission().CheckPermission(ctx, co_permission.Employee.PermissionType(s.modules).MoreDetail)
-		if can == false {
+		if !can {
 			model = model.Where(sys_do.SysFile{UnionMainId: sessionUser.UnionMainId})
 		}
 	}
@@ -1187,6 +1189,11 @@ func (s *sEmployee[
 	}
 
 	result, err := s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Update(co_do.CompanyEmployee{State: state})
+
+	if err != nil {
+		return false, err
+	}
+
 	affected, err := result.RowsAffected()
 	if err != nil || affected == 0 {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_update_employee_state_failed"), s.dao.Employee.Table())
