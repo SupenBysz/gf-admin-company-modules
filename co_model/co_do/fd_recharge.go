@@ -17,7 +17,7 @@ type FdRecharge struct {
 	Username       interface{} // 用户账号，冗余存储方便快速查询用户相关充值记录，无需每次都关联用户表
 	CurrencyCode   interface{} // 货币代码，如CNY（人民币）、USD（美元）等
 	Amount         interface{} // 充值金额，小数点后保留2位，且金额需大于0
-	RechargeMethod interface{} // 充值方式：1 - 银行卡；2 - 支付宝；3 - 微信；4 - 云闪付；5 - ApplePay；6 - PayPal；7 - AmazonPay；8 - 线下现金（若有对应业务）；9 - 区块链钱包；10 - 其他（可进一步在备注说明）
+	RechargeMethod interface{} // 充值方式：1 - 银行卡；2 - 支付宝；3 - 微信；4 - 云闪付；5 - ApplePay；6 - PayPal；7 - AmazonPay；8 - 线下现金（若有对应业务）；9 - 区块链钱包；100 - 其他（可进一步在备注说明）
 	PaymentAt      *gtime.Time // 充值支付时间，记录用户实际支付成功的时间
 	PaymentOrderNo interface{} // 外部支付订单号，第三方支付平台生成的订单编号
 	TransactionNo  interface{} // 交易流水号，系统内部生成，用于后续对账和查询
