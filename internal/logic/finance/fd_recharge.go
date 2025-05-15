@@ -254,9 +254,11 @@ func (s *sFdRecharge[
 
 	employee, _ := s.modules.Employee().GetEmployeeById(ctx, info.UserId)
 
-	data := kconv.Struct(info, co_do.FdRecharge{})
+	data := kconv.Struct(info.FdRecharge, &co_do.FdRecharge{})
 	data.Id = idgen.NextId()
-	data.AuditState = sys_enum.Audit.AuditState.WaitReview
+	data.State = co_enum.Finance.RechargeState.Pending.Code()
+	data.AuditState = sys_enum.Audit.AuditState.WaitReview.Code()
+	data.RechargeMethod = info.RechargeMethod
 	data.Username = createUser.Username
 	data.UserId = createUser.Id
 	data.CurrencyCode = accountInfo.CurrencyCode
@@ -270,15 +272,15 @@ func (s *sFdRecharge[
 		data.UnionMainId = employee.Data().UnionMainId
 	}
 
-	if err = s.dao.FdAccount.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	if err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
 		if info.RechargeMethod == co_enum.Finance.RechargeMethod.WeChat.Code() || info.RechargeMethod == co_enum.Finance.RechargeMethod.Alipay.Code() || info.RechargeMethod == co_enum.Finance.RechargeMethod.CloudPay.Code() {
-			data.State = co_enum.Finance.RechargeState.Processing
+			data.State = co_enum.Finance.RechargeState.Processing.Code()
 		} else {
-			data.State = co_enum.Finance.RechargeState.Awaiting
+			data.State = co_enum.Finance.RechargeState.Awaiting.Code()
 		}
 
-		newData, err := info.OverrideDo.DoFactory(data)
+		newData, err := info.OverrideDo.DoFactory(*data)
 
 		if err != nil {
 			return err
@@ -306,7 +308,7 @@ func (s *sFdRecharge[
 			}
 		}
 
-		err = info.OverrideDo.DoSaved(data, newData)
+		err = info.OverrideDo.DoSaved(*data, newData)
 
 		return err
 	}); err != nil {
