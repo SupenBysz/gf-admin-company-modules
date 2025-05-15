@@ -27,52 +27,62 @@ type FdRechargeViewDao struct {
 
 // FdRechargeViewColumns defines and stores column names for table co_fd_recharge_view.
 type FdRechargeViewColumns struct {
-	Id             string //
-	UserId         string //
-	Username       string //
-	CurrencyCode   string //
-	Amount         string //
-	RechargeMethod string //
-	PaymentAt      string //
-	PaymentOrderNo string //
-	TransactionNo  string //
-	State          string //
-	AuditState     string //
-	AuditReply     string //
-	IpAddress      string //
-	UserAgent      string //
-	UnionMainId    string //
-	AccountId      string //
-	Remark         string //
-	ScreenshotId   string //
-	CreatedAt      string //
-	UpdatedAt      string //
-	DeletedAt      string //
+	Id                string //
+	UserId            string //
+	Username          string //
+	CurrencyCode      string //
+	Amount            string //
+	RechargeMethod    string //
+	PaymentAt         string //
+	PaymentOrderNo    string //
+	TransactionNo     string //
+	State             string //
+	AuditState        string //
+	AuditReply        string //
+	IpAddress         string //
+	UserAgent         string //
+	UnionMainId       string //
+	AccountId         string //
+	Remark            string //
+	ScreenshotId      string //
+	CreatedAt         string //
+	UpdatedAt         string //
+	DeletedAt         string //
+	AccountNumber     string //
+	AccountName       string //
+	AccountEnabled    string //
+	AccountLimitState string //
+	CompanyType       string //
 }
 
 // fdRechargeViewColumns holds the columns for table co_fd_recharge_view.
 var fdRechargeViewColumns = FdRechargeViewColumns{
-	Id:             "id",
-	UserId:         "user_id",
-	Username:       "username",
-	CurrencyCode:   "currency_code",
-	Amount:         "amount",
-	RechargeMethod: "recharge_method",
-	PaymentAt:      "payment_at",
-	PaymentOrderNo: "payment_order_no",
-	TransactionNo:  "transaction_no",
-	State:          "state",
-	AuditState:     "audit_state",
-	AuditReply:     "audit_reply",
-	IpAddress:      "ip_address",
-	UserAgent:      "user_agent",
-	UnionMainId:    "union_main_id",
-	AccountId:      "account_id",
-	Remark:         "remark",
-	ScreenshotId:   "screenshot_id",
-	CreatedAt:      "created_at",
-	UpdatedAt:      "updated_at",
-	DeletedAt:      "deleted_at",
+	Id:                "id",
+	UserId:            "user_id",
+	Username:          "username",
+	CurrencyCode:      "currency_code",
+	Amount:            "amount",
+	RechargeMethod:    "recharge_method",
+	PaymentAt:         "payment_at",
+	PaymentOrderNo:    "payment_order_no",
+	TransactionNo:     "transaction_no",
+	State:             "state",
+	AuditState:        "audit_state",
+	AuditReply:        "audit_reply",
+	IpAddress:         "ip_address",
+	UserAgent:         "user_agent",
+	UnionMainId:       "union_main_id",
+	AccountId:         "account_id",
+	Remark:            "remark",
+	ScreenshotId:      "screenshot_id",
+	CreatedAt:         "created_at",
+	UpdatedAt:         "updated_at",
+	DeletedAt:         "deleted_at",
+	AccountNumber:     "account_number",
+	AccountName:       "account_name",
+	AccountEnabled:    "account_enabled",
+	AccountLimitState: "account_limit_state",
+	CompanyType:       "company_type",
 }
 
 // NewFdRechargeViewDao creates and returns a new DAO object for table data access.
