@@ -7,6 +7,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/kysion/base-library/utility/base_funs"
 	"github.com/kysion/base-library/utility/kconv"
 
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -136,9 +137,8 @@ func (s *sFdAccountBills[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
-	var ret co_model.IFdAccountBillsRes
-	ret = &co_model.FdAccountBillsRes{}
-	return ret.(TR)
+	instance, _ := base_funs.CreateGenericInstance[TR]()
+	return instance
 }
 
 // CreateAccountBills 创建财务账单
@@ -172,9 +172,9 @@ func (s *sFdAccountBills[
 	var err error
 
 	// 判读收支类型  收入/支出
-	if info.InOutType == 1 {
+	if info.InOutType == co_enum.Finance.InOutType.In.Code() {
 		success, err = s.income(ctx, info)
-	} else if info.InOutType == 2 {
+	} else if info.InOutType == co_enum.Finance.InOutType.Out.Code() {
 		success, err = s.spending(ctx, info)
 	}
 
@@ -223,7 +223,7 @@ func (s *sFdAccountBills[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"), s.dao.FdAccountBills.Table())
 	}
 
-	bill := s.FactoryMakeResponseInstance()
+	bill, _ := base_funs.CreateGenericInstance[TR]()
 
 	// 使用乐观锁校验余额，和更新余额
 	err = s.dao.FdAccountBills.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {

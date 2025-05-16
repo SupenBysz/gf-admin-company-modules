@@ -52,6 +52,7 @@ type FdRechargeViewColumns struct {
 	AccountName       string //
 	AccountEnabled    string //
 	AccountLimitState string //
+	AuditId           string //
 	CompanyType       string //
 }
 
@@ -82,6 +83,7 @@ var fdRechargeViewColumns = FdRechargeViewColumns{
 	AccountName:       "account_name",
 	AccountEnabled:    "account_enabled",
 	AccountLimitState: "account_limit_state",
+	AuditId:           "audit_id",
 	CompanyType:       "company_type",
 }
 

@@ -35,5 +35,6 @@ type FdRechargeView struct {
 	AccountName       string      `json:"accountName"       orm:"account_name"        description:""`
 	AccountEnabled    int         `json:"accountEnabled"    orm:"account_enabled"     description:""`
 	AccountLimitState int         `json:"accountLimitState" orm:"account_limit_state" description:""`
+	AuditId           int64       `json:"auditId"           orm:"audit_id"            description:""`
 	CompanyType       int         `json:"companyType"       orm:"company_type"        description:""`
 }

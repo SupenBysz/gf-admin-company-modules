@@ -37,5 +37,6 @@ type FdRechargeView struct {
 	AccountName       interface{} //
 	AccountEnabled    interface{} //
 	AccountLimitState interface{} //
+	AuditId           interface{} //
 	CompanyType       interface{} //
 }

@@ -161,19 +161,19 @@ func (s *sFdRecharge[
 
 	if !base_funs.Contains([]int{
 		sys_enum.Audit.AuditState.WaitReview.Code(),
-		sys_enum.Audit.AuditState.PendingReview.Code(),
+		sys_enum.Audit.AuditState.WaitingSupplementaryInfo.Code(),
 		sys_enum.Audit.AuditState.Reviewing.Code(),
 	}, info.AuditState) {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#error_Financial_AccountRecharge_Audit_Failed}"), s.dao.FdRecharge.Table())
 	}
 
-	if state == sys_enum.Audit.AuditState.Reject && reply == "" {
+	if state == sys_enum.Audit.AuditState.Rejected && reply == "" {
 		return false, gerror.New(s.modules.T(ctx, "error_Financial_AccountRecharge_Audit_Failed"))
 	}
 
 	data := co_do.FdRecharge{
-		State:      base_funs.If(state == sys_enum.Audit.Action.Approve, sys_enum.Audit.AuditState.Reject, sys_enum.Audit.AuditState.Approve),
-		AuditState: state,
+		State:      base_funs.If(state == sys_enum.Audit.Action.Approved, co_enum.Finance.RechargeState.Paid, co_enum.Finance.RechargeState.Failed).Code(),
+		AuditState: state.Code(),
 		AuditReply: reply,
 		UpdatedAt:  gtime.Now(),
 	}
