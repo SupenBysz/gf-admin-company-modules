@@ -280,7 +280,7 @@ func (s *sFdRecharge[
 			data.State = co_enum.Finance.RechargeState.Awaiting.Code()
 		}
 
-		newData, err := info.OverrideDo.DoFactory(*data)
+		newData, err := info.OverrideDo.DoFactory(data)
 
 		if err != nil {
 			return err
@@ -308,7 +308,7 @@ func (s *sFdRecharge[
 			}
 		}
 
-		err = info.OverrideDo.DoSaved(*data, newData)
+		err = info.OverrideDo.DoSaved(data, newData)
 
 		return err
 	}); err != nil {

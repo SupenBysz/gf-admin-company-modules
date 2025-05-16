@@ -9,7 +9,7 @@ import (
 )
 
 type FdRecharge struct {
-	OverrideDo base_interface.DoModel[co_do.FdRecharge] `json:"-"`
+	OverrideDo base_interface.DoModel[*co_do.FdRecharge] `json:"-"`
 	co_entity.FdRecharge
 	CreatedAt *gtime.Time `json:"-"      orm:"created_at"       description:"记录创建时间，即充值请求提交时间"`
 	UpdatedAt *gtime.Time `json:"-"      orm:"updated_at"       description:"记录最后更新时间，每次记录状态等信息变更时更新"`
