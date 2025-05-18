@@ -33,4 +33,5 @@ type FdAccount struct {
 	AccountNumber      interface{} // 账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号
 	UnionMainId        interface{} // 关联主体ID，与union_license_id 中的union_main_id 一致
 	AllowExceed        interface{} // 是否允许存在负余额: 0禁止、1允许
+	FrozenBlance       interface{} // 冻结金额
 }

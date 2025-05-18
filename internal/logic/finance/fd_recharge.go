@@ -161,19 +161,19 @@ func (s *sFdRecharge[
 
 	if !base_funs.Contains([]int{
 		sys_enum.Audit.AuditState.WaitReview.Code(),
-		sys_enum.Audit.AuditState.PendingReview.Code(),
+		sys_enum.Audit.AuditState.WaitingSupplementaryInfo.Code(),
 		sys_enum.Audit.AuditState.Reviewing.Code(),
 	}, info.AuditState) {
 		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#error_Financial_AccountRecharge_Audit_Failed}"), s.dao.FdRecharge.Table())
 	}
 
-	if state == sys_enum.Audit.AuditState.Reject && reply == "" {
+	if state == sys_enum.Audit.AuditState.Rejected && reply == "" {
 		return false, gerror.New(s.modules.T(ctx, "error_Financial_AccountRecharge_Audit_Failed"))
 	}
 
 	data := co_do.FdRecharge{
-		State:      base_funs.If(state == sys_enum.Audit.Action.Approve, sys_enum.Audit.AuditState.Reject, sys_enum.Audit.AuditState.Approve),
-		AuditState: state,
+		State:      base_funs.If(state == sys_enum.Audit.Action.Approved, co_enum.Finance.RechargeState.Paid, co_enum.Finance.RechargeState.Failed).Code(),
+		AuditState: state.Code(),
 		AuditReply: reply,
 		UpdatedAt:  gtime.Now(),
 	}
@@ -254,9 +254,11 @@ func (s *sFdRecharge[
 
 	employee, _ := s.modules.Employee().GetEmployeeById(ctx, info.UserId)
 
-	data := kconv.Struct(info, co_do.FdRecharge{})
+	data := kconv.Struct(info.FdRecharge, &co_do.FdRecharge{})
 	data.Id = idgen.NextId()
-	data.AuditState = sys_enum.Audit.AuditState.WaitReview
+	data.State = co_enum.Finance.RechargeState.Pending.Code()
+	data.AuditState = sys_enum.Audit.AuditState.WaitReview.Code()
+	data.RechargeMethod = info.RechargeMethod
 	data.Username = createUser.Username
 	data.UserId = createUser.Id
 	data.CurrencyCode = accountInfo.CurrencyCode
@@ -270,12 +272,12 @@ func (s *sFdRecharge[
 		data.UnionMainId = employee.Data().UnionMainId
 	}
 
-	if err = s.dao.FdAccount.Ctx(ctx).Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	if err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
 		if info.RechargeMethod == co_enum.Finance.RechargeMethod.WeChat.Code() || info.RechargeMethod == co_enum.Finance.RechargeMethod.Alipay.Code() || info.RechargeMethod == co_enum.Finance.RechargeMethod.CloudPay.Code() {
-			data.State = co_enum.Finance.RechargeState.Processing
+			data.State = co_enum.Finance.RechargeState.Processing.Code()
 		} else {
-			data.State = co_enum.Finance.RechargeState.Awaiting
+			data.State = co_enum.Finance.RechargeState.Awaiting.Code()
 		}
 
 		newData, err := info.OverrideDo.DoFactory(data)

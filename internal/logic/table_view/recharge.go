@@ -52,7 +52,7 @@ func (s *sFdRechargeView) QueryAccountRecharge(ctx context.Context, search *base
 	return result, nil
 }
 
-// GetAccountRechargeById 根据ID获取充值记录
+// GetAccountRechargeById 根据资金账户ID获取充值记录
 func (s *sFdRechargeView) GetAccountRechargeById(ctx context.Context, id int64) (*co_model.FdRechargeViewRes, error) {
 
 	if id == 0 {
@@ -64,6 +64,75 @@ func (s *sFdRechargeView) GetAccountRechargeById(ctx context.Context, id int64) 
 	if err != nil {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "{#error_Data_Get_Failed}", co_dao.FdRechargeView.Table())
 	}
+
+	return result, nil
+}
+
+// GetRechargeByAccountId 根据资金账户ID获取充值记录
+func (s *sFdRechargeView) GetRechargeByAccountId(ctx context.Context, id int64) (*co_model.FdRechargeViewListRes, error) {
+	if id == 0 {
+		return nil, gerror.New("error_Financial_AccountId_Failed")
+	}
+
+	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx).
+		Where(co_dao.FdRechargeView.Columns().AccountId, id).
+		OrderDesc(co_dao.FdRechargeView.Columns().CreatedAt),
+		nil,
+		true,
+	)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "{#error_Data_Get_Failed}", co_dao.FdRechargeView.Table())
+	}
+
+	result := &co_model.FdRechargeViewListRes{}
+	gconv.Struct(data, &result)
+
+	return result, nil
+}
+
+// GetRechargeByUserId 根据用户ID获取充值记录
+func (s *sFdRechargeView) GetRechargeByUserId(ctx context.Context, id int64) (*co_model.FdRechargeViewListRes, error) {
+	if id == 0 {
+		return nil, gerror.New("error_Financial_UserId_Failed")
+	}
+
+	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx).
+		Where(co_dao.FdRechargeView.Columns().UserId, id).
+		OrderDesc(co_dao.FdRechargeView.Columns().CreatedAt),
+		nil,
+		true,
+	)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "{#error_Data_Get_Failed}", co_dao.FdRechargeView.Table())
+	}
+
+	result := &co_model.FdRechargeViewListRes{}
+	gconv.Struct(data, &result)
+
+	return result, nil
+}
+
+// GetRechargeByCompanyId 根据公司ID获取充值记录
+func (s *sFdRechargeView) GetRechargeByCompanyId(ctx context.Context, id int64) (*co_model.FdRechargeViewListRes, error) {
+	if id == 0 {
+		return nil, gerror.New("error_Financial_CompanyId_Failed")
+	}
+
+	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx).
+		Where(co_dao.FdRechargeView.Columns().UnionMainId, id).
+		OrderDesc(co_dao.FdRechargeView.Columns().CreatedAt),
+		nil,
+		true,
+	)
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, "{#error_Data_Get_Failed}", co_dao.FdRechargeView.Table())
+	}
+
+	result := &co_model.FdRechargeViewListRes{}
+	gconv.Struct(data, &result)
 
 	return result, nil
 }

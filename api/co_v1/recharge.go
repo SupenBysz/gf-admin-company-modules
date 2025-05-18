@@ -6,7 +6,7 @@ import (
 )
 
 type GetAccountRechargeByIdReq struct {
-	g.Meta `path:"/getAccountRechargeById" method:"post" summary:"根据ID获取充值记录" tags:"组织单位/财务服务"`
+	g.Meta `path:"/getAccountRechargeById" method:"post" summary:"根据资金账户ID获取充值记录" tags:"组织单位/财务服务"`
 	co_company_api.GetAccountRechargeByIdReq
 }
 

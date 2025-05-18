@@ -41,6 +41,7 @@ type CompanyTeamColumns struct {
 	Slogan            string // 口号
 	Title             string // 称号
 	LogoId            string // LOGO
+	CreatedBy         string // 创建者
 }
 
 // companyTeamColumns holds the columns for table co_company_team.
@@ -59,6 +60,7 @@ var companyTeamColumns = CompanyTeamColumns{
 	Slogan:            "slogan",
 	Title:             "title",
 	LogoId:            "logo_id",
+	CreatedBy:         "created_by",
 }
 
 // NewCompanyTeamDao creates and returns a new DAO object for table data access.

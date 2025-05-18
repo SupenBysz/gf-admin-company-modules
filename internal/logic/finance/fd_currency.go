@@ -22,19 +22,25 @@ func NewFdCurrency() co_service.IFdCurrency {
 	return &sFdCurrency{}
 }
 
+func init() {
+	co_service.RegisterFdCurrency(NewFdCurrency())
+}
+
 // GetCurrencyByCode 根据货币代码查找货币(主键)
 func (s *sFdCurrency) GetCurrencyByCode(ctx context.Context, currencyCode string) (response *co_model.FdCurrencyRes, err error) {
 	if currencyCode == "" {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, "error_CurrencyCode_NotNull", co_dao.FdCurrency.Table())
 	}
 
-	err = co_dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).Scan(response)
+	result, err := co_dao.FdCurrency.Ctx(ctx).Where(co_do.FdCurrency{CurrencyCode: currencyCode}).One()
 
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, "{#Currency}{#error_Data_Get_Failed}", co_dao.FdCurrency.Table())
 	}
 
-	return response, nil
+	err = result.Struct(&response)
+
+	return response, err
 }
 
 // QueryCurrencyList 获取币种列表

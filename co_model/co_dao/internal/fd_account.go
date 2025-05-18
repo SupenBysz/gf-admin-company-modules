@@ -48,6 +48,7 @@ type FdAccountColumns struct {
 	AccountNumber      string // 账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号
 	UnionMainId        string // 关联主体ID，与union_license_id 中的union_main_id 一致
 	AllowExceed        string // 是否允许存在负余额: 0禁止、1允许
+	FrozenBlance       string // 冻结金额
 }
 
 // fdAccountColumns holds the columns for table co_fd_account.
@@ -73,6 +74,7 @@ var fdAccountColumns = FdAccountColumns{
 	AccountNumber:      "account_number",
 	UnionMainId:        "union_main_id",
 	AllowExceed:        "allow_exceed",
+	FrozenBlance:       "frozen_blance",
 }
 
 // NewFdAccountDao creates and returns a new DAO object for table data access.

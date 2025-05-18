@@ -24,6 +24,8 @@ type (
 	FinanceInOutType = finance.InOutTypeEnum
 	// FinanceTradeType 交易类型
 	FinanceTradeType = finance.TradeTypeEnum
+	// FinanceTradeState 交易状态
+	FinanceTradeState = finance.TradeStateEnum
 	// AccountType 财务账号类型
 	AccountType = finance.AccountTypeEnum
 	// SceneType 场景类型

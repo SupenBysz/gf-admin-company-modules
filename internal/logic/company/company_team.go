@@ -524,7 +524,7 @@ func (s *sTeam[
 			if err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#error_Data_Save_Failed}"), s.dao.Team.Table())
 			}
-			if logoInfo != nil && logoInfo.Id != info.LogoId {
+			if logoInfo != nil && logoInfo.Id != team.Data().LogoId {
 				uploadPath := g.Cfg().MustGet(ctx, "upload.path").String()
 				tempPath := g.Cfg().MustGet(ctx, "upload.tempPath").String()
 				if strings.HasPrefix(logoInfo.Src, tempPath) {
@@ -593,11 +593,19 @@ func (s *sTeam[
 				Field: s.dao.Team.Columns().UnionMainId,
 				Where: "=",
 				Value: unionMainId,
-			},
-			base_model.FilterInfo{
-				Field: s.dao.Team.Columns().Id,
-				Where: "in",
-				Value: teamIds,
+				Children: append(make([]base_model.FilterInfo, 0),
+					base_model.FilterInfo{
+						Field: s.dao.Team.Columns().CreatedBy,
+						Where: "=",
+						Value: employeeId,
+					},
+					base_model.FilterInfo{
+						Field:     s.dao.Team.Columns().Id,
+						Where:     "in",
+						Value:     teamIds,
+						IsOrWhere: true,
+					},
+				),
 			},
 		),
 	})
@@ -712,19 +720,17 @@ func (s *sTeam[
 		}
 	}
 
-	err = s.dao.TeamMember.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		for _, employeeId := range newTeamMemberIds {
-			affected, err := daoctl.InsertWithError(
-				s.dao.TeamMember.Ctx(ctx).Data(
-					co_do.CompanyTeamMember{
-						Id:          idgen.NextId(),
-						TeamId:      team.Data().Id,
-						EmployeeId:  employeeId,
-						UnionMainId: sessionUser.UnionMainId,
-						JoinAt:      gtime.Now(),
-					},
-				),
-			)
+			data := co_do.CompanyTeamMember{
+				Id:          idgen.NextId(),
+				TeamId:      team.Data().Id,
+				EmployeeId:  employeeId,
+				UnionMainId: sessionUser.UnionMainId,
+				JoinAt:      gtime.Now(),
+			}
+
+			affected, err := daoctl.InsertWithError(s.dao.TeamMember.Ctx(ctx), data)
 			if affected == 0 || err != nil {
 				return err
 			}

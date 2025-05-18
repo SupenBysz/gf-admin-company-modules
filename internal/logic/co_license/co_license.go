@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
+
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_do"
@@ -26,7 +28,6 @@ import (
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
 	"github.com/kysion/base-library/utility/masker"
-	"time"
 )
 
 type sLicense struct {
@@ -46,10 +47,10 @@ func NewLicense() co_service.ILicense {
 	}
 
 	// 订阅审核Hook,审核通过添加主体资质主体信息
-	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approve, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.AuditChange)
+	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approved, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.AuditChange)
 
 	// 订阅审核数据获取Hook, 将审核数据渲染成主体资质然后进行输出
-	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approve, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.GetAuditData)
+	sys_service.SysAudit().InstallHook(sys_enum.Audit.Action.Approved, sys_enum.Audit.Category.CompanyLicenseAudit.Code(), result.GetAuditData)
 
 	return result
 }
@@ -156,7 +157,7 @@ func (s *sLicense) AuditChange(ctx context.Context, auditEvent sys_enum.AuditEve
 	//  处理审核
 	if (auditEvent.Code() & sys_enum.Audit.Event.ExecAudit.Code()) == sys_enum.Audit.Event.ExecAudit.Code() {
 		// 审核通过
-		if (info.State & sys_enum.Audit.Action.Approve.Code()) == sys_enum.Audit.Action.Approve.Code() {
+		if (info.State & sys_enum.Audit.Action.Approved.Code()) == sys_enum.Audit.Action.Approved.Code() {
 			// 创建主体资质
 			//license := co_model.License{}
 			license := co_model.AuditLicense{}

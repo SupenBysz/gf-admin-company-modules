@@ -24,4 +24,5 @@ type CompanyTeam struct {
 	Slogan            string      `json:"slogan"            orm:"slogan"              description:"口号"`
 	Title             string      `json:"title"             orm:"title"               description:"称号"`
 	LogoId            int64       `json:"logoId"            orm:"logo_id"             description:"LOGO"`
+	CreatedBy         int64       `json:"createdBy"         orm:"created_by"          description:"创建者"`
 }
