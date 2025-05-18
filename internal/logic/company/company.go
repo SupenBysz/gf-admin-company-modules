@@ -823,5 +823,10 @@ func (s *sCompany[
 
 	data.Data().ContactMobile = masker.MaskString(data.Data().ContactMobile, masker.MaskPhone)
 
+	ref := reflect.ValueOf(data).Elem()
+
+	if ref.FieldByName("ContactMobile").CanSet() {
+		ref.FieldByName("ContactMobile").SetString(data.Data().ContactMobile)
+	}
 	return data
 }

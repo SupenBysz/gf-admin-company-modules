@@ -27,54 +27,56 @@ type CompanyEmployeeDao struct {
 
 // CompanyEmployeeColumns defines and stores column names for table co_company_employee.
 type CompanyEmployeeColumns struct {
-	Id            string // ID，保持与USERID一致
-	No            string // 工号
-	Avatar        string // 头像
-	Name          string // 姓名
-	Mobile        string // 手机号
-	UnionMainId   string // 所属主体
-	State         string // 状态： -1已离职，0待确认，1已入职
-	LastActiveIp  string // 最后活跃IP
-	HiredAt       string // 入职时间
-	CreatedBy     string //
-	CreatedAt     string //
-	UpdatedBy     string //
-	UpdatedAt     string //
-	DeletedBy     string //
-	DeletedAt     string //
-	Sex           string // 性别：0未知、1男、2女
-	Remark        string // 备注
-	CountryCode   string // 所属国家编码
-	Region        string // 所属地区
-	Email         string // 业务邮箱
-	WeixinAccount string // 微信号
-	Address       string // 地址
+	Id             string // ID，保持与USERID一致
+	No             string // 工号
+	Avatar         string // 头像
+	Name           string // 姓名
+	Mobile         string // 手机号
+	UnionMainId    string // 所属主体
+	State          string // 状态： -1已离职，0待确认，1已入职
+	LastActiveIp   string // 最后活跃IP
+	HiredAt        string // 入职时间
+	CreatedBy      string //
+	CreatedAt      string //
+	UpdatedBy      string //
+	UpdatedAt      string //
+	DeletedBy      string //
+	DeletedAt      string //
+	Sex            string // 性别：0未知、1男、2女
+	Remark         string // 备注
+	CountryCode    string // 所属国家编码
+	Region         string // 所属地区
+	Email          string // 业务邮箱
+	WeixinAccount  string // 微信号
+	Address        string // 地址
+	WorkCardAvatar string // 工牌头像
 }
 
 // companyEmployeeColumns holds the columns for table co_company_employee.
 var companyEmployeeColumns = CompanyEmployeeColumns{
-	Id:            "id",
-	No:            "no",
-	Avatar:        "avatar",
-	Name:          "name",
-	Mobile:        "mobile",
-	UnionMainId:   "union_main_id",
-	State:         "state",
-	LastActiveIp:  "last_active_ip",
-	HiredAt:       "hired_at",
-	CreatedBy:     "created_by",
-	CreatedAt:     "created_at",
-	UpdatedBy:     "updated_by",
-	UpdatedAt:     "updated_at",
-	DeletedBy:     "deleted_by",
-	DeletedAt:     "deleted_at",
-	Sex:           "sex",
-	Remark:        "remark",
-	CountryCode:   "country_code",
-	Region:        "region",
-	Email:         "email",
-	WeixinAccount: "weixin_account",
-	Address:       "address",
+	Id:             "id",
+	No:             "no",
+	Avatar:         "avatar",
+	Name:           "name",
+	Mobile:         "mobile",
+	UnionMainId:    "union_main_id",
+	State:          "state",
+	LastActiveIp:   "last_active_ip",
+	HiredAt:        "hired_at",
+	CreatedBy:      "created_by",
+	CreatedAt:      "created_at",
+	UpdatedBy:      "updated_by",
+	UpdatedAt:      "updated_at",
+	DeletedBy:      "deleted_by",
+	DeletedAt:      "deleted_at",
+	Sex:            "sex",
+	Remark:         "remark",
+	CountryCode:    "country_code",
+	Region:         "region",
+	Email:          "email",
+	WeixinAccount:  "weixin_account",
+	Address:        "address",
+	WorkCardAvatar: "work_card_avatar",
 }
 
 // NewCompanyEmployeeDao creates and returns a new DAO object for table data access.

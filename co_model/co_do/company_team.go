@@ -26,4 +26,5 @@ type CompanyTeam struct {
 	Slogan            interface{} // 口号
 	Title             interface{} // 称号
 	LogoId            interface{} // LOGO
+	CreatedBy         interface{} // 创建者
 }
