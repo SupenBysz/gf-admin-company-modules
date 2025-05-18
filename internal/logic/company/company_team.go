@@ -412,8 +412,13 @@ func (s *sTeam[
 		UnionMainId: sessionUser.UnionMainId,
 		JoinAt:      gtime.Now(),
 	}
-	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
+	session := sys_service.SysSession().Get(ctx)
+	if session != nil  && info.Id == 0 {
+		data.CreatedBy = session.JwtClaimsUser.Id
+	}
+
+	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		// 重载Do模型
 		doData, err := info.OverrideDo.DoFactory(data)
 		if err != nil {
