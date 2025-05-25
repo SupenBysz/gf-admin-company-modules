@@ -38,7 +38,7 @@ func (s *sFdRechargeView) QueryAccountRecharge(ctx context.Context, search *base
 		isExport = gconv.Bool(ctx.Value("isExport"))
 	}
 
-	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx), search, isExport)
+	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx).OrderDesc(co_dao.FdRechargeView.Columns().PaymentAt), search, isExport)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &co_model.FdRechargeViewListRes{}, nil
