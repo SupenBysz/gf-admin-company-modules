@@ -29,15 +29,15 @@ import (
 )
 
 type sFdRecharge[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	TTFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	TR co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+TTFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -55,15 +55,15 @@ type sFdRecharge[
 }
 
 func NewFdRecharge[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	TFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	TR co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+TFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+TR co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -214,7 +214,7 @@ func (s *sFdRecharge[
 		isExport = gconv.Bool(ctx.Value("isExport"))
 	}
 
-	result, err := daoctl.Query[TR](s.dao.FdRecharge.Ctx(ctx), search, isExport)
+	result, err := daoctl.Query[TR](s.dao.FdRecharge.Ctx(ctx).OrderDesc(s.dao.FdRecharge.Columns().PaymentAt), search, isExport)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &base_model.CollectRes[TR]{}, nil
