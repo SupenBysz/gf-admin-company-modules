@@ -422,7 +422,7 @@ func (s *sEmployee[
 	}
 
 	// 如果data为nil，则直接返回，避免空指针异常
-	if data == nil {
+	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
 	}
 
