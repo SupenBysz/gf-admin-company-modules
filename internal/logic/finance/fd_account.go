@@ -354,8 +354,43 @@ func (s *sFdAccount[
 
 	data, err := daoctl.Query[TR](s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{UnionUserId: userId}), nil, false)
 
-	if err != nil || len(data.Records) <= 0 {
+	if err != nil || (len(data.Records) <= 0 && co_consts.Global.AutoCreateUserFinanceAccount == false) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
+	}
+
+	if co_consts.Global.AutoCreateUserFinanceAccount == true && len(data.Records) <= 0 {
+		employee, err := s.modules.Employee().GetEmployeeById(ctx, userId)
+
+		if err != nil {
+			return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
+		}
+
+		newData, err := s.CreateAccount(ctx, co_model.FdAccountRegister{
+			Name:               "System",
+			UnionUserId:        userId,
+			UnionMainId:        employee.Data().UnionMainId,
+			CurrencyCode:       co_consts.Global.DefaultCurrency,
+			PrecisionOfBalance: 100,
+			SceneType:          0,
+			AccountType:        1,
+			AccountNumber:      "",
+			LimitState:         0,
+			AllowExceed:        1,
+		}, userId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		newData = makeMore(ctx, s.dao.FdAccountDetail, newData)
+
+		data.Records = append(data.Records, newData)
+		data.Total = 1
+		data.PageNum = 1
+		data.PageTotal = 1
+		data.PageSize = 20
+
+		return data, nil
 	}
 
 	dataList := make([]TR, 0)

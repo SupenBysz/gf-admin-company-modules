@@ -15,6 +15,9 @@ type global struct {
 
 	// 是否允许主体下的员工同名
 	EmployeeNameCanRepeated bool
+
+	// 是否自动创建员工财务账户
+	AutoCreateUserFinanceAccount bool
 }
 
 var (
@@ -30,5 +33,5 @@ func init() {
 	Global.DefaultCurrency = defaultCurrency.String()
 	Global.GroupNameCanRepeated = g.Cfg().MustGet(context.Background(), "service.groupNameCanRepeated", false).Bool()
 	Global.EmployeeNameCanRepeated = g.Cfg().MustGet(context.Background(), "service.employeeNameCanRepeated", true).Bool()
-
+	Global.AutoCreateUserFinanceAccount = g.Cfg().MustGet(context.Background(), "service.autoCreateUserFinanceAccount", true).Bool()
 }
