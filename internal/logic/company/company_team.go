@@ -33,15 +33,15 @@ import (
 )
 
 type sTeam[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TR co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TR co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 
@@ -63,15 +63,15 @@ type sTeam[
 }
 
 func NewTeam[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	TR co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+TR co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -414,7 +414,7 @@ func (s *sTeam[
 	}
 
 	session := sys_service.SysSession().Get(ctx)
-	if session != nil  && info.Id == 0 {
+	if session != nil && info.Id == 0 {
 		data.CreatedBy = session.JwtClaimsUser.Id
 	}
 
@@ -776,12 +776,12 @@ func (s *sTeam[
 					Value:     employeeId,
 					IsOrWhere: true,
 				},
-				//base_model.FilterInfo{
-				//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
-				//	Where:     "=",
-				//	Value:     employeeId,
-				//	IsOrWhere: true,
-				//}
+					//base_model.FilterInfo{
+					//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
+					//	Where:     "=",
+					//	Value:     employeeId,
+					//	IsOrWhere: true,
+					//}
 				),
 			})
 
@@ -1088,10 +1088,19 @@ func (s *sTeam[
 		"teamId": teamId, // 团队邀约码信息存储团队ID即可
 	})
 	data := &sys_model.Invite{
-		UserId: userId,
-		Value:  encodeStr,
-		State:  1, //  默认正常
-		Type:   sys_enum.Invite.Type.JoinTeam.Code(),
+		UserId:     userId,
+		Value:      encodeStr,
+		State:      1, //  默认正常
+		Type:       sys_enum.Invite.Type.JoinTeam.Code() | sys_enum.Invite.Type.Register.Code(),
+		Identifier: gconv.String(userId) + "::" + gconv.String(teamId),
+	}
+
+	inviteInfo, _ := sys_service.SysInvite().GetInviteByIdentifier(ctx, data.Identifier)
+	if inviteInfo != nil {
+		res := co_model.TeamInviteCodeRes{}
+		res.InviteRes = inviteInfo
+		res.Team = team.Data().CompanyTeam
+		return &res, nil
 	}
 
 	invite, err := sys_service.SysInvite().CreateInvite(ctx, data)
@@ -1119,13 +1128,62 @@ func (s *sTeam[
 	// 1.解析邀约码，获取团队信息
 	//id := invite_id.CodeToInviteId(inviteCode)
 	inviteInfo, err := sys_rules.CheckInviteCode(ctx, inviteCode)
+
+	if err != nil {
+		return false, err
+	}
+
+	inviteInfo, err = sys_service.SysInvite().GetInviteById(ctx, inviteInfo.Id)
+
 	info := g.Map{
-		"teamId": 0,
+		"teamId": int64(0),
 	}
 	gjson.DecodeTo(inviteInfo.Value, &info)
 	teamId := gconv.Int64(info["teamId"])
 
 	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		user, err := sys_service.SysUser().GetSysUserById(ctx, userId)
+
+		if err != nil {
+			return err
+		}
+
+		if user != nil {
+			team, err := s.modules.Team().GetTeamById(ctx, teamId)
+
+			if err != nil {
+				return err
+			}
+
+			employee, _ := s.modules.Employee().GetEmployeeById(ctx, userId)
+
+			if reflect.ValueOf(employee).IsNil() && !reflect.ValueOf(team).IsNil() {
+				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+					Id:             user.Id,
+					No:             "",
+					Avatar:         "",
+					WorkCardAvatar: "",
+					Name:           user.Username,
+					Mobile:         user.Mobile,
+					State:          1,
+					UnionMainId:    team.Data().UnionMainId,
+					HiredAt:        gtime.Now(),
+					Sex:            0,
+					Remark:         "",
+					CountryCode:    "",
+					Region:         "",
+					CreatedBy:      userId,
+					Email:          user.Email,
+				}, user)
+
+
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+
 		// 1.获取团队信息
 		team, err := s.modules.Team().GetTeamById(ctx, teamId)
 		if err != nil {
