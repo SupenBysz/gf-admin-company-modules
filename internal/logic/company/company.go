@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"reflect"
 	"strings"
 
@@ -34,15 +36,15 @@ import (
 )
 
 type sCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -62,15 +64,15 @@ type sCompany[
 }
 
 func NewCompany[
-	TR co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+TR co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	TR,
 	ITEmployeeRes,
@@ -121,8 +123,11 @@ func (s *sCompany[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
-]) SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, registerInfo *sys_model.SysUser) (bool, error) {
+]) SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, info *sys_entity.SysInvitePerson, registerInfo *sys_model.SysUser) (bool, error) {
 	// 如下的逻辑：符合邀约的情况，为xx主体邀请新用户，下列逻辑只是将新用户设置为该主体的员工
+	if state.Code() != sys_enum.Invite.Type.Register.Code() {
+		return false, nil
+	}
 
 	// 找到userId对应的主体
 	user, err := sys_service.SysUser().GetSysUserById(ctx, invite.UserId)
@@ -131,8 +136,8 @@ func (s *sCompany[
 	}
 
 	employee, err := s.modules.Employee().GetEmployeeById(ctx, user.Id)
-	if err != nil || reflect.ValueOf(employee).IsNil() {
-		return true, nil
+	if err != nil || reflect.ValueOf(employee).IsNil() || employee.Data() == nil {
+		return false, nil
 	}
 
 	// 将新用户设置至主体中  TODO 需要封装
@@ -148,13 +153,32 @@ func (s *sCompany[
 		CreatedAt:   gtime.Now(),
 	}
 
-	affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).OmitNilData().Data(data))
+	affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).OmitNilData().Data(data))
 	if affected == 0 || err != nil {
-		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
 	}
 
-	// 是否进行邀约码处理 （设置剩余次数，设置状态） 不处理
-	return true, nil
+	{
+		SubInvitePersonData := sys_model.InvitePersonInfo{
+			FormUserId: invite.UserId,
+			ByUserId:   registerInfo.Id,
+			InviteCode: invite.Code,
+			InviteId:   invite.Id,
+		}
+
+		{
+			// 邀请人
+			InvitePerson, _ := sys_service.SysInvite().GetInvitePersonByUserId(ctx, invite.UserId)
+			if InvitePerson != nil {
+				SubInvitePersonData.CompanyIdentifierPrefix = InvitePerson.CompanyIdentifierPrefix
+			}
+		}
+
+		// 创建邀约级别关系
+		person, err := sys_service.SysInvite().CreateInvitePerson(ctx, &SubInvitePersonData)
+
+		return person != nil, err
+	}
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
@@ -190,7 +214,7 @@ func (s *sCompany[
 ]) GetCompanyById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 	if id == 0 {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
+		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
 	}
 	m := s.dao.Company.Ctx(ctx)
 
@@ -347,7 +371,7 @@ func (s *sCompany[
 	ITFdRechargeRes,
 ]) UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error) {
 	if info.Id <= 0 {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
+		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 	return s.saveCompany(ctx, info, nil)
 }
@@ -364,7 +388,7 @@ func (s *sCompany[
 	ITFdRechargeRes,
 ]) SetCompanyState(ctx context.Context, companyId int64, companyState co_enum.CompanyState) (bool, error) {
 	if companyId <= 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
+		return false, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_Data_NotFound}"), s.dao.Company.Table())
 	}
 
 	affected, err := daoctl.UpdateWithError(s.dao.Company.Ctx(ctx).Where(s.dao.Company.Columns().Id, companyId), co_do.Company{State: companyState.Code()})
@@ -387,7 +411,7 @@ func (s *sCompany[
 	// 名称重名检测
 	if info.Name != nil {
 		if s.HasCompanyByName(ctx, *info.Name, info.Id) {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
+			return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#CompanyName} {#error_NameAlreadyExists}"), s.dao.Company.Table())
 		}
 	}
 
@@ -411,7 +435,7 @@ func (s *sCompany[
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if bindUser == nil && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.Type < s.modules.GetConfig().UserType.Code() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_insufficient_permissions"), s.dao.Company.Table())
+		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "error_insufficient_permissions"), s.dao.Company.Table())
 	}
 
 	// 启用事务
@@ -421,7 +445,7 @@ func (s *sCompany[
 			if bindUser != nil && bindUser.Type != s.modules.GetConfig().UserType.Code() {
 				ok, err := sys_service.SysUser().SetUserType(ctx, bindUser.Id, s.modules.GetConfig().UserType)
 				if !ok || err != nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_save_failed_cannot_update_related_user"), s.dao.Company.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_save_failed_cannot_update_related_user"), s.dao.Company.Table())
 				}
 			}
 
@@ -612,6 +636,65 @@ func (s *sCompany[
 	return s.MakeMore(ctx, response), nil
 }
 
+// SetCommissionRate 设置佣金比例
+func (s *sCompany[
+	TR,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) SetCommissionRate(ctx context.Context, companyId int64, commissionRate int, actionUserId int64) (bool, error) {
+	response, err := s.GetCompanyById(ctx, companyId)
+	if err != nil {
+		return false, err
+	}
+
+	if response.Data().UserId == actionUserId {
+		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	}
+
+	actionUser, err := sys_service.SysUser().GetSysUserById(ctx, actionUserId)
+	if err != nil {
+		return false, err
+	}
+
+	// 限制同级用户或单位进行佣金的配置
+	if actionUser.Type <= s.modules.GetConfig().UserType.Code() {
+		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	}
+
+	canMaxCommissionRate := 100
+
+	// 佣金模式如果相对成交金额则不超过上级佣金百分比，否则将相对于上级佣金收益的百分比
+	if co_consts.Global.CommissionModel.Code() == co_enum.Common.CommissionMode.TradeAmount.Code() && response.Data().ParentId > 0 {
+		parentCompany, err := s.GetCompanyById(ctx, response.Data().ParentId)
+		if err != nil {
+			return false, err
+		}
+		if parentCompany.Data().ParentId > 0 {
+			canMaxCommissionRate = parentCompany.Data().CommissionRate
+		}
+	}
+
+	if commissionRate < 0 || commissionRate > canMaxCommissionRate {
+		return false, errors.New("error_commission_rate_must_be_between_0_and_" + gconv.String(canMaxCommissionRate))
+	}
+
+	affected, err := daoctl.UpdateWithError(s.modules.Dao().Company.Ctx(ctx).Where(s.modules.Dao().Company.Columns().Id, companyId).Data(co_do.Company{
+		CommissionRate: commissionRate,
+	}))
+
+	if err != nil && affected == 0 {
+		return false, err
+	}
+	
+	return affected == 1, err
+}
+
 // SetCompanyAdminUser 设置主体的管理员用户
 func (s *sCompany[
 	TR,
@@ -670,9 +753,9 @@ func (s *sCompany[
 			CreatedBy:   0,   // 系统创建：0
 			CreatedAt:   gtime.Now(),
 		}
-		affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).OmitNilData().Data(data))
+		affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).OmitNilData().Data(data))
 		if affected == 0 || err != nil {
-			return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+			return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
 		}
 	}
 

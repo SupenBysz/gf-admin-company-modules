@@ -35,6 +35,10 @@ service:
           enableRegisterInviteCode: false
           # 是否开启发送验证码，默认false。正式环境建议配置好相关参数后，这里需要设置为 true 才能真正发送验证码
           enableSendCaptcha: false
+          # 是否允许跨级创建子公司单位
+          allowSkipLevelCreateCompany: true
+          # 佣金模式，1：相对上级佣金百分比，2：相对交易金额百分比。注意：一旦选定模式后，不能修改
+          commissionModel: 1
     # 超级管理员主体ID
     superAdminMainId: 1
     # 需要存储到数据库中的日志，支持：all,error,warn,info

@@ -1,9 +1,11 @@
 package finance
 
 type finance struct {
-	InOutType  inOutType
-	TradeType  tradeType
-	TradeState tradeState
+	InOutType           inOutType
+	TradeType           tradeType
+	TradeState          tradeState
+	PaymentState        paymentState
+	SpecialPaymentState specialPaymentState
 
 	AccountType accountType
 	SceneType   sceneType
@@ -15,12 +17,14 @@ type finance struct {
 }
 
 var Finance = finance{
-	InOutType:      InOutType,
-	TradeType:      TradeType,
-	TradeState:     TradeState,
-	AccountType:    AccountType,
-	SceneType:      SceneType,
-	AllowExceed:    AllowExceed,
-	RechargeState:  RechargeState,
-	RechargeMethod: RechargeMethod,
+	InOutType:           InOutType,
+	TradeType:           TradeType,
+	TradeState:          TradeState,
+	AccountType:         AccountType,
+	PaymentState:        PaymentState,
+	SpecialPaymentState: SpecialPaymentState,
+	SceneType:           SceneType,
+	AllowExceed:         AllowExceed,
+	RechargeState:       RechargeState,
+	RechargeMethod:      RechargeMethod,
 }

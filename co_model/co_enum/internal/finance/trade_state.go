@@ -18,15 +18,15 @@ type tradeState struct {
 }
 
 var TradeState = tradeState{
-	WaitPay:        enum.New[TradeStateEnum](1, "待支付"),
-	Paying:         enum.New[TradeStateEnum](2, "支付中"),
-	Paid:           enum.New[TradeStateEnum](4, "已支付"),
-	Cancel:         enum.New[TradeStateEnum](8, "取消支付"),
-	Completed:      enum.New[TradeStateEnum](16, "交易完成"),
-	Refunding:      enum.New[TradeStateEnum](32, "退款中"),
-	Refunded:       enum.New[TradeStateEnum](64, "已退款"),
-	PaymentTimeout: enum.New[TradeStateEnum](128, "支付超时"),
-	Closed:         enum.New[TradeStateEnum](256, "已关闭"),
+	WaitPay:        enum.New[TradeStateEnum](0, "待支付"),
+	Paying:         enum.New[TradeStateEnum](1, "支付中"),
+	Paid:           enum.New[TradeStateEnum](2, "已支付"),
+	Cancel:         enum.New[TradeStateEnum](4, "取消支付"),
+	Completed:      enum.New[TradeStateEnum](8, "交易完成"),
+	Refunding:      enum.New[TradeStateEnum](16, "退款中"),
+	Refunded:       enum.New[TradeStateEnum](32, "已退款"),
+	PaymentTimeout: enum.New[TradeStateEnum](64, "支付超时"),
+	Closed:         enum.New[TradeStateEnum](128, "已关闭"),
 }
 
 func (e tradeState) New(code int, description string) TradeStateEnum {

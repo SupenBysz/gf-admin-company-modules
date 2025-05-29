@@ -3,11 +3,11 @@ package company
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"reflect"
 	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/api_v1"
-	"github.com/SupenBysz/gf-admin-community/sys_consts"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
@@ -33,15 +33,15 @@ import (
 )
 
 type sTeam[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-TR co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillsRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-ITFdRechargeRes co_model.IFdRechargeRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	TR co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 
@@ -63,15 +63,15 @@ ITFdRechargeRes co_model.IFdRechargeRes,
 }
 
 func NewTeam[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-TR co_model.ITeamRes,
-ITFdAccountRes co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillsRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-ITFdRechargeRes co_model.IFdRechargeRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	TR co_model.ITeamRes,
+	ITFdAccountRes co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -160,7 +160,7 @@ func (s *sTeam[
 
 	if err != nil {
 		message := s.modules.T(ctx, "{#teamOrGroup}{#error_Data_NotFound}")
-		if err != sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			message = s.modules.T(ctx, "{#teamOrGroup}{#error_Data_Get_Failed}")
 		}
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Team.Table())
@@ -172,7 +172,7 @@ func (s *sTeam[
 
 	// 需要进行跨主体判断
 	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(response).IsNil() ||
-		err == sql.ErrNoRows || !reflect.ValueOf(data).IsNil() &&
+		errors.Is(err, sql.ErrNoRows) || !reflect.ValueOf(data).IsNil() &&
 		response.Data().UnionMainId != sessionUser.UnionMainId &&
 		!sessionUser.IsAdmin &&
 		!sessionUser.IsSuperAdmin {
@@ -274,9 +274,19 @@ func (s *sTeam[
 		isExport = gconv.Bool(ctx.Value("isExport"))
 	}
 
-	//isExport := r.GetForm("isExport", false).Bool()
-
 	data, err := daoctl.Query[TR](s.dao.Team.Ctx(ctx), search, isExport)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName}{#error_Data_Get_Failed}"), s.dao.Team.Table())
+	}
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return &base_model.CollectRes[TR]{
+			PaginationRes: base_model.PaginationRes{
+				Pagination: search.Pagination,
+			},
+		}, nil
+	}
 
 	items := make([]TR, 0)
 	for _, item := range data.Records {
@@ -308,6 +318,18 @@ func (s *sTeam[
 	}
 	data, err := daoctl.Query[*co_model.TeamMemberRes](model, search, export)
 
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamName} {#error_Data_NotFound}"), s.dao.TeamMember.Table())
+	}
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return &base_model.CollectRes[*co_model.TeamMemberRes]{
+			PaginationRes: base_model.PaginationRes{
+				Pagination: search.Pagination,
+			},
+		}, nil
+	}
+
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	var UnionMain co_model.ICompanyRes
@@ -329,7 +351,7 @@ func (s *sTeam[
 				item.InviteUser = v.Data()
 			}
 		}
-		if item.UnionMainId == sessionUser.UnionMainId {
+		if item.UnionMainId == sessionUser.UnionMainId && UnionMain != nil {
 			item.UnionMain = UnionMain.Data()
 		} else if item.UnionMainId > 0 {
 			UnionMain, _ = s.modules.Company().GetCompanyById(ctx, item.UnionMainId)
@@ -382,7 +404,7 @@ func (s *sTeam[
 		}
 
 		data, err := s.QueryTeamListByEmployee(ctx, employee.Data().Id, employee.Data().UnionMainId)
-		if err != nil && err != sql.ErrNoRows {
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamOwnerEmployee}{#error_Data_NotFound}"), s.dao.Team.Table())
 		}
 
@@ -465,7 +487,7 @@ func (s *sTeam[
 				}
 			}
 
-			info.OverrideDo.DoSaved(data, doData)
+			return info.OverrideDo.DoSaved(data, doData)
 		}
 
 		return nil
@@ -578,12 +600,12 @@ func (s *sTeam[
 			Where(co_do.CompanyTeamMember{EmployeeId: employeeId, UnionMainId: unionMainId}),
 	)
 
-	if err != nil {
+	if data == nil || (err != nil && !errors.Is(err, sql.ErrNoRows)) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_NotFound"), s.dao.Team.Table())
 	}
 
 	// 跨主体判断
-	if err == sql.ErrNoRows || data != nil && unionMainId != sessionUser.UnionMainId {
+	if errors.Is(err, sql.ErrNoRows) && unionMainId != sessionUser.UnionMainId {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#TeamMember} {#error_Data_NotFound}"), s.dao.TeamMember.Table())
 	}
 
@@ -643,6 +665,10 @@ func (s *sTeam[
 				UnionMainId: sessionUser.UnionMainId,
 			}),
 	)
+
+	if err != nil {
+		return false, err
+	}
 
 	// 已存在的团队成员
 	existIds := make([]int64, 0)
@@ -711,8 +737,8 @@ func (s *sTeam[
 			PageSize: 1000,
 		},
 	})
-	if res.Total < gconv.Int64(len(newTeamMemberIds)) {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NewTeam_NotFoundMembers"), s.dao.Team.Table())
+	if err != nil || res.Total < gconv.Int64(len(newTeamMemberIds)) {
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_NewTeam_NotFoundMembers"), s.dao.Team.Table())
 	}
 
 	// 团队队员不能是其他团队的队员
@@ -776,12 +802,12 @@ func (s *sTeam[
 					Value:     employeeId,
 					IsOrWhere: true,
 				},
-					//base_model.FilterInfo{
-					//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
-					//	Where:     "=",
-					//	Value:     employeeId,
-					//	IsOrWhere: true,
-					//}
+				//base_model.FilterInfo{
+				//	Field:     s.dao.Team.Columns().OwnerEmployeeId,
+				//	Where:     "=",
+				//	Value:     employeeId,
+				//	IsOrWhere: true,
+				//}
 				),
 			})
 
@@ -811,7 +837,7 @@ func (s *sTeam[
 		return false, err
 	}
 
-	return err == nil, err
+	return true, err
 }
 
 // SetTeamOwner 设置团队或小组的负责人
@@ -921,7 +947,7 @@ func (s *sTeam[
 	{
 		// 查询员工所在的所有团队信息
 		data, err := s.QueryTeamListByEmployee(ctx, employee.Data().Id, employee.Data().UnionMainId)
-		if err != nil && err != sql.ErrNoRows {
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#TeamCaptainEmployee}{#error_Data_NotFound}"), s.dao.Team.Table())
 		}
 
@@ -1035,6 +1061,10 @@ func (s *sTeam[
 		}),
 	)
 
+	if err != nil {
+		return nil, err
+	}
+
 	ids := make([]int64, 0)
 	for _, item := range *items {
 		ids = append(ids, item.EmployeeId)
@@ -1053,6 +1083,11 @@ func (s *sTeam[
 			},
 		),
 	})
+
+	if err != nil {
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+	}
+
 	//kconv.Struct(ret, &base_model.CollectRes[co_model.IEmployeeRes]{})
 
 	result := base_model.CollectRes[co_model.IEmployeeRes]{}
@@ -1138,7 +1173,13 @@ func (s *sTeam[
 	info := g.Map{
 		"teamId": int64(0),
 	}
-	gjson.DecodeTo(inviteInfo.Value, &info)
+	if inviteInfo != nil {
+		err := gjson.DecodeTo(inviteInfo.Value, &info)
+
+		if err != nil {
+			return false, err
+		}
+	}
 	teamId := gconv.Int64(info["teamId"])
 
 	err = s.dao.Team.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
@@ -1155,10 +1196,8 @@ func (s *sTeam[
 				return err
 			}
 
-			employee, _ := s.modules.Employee().GetEmployeeById(ctx, userId)
-
-			if reflect.ValueOf(employee).IsNil() && !reflect.ValueOf(team).IsNil() {
-				employee, err = s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
+			if !reflect.ValueOf(team).IsNil() {
+				_, err := s.modules.Employee().CreateEmployee(ctx, &co_model.Employee{
 					Id:             user.Id,
 					No:             "",
 					Avatar:         "",
@@ -1172,17 +1211,15 @@ func (s *sTeam[
 					Remark:         "",
 					CountryCode:    "",
 					Region:         "",
-					CreatedBy:      userId,
+					CreatedBy:      inviteInfo.UserId,
 					Email:          user.Email,
 				}, user)
-
 
 				if err != nil {
 					return err
 				}
 			}
 		}
-
 
 		// 1.获取团队信息
 		team, err := s.modules.Team().GetTeamById(ctx, teamId)
@@ -1205,7 +1242,7 @@ func (s *sTeam[
 				// 判断订阅的Hook类型是否一致
 				if key.Code()&inviteInfo.Type == inviteInfo.Type {
 					// 业务类型一致则调用注入的Hook函数
-					g.Try(ctx, func(ctx context.Context) {
+					_ = g.Try(ctx, func(ctx context.Context) {
 						needToSettleInvite, err = value(ctx, sys_enum.Invite.Type.Register, inviteInfo, team)
 						if err != nil {
 							return
@@ -1217,12 +1254,10 @@ func (s *sTeam[
 
 		// 业务层没有处理邀约
 		if needToSettleInvite {
-			if sys_consts.Global.InviteCodeMaxActivateNumber != 0 { // 非无上限
-				// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
-				_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false)
-				if err != nil {
-					return err
-				}
+			// 修改邀约次数（里面包含了判断邀约次数从而修改邀约状态的逻辑）
+			_, err = sys_service.SysInvite().SetInviteNumber(ctx, inviteInfo.Id, 1, false, false)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -1271,8 +1306,8 @@ func (s *sTeam[
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().OwnerEmployeeId)
 				if user != nil && data.Data().Owner != nil {
-					gconv.Struct(user.SysUser, &data.Data().Owner.User)
-					gconv.Struct(user.Detail, &data.Data().Owner.Detail)
+					_ = gconv.Struct(user.SysUser, &data.Data().Owner.User)
+					_ = gconv.Struct(user.Detail, &data.Data().Owner.Detail)
 				}
 
 				return employee
@@ -1302,8 +1337,8 @@ func (s *sTeam[
 
 				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CaptainEmployeeId)
 				if user != nil && data.Data().Captain != nil {
-					gconv.Struct(user.SysUser, &data.Data().Captain.User)
-					gconv.Struct(user.Detail, &data.Data().Captain.Detail)
+					_ = gconv.Struct(user.SysUser, &data.Data().Captain.User)
+					_ = gconv.Struct(user.Detail, &data.Data().Captain.Detail)
 				}
 
 				return employee

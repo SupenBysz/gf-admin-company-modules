@@ -2,6 +2,7 @@ package co_module
 
 import (
 	"context"
+	"github.com/kysion/base-library/utility/base_funs"
 
 	"github.com/gogf/gf/v2/os/gfile"
 
@@ -26,6 +27,19 @@ type Modules[
 	TFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
+	co_interface.IModuleBase
+	co_interface.IModules[
+		co_model.ICompanyRes,
+		co_model.IEmployeeRes,
+		co_model.ITeamRes,
+		co_model.IFdAccountRes,
+		co_model.IFdAccountBillsRes,
+		co_model.IFdBankCardRes,
+		co_model.IFdInvoiceRes,
+		co_model.IFdInvoiceDetailRes,
+		co_model.IFdRechargeRes,
+	]
+
 	co_interface.IConfig
 	conf          *co_model.Config
 	company       co_interface.ICompany[TCompanyRes]
@@ -268,6 +282,45 @@ func (m *Modules[
 	return m.xDao
 }
 
+var modules []*Modules[
+	co_model.ICompanyRes,
+	co_model.IEmployeeRes,
+	co_model.ITeamRes,
+	co_model.IFdAccountRes,
+	co_model.IFdAccountBillsRes,
+	co_model.IFdBankCardRes,
+	co_model.IFdInvoiceRes,
+	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes,
+]
+
+func GetModules(predicate func(conf co_model.Config) bool) *Modules[
+	co_model.ICompanyRes,
+	co_model.IEmployeeRes,
+	co_model.ITeamRes,
+	co_model.IFdAccountRes,
+	co_model.IFdAccountBillsRes,
+	co_model.IFdBankCardRes,
+	co_model.IFdInvoiceRes,
+	co_model.IFdInvoiceDetailRes,
+	co_model.IFdRechargeRes] {
+	_, oldModule, _ := base_funs.FindInSlice(modules, func(item *Modules[
+		co_model.ICompanyRes,
+		co_model.IEmployeeRes,
+		co_model.ITeamRes,
+		co_model.IFdAccountRes,
+		co_model.IFdAccountBillsRes,
+		co_model.IFdBankCardRes,
+		co_model.IFdInvoiceRes,
+		co_model.IFdInvoiceDetailRes,
+		co_model.IFdRechargeRes,
+	]) bool {
+		return predicate(*item.GetConfig())
+	})
+
+	return oldModule
+}
+
 func NewModules[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
@@ -328,6 +381,43 @@ func NewModules[
 	// 权限树追加权限
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)
 	co_consts.FinancePermissionTree = append(co_consts.FinancePermissionTree, boot.InitFinancePermission(response)...)
+
+	{
+		//_, oldModule, _ := base_funs.FindInSlice(modules, func(item *Modules[
+		//	co_model.ICompanyRes,
+		//	co_model.IEmployeeRes,
+		//	co_model.ITeamRes,
+		//	co_model.IFdAccountRes,
+		//	co_model.IFdAccountBillsRes,
+		//	co_model.IFdBankCardRes,
+		//	co_model.IFdInvoiceRes,
+		//	co_model.IFdInvoiceDetailRes,
+		//	co_model.IFdRechargeRes,
+		//]) bool {
+		//	return item.conf.Identifier != module.conf.Identifier
+		//})
+
+		//if oldModule == nil {
+		//
+		//	var iModule interface{} = module
+		//
+		//	if module.IModules == nil {
+		//		module.IModules = iModule.(*Modules[
+		//			co_model.ICompanyRes,
+		//			co_model.IEmployeeRes,
+		//			co_model.ITeamRes,
+		//			co_model.IFdAccountRes,
+		//			co_model.IFdAccountBillsRes,
+		//			co_model.IFdBankCardRes,
+		//			co_model.IFdInvoiceRes,
+		//			co_model.IFdInvoiceDetailRes,
+		//			co_model.IFdRechargeRes,
+		//		])
+		//	}
+		//
+		//	modules = append(modules, module.IModules)
+		//}
+	}
 
 	return module
 }

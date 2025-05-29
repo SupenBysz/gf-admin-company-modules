@@ -11,26 +11,27 @@ import (
 
 // Company is the golang structure of table co_company for DAO operations like Where/Data.
 type Company struct {
-	g.Meta        `orm:"table:co_company, do:true"`
-	Id            interface{} // ID
-	Name          interface{} // 名称
-	ContactName   interface{} // 商务联系人
-	ContactMobile interface{} // 商务联系电话
-	UserId        interface{} // 管理员ID
-	State         interface{} // 状态：0未启用，1正常
-	Remark        interface{} // 备注
-	CreatedBy     interface{} // 创建者
-	CreatedAt     *gtime.Time // 创建时间
-	UpdatedBy     interface{} // 更新者
-	UpdatedAt     *gtime.Time // 更新时间
-	DeletedBy     interface{} // 删除者
-	DeletedAt     *gtime.Time // 删除时间
-	ParentId      interface{} // 父级ID
-	Address       interface{} // 地址
-	LicenseId     interface{} // 主体资质id
-	LicenseState  interface{} // 主体状态,和主体资质状态保持一致
-	CountryCode   interface{} // 所属国家编码
-	Region        interface{} // 所属地区
-	LogoId        interface{} // LOGO
-	StartLevel    interface{} // 服务星级
+	g.Meta         `orm:"table:co_company, do:true"`
+	Id             interface{} // ID
+	Name           interface{} // 名称
+	ContactName    interface{} // 商务联系人
+	ContactMobile  interface{} // 商务联系电话
+	UserId         interface{} // 管理员ID
+	State          interface{} // 状态：0未启用，1正常
+	Remark         interface{} // 备注
+	CreatedBy      interface{} // 创建者
+	CreatedAt      *gtime.Time // 创建时间
+	UpdatedBy      interface{} // 更新者
+	UpdatedAt      *gtime.Time // 更新时间
+	DeletedBy      interface{} // 删除者
+	DeletedAt      *gtime.Time // 删除时间
+	ParentId       interface{} // 父级ID
+	Address        interface{} // 地址
+	LicenseId      interface{} // 主体资质id
+	LicenseState   interface{} // 主体状态,和主体资质状态保持一致
+	CountryCode    interface{} // 所属国家编码
+	Region         interface{} // 所属地区
+	LogoId         interface{} // LOGO
+	StartLevel     interface{} // 服务星级
+	CommissionRate interface{} // 佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金
 }

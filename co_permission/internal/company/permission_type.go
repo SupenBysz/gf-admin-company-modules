@@ -21,6 +21,7 @@ type permissionType[T co_interface.IConfig] struct {
 	SetLogo       Permission
 	SetState      Permission
 	SetAdminUser  Permission
+	SetCommission Permission
 	ViewLicense   Permission
 	AuditLicense  Permission
 	UpdateLicense Permission
@@ -40,6 +41,7 @@ var (
 			SetLogo:       base_permission.NewInIdentifier("SetLogo", "设置LOGO", ""),
 			SetState:      base_permission.NewInIdentifier("SetState", "设置状态", ""),
 			SetAdminUser:  base_permission.NewInIdentifier("SetAdminUser", "设置管理员", ""),
+			SetCommission: base_permission.NewInIdentifier("SetCommission", "设置佣金", "更新公司佣金百分比"),
 			ViewLicense:   base_permission.NewInIdentifier("ViewLicense", "查看认证信息", "查看公司认证信息"),
 			AuditLicense:  base_permission.NewInIdentifier("AuditLicense", "审核认证信息", "审核公司认证信息"),
 			UpdateLicense: base_permission.NewInIdentifier("UpdateLicense", "更新认证信息", "更新公司认证信息"),

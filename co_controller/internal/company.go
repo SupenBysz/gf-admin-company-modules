@@ -246,6 +246,28 @@ func (c *CompanyController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) SetCommissionRate(ctx context.Context, req *co_company_api.SetCompanyCommissionRateReq) (api_v1.BoolRes, error) {
+	permission := c.getPermission(ctx, co_permission.Company.PermissionType(c.modules).SetCommission)
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Company().SetCommissionRate(ctx, req.Id, req.CommissionRate, sessionUser.Id)
+			return ret == true, err
+		},
+		permission,
+	)
+}
+
+func (c *CompanyController[
+	TIRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) makeMore(ctx context.Context) context.Context {
 	include := &garray.StrArray{}
 	if ctx.Value("include") == nil {

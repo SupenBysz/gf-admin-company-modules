@@ -27,52 +27,54 @@ type CompanyDao struct {
 
 // CompanyColumns defines and stores column names for table co_company.
 type CompanyColumns struct {
-	Id            string // ID
-	Name          string // 名称
-	ContactName   string // 商务联系人
-	ContactMobile string // 商务联系电话
-	UserId        string // 管理员ID
-	State         string // 状态：0未启用，1正常
-	Remark        string // 备注
-	CreatedBy     string // 创建者
-	CreatedAt     string // 创建时间
-	UpdatedBy     string // 更新者
-	UpdatedAt     string // 更新时间
-	DeletedBy     string // 删除者
-	DeletedAt     string // 删除时间
-	ParentId      string // 父级ID
-	Address       string // 地址
-	LicenseId     string // 主体资质id
-	LicenseState  string // 主体状态,和主体资质状态保持一致
-	CountryCode   string // 所属国家编码
-	Region        string // 所属地区
-	LogoId        string // LOGO
-	StartLevel    string // 服务星级
+	Id             string // ID
+	Name           string // 名称
+	ContactName    string // 商务联系人
+	ContactMobile  string // 商务联系电话
+	UserId         string // 管理员ID
+	State          string // 状态：0未启用，1正常
+	Remark         string // 备注
+	CreatedBy      string // 创建者
+	CreatedAt      string // 创建时间
+	UpdatedBy      string // 更新者
+	UpdatedAt      string // 更新时间
+	DeletedBy      string // 删除者
+	DeletedAt      string // 删除时间
+	ParentId       string // 父级ID
+	Address        string // 地址
+	LicenseId      string // 主体资质id
+	LicenseState   string // 主体状态,和主体资质状态保持一致
+	CountryCode    string // 所属国家编码
+	Region         string // 所属地区
+	LogoId         string // LOGO
+	StartLevel     string // 服务星级
+	CommissionRate string // 佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金
 }
 
 // companyColumns holds the columns for table co_company.
 var companyColumns = CompanyColumns{
-	Id:            "id",
-	Name:          "name",
-	ContactName:   "contact_name",
-	ContactMobile: "contact_mobile",
-	UserId:        "user_id",
-	State:         "state",
-	Remark:        "remark",
-	CreatedBy:     "created_by",
-	CreatedAt:     "created_at",
-	UpdatedBy:     "updated_by",
-	UpdatedAt:     "updated_at",
-	DeletedBy:     "deleted_by",
-	DeletedAt:     "deleted_at",
-	ParentId:      "parent_id",
-	Address:       "address",
-	LicenseId:     "license_id",
-	LicenseState:  "license_state",
-	CountryCode:   "country_code",
-	Region:        "region",
-	LogoId:        "logo_id",
-	StartLevel:    "start_level",
+	Id:             "id",
+	Name:           "name",
+	ContactName:    "contact_name",
+	ContactMobile:  "contact_mobile",
+	UserId:         "user_id",
+	State:          "state",
+	Remark:         "remark",
+	CreatedBy:      "created_by",
+	CreatedAt:      "created_at",
+	UpdatedBy:      "updated_by",
+	UpdatedAt:      "updated_at",
+	DeletedBy:      "deleted_by",
+	DeletedAt:      "deleted_at",
+	ParentId:       "parent_id",
+	Address:        "address",
+	LicenseId:      "license_id",
+	LicenseState:   "license_state",
+	CountryCode:    "country_code",
+	Region:         "region",
+	LogoId:         "logo_id",
+	StartLevel:     "start_level",
+	CommissionRate: "commission_rate",
 }
 
 // NewCompanyDao creates and returns a new DAO object for table data access.

@@ -36,6 +36,8 @@ type (
 		SetCompanyAdminUser(ctx context.Context, sysUserId, unionMainId int64) (bool, error)
 		// FilterUnionMainId 跨主体查询条件过滤
 		FilterUnionMainId(ctx context.Context, search *base_model.SearchParams) *base_model.SearchParams
+		// SetCommissionRate 设置公司佣金比例
+		SetCommissionRate(ctx context.Context, companyId int64, commissionRate int, actionUserId int64) (bool, error)
 	}
 	IEmployee[TR co_model.IEmployeeRes] interface {
 		SetXDao(dao co_dao.XDao)
@@ -65,6 +67,8 @@ type (
 		GetEmployeeListByRoleId(ctx context.Context, roleId int64) (*base_model.CollectRes[TR], error)
 		// SetEmployeeState 设置员工状态
 		SetEmployeeState(ctx context.Context, id int64, state int) (bool, error)
+		// SetCommissionRate 设置员工提成比例
+		SetCommissionRate(ctx context.Context, userId int64, commissionRate int, actionUserId int64) (bool, error)
 	}
 	ITeam[TR co_model.ITeamRes] interface {
 		SetXDao(dao co_dao.XDao)
@@ -280,6 +284,15 @@ type IConfig interface {
 //	]) ITeam[ITTeamRes, ITEmployeeRes]
 //}
 
+type IModuleBase interface {
+	IConfig
+	My() IMy
+	SetI18n(i18n *gi18n.Manager) error
+	T(ctx context.Context, content string) string
+	Tf(ctx context.Context, format string, values ...interface{}) string
+	Dao() *co_dao.XDao
+}
+
 type IModules[
 	ITCompanyRes co_model.ICompanyRes,
 	ITEmployeeRes co_model.IEmployeeRes,
@@ -291,20 +304,14 @@ type IModules[
 	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdRechargeRes co_model.IFdRechargeRes,
 ] interface {
-	IConfig
+	IModuleBase
 	Company() ICompany[ITCompanyRes]
 	Team() ITeam[ITTeamRes]
 	Employee() IEmployee[ITEmployeeRes]
-	My() IMy
 	Account() IFdAccount[ITFdAccountRes]
 	AccountBills() IFdAccountBills[ITFdAccountBillRes]
 	BankCard() IFdBankCard[ITFdBankCardRes]
 	Invoice() IFdInvoice[ITFdInvoiceRes]
 	InvoiceDetail() IFdInvoiceDetail[ITFdInvoiceDetailRes]
 	Recharge() IFdRecharge[ITFdRechargeRes]
-
-	SetI18n(i18n *gi18n.Manager) error
-	T(ctx context.Context, content string) string
-	Tf(ctx context.Context, format string, values ...interface{}) string
-	Dao() *co_dao.XDao
 }
