@@ -317,6 +317,28 @@ func (c *EmployeeController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) SetCommissionRate(ctx context.Context, req *co_company_api.SetEmployeeCommissionRateReq) (api_v1.BoolRes, error) {
+	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetCommission)
+	return funs.CheckPermission(ctx,
+		func() (api_v1.BoolRes, error) {
+			sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+			ret, err := c.modules.Employee().SetCommissionRate(ctx, req.UserId, req.CommissionRate, sessionUser.Id)
+			return ret == true, err
+		},
+		permission,
+	)
+}
+
+func (c *EmployeeController[
+	ITCompanyRes,
+	TIRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error) {
 	// 注意：标识符匹配的话，需要找到数据库中的权限，然后传递进去
 	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).SetState)

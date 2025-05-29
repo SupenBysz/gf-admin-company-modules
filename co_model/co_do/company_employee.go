@@ -35,4 +35,5 @@ type CompanyEmployee struct {
 	WeixinAccount  interface{} // 微信号
 	Address        interface{} // 地址
 	WorkCardAvatar interface{} // 工牌头像
+	CommissionRate interface{} // 佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金，同时不能大于所属单位的佣金
 }

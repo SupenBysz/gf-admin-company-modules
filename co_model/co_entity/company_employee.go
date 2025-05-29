@@ -33,4 +33,5 @@ type CompanyEmployee struct {
 	WeixinAccount  string      `json:"weixinAccount"  orm:"weixin_account"   description:"微信号"`
 	Address        string      `json:"address"        orm:"address"          description:"地址"`
 	WorkCardAvatar string      `json:"workCardAvatar" orm:"work_card_avatar" description:"工牌头像"`
+	CommissionRate int         `json:"commissionRate" orm:"commission_rate"  description:"佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金，同时不能大于所属单位的佣金"`
 }

@@ -219,7 +219,7 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) removeRoleMember(ctx context.Context, event sys_enum.RoleMemberChange, role sys_entity.SysRole, sysUser *sys_model.SysUser) (bool, error) {
-	if s.dao.Employee == nil {
+	if s.modules.Dao().Employee == nil {
 		return false, nil
 	}
 
@@ -259,19 +259,23 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) authHookFunc(ctx context.Context, _ sys_enum.AuthActionType, user *sys_model.SysUser) error {
-	if s.dao.Employee == nil {
+	if s.modules.Dao().Employee == nil {
+		return nil
+	}
+
+	if s.modules.GetConfig().UserType.Code()&user.Type != user.Type {
 		return nil
 	}
 
 	// 通过用户ID获取员工信息
-	employeeData, err := daoctl.GetByIdWithError[TR](s.dao.Employee.Ctx(ctx), user.Id)
+	employeeData, err := daoctl.GetByIdWithError[TR](s.modules.Dao().Employee.Ctx(ctx), user.Id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		// 如果员工不存在，记录日志并返回错误
 		return sys_service.SysLogs().ErrorSimple(
 			ctx,
 			err,
 			s.modules.T(ctx, "error_user_not_exist"),
-			s.dao.Employee.Table(),
+			s.modules.Dao().Employee.Table(),
 		)
 	}
 
@@ -310,14 +314,14 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) userHookFunc(ctx context.Context, _ sys_enum.UserEvent, info sys_model.SysUser) (sys_model.SysUser, error) {
 	// 通过用户ID获取员工信息
-	data, err := daoctl.GetByIdWithError[TR](s.dao.Employee.Ctx(ctx), info.Id)
+	data, err := daoctl.GetByIdWithError[TR](s.modules.Dao().Employee.Ctx(ctx), info.Id)
 	if err != nil {
 		// 如果查询过程中出现错误，记录日志并返回错误信息
 		return info, sys_service.SysLogs().ErrorSimple(
 			ctx,
 			err,
 			s.modules.T(ctx, "error_user_not_exist"),
-			s.dao.Employee.Table(),
+			s.modules.Dao().Employee.Table(),
 		)
 	}
 
@@ -364,12 +368,12 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) jwtHookFunc(ctx context.Context, claims *sys_model.JwtCustomClaims) (*sys_model.JwtCustomClaims, error) {
-	if s.dao.Employee == nil {
+	if s.modules.Dao().Employee == nil {
 		return claims, nil
 	}
 	// 获取到当前user的主体id，由于JWT钩子函数大多是登录成功前调用，所以这里不能使用 s.GetEmployeeById 方法调用获取员工数据
 	employee, err := daoctl.GetByIdWithError[co_model.EmployeeRes](
-		s.dao.Employee.Ctx(ctx),
+		s.modules.Dao().Employee.Ctx(ctx),
 		claims.Id,
 	)
 	if employee == nil {
@@ -409,7 +413,7 @@ func (s *sEmployee[
 
 	// 从数据库中根据ID获取员工数据
 	data, err := daoctl.GetByIdWithError[TR](
-		s.dao.Employee.Ctx(ctx),
+		s.modules.Dao().Employee.Ctx(ctx),
 		id,
 	)
 
@@ -418,12 +422,12 @@ func (s *sEmployee[
 		if !errors.Is(err, sql.ErrNoRows) {
 			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
 		}
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.modules.Dao().Employee.Table())
 	}
 
 	// 如果data为nil，则直接返回，避免空指针异常
 	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 	}
 
 	response = *data
@@ -435,7 +439,7 @@ func (s *sEmployee[
 			employeeUnionMainId := response.Data().UnionMainId
 			// 检查员工所属主体是否与当前用户所属主体一致，或者是否是上级主体
 			if employeeUnionMainId != sessionUser.UnionMainId && employeeUnionMainId != sessionUser.ParentId {
-				return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+				return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 			}
 		}
 	}
@@ -457,7 +461,7 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) GetEmployeeByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
-		s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
+		s.modules.Dao().Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
 	)
 
 	if err != nil {
@@ -465,7 +469,7 @@ func (s *sEmployee[
 		if !errors.Is(err, sql.ErrNoRows) {
 			message = s.modules.T(ctx, "{#EmployeeName}{#Data}")
 		}
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, message, s.modules.Dao().Employee.Table())
 	}
 
 	return s.masker(s.makeMore(ctx, *data)), nil
@@ -487,7 +491,7 @@ func (s *sEmployee[
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
 
-	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
+	model := s.modules.Dao().Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
 		Name:        name,
 		UnionMainId: unionMainId,
 	})
@@ -500,7 +504,7 @@ func (s *sEmployee[
 			}
 		}
 		if len(ids) > 0 {
-			model = model.WhereNotIn(s.dao.Employee.Columns().Id, ids)
+			model = model.WhereNotIn(s.modules.Dao().Employee.Columns().Id, ids)
 		}
 	}
 
@@ -529,7 +533,7 @@ func (s *sEmployee[
 		unionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
 	}
 
-	model := s.dao.Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
+	model := s.modules.Dao().Employee.Ctx(ctx).Where(co_do.CompanyEmployee{
 		No:          no,
 		UnionMainId: unionMainId,
 	})
@@ -542,7 +546,7 @@ func (s *sEmployee[
 			}
 		}
 		if len(ids) > 0 {
-			model = model.WhereNotIn(s.dao.Employee.Columns().Id, ids)
+			model = model.WhereNotIn(s.modules.Dao().Employee.Columns().Id, ids)
 		}
 	}
 
@@ -565,12 +569,12 @@ func (s *sEmployee[
 	user := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
 	if user.Type != s.modules.GetConfig().UserType.Code() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NotHasServerPermission"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_NotHasServerPermission"), s.modules.Dao().Employee.Table())
 	}
 
 	result, _ := s.GetEmployeeById(ctx, user.Id)
 	if reflect.ValueOf(result).IsNil() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CheckLoginUser_Failed"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_CheckLoginUser_Failed"), s.modules.Dao().Employee.Table())
 	}
 	return result, nil
 }
@@ -590,7 +594,7 @@ func (s *sEmployee[
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	model := s.dao.Employee.Ctx(ctx)
+	model := s.modules.Dao().Employee.Ctx(ctx)
 
 	includeIds := make([]int64, 0)
 	var teamId int64
@@ -618,7 +622,7 @@ func (s *sEmployee[
 			if len(includeIds) > 0 {
 				// 过滤掉重复的id
 				includeIds = gconv.Int64s(garray.NewSortedStrArrayFrom(gconv.Strings(includeIds)).Unique().Slice())
-				model = model.WhereIn(s.dao.Employee.Columns().Id, includeIds)
+				model = model.WhereIn(s.modules.Dao().Employee.Columns().Id, includeIds)
 			}
 		}
 	}
@@ -640,7 +644,7 @@ func (s *sEmployee[
 	//result, err := daoctl.Query[TR](model.With(co_model.EmployeeRes{}.Detail, co_model.EmployeeRes{}.User), search, isExport)
 	result, err := daoctl.Query[TR](model, search, isExport)
 	if err != nil {
-		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.dao.Employee.Table())
+		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Data_Get_Failed}"), s.modules.Dao().Employee.Table())
 	}
 
 	items := make([]TR, 0)
@@ -695,23 +699,23 @@ func (s *sEmployee[
 	if info.Name != nil {
 		// 重名 & 系统不允许员工重名
 		if s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.modules.Dao().Employee.Table())
 		}
 	}
 	// 校验工号是否允许为空
 	if info.No != nil {
 		if *info.No == "" && !s.modules.GetConfig().AllowEmptyNo {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.modules.Dao().Employee.Table())
 		}
 	}
 	// 校验工号是否已存在
 	if s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.modules.Dao().Employee.Table())
 	}
 
 	data := kconv.Struct(info, &co_do.CompanyEmployee{})
 
-	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.modules.Dao().Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		if employee.Data() != nil {
 
 			var avatarAvatarFile *sys_model.FileInfo
@@ -721,7 +725,7 @@ func (s *sEmployee[
 				fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(data.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 				if err != nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.modules.Dao().Employee.Table())
 				}
 				avatarAvatarFile = fileInfo
 
@@ -737,7 +741,7 @@ func (s *sEmployee[
 				fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 				if err != nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.modules.Dao().Employee.Table())
 				}
 				workCardAvatarFile = fileInfo
 
@@ -760,9 +764,9 @@ func (s *sEmployee[
 				return err
 			}
 
-			_, err = daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: id}))
+			_, err = daoctl.UpdateWithError(s.modules.Dao().Employee.Ctx(ctx).Data(doData).OmitNilData().Where(co_do.CompanyEmployee{Id: id}))
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
 			}
 			err = info.OverrideDo.DoSaved(data, doData)
 			if err != nil {
@@ -773,7 +777,7 @@ func (s *sEmployee[
 			if avatarAvatarFile != nil {
 				avatarAvatarFile, err = sys_service.File().SaveFile(ctx, storageAvatarSrc, avatarAvatarFile)
 				if err != nil || avatarAvatarFile == nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.modules.Dao().Employee.Table())
 				}
 			}
 
@@ -781,7 +785,7 @@ func (s *sEmployee[
 				workCardAvatarFile, err = sys_service.File().SaveFile(ctx, storageWorkCardAvatarSrc, workCardAvatarFile)
 				//_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
 				if err != nil || workCardAvatarFile == nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.modules.Dao().Employee.Table())
 				}
 			}
 		}
@@ -807,7 +811,7 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) UpdateEmployeeAvatar(ctx context.Context, id int64, avatar string) bool {
-	result, err := daoctl.UpdateWithError(s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Data(co_do.CompanyEmployee{
+	result, err := daoctl.UpdateWithError(s.modules.Dao().Employee.Ctx(ctx).Where(s.modules.Dao().Employee.Columns().Id, id).Data(co_do.CompanyEmployee{
 		Avatar: avatar,
 	}))
 
@@ -843,23 +847,23 @@ func (s *sEmployee[
 
 	// 校验员工名称是否已存在
 	if s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.modules.Dao().Employee.Table())
 	}
 
 	// 校验工号是否允许为空
 	if info.No == "" && !s.modules.GetConfig().AllowEmptyNo {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.modules.Dao().Employee.Table())
 	}
 
 	// 校验工号是否已存在
 	if s.HasEmployeeByNo(ctx, info.No, info.UnionMainId, info.Id) {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.modules.Dao().Employee.Table())
 	}
 
 	data := &co_do.CompanyEmployee{}
 	_ = gconv.Struct(info, data)
 
-	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.modules.Dao().Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 		var avatarFile *sys_model.FileInfo
 		storageAvatarSrc := ""
 		if info.Avatar != "" {
@@ -867,7 +871,7 @@ func (s *sEmployee[
 			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.modules.Dao().Employee.Table())
 			}
 			avatarFile = fileInfo
 
@@ -883,7 +887,7 @@ func (s *sEmployee[
 			fileInfo, err := sys_service.File().GetFileById(ctx, gconv.Int64(info.Avatar), s.modules.T(ctx, "{#Avatar}{#error_File_FileVoid}"))
 
 			if err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, "", s.modules.Dao().Employee.Table())
 			}
 			workCardAvatarFile = fileInfo
 
@@ -910,7 +914,7 @@ func (s *sEmployee[
 					gconv.Int64(data.Id),
 				)
 				if err != nil {
-					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_User_Save_Failed"), s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_User_Save_Failed"), s.modules.Dao().Employee.Table())
 				}
 			}
 
@@ -926,14 +930,14 @@ func (s *sEmployee[
 				return err
 			}
 
-			affected, err := daoctl.InsertWithError(s.dao.Employee.Ctx(ctx).Data(doData))
+			affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).Data(doData))
 
 			if sessionUser.Id == data.Id {
 				sessionUser.UnionMainId = info.UnionMainId
 			}
 
 			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
 			}
 
 			err = info.OverrideDo.DoSaved(data, doData)
@@ -948,7 +952,7 @@ func (s *sEmployee[
 			avatarFile, err = sys_service.File().SaveFile(ctx, storageAvatarSrc, avatarFile)
 			//_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
 			if err != nil || avatarFile == nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.modules.Dao().Employee.Table())
 			}
 		}
 
@@ -956,7 +960,7 @@ func (s *sEmployee[
 			workCardAvatarFile, err = sys_service.File().SaveFile(ctx, storageWorkCardAvatarSrc, workCardAvatarFile)
 			//_, err = sys_dao.SysFile.Ctx(ctx).Insert(avatarFile)
 			if err != nil || avatarFile == nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.dao.Employee.Table())
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#Avatar}{#error_File_Save_Failed}"), s.modules.Dao().Employee.Table())
 			}
 		}
 
@@ -987,16 +991,16 @@ func (s *sEmployee[
 
 	//  Unscoped 找到被软删除的记录
 	var employee TR
-	err := s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Unscoped().Scan(&employee)
+	err := s.modules.Dao().Employee.Ctx(ctx).Where(s.modules.Dao().Employee.Columns().Id, id).Unscoped().Scan(&employee)
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Disabled_Delete}"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Disabled_Delete}"), s.modules.Dao().Employee.Table())
 	}
 
 	if s.modules.GetConfig().HardDeleteWaitAt == -1 || s.modules.GetConfig().HardDeleteWaitAt == math.MaxInt64 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Nonsupport_Delete}"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_Nonsupport_Delete}"), s.modules.Dao().Employee.Table())
 	}
 
-	err = s.dao.Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+	err = s.modules.Dao().Employee.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
 
 		if s.modules.GetConfig().HardDeleteWaitAt > 0 && !reflect.ValueOf(employee).IsNil() && employee.Data() != nil && employee.Data().DeletedAt == nil {
 			// 设置账户状态为已注销
@@ -1005,7 +1009,7 @@ func (s *sEmployee[
 				return err
 			}
 			// 设置员工状态为已注销
-			_, err = s.dao.Employee.Ctx(ctx).
+			_, err = s.modules.Dao().Employee.Ctx(ctx).
 				Data(co_do.CompanyEmployee{State: co_enum.Employee.State.Canceled.Code()}).
 				Where(co_do.CompanyEmployee{Id: employee.Data().Id}).
 				Update()
@@ -1013,7 +1017,7 @@ func (s *sEmployee[
 				return err
 			}
 			// 软删除
-			_, err = s.dao.Employee.Ctx(ctx).Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
+			_, err = s.modules.Dao().Employee.Ctx(ctx).Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
 			if err != nil {
 				return err
 			}
@@ -1024,7 +1028,7 @@ func (s *sEmployee[
 				if gtime.Now().Before(employee.Data().DeletedAt.Add(HardDeleteWaitAt)) {
 					hours := gtime.Now().Sub(employee.Data().DeletedAt.Add(HardDeleteWaitAt)).Hours()
 					message := s.modules.T(ctx, "error_Employee_Delete_Failed") + s.modules.Tf(ctx, "#data_protection_wait_hours", math.Abs(hours))
-					return sys_service.SysLogs().ErrorSimple(ctx, err, message, s.dao.Employee.Table())
+					return sys_service.SysLogs().ErrorSimple(ctx, err, message, s.modules.Dao().Employee.Table())
 				}
 			}
 
@@ -1035,7 +1039,7 @@ func (s *sEmployee[
 			}
 
 			// 删除员工
-			_, err = s.dao.Employee.Ctx(ctx).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
+			_, err = s.modules.Dao().Employee.Ctx(ctx).Unscoped().Delete(co_do.CompanyEmployee{Id: employee.Data().Id})
 			if err != nil {
 				return err
 			}
@@ -1050,7 +1054,7 @@ func (s *sEmployee[
 	})
 
 	if err != nil {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed")+": "+err.Error(), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed")+": "+err.Error(), s.modules.Dao().Employee.Table())
 	}
 	return true, nil
 }
@@ -1070,7 +1074,7 @@ func (s *sEmployee[
 	// 直接删除属于员工的团队成员记录
 	isSuccess, err := s.modules.Team().DeleteTeamMemberByEmployee(ctx, employeeId)
 	if err != nil && !isSuccess {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Team_DeleteMember_Failed"), s.modules.Dao().Employee.Table())
 	}
 
 	// 查找到员工是管理员或者队长的团队
@@ -1098,14 +1102,14 @@ func (s *sEmployee[
 			if item.Data().CaptainEmployeeId == employeeId { // 队长或者组长
 				ret, err := s.modules.Team().SetTeamCaptain(ctx, item.Data().Id, 0)
 				if err != nil || !ret {
-					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.modules.Dao().Employee.Table())
 				}
 			}
 
 			if item.Data().OwnerEmployeeId == employeeId { // 团队负责人
 				ret, err := s.modules.Team().SetTeamOwner(ctx, item.Data().Id, 0)
 				if err != nil || !ret {
-					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.dao.Employee.Table())
+					return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Delete_Failed"), s.modules.Dao().Employee.Table())
 				}
 			}
 		}
@@ -1127,7 +1131,7 @@ func (s *sEmployee[
 ]) GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	model := s.dao.Employee.Ctx(ctx)
+	model := s.modules.Dao().Employee.Ctx(ctx)
 
 	// 非管理员需要校验权限
 	if !sessionUser.IsAdmin {
@@ -1141,7 +1145,7 @@ func (s *sEmployee[
 	// 查询员工数据
 	data, err := daoctl.GetByIdWithError[TR](model, id)
 	if err != nil || data == nil {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.dao.Employee.Table())
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetEmployeeDetailById_Failed"), s.modules.Dao().Employee.Table())
 	}
 
 	response = *data
@@ -1152,7 +1156,7 @@ func (s *sEmployee[
 
 		// 禁止跨主体访问，下级公司可查看上级公司员工信息（如需支持则放开注释）
 		if employeeUnionMainId != sessionUser.UnionMainId /*&& employeeUnionMainId != sessionUser.ParentId*/ {
-			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.dao.Employee.Table())
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 		}
 	}
 
@@ -1189,10 +1193,10 @@ func (s *sEmployee[
 	}
 
 	result, err := daoctl.Query[TR](
-		s.dao.Employee.Ctx(ctx),
+		s.modules.Dao().Employee.Ctx(ctx),
 		&base_model.SearchParams{
 			Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
-				Field: s.dao.Employee.Columns().Id,
+				Field: s.modules.Dao().Employee.Columns().Id,
 				Where: "in",
 				Value: userIds,
 			}),
@@ -1230,7 +1234,7 @@ func (s *sEmployee[
 		return false, err
 	}
 
-	result, err := s.dao.Employee.Ctx(ctx).Where(s.dao.Employee.Columns().Id, id).Update(co_do.CompanyEmployee{State: state})
+	result, err := s.modules.Dao().Employee.Ctx(ctx).Where(s.modules.Dao().Employee.Columns().Id, id).Update(co_do.CompanyEmployee{State: state})
 
 	if err != nil {
 		return false, err
@@ -1238,11 +1242,45 @@ func (s *sEmployee[
 
 	affected, err := result.RowsAffected()
 	if err != nil || affected == 0 {
-		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_update_employee_state_failed"), s.dao.Employee.Table())
+		return false, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "error_update_employee_state_failed"), s.modules.Dao().Employee.Table())
 	}
 
 	return true, nil
+}
 
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) SetCommissionRate(ctx context.Context, userId int64, commissionRate int, actionUserId int64) (bool, error) {
+	// 获取要被设置佣金用户信息
+	employee, err := s.modules.Employee().GetEmployeeById(ctx, userId)
+
+	if err != nil || reflect.ValueOf(employee).IsNil() {
+		return false, err
+	}
+
+	actionEmployee, _ := s.modules.Employee().GetEmployeeById(ctx, actionUserId)
+
+	if reflect.ValueOf(actionEmployee).IsNil() || actionEmployee.Data().UnionMainId != employee.Data().UnionMainId {
+		return false, errors.New("error_illegal_operation")
+	}
+
+	canMaxCommissionRate := 100
+
+	if commissionRate < 0 || commissionRate > canMaxCommissionRate {
+		return false, errors.New("error_commission_rate_must_be_between_0_and_" + gconv.String(canMaxCommissionRate))
+	}
+
+	affected, err := daoctl.UpdateWithError(s.modules.Dao().Employee.Ctx(ctx).Where(s.modules.Dao().Employee.Columns().Id, userId), &co_do.CompanyEmployee{CommissionRate: commissionRate})
+
+	return affected == 1, err
 }
 
 // Masker 员工信息脱敏，并加载附加数据
@@ -1317,7 +1355,7 @@ func (s *sEmployee[
 		//if data.Data().UnionMainId > 0 && !exclude.Contains("teamList") {
 		//if data.Data().UnionMainId > 0 && exclude.Contains("teamList") {
 		base_funs.AttrMake[TR](ctx,
-			s.dao.Employee.Columns().UnionMainId,
+			s.modules.Dao().Employee.Columns().UnionMainId,
 			func() []ITTeamRes {
 				_ = g.Try(ctx, func(ctx context.Context) {
 					// 获取到该员工的所有团队成员信息记录ids
@@ -1360,7 +1398,7 @@ func (s *sEmployee[
 		//	data.Data().User = nil
 		//} else {
 		base_funs.AttrMake[TR](ctx,
-			s.dao.Employee.Columns().Id,
+			s.modules.Dao().Employee.Columns().Id,
 			func() (res TR) {
 				// 为什么要在内部订阅
 				//ctx = base_funs.AttrBuilder[TR, []ITTeamRes](ctx, s.modules.Dao().Employee.Columns().UnionMainId)
