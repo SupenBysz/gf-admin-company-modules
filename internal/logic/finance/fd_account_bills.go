@@ -346,7 +346,15 @@ func (s *sFdAccountBills[
 			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
 			bill.Data().CreatedBy = info.FromUserId
 
-			result, err := s.dao.FdAccountBills.Ctx(ctx).Insert(bill)
+			data := kconv.Struct(bill.Data(), &co_do.FdAccountBills{})
+
+			// 重载Do模型
+			doData, err := info.OverrideDo.DoFactory(*data)
+			if err != nil {
+				return err
+			}
+
+			result, err := s.dao.FdAccountBills.Ctx(ctx).Insert(doData)
 
 			if result == nil || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_AccountBalance_Update_Failed"), s.dao.FdAccountBills.Table())
@@ -361,6 +369,11 @@ func (s *sFdAccountBills[
 			}
 			// 3.修改财务账号金额明细统计
 			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
+
+			// 如果类型是保证金则增加冻结金额
+			if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() {
+				s.modules.Account().IncrementFrozenAmount(ctx, account.Data().Id, info.Amount)
+			}
 
 			if decrement == false || err != nil {
 				return err

@@ -198,6 +198,48 @@ func (s *sFdAccount[
 	return makeMore(ctx, s.dao.FdAccountDetail, *data), nil
 }
 
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) IncrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error) {
+	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Increment(s.dao.FdAccount.Columns().FrozenBlance, addAmount)
+
+	affected, err2 := result.RowsAffected()
+	if affected == 0 || err != nil || err2 != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) DecrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error) {
+	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Decrement(s.dao.FdAccount.Columns().FrozenBlance, addAmount)
+
+	affected, err2 := result.RowsAffected()
+	if affected == 0 || err != nil || err2 != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 // UpdateAccount 修改财务账号
 func (s *sFdAccount[
 	ITCompanyRes,

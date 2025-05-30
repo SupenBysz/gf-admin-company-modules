@@ -22,6 +22,8 @@ type AccountBillsRegister struct {
 	TradeAt       *gtime.Time                                  `json:"tradeAt"        v:"required#交易时间不能为空"   dc:"交易时间"`
 	Remark        string                                       `json:"remark"         dc:"备注信息"`
 	TradeState    int                                          `json:"tradeState"     v:"required|in:1,2,4,8,16,32,64,128,256#交易状态错误"  dc:"交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭"`
+	HandlingFee   int64       								   `json:"handlingFee"    dc:"手续费，当前记录产生的手续费，如果有的话"`
+	ExtJson       string     								   `json:"extJson"        dc:"扩展数据"`
 }
 
 type FdAccountBillsListRes base_model.CollectRes[FdAccountBillsRes]

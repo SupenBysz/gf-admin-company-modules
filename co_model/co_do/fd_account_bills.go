@@ -29,4 +29,5 @@ type FdAccountBills struct {
 	CreatedAt     *gtime.Time //
 	CreatedBy     interface{} //
 	HandlingFee   interface{} // 手续费，当前记录产生的手续费，如果有的话
+	ExtJson       interface{} // 扩展数据
 }

@@ -44,6 +44,7 @@ type FdAccountBillsColumns struct {
 	CreatedAt     string //
 	CreatedBy     string //
 	HandlingFee   string // 手续费，当前记录产生的手续费，如果有的话
+	ExtJson       string // 扩展数据
 }
 
 // fdAccountBillsColumns holds the columns for table co_fd_account_bills.
@@ -65,6 +66,7 @@ var fdAccountBillsColumns = FdAccountBillsColumns{
 	CreatedAt:     "created_at",
 	CreatedBy:     "created_by",
 	HandlingFee:   "handling_fee",
+	ExtJson:       "ext_json",
 }
 
 // NewFdAccountBillsDao creates and returns a new DAO object for table data access.

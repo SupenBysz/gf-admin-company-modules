@@ -27,4 +27,5 @@ type FdAccountBills struct {
 	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:""`
 	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:""`
 	HandlingFee   int64       `json:"handlingFee"   orm:"handling_fee"   description:"手续费，当前记录产生的手续费，如果有的话"`
+	ExtJson       string      `json:"extJson"       orm:"ext_json"       description:"扩展数据"`
 }

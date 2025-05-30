@@ -170,6 +170,10 @@ type (
 		SetAccountAllowExceed(ctx context.Context, accountId int64, allowExceed int) (bool, error)
 		// QueryDetailByUnionUserIdAndSceneType  获取用户指定业务场景的财务账号金额明细统计记录|列表
 		QueryDetailByUnionUserIdAndSceneType(ctx context.Context, unionUserId int64, sceneType co_enum.SceneType) (*base_model.CollectRes[co_model.FdAccountDetailRes], error)
+		// IncrementFrozenAmount 增加冻结金额
+		IncrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error)
+		// DecrementFrozenAmount 减冻结金额
+		DecrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error)
 	}
 	IFdBankCard[TR co_model.IFdBankCardRes] interface {
 		// CreateBankCard 添加银行卡账号
@@ -294,15 +298,15 @@ type IModuleBase interface {
 }
 
 type IModules[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ] interface {
 	IModuleBase
 	Company() ICompany[ITCompanyRes]
