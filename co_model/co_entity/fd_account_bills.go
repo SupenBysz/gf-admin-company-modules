@@ -22,10 +22,11 @@ type FdAccountBills struct {
 	TradeType     int         `json:"tradeType"     orm:"trade_type"     description:"交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它"`
 	TradeAt       *gtime.Time `json:"tradeAt"       orm:"trade_at"       description:"交易时间"`
 	Remark        string      `json:"remark"        orm:"remark"         description:"备注信息"`
-	TradeState    int         `json:"tradeState"    orm:"trade_state"    description:"交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭"`
-	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"     description:""`
-	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:""`
-	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:""`
+	TradeState    int         `json:"tradeState"    orm:"trade_state"    description:"交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭、512已冻结、1024、已解冻、2048解冻失败"`
 	HandlingFee   int64       `json:"handlingFee"   orm:"handling_fee"   description:"手续费，当前记录产生的手续费，如果有的话"`
 	ExtJson       string      `json:"extJson"       orm:"ext_json"       description:"扩展数据"`
+	DeletedAt     *gtime.Time `json:"deletedAt"     orm:"deleted_at"     description:""`
+	DeletedBy     int64       `json:"deletedBy"     orm:"deleted_by"     description:""`
+	CreatedAt     *gtime.Time `json:"createdAt"     orm:"created_at"     description:""`
+	CreatedBy     int64       `json:"createdBy"     orm:"created_by"     description:""`
 }

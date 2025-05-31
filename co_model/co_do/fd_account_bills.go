@@ -24,10 +24,11 @@ type FdAccountBills struct {
 	TradeType     interface{} // 交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它
 	TradeAt       *gtime.Time // 交易时间
 	Remark        interface{} // 备注信息
-	TradeState    interface{} // 交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭
-	DeletedAt     *gtime.Time //
-	CreatedAt     *gtime.Time //
-	CreatedBy     interface{} //
+	TradeState    interface{} // 交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭、512已冻结、1024、已解冻、2048解冻失败
 	HandlingFee   interface{} // 手续费，当前记录产生的手续费，如果有的话
 	ExtJson       interface{} // 扩展数据
+	DeletedAt     *gtime.Time //
+	DeletedBy     interface{} //
+	CreatedAt     *gtime.Time //
+	CreatedBy     interface{} //
 }
