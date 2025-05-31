@@ -14,10 +14,33 @@ gfcli:
   gen:
     dao:
       - link: "pgsql:user=user password=password host=127.0.0.1 port=5432 dbname=dnName sslmode=disable"
-        tables: "co_company,co_company_employee,co_company_team,co_company_team_member, 
-        co_fd_account, co_fd_account_bill, co_fd_bank_card, co_fd_currency, co_fd_invoice, co_fd_invoice_detail, co_fd_account_detail"
+        tables: "
+        co_company,
+        co_company_employee,
+        co_company_team,
+        co_company_team_member, 
+        co_fd_account,
+        co_fd_account_bill,
+        co_fd_bank_card,
+        co_fd_currency,
+        co_fd_invoice,
+        co_fd_invoice_detail,
+        co_fd_account_detail,
+        
+        co_company_view,
+        co_company_employee_view,
+        co_company_team_view,
+        co_company_team_member_view, 
+        co_fd_account_view,
+        co_fd_account_bill_view,
+        co_fd_bank_card_view,
+        co_fd_currency_view,
+        co_fd_invoice_view,
+        co_fd_invoice_detail_view,
+        co_fd_account_detail_view
+        "
         removePrefix: "co_"
         descriptionTag:  true
         noModelComment:  true
         withTime: false
-        # - link: "pgsql:user=kysion password=kysiondb host=182.43.195.225 port=15432 dbname=gf-admin sslmode=disable"
+        # - link: "pgsql:user=kysion password=kysiondb host=127.0.0.11 port=15432 dbname=kysiondb sslmode=disable"
