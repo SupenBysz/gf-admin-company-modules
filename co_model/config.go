@@ -31,8 +31,6 @@ type Identifier struct {
 	FdRecharge      string `p:"fdRecharge" dc:"财务充值记录标识符"`
 }
 
-var ModulesConfigArr = []*Config{}
-
 type Config struct {
 	DB                             gdb.DB            `p:"-" dc:"数据库连接"`
 	AllowEmptyNo                   bool              `p:"allowEmptyNo" dc:"允许员工工号为空" default:"false"`
