@@ -269,6 +269,16 @@ func (s *sFdAccountBills[
 		if increment == false || err != nil {
 			return err
 		}
+
+		// 如果类型是保证金则增加冻结金额
+		if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() && info.TradeState == co_enum.Finance.TradeState.Unfrozen.Code() {
+			increment, err = s.modules.Account().DecrementFrozenAmount(ctx, account.Data().Id, info.Amount)
+		}
+
+		if increment == false || err != nil {
+			return err
+		}
+
 		_ = g.Try(ctx, func(ctx context.Context) {
 			s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 				if key.InTransaction && key.InOutType == co_enum.Finance.InOutType.In {
@@ -370,14 +380,19 @@ func (s *sFdAccountBills[
 			// 3.修改财务账号金额明细统计
 			decrement, err := s.modules.Account().Decrement(ctx, account.Data().Id, gconv.Int(info.Amount))
 
+			if decrement == false || err != nil {
+				return err
+			}
+
 			// 如果类型是保证金则增加冻结金额
 			if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() {
-				s.modules.Account().IncrementFrozenAmount(ctx, account.Data().Id, info.Amount)
+				decrement, err = s.modules.Account().IncrementFrozenAmount(ctx, account.Data().Id, info.Amount)
 			}
 
 			if decrement == false || err != nil {
 				return err
 			}
+
 			g.Try(ctx, func(ctx context.Context) {
 				s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 					// 在事务中 && 订阅key是收入类型的
