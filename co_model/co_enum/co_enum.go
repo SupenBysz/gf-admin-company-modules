@@ -13,8 +13,12 @@ import (
 type (
 	// AppealState 申诉状态
 	AppealState = common.AppealStateEnum
-	// CommissionMode 佣金模式
-	CommissionMode = common.CommissionModeEnum
+	// CompanyCommissionMode 公司佣金模式
+	CompanyCommissionMode = common.CompanyCommissionModeEnum
+	// EmployeeCommissionMode 员工绩效提成模式
+	EmployeeCommissionMode = common.EmployeeCommissionModeEnum
+	// EmployeeCommissionLevelMode 员工提成分配等级模式
+	EmployeeCommissionLevelMode = common.EmployeeCommissionLevelModeEnum
 	// Audit
 
 	// CompanyState 主体状态

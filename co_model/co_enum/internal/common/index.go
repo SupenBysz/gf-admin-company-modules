@@ -1,11 +1,15 @@
 package common
 
 type common struct {
-	AppealState    appealState
-	CommissionMode commissionMode
+	AppealState                 appealState
+	CompanyCommissionMode       companyCommissionMode
+	EmployeeCommissionMode      employeeCommissionMode
+	EmployeeCommissionLevelMode employeeCommissionLevelMode
 }
 
 var Common = common{
-	AppealState:    AppealState,
-	CommissionMode: CommissionMode,
+	AppealState:                 AppealState,
+	CompanyCommissionMode:       CompanyCommissionMode,
+	EmployeeCommissionMode:      EmployeeCommissionMode,
+	EmployeeCommissionLevelMode: EmployeeCommissionLevelMode,
 }
