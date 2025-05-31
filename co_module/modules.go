@@ -360,7 +360,7 @@ func NewModules[
 		xDao: xDao,
 	}
 
-	co_model.ModulesConfigArr = append(co_model.ModulesConfigArr, conf)
+	co_consts.ModulesConfigArr = append(co_consts.ModulesConfigArr, conf)
 
 	response = module
 
@@ -382,6 +382,7 @@ func NewModules[
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)
 	co_consts.FinancePermissionTree = append(co_consts.FinancePermissionTree, boot.InitFinancePermission(response)...)
 
+	co_consts.ModuleArr = append(co_consts.ModuleArr, module.IModuleBase)
 	{
 		//_, oldModule, _ := base_funs.FindInSlice(modules, func(item *Modules[
 		//	co_model.ICompanyRes,
