@@ -670,7 +670,13 @@ func (s *sCompany[
 	canMaxCommissionRate := 100
 
 	// 佣金模式如果相对成交金额则不超过上级佣金百分比，否则将相对于上级佣金收益的百分比
-	if co_consts.Global.CommissionModel.Code() == co_enum.Common.CommissionMode.TradeAmount.Code() && response.Data().ParentId > 0 {
+	clientConfig, err := co_consts.Global.GetClientConfig(ctx)
+
+	if err != nil {
+		return false, err
+	}
+
+	if clientConfig.CompanyCommissionModel == co_enum.Common.CompanyCommissionMode.TradeAmount.Code() && response.Data().ParentId > 0 {
 		parentCompany, err := s.GetCompanyById(ctx, response.Data().ParentId)
 		if err != nil {
 			return false, err
@@ -691,7 +697,7 @@ func (s *sCompany[
 	if err != nil && affected == 0 {
 		return false, err
 	}
-	
+
 	return affected == 1, err
 }
 

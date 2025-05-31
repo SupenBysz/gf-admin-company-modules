@@ -50,7 +50,7 @@ type CompanyEmployeeColumns struct {
 	WeixinAccount  string // 微信号
 	Address        string // 地址
 	WorkCardAvatar string // 工牌头像
-	CommissionRate string // 佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金，同时不能大于所属单位的佣金
+	CommissionRate string // 佣金率，如果开启会员权益模块，且佣金率有冲突，则该值优先级高会员权益模块；规则：该值不能大于上级佣金
 }
 
 // companyEmployeeColumns holds the columns for table co_company_employee.

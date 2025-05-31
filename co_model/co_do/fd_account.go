@@ -29,7 +29,7 @@ type FdAccount struct {
 	DeletedAt          *gtime.Time //
 	DeletedBy          interface{} //
 	SceneType          interface{} // 场景类型：0不限、1充电佣金收入
-	AccountType        interface{} // 账户类型：1系统账户、2银行卡、3支付宝、4微信、5云闪付、6翼支付
+	AccountType        interface{} // 账户类型：0 - 系统账户、1 - 银行卡；2 - 支付宝；3 - 微信；4 - 云闪付；5 - ApplePay；6 - PayPal；7 - AmazonPay；8 - 线下现金（若有对应业务）；9 - 区块链钱包；100 - 其他（可进一步在备注说明）
 	AccountNumber      interface{} // 账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号
 	UnionMainId        interface{} // 关联主体ID，与union_license_id 中的union_main_id 一致
 	AllowExceed        interface{} // 是否允许存在负余额: 0禁止、1允许
