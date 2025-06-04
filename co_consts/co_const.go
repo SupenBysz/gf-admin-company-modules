@@ -85,3 +85,12 @@ func (s global) GetClientConfig(ctx context.Context) (*co_model.ClientConfig, er
 
 	return nil, gerror.NewCode(gcode.CodeNotAuthorized, "error_client_info_incorrect")
 }
+
+func(s global) GetClientConfigByKey( ctx context.Context, key string) (*co_model.ClientConfig, error) {
+	 for _, v := range s.ClientConfig {
+		if strings.EqualFold(v.XClientToken, key) {
+			return &v, nil
+		}
+	}
+	return nil, gerror.NewCode(gcode.CodeNotAuthorized, "error_client_info_incorrect")
+}
