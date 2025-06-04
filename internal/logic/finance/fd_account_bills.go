@@ -2,8 +2,8 @@ package finance
 
 import (
 	"context"
+	"errors"
 	"fmt"
-
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
 	"github.com/gogf/gf/v2/frame/g"
@@ -185,6 +185,46 @@ func (s *sFdAccountBills[
 	return success == true, err
 }
 
+func (s *sFdAccountBills[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	TR,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) SetBillsTradeState(ctx context.Context, id int64, tradeState co_enum.FinanceTradeState) (bool, error) {
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccountBills.Ctx(ctx).Where(co_do.FdAccountBills{
+		Id: id,
+	}), co_do.FdAccountBills{
+		TradeState: tradeState.Code(),
+	})
+
+	return affected > 0, err
+}
+
+func (s *sFdAccountBills[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	TR,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) SetBillsExtJson(ctx context.Context, id int64, extJson string) (bool, error) {
+	affected, err := daoctl.UpdateWithError(s.dao.FdAccountBills.Ctx(ctx).Where(co_do.FdAccountBills{
+		Id: id,
+	}), co_do.FdAccountBills{
+		ExtJson: extJson,
+	})
+
+	return affected > 0, err
+}
+
 // 修改支付状态
 
 // 接收微信支付宝的支付通知  （账单id，微信的交易id，支付结果）
@@ -243,6 +283,10 @@ func (s *sFdAccountBills[
 
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBills{})
 
+		if data.ExtJson == "" {
+			data.ExtJson = nil
+		}
+
 		// 重载Do模型
 		doData, err := info.OverrideDo.DoFactory(*data)
 		if err != nil {
@@ -271,7 +315,16 @@ func (s *sFdAccountBills[
 		}
 
 		// 如果类型是保证金则增加冻结金额
-		if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() && info.TradeState == co_enum.Finance.TradeState.Unfrozen.Code() {
+		if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() && info.TradeState == co_enum.Finance.TradeState.Frozen.Code() {
+			rowsAffected, err := daoctl.UpdateWithError(s.dao.FdAccountBills.Ctx(ctx).
+				Where(s.dao.FdAccountBills.Columns().Id, bill.Data().Id), map[string]interface{}{
+				s.dao.FdAccountBills.Columns().TradeState: co_enum.Finance.TradeState.Unfrozen.Code(),
+			})
+
+			if rowsAffected > 0 || err != nil {
+				return errors.Join(err, errors.New("{#error_Transaction_Failed}"))
+			}
+
 			increment, err = s.modules.Account().DecrementFrozenAmount(ctx, account.Data().Id, info.Amount)
 		}
 
@@ -350,7 +403,7 @@ func (s *sFdAccountBills[
 			info.BeforeBalance = account.Data().Balance
 			info.AfterBalance = afterBalance
 
-			gconv.Struct(info, bill.Data())
+			_ = gconv.Struct(info, bill.Data())
 			bill.Data().Id = idgen.NextId()
 			bill.Data().CreatedAt = gtime.Now()
 			//bill.Data().CreatedBy = sessionUser.Id  // TODO 后续解开
@@ -386,7 +439,22 @@ func (s *sFdAccountBills[
 
 			// 如果类型是保证金则增加冻结金额
 			if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() {
+				update, err := s.dao.FdAccountBills.Ctx(ctx).
+					Where(s.dao.FdAccountBills.Columns().Id, bill.Data().Id).
+					Where(s.dao.FdAccountBills.Columns().TradeState, co_enum.Finance.TradeState.Paid.Code()).
+					Data(map[string]interface{}{
+						s.dao.FdAccountBills.Columns().TradeState: co_enum.Finance.TradeState.Frozen.Code(),
+					}).Update()
+
+				if update == nil || err != nil {
+					return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
+				}
+
 				decrement, err = s.modules.Account().IncrementFrozenAmount(ctx, account.Data().Id, info.Amount)
+
+				if decrement == false || err != nil {
+					return err
+				}
 			}
 
 			if decrement == false || err != nil {

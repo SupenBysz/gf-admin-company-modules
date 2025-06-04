@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
+	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"reflect"
 	"strings"
 
@@ -648,24 +649,24 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) SetCommissionRate(ctx context.Context, companyId int64, commissionRate int, actionUserId int64) (bool, error) {
-	response, err := s.GetCompanyById(ctx, companyId)
+	companyInfo, err := co_service.CompanyView().GetCompanyById(ctx, companyId, false)
 	if err != nil {
 		return false, err
 	}
 
-	if response.Data().UserId == actionUserId {
-		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
-	}
+	//if companyInfo.UserId == actionUserId {
+	//	return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	//}
 
-	actionUser, err := sys_service.SysUser().GetSysUserById(ctx, actionUserId)
-	if err != nil {
-		return false, err
-	}
+	//actionUser, err := sys_service.SysUser().GetSysUserById(ctx, actionUserId)
+	//if err != nil {
+	//	return false, err
+	//}
 
 	// 限制同级用户或单位进行佣金的配置
-	if actionUser.Type <= s.modules.GetConfig().UserType.Code() {
-		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
-	}
+	//if actionUser.Type <= s.modules.GetConfig().UserType.Code() {
+	//	return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	//}
 
 	canMaxCommissionRate := 100
 
@@ -676,13 +677,13 @@ func (s *sCompany[
 		return false, err
 	}
 
-	if clientConfig.CompanyCommissionModel == co_enum.Common.CompanyCommissionMode.TradeAmount.Code() && response.Data().ParentId > 0 {
-		parentCompany, err := s.GetCompanyById(ctx, response.Data().ParentId)
+	if clientConfig.CompanyCommissionModel == co_enum.Common.CompanyCommissionMode.TradeAmount.Code() && companyInfo.ParentId > 0 {
+		parentCompany, err := co_service.CompanyView().GetCompanyById(ctx, companyInfo.ParentId, false)
 		if err != nil {
 			return false, err
 		}
-		if parentCompany.Data().ParentId > 0 {
-			canMaxCommissionRate = parentCompany.Data().CommissionRate
+		if parentCompany.ParentId > 0 {
+			canMaxCommissionRate = parentCompany.CommissionRate
 		}
 	}
 
@@ -690,15 +691,22 @@ func (s *sCompany[
 		return false, errors.New("error_commission_rate_must_be_between_0_and_" + gconv.String(canMaxCommissionRate))
 	}
 
-	affected, err := daoctl.UpdateWithError(s.modules.Dao().Company.Ctx(ctx).Where(s.modules.Dao().Company.Columns().Id, companyId).Data(co_do.Company{
-		CommissionRate: commissionRate,
-	}))
+	for _, module := range co_consts.ModuleArr {
+		if module.GetConfig().UserType.Code() == companyInfo.CompanyType {
 
-	if err != nil && affected == 0 {
-		return false, err
+			affected, err := daoctl.UpdateWithError(module.Dao().Company.Ctx(ctx).Where(s.modules.Dao().Company.Columns().Id, companyId).Data(co_do.Company{
+				CommissionRate: commissionRate,
+			}))
+
+			if err != nil && affected == 0 {
+				return false, err
+			}
+
+			return affected == 1, err
+		}
 	}
 
-	return affected == 1, err
+	return false, errors.New("error_company_not_match")
 }
 
 // SetCompanyAdminUser 设置主体的管理员用户
