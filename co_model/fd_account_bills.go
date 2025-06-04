@@ -17,6 +17,7 @@ type AccountBillsRegister struct {
 	Amount        int64       `json:"amount"        orm:"amount"         description:"交易金额"`
 	AfterBalance  int64       `json:"afterBalance"  orm:"after_balance"  description:"交易后账户余额"`
 	UnionOrderId  int64       `json:"unionOrderId"  orm:"union_order_id" description:"关联业务订单ID"`
+	UnionMainId   int64       `json:"unionMainId"   orm:"union_main_id"  description:"关联单位ID"`
 	InOutType     int         `json:"inOutType"     orm:"in_out_type"    description:"收支类型：1收入，2支出"`
 	TradeType     int         `json:"tradeType"     orm:"trade_type"     description:"交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它"`
 	TradeAt       *gtime.Time `json:"tradeAt"       orm:"trade_at"       description:"交易时间"`
