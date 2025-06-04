@@ -27,7 +27,6 @@ type Modules[
 	TFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
 	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
-	co_interface.IModuleBase
 	co_interface.IModules[
 		co_model.ICompanyRes,
 		co_model.IEmployeeRes,
@@ -40,7 +39,6 @@ type Modules[
 		co_model.IFdRechargeRes,
 	]
 
-	co_interface.IConfig
 	conf          *co_model.Config
 	company       co_interface.ICompany[TCompanyRes]
 	employee      co_interface.IEmployee[TEmployeeRes]
@@ -95,7 +93,35 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) GetICompany() co_interface.ICompanyBase {
+	return m.company
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Employee() co_interface.IEmployee[TEmployeeRes] {
+	return m.employee
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) GetIEmployee() co_interface.IEmployeeBase {
 	return m.employee
 }
 
@@ -123,7 +149,35 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) GetITeam() co_interface.ITeamBase {
+	return m.team
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Account() co_interface.IFdAccount[TFdAccountRes] {
+	return m.account
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) GetIFdAccount() co_interface.IFdAccountBase {
 	return m.account
 }
 
@@ -151,7 +205,35 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) GetIFdAccountBills() co_interface.IFdAccountBillsBase {
+	return m.accountBills
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) BankCard() co_interface.IFdBankCard[TFdBankCardRes] {
+	return m.bankCard
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) GetIFdBankCard() co_interface.IFdBankCardBase {
 	return m.bankCard
 }
 
@@ -179,6 +261,20 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) GetIFdInvoice() co_interface.IFdInvoiceBase {
+	return m.invoice
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) InvoiceDetail() co_interface.IFdInvoiceDetail[TFdInvoiceDetailRes] {
 	return m.invoiceDetail
 }
@@ -193,7 +289,35 @@ func (m *Modules[
 	TFdInvoiceRes,
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
+]) GetIFdInvoiceDetail() co_interface.IFdInvoiceDetailBase {
+	return m.invoiceDetail
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
 ]) Recharge() co_interface.IFdRecharge[ITFdRechargeRes] {
+	return m.rechargeRes
+}
+
+func (m *Modules[
+	TCompanyRes,
+	TEmployeeRes,
+	TTeamRes,
+	TFdAccountRes,
+	TFdAccountBillsRes,
+	TFdBankCardRes,
+	TFdInvoiceRes,
+	TFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) GetIFdRecharge() co_interface.IFdRechargeBase {
 	return m.rechargeRes
 }
 
@@ -222,7 +346,7 @@ func (m *Modules[
 	TFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) T(ctx context.Context, content string) string {
-	data := m.i18n.Translate(gi18n.WithLanguage(context.TODO(), "zh-CN"), content)
+	data := m.i18n.Translate(gi18n.WithLanguage(ctx, "zh-CN"), content)
 
 	return data
 }
@@ -382,43 +506,7 @@ func NewModules[
 	co_consts.PermissionTree = append(co_consts.PermissionTree, boot.InitPermission(response)...)
 	co_consts.FinancePermissionTree = append(co_consts.FinancePermissionTree, boot.InitFinancePermission(response)...)
 
-	co_consts.ModuleArr = append(co_consts.ModuleArr, module.IModuleBase)
-	{
-		//_, oldModule, _ := base_funs.FindInSlice(modules, func(item *Modules[
-		//	co_model.ICompanyRes,
-		//	co_model.IEmployeeRes,
-		//	co_model.ITeamRes,
-		//	co_model.IFdAccountRes,
-		//	co_model.IFdAccountBillsRes,
-		//	co_model.IFdBankCardRes,
-		//	co_model.IFdInvoiceRes,
-		//	co_model.IFdInvoiceDetailRes,
-		//	co_model.IFdRechargeRes,
-		//]) bool {
-		//	return item.conf.Identifier != module.conf.Identifier
-		//})
-
-		//if oldModule == nil {
-		//
-		//	var iModule interface{} = module
-		//
-		//	if module.IModules == nil {
-		//		module.IModules = iModule.(*Modules[
-		//			co_model.ICompanyRes,
-		//			co_model.IEmployeeRes,
-		//			co_model.ITeamRes,
-		//			co_model.IFdAccountRes,
-		//			co_model.IFdAccountBillsRes,
-		//			co_model.IFdBankCardRes,
-		//			co_model.IFdInvoiceRes,
-		//			co_model.IFdInvoiceDetailRes,
-		//			co_model.IFdRechargeRes,
-		//		])
-		//	}
-		//
-		//	modules = append(modules, module.IModules)
-		//}
-	}
+	co_consts.ModuleArr = append(co_consts.ModuleArr, module)
 
 	return module
 }
