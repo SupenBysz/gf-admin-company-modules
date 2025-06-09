@@ -426,7 +426,7 @@ func (s *sEmployee[
 	}
 
 	// 如果data为nil，则直接返回，避免空指针异常
-	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() {
+	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() || sessionUser == nil || sessionUser.SysUser.SysUser == nil {
 		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 	}
 
@@ -435,7 +435,7 @@ func (s *sEmployee[
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
 	if response.Data() != nil {
 		// 当前登录用户信息存在且不是超级管理员或系统管理员时进行权限校验
-		if sessionUser != nil && sessionUser.Id != 0 && !sessionUser.IsAdmin && !sessionUser.IsSuperAdmin {
+		if sessionUser != nil && sessionUser.SysUser.SysUser != nil && sessionUser.Id != 0 && !sessionUser.IsAdmin && !sessionUser.IsSuperAdmin {
 			employeeUnionMainId := response.Data().UnionMainId
 			// 检查员工所属主体是否与当前用户所属主体一致，或者是否是上级主体
 			if employeeUnionMainId != sessionUser.UnionMainId && employeeUnionMainId != sessionUser.ParentId {

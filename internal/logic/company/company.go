@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/SupenBysz/gf-admin-community/sys_consts"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_service"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"reflect"
 	"strings"
 
@@ -125,61 +127,110 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, info *sys_entity.SysInvitePerson, registerInfo *sys_model.SysUser) (bool, error) {
+	config, err := sys_consts.Global.GetClientConfig(ctx)
+
+	if err != nil {
+		return false, errors.Join(err, errors.New(""))
+	}
+
+	if !config.EnableInviteRegister {
+		return false, nil
+	}
+
+	jsonObj, err := gjson.DecodeToJson(invite.Value)
+
+	if jsonObj == nil || err != nil {
+		return false, errors.Join(err, errors.New("error_parameter_error"))
+	}
+
+	userType := s.modules.GetConfig().UserType.Code()
+	toUserType := jsonObj.Get("ToUserType").Int()
+
+	if !jsonObj.Contains("ToUserType") || toUserType != userType {
+		return false, nil
+	}
+
 	// 如下的逻辑：符合邀约的情况，为xx主体邀请新用户，下列逻辑只是将新用户设置为该主体的员工
 	if state.Code() != sys_enum.Invite.Type.Register.Code() {
 		return false, nil
 	}
 
-	// 找到userId对应的主体
-	user, err := sys_service.SysUser().GetSysUserById(ctx, invite.UserId)
-	if err != nil {
-		return true, nil
-	}
+	ret := false
 
-	employee, err := s.modules.Employee().GetEmployeeById(ctx, user.Id)
-	if err != nil || reflect.ValueOf(employee).IsNil() || employee.Data() == nil {
-		return false, nil
-	}
-
-	// 将新用户设置至主体中  TODO 需要封装
-	data := co_do.CompanyEmployee{
-		Id:          registerInfo.Id,
-		No:          nil, // 工号暂定
-		Avatar:      nil, // 头像等后期用户登陆系统进行完善
-		Name:        registerInfo.Username,
-		Mobile:      registerInfo.Mobile,
-		UnionMainId: employee.Data().UnionMainId,
-		State:       0, // 状态：待确认
-		CreatedBy:   invite.UserId,
-		CreatedAt:   gtime.Now(),
-	}
-
-	affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).OmitNilData().Data(data))
-	if affected == 0 || err != nil {
-		return true, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
-	}
-
-	{
-		SubInvitePersonData := sys_model.InvitePersonInfo{
-			FormUserId: invite.UserId,
-			ByUserId:   registerInfo.Id,
-			InviteCode: invite.Code,
-			InviteId:   invite.Id,
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		// 找到邀请人userId对应的员工信息
+		fromUserEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, invite.UserId, false)
+		if err != nil || fromUserEmployee == nil {
+			return nil
 		}
 
 		{
-			// 邀请人
-			InvitePerson, _ := sys_service.SysInvite().GetInvitePersonByUserId(ctx, invite.UserId)
-			if InvitePerson != nil {
-				SubInvitePersonData.CompanyIdentifierPrefix = InvitePerson.CompanyIdentifierPrefix
+			SubInvitePersonData := sys_model.InvitePersonInfo{
+				FormUserId: invite.UserId,
+				ByUserId:   registerInfo.Id,
+				InviteCode: invite.Code,
+				InviteId:   invite.Id,
+			}
+
+			{
+				// 邀请人
+				InvitePerson, _ := sys_service.SysInvite().GetInvitePersonByUserId(ctx, invite.UserId)
+				if InvitePerson != nil {
+					if InvitePerson.CompanyIdentifierPrefix == "" {
+						SubInvitePersonData.CompanyIdentifierPrefix = gconv.String(fromUserEmployee.UnionMainId) + "::" + gconv.String(fromUserEmployee.UnionMainId)
+					} else {
+						SubInvitePersonData.CompanyIdentifierPrefix = InvitePerson.CompanyIdentifierPrefix + "::" + gconv.String(fromUserEmployee.UnionMainId)
+					}
+
+					// 更新被邀请公司级别标识符信息
+					_, err = sys_service.SysInvite().SetInviteCompanyIdentifierPrefix(ctx, registerInfo.Id, SubInvitePersonData.CompanyIdentifierPrefix)
+
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			// 创建邀约级别关系
+			_, err := sys_service.SysInvite().CreateInvitePerson(ctx, &SubInvitePersonData)
+
+			if err != nil {
+				return err
 			}
 		}
 
-		// 创建邀约级别关系
-		person, err := sys_service.SysInvite().CreateInvitePerson(ctx, &SubInvitePersonData)
+		if fromUserEmployee.CompanyType != s.modules.GetConfig().UserType.Code() {
+			ret = true
+			return nil
+		}
 
-		return person != nil, err
-	}
+		targetEmployee, _ := s.modules.Employee().GetEmployeeById(ctx, registerInfo.Id)
+
+		if reflect.ValueOf(targetEmployee).IsNil() {
+			// 将新用户设置至主体中  TODO 需要封装
+			data := co_do.CompanyEmployee{
+				Id:          registerInfo.Id,
+				No:          nil, // 工号暂定
+				Avatar:      nil, // 头像等后期用户登陆系统进行完善
+				Name:        registerInfo.Username,
+				Mobile:      registerInfo.Mobile,
+				UnionMainId: fromUserEmployee.UnionMainId,
+				State:       0, // 状态：待确认
+				CreatedBy:   invite.UserId,
+				CreatedAt:   gtime.Now(),
+			}
+
+			affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).OmitNilData().Data(data))
+			if affected == 0 || err != nil {
+				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
+			}
+		}
+
+		ret = true
+		return nil
+	})
+
+	return ret, err
 }
 
 // FactoryMakeResponseInstance 响应实例工厂方法
@@ -213,15 +264,11 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) GetCompanyById(ctx context.Context, id int64) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+
 	if id == 0 {
 		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
 	}
 	m := s.dao.Company.Ctx(ctx)
-
-	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId && sessionUser.UnionMainId != id {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
-	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
