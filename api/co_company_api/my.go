@@ -13,6 +13,8 @@ type GetCompanyReq struct{}
 
 type GetTeamsReq struct {
 	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
+	IsFilterOwner bool `json:"isFilterOwner" dc:"是否筛出所有者"`
+	IsFilterCreate bool `json:"isFilterCreate" dc:"是否晒出创建者"`
 }
 
 type SetAvatarReq struct {

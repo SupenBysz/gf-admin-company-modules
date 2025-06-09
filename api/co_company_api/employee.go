@@ -61,3 +61,8 @@ type SetEmployeeStateReq struct {
 	Id    int64 `json:"id"       v:"required#ID校验失败"     dc:"ID，保持与USERID一致" `
 	State int   `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 }
+
+type SetEmployeeCommissionRateReq struct {
+	UserId         int64 `json:"userId"       v:"required#用户ID校验失败"     dc:"用户ID"`
+	CommissionRate int   `json:"commissionRate"        v:"in:0,1#请选择佣金比例" dc:"佣金比例：0不参与，1参与"`
+}

@@ -1,4 +1,4 @@
-package tableview
+package views
 
 import (
 	"context"
@@ -38,7 +38,7 @@ func (s *sFdRechargeView) QueryAccountRecharge(ctx context.Context, search *base
 		isExport = gconv.Bool(ctx.Value("isExport"))
 	}
 
-	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx), search, isExport)
+	data, err := daoctl.Query[co_model.FdRechargeViewRes](co_dao.FdRechargeView.Ctx(ctx).OrderDesc(co_dao.FdRechargeView.Columns().PaymentAt), search, isExport)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &co_model.FdRechargeViewListRes{}, nil
@@ -47,7 +47,7 @@ func (s *sFdRechargeView) QueryAccountRecharge(ctx context.Context, search *base
 	}
 
 	result := &co_model.FdRechargeViewListRes{}
-	gconv.Struct(data, &result)
+	_ = gconv.Struct(data, &result)
 
 	return result, nil
 }
@@ -86,7 +86,7 @@ func (s *sFdRechargeView) GetRechargeByAccountId(ctx context.Context, id int64) 
 	}
 
 	result := &co_model.FdRechargeViewListRes{}
-	gconv.Struct(data, &result)
+	_ = gconv.Struct(data, &result)
 
 	return result, nil
 }
@@ -109,7 +109,7 @@ func (s *sFdRechargeView) GetRechargeByUserId(ctx context.Context, id int64) (*c
 	}
 
 	result := &co_model.FdRechargeViewListRes{}
-	gconv.Struct(data, &result)
+	_ = gconv.Struct(data, &result)
 
 	return result, nil
 }
@@ -132,7 +132,7 @@ func (s *sFdRechargeView) GetRechargeByCompanyId(ctx context.Context, id int64) 
 	}
 
 	result := &co_model.FdRechargeViewListRes{}
-	gconv.Struct(data, &result)
+	_ = gconv.Struct(data, &result)
 
 	return result, nil
 }

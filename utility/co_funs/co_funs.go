@@ -161,5 +161,5 @@ func ApplyUserRestrictions(m *gdb.Model) *gdb.Model {
 	}
 
 	// 对于非平台用户，限制查询结果仅为当前用户的数据。
-	return m.Where(m.Builder().Where("UnionMainId", sessionContent.UnionMainId))
+	return m.Where(m.Builder().Where("union_main_id", sessionContent.UnionMainId))
 }

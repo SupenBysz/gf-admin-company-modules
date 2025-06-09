@@ -16,7 +16,7 @@ type IMy interface {
 	GetCompany(ctx context.Context, _ *co_company_api.GetCompanyReq) (*co_model.MyCompanyRes, error)
 
 	// GetTeams 获取当前团队信息
-	GetTeams(ctx context.Context, _ *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error)
+	GetTeams(ctx context.Context, req *co_company_api.GetTeamsReq) (co_model.MyTeamListRes, error)
 
 	// SetAvatar 设置头像
 	SetAvatar(ctx context.Context, req *co_company_api.SetAvatarReq) (api_v1.BoolRes, error)

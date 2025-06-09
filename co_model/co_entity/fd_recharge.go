@@ -10,7 +10,7 @@ import (
 
 // FdRecharge is the golang structure for table fd_recharge.
 type FdRecharge struct {
-	Id             int64       `json:"id"             orm:"id"               description:"唯一标识每一条充值记录"`
+	Id             int64       `json:"id"             orm:"id"               description:""`
 	UserId         int64       `json:"userId"         orm:"user_id"          description:"用户ID，关联用户表主键，用于标识充值所属用户"`
 	Username       string      `json:"username"       orm:"username"         description:"用户账号，冗余存储方便快速查询用户相关充值记录，无需每次都关联用户表"`
 	CurrencyCode   string      `json:"currencyCode"   orm:"currency_code"    description:"货币代码，如CNY（人民币）、USD（美元）等"`

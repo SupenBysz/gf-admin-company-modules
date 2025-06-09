@@ -41,4 +41,7 @@ type IEmployee[TIRes co_model.IEmployeeRes] interface {
 
 	// SetEmployeeState 设置员工状态
 	SetEmployeeState(ctx context.Context, req *co_company_api.SetEmployeeStateReq) (api_v1.BoolRes, error)
+
+	// SetCommissionRate 设置员工提成比例
+	SetCommissionRate(ctx context.Context, req *co_company_api.SetEmployeeCommissionRateReq) (api_v1.BoolRes, error)
 }

@@ -35,15 +35,18 @@ type FdAccountBillsColumns struct {
 	Amount        string // 交易金额
 	AfterBalance  string // 交易后账户余额
 	UnionOrderId  string // 关联业务订单ID
+	UnionMainId   string // 关联单位ID
 	InOutType     string // 收支类型：1收入，2支出
 	TradeType     string // 交易类型，1转账、2消费、4退款、8佣金、16保证金、32诚意金、64手续费/服务费、128提现、256充值、512营收，8192其它
 	TradeAt       string // 交易时间
 	Remark        string // 备注信息
 	TradeState    string // 交易状态：1待支付、2支付中、4已支付、8取消支付、16交易完成、32退款中、64已退款、128支付超时、256已关闭
+	HandlingFee   string // 手续费，当前记录产生的手续费，如果有的话
+	ExtJson       string // 扩展数据
 	DeletedAt     string //
+	DeletedBy     string //
 	CreatedAt     string //
 	CreatedBy     string //
-	HandlingFee   string // 手续费，当前记录产生的手续费，如果有的话
 }
 
 // fdAccountBillsColumns holds the columns for table co_fd_account_bills.
@@ -56,15 +59,18 @@ var fdAccountBillsColumns = FdAccountBillsColumns{
 	Amount:        "amount",
 	AfterBalance:  "after_balance",
 	UnionOrderId:  "union_order_id",
+	UnionMainId:   "union_main_id",
 	InOutType:     "in_out_type",
 	TradeType:     "trade_type",
 	TradeAt:       "trade_at",
 	Remark:        "remark",
 	TradeState:    "trade_state",
+	HandlingFee:   "handling_fee",
+	ExtJson:       "ext_json",
 	DeletedAt:     "deleted_at",
+	DeletedBy:     "deleted_by",
 	CreatedAt:     "created_at",
 	CreatedBy:     "created_by",
-	HandlingFee:   "handling_fee",
 }
 
 // NewFdAccountBillsDao creates and returns a new DAO object for table data access.
