@@ -12,7 +12,7 @@ import (
 // FdRecharge is the golang structure of table co_fd_recharge for DAO operations like Where/Data.
 type FdRecharge struct {
 	g.Meta         `orm:"table:co_fd_recharge, do:true"`
-	Id             interface{} // 唯一标识每一条充值记录
+	Id             interface{} //
 	UserId         interface{} // 用户ID，关联用户表主键，用于标识充值所属用户
 	Username       interface{} // 用户账号，冗余存储方便快速查询用户相关充值记录，无需每次都关联用户表
 	CurrencyCode   interface{} // 货币代码，如CNY（人民币）、USD（美元）等

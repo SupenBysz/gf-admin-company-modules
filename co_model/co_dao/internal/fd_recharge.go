@@ -27,7 +27,7 @@ type FdRechargeDao struct {
 
 // FdRechargeColumns defines and stores column names for table co_fd_recharge.
 type FdRechargeColumns struct {
-	Id             string // 唯一标识每一条充值记录
+	Id             string //
 	UserId         string // 用户ID，关联用户表主键，用于标识充值所属用户
 	Username       string // 用户账号，冗余存储方便快速查询用户相关充值记录，无需每次都关联用户表
 	CurrencyCode   string // 货币代码，如CNY（人民币）、USD（美元）等
