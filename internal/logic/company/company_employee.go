@@ -707,10 +707,11 @@ func (s *sEmployee[
 		if *info.No == "" && !s.modules.GetConfig().AllowEmptyNo {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoNotNull}"), s.modules.Dao().Employee.Table())
 		}
-	}
-	// 校验工号是否已存在
-	if s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.modules.Dao().Employee.Table())
+
+		// 校验工号是否已存在
+		if s.HasEmployeeByNo(ctx, *info.No, employee.Data().UnionMainId, info.Id) {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NoAlreadyExists}"), s.modules.Dao().Employee.Table())
+		}
 	}
 
 	data := kconv.Struct(info, &co_do.CompanyEmployee{})

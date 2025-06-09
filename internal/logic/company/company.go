@@ -657,13 +657,7 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) GetCompanyDetail(ctx context.Context, id int64) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
-
 	m := s.dao.Company.Ctx(ctx)
-
-	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
-		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
-	}
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
