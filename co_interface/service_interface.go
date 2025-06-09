@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
@@ -42,6 +43,8 @@ type (
 		UpdateCompany(ctx context.Context, info *co_model.Company) (response TR, err error)
 		// GetCompanyDetail 获取公司详情，包含完整商务联系人电话
 		GetCompanyDetail(ctx context.Context, id int64) (response TR, err error)
+		// SetNewUserJoinCompanyHook 设置新用户加入公司行为
+		SetNewUserJoinCompanyHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, info *sys_entity.SysInvitePerson, registerInfo *sys_model.SysUser) (bool, error)
 	}
 
 	IEmployeeBase interface {
