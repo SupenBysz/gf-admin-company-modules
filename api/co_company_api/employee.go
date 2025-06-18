@@ -64,5 +64,5 @@ type SetEmployeeStateReq struct {
 
 type SetEmployeeCommissionRateReq struct {
 	UserId         int64 `json:"userId"       v:"required#用户ID校验失败"     dc:"用户ID"`
-	CommissionRate int   `json:"commissionRate"        v:"in:0,1#请选择佣金比例" dc:"佣金比例：0不参与，1参与"`
+	CommissionRate int   `json:"commissionRate" v:"required#佣金比例校验失败" dc:"佣金比例"`
 }

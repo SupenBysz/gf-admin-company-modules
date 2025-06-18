@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"github.com/SupenBysz/gf-admin-community/sys_consts"
+	"github.com/SupenBysz/gf-admin-company-modules/co_service"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"math"
 	"reflect"
 	"strconv"
@@ -202,9 +206,153 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) injectHook() {
 	sys_service.Jwt().InstallHook(s.modules.GetConfig().UserType, s.jwtHookFunc)
+	sys_service.SysAuth().InstallInviteRegisterHook(sys_enum.Invite.Type.Register, s.authRegisterHook)
 	sys_service.SysAuth().InstallHook(sys_enum.Auth.ActionType.Login, s.modules.GetConfig().UserType, s.authHookFunc)
 	sys_service.SysUser().InstallHook(sys_enum.User.Event.BeforeCreate, s.userHookFunc)
 	sys_service.SysRole().InstallInviteRegisterHook(sys_enum.Role.Change.Remove, s.removeRoleMember)
+}
+
+func (s *sEmployee[
+	ITCompanyRes,
+	TR,
+	ITTeamRes,
+	ITFdAccountRes,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) authRegisterHook(ctx context.Context, state sys_enum.InviteType, invite *sys_model.InviteRes, invitePerson *sys_entity.SysInvitePerson, registerInfo *sys_model.SysUser) (bool, error) {
+	if s.modules.GetConfig().UserType.Code() != registerInfo.Type {
+		return false, nil
+	}
+
+	config, err := sys_consts.Global.GetClientConfig(ctx)
+
+	if err != nil {
+		return false, errors.Join(err, errors.New(""))
+	}
+
+	if !config.EnableInviteRegister {
+		return false, nil
+	}
+
+	jsonObj, err := gjson.DecodeToJson(invite.Value)
+
+	if jsonObj == nil || err != nil {
+		return false, errors.Join(err, errors.New("error_invite_code_error"))
+	}
+
+	toUserType := jsonObj.Get("ToUserType").Int()
+
+	fromUserEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, invitePerson.FormUserId, false)
+
+	if err != nil {
+		return false, err
+	}
+
+	if toUserType != fromUserEmployee.CompanyType {
+		return false, nil
+	}
+
+
+	newEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, registerInfo.Id, false)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return false, err
+	}
+
+	if newEmployee != nil {
+		return true, nil
+	}
+
+	if fromUserEmployee.CompanyType != registerInfo.Type {
+		return false, nil
+	}
+
+	err = g.DB().Transaction(ctx, func(ctx context.Context, tx gdb.TX) (err error) {
+		// 将新用户设置至主体中
+		data := co_model.Employee{
+			Id:          registerInfo.Id,
+			Name:        registerInfo.Username,
+			Mobile:      registerInfo.Mobile,
+			UnionMainId: fromUserEmployee.UnionMainId,
+			State:       1, // 状态：待确认
+			HiredAt:     gtime.Now(),
+			CreatedBy:   invite.UserId,
+			Email:       registerInfo.Email,
+		}
+
+		// 创建员工信息
+		_, err = s.modules.Employee().CreateEmployee(ctx, &data, registerInfo)
+
+		if err != nil {
+			return err
+		}
+
+		{
+
+			_, err = s.modules.Company().SetNewUserJoinCompanyHook(ctx, sys_enum.Invite.Type.Register, invite, invitePerson, registerInfo)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		{
+			coConfig, err := co_consts.Global.GetClientConfig(ctx)
+
+			if err != nil {
+				return err
+			}
+
+			if coConfig != nil && coConfig.RegisterBindMemberLevelId > 0 {
+				// 设置默认会员等级
+				_, err = sys_service.SysMemberLevel().AddMemberLevelUser(ctx, 680135658520645, []int64{registerInfo.Id})
+
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		{
+			_, err = sys_service.SysInvite().CreateInvite(ctx, &sys_model.Invite{
+				UserId: registerInfo.Id,
+				Value: gjson.MustEncodeString(map[string]any{
+					"UnionMainId":      fromUserEmployee.Id,
+					"IsInviteCustomer": true,
+					"ToUserType":       registerInfo.Type,
+				}),
+				ExpireAt:       nil,
+				ActivateNumber: -1,
+				State:          sys_enum.Invite.State.Normal.Code(),
+				Type:           sys_enum.Invite.Type.Register.Code(),
+				Identifier:     fmt.Sprintf("%v%v", "my_customer_invite_", registerInfo.Id),
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+
+		//{
+		//	if invitePerson.CompanyIdentifierPrefix != "" {
+		//		invitePerson.CompanyIdentifierPrefix = fmt.Sprintf("%v::%v", invitePerson.CompanyIdentifierPrefix, newEmployee.UnionMainId)
+		//	} else {
+		//		if fromUserEmployee != nil {
+		//			invitePerson.CompanyIdentifierPrefix = fmt.Sprintf("%v::%v", fromUserEmployee.UnionMainId, newEmployee.UnionMainId)
+		//		} else {
+		//			invitePerson.CompanyIdentifierPrefix = fmt.Sprintf("%v", newEmployee.UnionMainId)
+		//		}
+		//	}
+		//	_, err = sys_service.SysInvite().SetInviteCompanyIdentifierPrefix(ctx, invitePerson.Id, invitePerson.CompanyIdentifierPrefix)
+		//}
+
+		return nil
+	})
+
+	return err == nil, err
 }
 
 // removeRoleMember 判断是否能移除角色成员逻辑
@@ -697,8 +845,10 @@ func (s *sEmployee[
 
 	// 校验员工名称是否已存在
 	if info.Name != nil {
+		config, _ := co_consts.Global.GetClientConfig(ctx)
+
 		// 重名 & 系统不允许员工重名
-		if s.HasEmployeeByName(ctx, *info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
+		if s.HasEmployeeByName(ctx, *info.Name, info.Id) && (config == nil || !config.EmployeeNameCanRepeated) {
 			return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.modules.Dao().Employee.Table())
 		}
 	}
@@ -756,6 +906,7 @@ func (s *sEmployee[
 			data.UpdatedAt = gtime.Now()
 			// unionMainId不能修改，强制为nil
 			data.UnionMainId = nil
+			data.CommissionRate = info.CommissionRate
 			//data.Mobile = nil
 			data.Id = nil
 
@@ -846,9 +997,11 @@ func (s *sEmployee[
 		info.UnionMainId = sessionUser.UnionMainId
 	}
 
+	config, err := co_consts.Global.GetClientConfig(ctx)
+
 	// 校验员工名称是否已存在
-	if s.HasEmployeeByName(ctx, info.Name, info.Id) && !co_consts.Global.EmployeeNameCanRepeated {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.modules.Dao().Employee.Table())
+	if s.HasEmployeeByName(ctx, info.Name, info.Id) && (config == nil || !config.EmployeeNameCanRepeated) {
+		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#EmployeeName}{#error_NameAlreadyExists}"), s.modules.Dao().Employee.Table())
 	}
 
 	// 校验工号是否允许为空
@@ -924,6 +1077,7 @@ func (s *sEmployee[
 			data.CreatedBy = sessionUser.Id
 			data.CreatedAt = gtime.Now()
 			data.UnionMainId = info.UnionMainId
+			data.CommissionRate = info.CommissionRate
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(data)
@@ -945,6 +1099,25 @@ func (s *sEmployee[
 
 			if err != nil {
 				return err
+			}
+
+			// 判断是否有财务账户，没有则根据配置决定是否创建
+			clientConfig, _ := co_consts.Global.GetClientConfig(ctx)
+
+			if clientConfig != nil {
+				if clientConfig.AutoCreateUserFinanceAccount {
+					_, err := s.modules.Account().CreateAccount(ctx, co_model.FdAccountRegister{
+						Name:          co_enum.Finance.AccountType.System.Description(),
+						UnionUserId:   bindUser.Id,
+						UnionMainId:   info.UnionMainId,
+						AccountType:   co_enum.Finance.AccountType.System.Code(),
+						AccountNumber: gconv.String(bindUser.Id),
+					}, sessionUser.Id)
+
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
 
@@ -1267,13 +1440,28 @@ func (s *sEmployee[
 		return false, err
 	}
 
-	actionEmployee, _ := s.modules.Employee().GetEmployeeById(ctx, actionUserId)
+	actionEmployee, _ := co_service.EmployeeView().GetEmployeeById(ctx, actionUserId, true)
 
-	if reflect.ValueOf(actionEmployee).IsNil() || actionEmployee.Data().UnionMainId != employee.Data().UnionMainId {
+	invitePerson, err := sys_service.SysInvite().GetInvitePersonByUserId(ctx, userId)
+
+	canOperation := false
+
+	if invitePerson != nil {
+		canOperation = invitePerson.FormUserId == actionUserId
+		if !canOperation {
+			inviteEmployee, _ := co_service.EmployeeView().GetEmployeeById(ctx, invitePerson.FormUserId, true)
+
+			if inviteEmployee != nil {
+				canOperation = inviteEmployee.UnionMainId == actionEmployee.UnionMainId
+			}
+		}
+	}
+
+	if canOperation == false && (reflect.ValueOf(actionEmployee).IsNil() || actionEmployee.UnionMainId != employee.Data().UnionMainId) {
 		return false, errors.New("error_illegal_operation")
 	}
 
-	canMaxCommissionRate := 100
+	canMaxCommissionRate := 10000
 
 	if commissionRate < 0 || commissionRate > canMaxCommissionRate {
 		return false, errors.New("error_commission_rate_must_be_between_0_and_" + gconv.String(canMaxCommissionRate))
