@@ -49,6 +49,14 @@ service:
           employeeCommissionLevelMode: 1
           # 员工提成分配级别（仅作用于员工）
           employeeCommissionAllocationLevel: 3
+          # 是否允许主体下的不同团队内的小组同名: true允许、false不允许
+          groupNameCanRepeated: true
+          # 是否允许主体下的员工同名: true允许、false不允许
+          employeeNameCanRepeated: false
+          # 是否自动创建财务账户: true自动创建、false不创建
+          autoCreateUserFinanceAccount:  true
+          # 注册时绑定的会员等级ID，0为不绑定
+          registerBindMemberLevelId: 680135658520645
     # 超级管理员主体ID
     superAdminMainId: 1
     # 需要存储到数据库中的日志，支持：all,error,warn,info
@@ -60,10 +68,6 @@ service:
     defaultCurrency: 'CNY'
     # Session上下文缓存Key
     sessionContextKey: 'KysionCompanyBizCtxContextKye'
-    # 是否允许主体下的不同团队内的小组同名: true允许、false不允许
-    groupNameCanRepeated: true
-    # 是否允许主体下的员工同名: true允许、false不允许
-    employeeNameCanRepeated: false
     # 是否部署NFS文件系统
     isDeployNFS: false
     # 是否开启发送验证码，默认false时不会真的发送验证码，且相关表单默认验证码为 666666。正式环境建议配置好相关参数后，这里需要设置为 true 才能真正发送验证码

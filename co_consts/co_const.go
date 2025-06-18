@@ -20,15 +20,6 @@ type global struct {
 
 	PlatformUserTypeArr []int
 
-	// 是否允许主体下的不同团队内的小组同名
-	GroupNameCanRepeated bool
-
-	// 是否允许主体下的员工同名
-	EmployeeNameCanRepeated bool
-
-	// 是否自动创建员工财务账户
-	AutoCreateUserFinanceAccount bool
-
 	// 客户端配置
 	ClientConfig []co_model.ClientConfig
 }
@@ -49,9 +40,6 @@ var (
 func init() {
 	defaultCurrency, _ := g.Cfg().Get(context.Background(), "service.defaultCurrency")
 	Global.DefaultCurrency = defaultCurrency.String()
-	Global.GroupNameCanRepeated = g.Cfg().MustGet(context.Background(), "service.groupNameCanRepeated", false).Bool()
-	Global.EmployeeNameCanRepeated = g.Cfg().MustGet(context.Background(), "service.employeeNameCanRepeated", true).Bool()
-	Global.AutoCreateUserFinanceAccount = g.Cfg().MustGet(context.Background(), "service.autoCreateUserFinanceAccount", true).Bool()
 	Global.PlatformUserTypeArr = g.Cfg().MustGet(context.Background(), "service.platformUserType", []int{}).Ints()
 
 	for _, clientConfig := range g.Cfg().MustGet(context.Background(), "service.clientConfig").Array() {
@@ -62,6 +50,10 @@ func init() {
 			EmployeeCommissionModel:           co_enum.Common.EmployeeCommissionMode.Superior.Code(),
 			EmployeeCommissionLevelMode:       co_enum.Common.EmployeeCommissionLevelMode.Superior.Code(),
 			EmployeeCommissionAllocationLevel: 3,
+			GroupNameCanRepeated:              false,
+			EmployeeNameCanRepeated:           false,
+			AutoCreateUserFinanceAccount:      false,
+			RegisterBindMemberLevelId:         0,
 		}
 
 		err := gconv.Struct(clientConfig, &configItem)
@@ -86,8 +78,8 @@ func (s global) GetClientConfig(ctx context.Context) (*co_model.ClientConfig, er
 	return nil, gerror.NewCode(gcode.CodeNotAuthorized, "error_client_info_incorrect")
 }
 
-func(s global) GetClientConfigByKey( ctx context.Context, key string) (*co_model.ClientConfig, error) {
-	 for _, v := range s.ClientConfig {
+func (s global) GetClientConfigByKey(ctx context.Context, key string) (*co_model.ClientConfig, error) {
+	for _, v := range s.ClientConfig {
 		if strings.EqualFold(v.XClientToken, key) {
 			return &v, nil
 		}
