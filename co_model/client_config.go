@@ -21,4 +21,12 @@ type ClientConfig struct {
 	EmployeeCommissionLevelMode int `json:"employee_commission_level_mode"     dc:"员工提成分配等级模式"`
 	// 员工提成分配级别（仅作用于员工）
 	EmployeeCommissionAllocationLevel int `json:"employee_commission_allocation_level" dc:"员工提成分配级别"`
+	// 是否允许主体下的不同团队内的小组同名
+	GroupNameCanRepeated bool `json:"group_name_can_repeated" dc:"是否允许主体下的不同团队内的小组同名"`
+	// 是否允许主体下的员工同名
+	EmployeeNameCanRepeated bool `json:"employee_name_can_repeated" dc:"是否允许主体下的员工同名"`
+	// 是否自动创建员工财务账户
+	AutoCreateUserFinanceAccount bool `json:"auto_create_user_finance_account" dc:"是否自动创建员工财务账户"`
+	// 是否自动创建财务账户: true自动创建、false不创建
+	RegisterBindMemberLevelId int64 `json:"register_bind_member_level_id" dc:"是否自动创建财务账户: true自动创建、false不创建"`
 }
