@@ -231,7 +231,9 @@ func (s *sTeam[
 		UnionMainId: unionMainId,
 	})
 
-	if parentId != 0 && co_consts.Global.GroupNameCanRepeated { //
+	config, _ := co_consts.Global.GetClientConfig(ctx)
+
+	if parentId != 0 && (config != nil && config.GroupNameCanRepeated) { //
 		model = model.Where(co_do.CompanyTeam{ParentId: parentId})
 	}
 

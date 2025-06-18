@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_consts"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
@@ -140,18 +142,28 @@ func (s *sCompany[
 	jsonObj, err := gjson.DecodeToJson(invite.Value)
 
 	if jsonObj == nil || err != nil {
-		return false, errors.Join(err, errors.New("error_parameter_error"))
+		return false, errors.Join(err, errors.New("error_invite_code_error"))
 	}
 
 	userType := s.modules.GetConfig().UserType.Code()
 	toUserType := jsonObj.Get("ToUserType").Int()
 
-	if !jsonObj.Contains("ToUserType") || toUserType != userType {
+	if userType != toUserType {
 		return false, nil
 	}
 
-	// 如下的逻辑：符合邀约的情况，为xx主体邀请新用户，下列逻辑只是将新用户设置为该主体的员工
-	if state.Code() != sys_enum.Invite.Type.Register.Code() {
+	if s.modules.GetConfig().UserType.Code() != toUserType {
+		return false, nil
+	}
+
+	employee, err := co_service.EmployeeView().GetEmployeeById(ctx, registerInfo.Id, false)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return false, err
+	}
+
+	// 如果已经存在，则返回false
+	if employee != nil {
 		return false, nil
 	}
 
@@ -162,6 +174,18 @@ func (s *sCompany[
 		fromUserEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, invite.UserId, false)
 		if err != nil || fromUserEmployee == nil {
 			return nil
+		}
+
+		// 创建主体
+		newCompanyInfo, err := s.modules.Company().CreateCompany(ctx, &co_model.Company{
+			Name:          &registerInfo.Username,
+			ContactName:   &registerInfo.Username,
+			ContactMobile: &registerInfo.Mobile,
+			ParentId:      fromUserEmployee.UnionMainId,
+		}, registerInfo)
+
+		if err != nil {
+			return err
 		}
 
 		{
@@ -177,9 +201,9 @@ func (s *sCompany[
 				InvitePerson, _ := sys_service.SysInvite().GetInvitePersonByUserId(ctx, invite.UserId)
 				if InvitePerson != nil {
 					if InvitePerson.CompanyIdentifierPrefix == "" {
-						SubInvitePersonData.CompanyIdentifierPrefix = gconv.String(fromUserEmployee.UnionMainId) + "::" + gconv.String(fromUserEmployee.UnionMainId)
+						SubInvitePersonData.CompanyIdentifierPrefix = gconv.String(fromUserEmployee.UnionMainId) + "::" + gconv.String(newCompanyInfo.Data().Id)
 					} else {
-						SubInvitePersonData.CompanyIdentifierPrefix = InvitePerson.CompanyIdentifierPrefix + "::" + gconv.String(fromUserEmployee.UnionMainId)
+						SubInvitePersonData.CompanyIdentifierPrefix = InvitePerson.CompanyIdentifierPrefix + "::" + gconv.String(newCompanyInfo.Data().Id)
 					}
 
 					// 更新被邀请公司级别标识符信息
@@ -188,7 +212,10 @@ func (s *sCompany[
 					if err != nil {
 						return err
 					}
+				} else {
+					SubInvitePersonData.CompanyIdentifierPrefix = gconv.String(newCompanyInfo.Data().Id)
 				}
+
 			}
 
 			// 创建邀约级别关系
@@ -198,31 +225,42 @@ func (s *sCompany[
 				return err
 			}
 		}
+		{
+			{
+				coConfig, err := co_consts.Global.GetClientConfig(ctx)
 
-		if fromUserEmployee.CompanyType != s.modules.GetConfig().UserType.Code() {
-			ret = true
-			return nil
-		}
+				if err != nil {
+					return err
+				}
 
-		targetEmployee, _ := s.modules.Employee().GetEmployeeById(ctx, registerInfo.Id)
+				if coConfig != nil && coConfig.RegisterBindMemberLevelId > 0 {
+					// 设置默认会员等级
+					_, err = sys_service.SysMemberLevel().AddMemberLevelUser(ctx, 680135658520645, []int64{registerInfo.Id})
 
-		if reflect.ValueOf(targetEmployee).IsNil() {
-			// 将新用户设置至主体中  TODO 需要封装
-			data := co_do.CompanyEmployee{
-				Id:          registerInfo.Id,
-				No:          nil, // 工号暂定
-				Avatar:      nil, // 头像等后期用户登陆系统进行完善
-				Name:        registerInfo.Username,
-				Mobile:      registerInfo.Mobile,
-				UnionMainId: fromUserEmployee.UnionMainId,
-				State:       0, // 状态：待确认
-				CreatedBy:   invite.UserId,
-				CreatedAt:   gtime.Now(),
+					if err != nil {
+						return err
+					}
+				}
 			}
 
-			affected, err := daoctl.InsertWithError(s.modules.Dao().Employee.Ctx(ctx).OmitNilData().Data(data))
-			if affected == 0 || err != nil {
-				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Employee_Save_Failed"), s.modules.Dao().Employee.Table())
+			{
+				_, err = sys_service.SysInvite().CreateInvite(ctx, &sys_model.Invite{
+					UserId: registerInfo.Id,
+					Value: gjson.MustEncodeString(map[string]any{
+						"UnionMainId":      fromUserEmployee.Id,
+						"IsInviteCustomer": true,
+						"ToUserType":       registerInfo.Type,
+					}),
+					ExpireAt:       nil,
+					ActivateNumber: -1,
+					State:          sys_enum.Invite.State.Normal.Code(),
+					Type:           sys_enum.Invite.Type.Register.Code(),
+					Identifier:     fmt.Sprintf("%v%v", "my_customer_invite_", registerInfo.Id),
+				})
+
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -368,7 +406,7 @@ func (s *sCompany[
 
 	m := s.dao.Company.Ctx(ctx)
 
-	if !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
+	if !slices.Contains(co_consts.Global.PlatformUserTypeArr, sessionUser.Type) && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
 		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
 	}
 
@@ -545,7 +583,9 @@ func (s *sCompany[
 			// 3.构建公司信息
 			data.Id = unionMainId
 			info.Id = unionMainId
-			if sessionUser.Type > 4 {
+			data.ParentId = info.ParentId
+			data.CommissionRate = info.CommissionRate
+			if sessionUser.Type > 4 && info.ParentId == 0 {
 				data.ParentId = sessionUser.UnionMainId
 			}
 			data.CreatedBy = sessionUser.Id
@@ -566,27 +606,30 @@ func (s *sCompany[
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
 
-			// 4.创建主财务账号  通用账户
-			accountData := co_do.FdAccount{}
-			_ = gconv.Struct(info, &accountData)
-
-			account := &co_model.FdAccountRegister{
-				Name: *info.Name,
-				//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
-
-				UnionUserId:        gconv.Int64(data.UserId),
-				UnionMainId:        unionMainId,
-				CurrencyCode:       "CNY",
-				PrecisionOfBalance: 100,
-				SceneType:          0,                                         // 不限
-				AccountType:        co_enum.Finance.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
-				AccountNumber:      "",                                        // 账户编号
-				AllowExceed:        1,                                         // 系统账号默认是可以存在负余额
-			}
-
-			createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)
-			if err != nil || reflect.ValueOf(createAccount).IsNil() {
-				return err
+			{
+				// 创建员工账户时会自动根据配置创建财务账户，所以这里注释掉不需要了
+				// 4.创建主财务账号  通用账户
+				//accountData := co_do.FdAccount{}
+				//_ = gconv.Struct(info, &accountData)
+				//
+				//account := &co_model.FdAccountRegister{
+				//	Name: *info.Name,
+				//	//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
+				//
+				//	UnionUserId:        gconv.Int64(data.UserId),
+				//	UnionMainId:        unionMainId,
+				//	CurrencyCode:       "CNY",
+				//	PrecisionOfBalance: 100,
+				//	SceneType:          0,                                         // 不限
+				//	AccountType:        co_enum.Finance.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
+				//	AccountNumber:      "",                                        // 账户编号
+				//	AllowExceed:        1,                                         // 系统账号默认是可以存在负余额
+				//}
+				//
+				//createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)
+				//if err != nil || reflect.ValueOf(createAccount).IsNil() {
+				//	return err
+				//}
 			}
 
 		} else {
@@ -695,21 +738,41 @@ func (s *sCompany[
 		return false, err
 	}
 
-	//if companyInfo.UserId == actionUserId {
-	//	return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
-	//}
+	if companyInfo.UserId == actionUserId {
+		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	}
 
-	//actionUser, err := sys_service.SysUser().GetSysUserById(ctx, actionUserId)
-	//if err != nil {
-	//	return false, err
-	//}
+	actionUser, err := sys_service.SysUser().GetSysUserById(ctx, actionUserId)
+	if err != nil {
+		return false, err
+	}
+
+	canOperation := slices.Contains(co_consts.Global.PlatformUserTypeArr, actionUser.Type)
 
 	// 限制同级用户或单位进行佣金的配置
-	//if actionUser.Type <= s.modules.GetConfig().UserType.Code() {
-	//	return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
-	//}
+	if !slices.Contains(co_consts.Global.PlatformUserTypeArr, actionUser.Type) && actionUser.Type <= s.modules.GetConfig().UserType.Code() {
+		return false, errors.New("error_only_your_superior_has_the_authority_to_set_it._please_contact_your_superior")
+	}
 
-	canMaxCommissionRate := 100
+	invitePerson, err := sys_service.SysInvite().GetInvitePersonByUserId(ctx, companyInfo.UserId)
+
+
+	if invitePerson != nil {
+		canOperation = invitePerson.FormUserId == actionUserId
+		if !canOperation {
+			inviteEmployee, _ := co_service.EmployeeView().GetEmployeeById(ctx, invitePerson.FormUserId, true)
+
+			if inviteEmployee != nil {
+				canOperation = inviteEmployee.UnionMainId == companyInfo.Id
+			}
+		}
+	}
+
+	if !canOperation {
+		return false, errors.New("error_illegal_operation")
+	}
+
+	canMaxCommissionRate := 10000
 
 	// 佣金模式如果相对成交金额则不超过上级佣金百分比，否则将相对于上级佣金收益的百分比
 	clientConfig, err := co_consts.Global.GetClientConfig(ctx)
