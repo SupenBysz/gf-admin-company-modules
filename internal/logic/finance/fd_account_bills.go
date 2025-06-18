@@ -141,6 +141,27 @@ func (s *sFdAccountBills[
 	return instance
 }
 
+// HasAccountBillsByUnionMainId 获取财务账单
+func (s *sFdAccountBills[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	ITFdAccountRes,
+	TR,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) HasAccountBillsByUnionMainId(ctx context.Context, accountId, unionOrderId, unionMainId int64) (bool, error) {
+	count, err := s.dao.FdAccountBills.Ctx(ctx).
+		Where(s.dao.FdAccountBills.Columns().FdAccountId, accountId).
+		Where(s.dao.FdAccountBills.Columns().UnionOrderId, unionOrderId).
+		Where(s.dao.FdAccountBills.Columns().UnionMainId, unionMainId).
+		Count()
+
+	return count > 0, err
+}
+
 // CreateAccountBills 创建财务账单
 func (s *sFdAccountBills[
 	ITCompanyRes,

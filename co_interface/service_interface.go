@@ -261,6 +261,8 @@ type (
 		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
+		// HasAccountBillsByUnionOrderId 获取财务账单
+		HasAccountBillsByUnionMainId(ctx context.Context, accountId, unionOrderId, unionMainId int64) (bool, error)
 		// CreateAccountBills 创建财务账单
 		CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
 		// SetBillsTradeState 设置财务账单交易状态

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_entity"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_consts"
 	"github.com/SupenBysz/gf-admin-company-modules/co_interface"
@@ -35,15 +36,15 @@ import (
 )
 
 type sFdAccount[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+TR co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -61,15 +62,15 @@ type sFdAccount[
 }
 
 func NewFdAccount[
-	ITCompanyRes co_model.ICompanyRes,
-	ITEmployeeRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	TR co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+ITEmployeeRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+TR co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -145,12 +146,14 @@ func (s *sFdAccount[
 		}
 	}
 	// 判断货币代码是否符合标准
-	currency, err := co_service.FdCurrency().GetCurrencyByCode(ctx, info.CurrencyCode)
-	if err != nil || reflect.ValueOf(currency).IsNil() {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_CurrencyCode_Failed"), co_dao.FdCurrency.Table())
-	}
-	if currency.Data().IsLegalTender != 1 {
-		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), co_dao.FdCurrency.Table())
+	if info.CurrencyCode != "" {
+		currency, err := co_service.FdCurrency().GetCurrencyByCode(ctx, info.CurrencyCode)
+		if err != nil || reflect.ValueOf(currency).IsNil() {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Finance_CurrencyCode_Failed"), co_dao.FdCurrency.Table())
+		}
+		if currency.Data().IsLegalTender != 1 {
+			return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_PleaseUse_Legal_Currency"), co_dao.FdCurrency.Table())
+		}
 	}
 
 	// 生产随机id
@@ -407,11 +410,13 @@ func (s *sFdAccount[
 
 	data, err := daoctl.Query[TR](s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{UnionUserId: userId}), nil, false)
 
-	if err != nil || (len(data.Records) <= 0 && co_consts.Global.AutoCreateUserFinanceAccount == false) {
+	config, err := co_consts.Global.GetClientConfig(ctx)
+
+	if err != nil || (len(data.Records) <= 0 && (config != nil || config.AutoCreateUserFinanceAccount == false)) {
 		return nil, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_ThisUser_NotHas_Account"), s.dao.FdAccount.Table())
 	}
 
-	if co_consts.Global.AutoCreateUserFinanceAccount == true && len(data.Records) <= 0 {
+	if config != nil && config.AutoCreateUserFinanceAccount == true && len(data.Records) <= 0 {
 		employee, err := s.modules.Employee().GetEmployeeById(ctx, userId)
 
 		if err != nil {
@@ -857,110 +862,154 @@ func (s *sFdAccount[
 		return false, errors.Join(err, errors.New("{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"))
 	}
 
-	if companyInfo.CommissionRate > 0 {
-		// 4、查询作业员工所属公司财务默认账户信息
-		companyAccountInfo := base_funs.If[*co_model.FdAccountViewRes](
-			accountInfo.UnionUserId == companyEmployeeInfo.Id,
-			accountInfo,
-			func() *co_model.FdAccountViewRes {
-				_companyAccountInfo, err := s.GetUserDefaultFdAccountByUserId(ctx, companyEmployeeInfo.Id)
-				if err != nil {
-					panic(err)
-				}
-				return _companyAccountInfo
-			}(),
-		)
+	// 4、查询作业员工所属公司财务默认账户信息
+	companyAccountInfo := base_funs.If[*co_model.FdAccountViewRes](
+		accountInfo.UnionUserId == companyEmployeeInfo.Id,
+		accountInfo,
+		func() *co_model.FdAccountViewRes {
+			_companyAccountInfo, err := s.GetUserDefaultFdAccountByUserId(ctx, companyEmployeeInfo.Id)
+			if err != nil {
+				panic(err)
+			}
+			return _companyAccountInfo
+		}(),
+	)
 
-		// 创建公司佣金收入账单
-		var companyCommissionData *co_model.AccountBillsRegister
-		for _, module := range co_consts.ModuleArr {
-			if module.GetConfig().UserType.Code() == companyAccountInfo.FdAccountView.CompanyType {
-				commissionAmount := int64(0)
+	// 创建公司佣金收入账单
+	var companyCommissionData co_model.AccountBillsRegister
+	for _, module := range co_consts.ModuleArr {
+		if module.GetConfig().UserType.Code() == companyAccountInfo.FdAccountView.CompanyType {
+			commissionAmount := int64(0)
 
+			if info.BuyerUserId == companyEmployeeInfo.Id {
+				commissionAmount = remainderCommission
+			} else {
 				if clientConfig.CompanyCommissionModel == co_enum.Common.CompanyCommissionMode.Superior.Code() {
-					commissionAmount = int64(float64(info.Amount) * float64(companyInfo.CommissionRate/100))
+					commissionAmount = int64(float64(info.Amount) * float64(companyInfo.CommissionRate) / 100.0)
 				} else if clientConfig.CompanyCommissionModel == co_enum.Common.CompanyCommissionMode.TradeAmount.Code() {
-					rate := float64(companyInfo.CommissionRate)/100
-					commissionAmount = int64(float64(goodsTradeAmount) * rate)
-					// 更新剩余佣金
-					remainderCommission -= commissionAmount
+					if companyInfo.UserId != info.BuyerUserId {
+						rate := float64(companyInfo.CommissionRate) / 100
+						commissionAmount = int64(float64(goodsTradeAmount) * rate)
+						// 更新剩余佣金
+						remainderCommission -= commissionAmount
+					}
 				}
 
-				companyCommissionData = &co_model.AccountBillsRegister{}
-				_ = gconv.Struct(info, &companyCommissionData)
-				companyCommissionData.ToUserId = companyEmployeeInfo.Id
-				companyCommissionData.FdAccountId = companyAccountInfo.Id
-				companyCommissionData.UnionOrderId = info.UnionOrderId
-				companyCommissionData.UnionMainId = companyAccountInfo.FdAccountView.UnionUserId
-				companyCommissionData.Amount = commissionAmount
-				companyCommissionData.Remark = "佣金收入"
-				companyCommissionData.TradeType = co_enum.Finance.TradeType.Commission.Code()
-				companyCommissionData.InOutType = co_enum.Finance.InOutType.In.Code()
-				companyCommissionData.TradeAt = gtime.Now()
-				companyCommissionData.TradeState = co_enum.Finance.TradeState.Completed.Code()
-
-				_, err = module.GetIFdAccountBills().CreateAccountBills(ctx, *companyCommissionData)
+				has, err := module.GetIFdAccountBills().HasAccountBillsByUnionMainId(ctx, companyAccountInfo.Id, info.UnionOrderId, companyAccountInfo.FdAccountView.UnionUserId)
 
 				if err != nil {
-					return false, errors.Join(err, errors.New("{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"))
+					return false, err
 				}
 
-				// 计算员工提成，为ture时不需要重复创建同一资金账户佣金账单
-				isCompanyAccountInfo := accountInfo.Id == companyAccountInfo.Id
+				if !has && commissionAmount > 0 {
+					companyCommissionData = co_model.AccountBillsRegister{}
+					_ = gconv.Struct(info, &companyCommissionData)
+					companyCommissionData.ToUserId = companyEmployeeInfo.Id
+					companyCommissionData.FdAccountId = companyAccountInfo.Id
+					companyCommissionData.UnionOrderId = info.UnionOrderId
+					companyCommissionData.UnionMainId = companyAccountInfo.FdAccountView.UnionUserId
+					companyCommissionData.Amount = commissionAmount
+					companyCommissionData.Remark = "佣金收入"
+					companyCommissionData.TradeType = co_enum.Finance.TradeType.Commission.Code()
+					companyCommissionData.InOutType = co_enum.Finance.InOutType.In.Code()
+					companyCommissionData.TradeAt = gtime.Now()
+					companyCommissionData.TradeState = co_enum.Finance.TradeState.Completed.Code()
+					companyCommissionData.BuyerUserId = info.BuyerUserId
 
-				if !isCompanyAccountInfo {
-					if clientConfig.EmployeeCommissionModel == co_enum.Common.EmployeeCommissionMode.Superior.Code() {
-						commissionAmount = companyCommissionData.Amount * int64(companyEmployeeInfo.CommissionRate/100)
-					} else if clientConfig.EmployeeCommissionModel == co_enum.Common.EmployeeCommissionMode.TradeAmount.Code() {
-						commissionAmount = goodsTradeAmount * int64(companyInfo.CommissionRate/100)
-					}
-
-					employeeCommissionData := co_model.AccountBillsRegister{}
-					_ = gconv.Struct(info, &employeeCommissionData)
-					employeeCommissionData.ToUserId = accountInfo.UnionUserId
-					employeeCommissionData.FdAccountId = accountInfo.Id
-					employeeCommissionData.UnionOrderId = info.UnionOrderId
-					employeeCommissionData.UnionMainId = accountInfo.FdAccountView.Id
-					employeeCommissionData.Amount = commissionAmount
-					employeeCommissionData.Remark = "佣金收入"
-					employeeCommissionData.TradeType = co_enum.Finance.TradeType.Commission.Code()
-					employeeCommissionData.InOutType = co_enum.Finance.InOutType.In.Code()
-					employeeCommissionData.TradeAt = gtime.Now()
-					employeeCommissionData.TradeState = co_enum.Finance.TradeState.Completed.Code()
-
-					_, err = module.GetIFdAccountBills().CreateAccountBills(ctx, employeeCommissionData)
+					_, err = module.GetIFdAccountBills().CreateAccountBills(ctx, companyCommissionData)
 
 					if err != nil {
 						return false, errors.Join(err, errors.New("{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"))
 					}
+					info = companyCommissionData
 				}
-				break
 			}
-		}
 
+			// 计算员工提成，为ture时不需要重复创建同一资金账户佣金账单
+			//isCompanyAccountInfo := accountInfo.Id == companyAccountInfo.Id
+
+			if info.BuyerUserId != companyEmployeeInfo.Id {
+				if clientConfig.EmployeeCommissionModel == co_enum.Common.EmployeeCommissionMode.Superior.Code() {
+					commissionAmount = commissionAmount * int64(companyEmployeeInfo.CommissionRate) / 100.0
+				} else if clientConfig.EmployeeCommissionModel == co_enum.Common.EmployeeCommissionMode.TradeAmount.Code() {
+					commissionAmount = goodsTradeAmount * int64(companyEmployeeInfo.CommissionRate) / 100.0
+				}
+			}
+
+			employeeCommissionData := co_model.AccountBillsRegister{}
+			_ = gconv.Struct(info, &employeeCommissionData)
+			employeeCommissionData.ToUserId = accountInfo.UnionUserId
+			employeeCommissionData.FdAccountId = accountInfo.Id
+			employeeCommissionData.UnionOrderId = info.UnionOrderId
+			employeeCommissionData.UnionMainId = accountInfo.FdAccountView.Id
+			employeeCommissionData.Amount = commissionAmount
+			employeeCommissionData.Remark = "佣金收入"
+			employeeCommissionData.TradeType = co_enum.Finance.TradeType.Commission.Code()
+			employeeCommissionData.InOutType = co_enum.Finance.InOutType.In.Code()
+			employeeCommissionData.TradeAt = gtime.Now()
+			employeeCommissionData.TradeState = co_enum.Finance.TradeState.Completed.Code()
+			employeeCommissionData.BuyerUserId = info.BuyerUserId
+
+			_, err = module.GetIFdAccountBills().CreateAccountBills(ctx, employeeCommissionData)
+
+			if err != nil {
+				return false, errors.Join(err, errors.New("{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"))
+			}
+			info = companyCommissionData
+
+			// 根据邀请关系检索邀请人
+			invitePersonRes, _ := sys_service.SysInvite().GetInvitePersonByUserId(ctx, accountInfo.UnionUserId)
+
+			if invitePersonRes != nil {
+				parentEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, invitePersonRes.FormUserId, false)
+
+				if err != nil {
+					return ret, err
+				}
+
+				parentAccountInfo, err := co_service.FdAccountView().GetUserDefaultFdAccountByUserId(ctx, invitePersonRes.FormUserId, sys_enum.User.Type.New(parentEmployee.CompanyType, ""))
+
+				if err != nil {
+					return ret, err
+				}
+
+				if parentAccountInfo != nil {
+					info.FromUserId = parentEmployee.Id
+					info.FdAccountId = parentAccountInfo.Id
+					income, err := s.CreateCommissionIncome(ctx,
+						info,
+						goodsTradeAmount,
+						remainderCommission,
+						clientConfig,
+					)
+					return income, err
+				}
+			}
+			break
+		}
 	}
 
-	allocationLevel := ctx.Value("CompanyCommissionAllocationLevel")
-	newAllocationLevel := 0
-	if allocationLevel == nil {
-		newAllocationLevel = clientConfig.CompanyCommissionAllocationLevel
-		ctx = context.WithValue(ctx, "CompanyCommissionAllocationLevel", newAllocationLevel)
-	} else {
-		newAllocationLevel = gconv.Int(allocationLevel) - 1
-
-		if newAllocationLevel > 0 {
-			ctx = context.WithValue(ctx, "CompanyCommissionAllocationLevel", newAllocationLevel)
-		}
-	}
-
-	// 如果有父级，且佣金分配深度不为0，则继续递归调用当前方法
-	if companyInfo.ParentId > 0 && newAllocationLevel > 0 {
-		ret, err = s.CreateCommissionIncome(ctx, info, goodsTradeAmount, remainderCommission, clientConfig)
-
-		if err != nil {
-			return ret, err
-		}
-	}
+	//allocationLevel := ctx.Value("CompanyCommissionAllocationLevel")
+	//newAllocationLevel := 0
+	//if allocationLevel == nil {
+	//	newAllocationLevel = clientConfig.CompanyCommissionAllocationLevel
+	//	ctx = context.WithValue(ctx, "CompanyCommissionAllocationLevel", newAllocationLevel)
+	//} else {
+	//	newAllocationLevel = gconv.Int(allocationLevel) - 1
+	//
+	//	if newAllocationLevel > 0 {
+	//		ctx = context.WithValue(ctx, "CompanyCommissionAllocationLevel", newAllocationLevel)
+	//	}
+	//}
+	//
+	//// 如果有父级，且佣金分配深度不为0，则继续递归调用当前方法
+	//if companyInfo.ParentId > 0 && newAllocationLevel > 0 {
+	//	ret, err = s.CreateCommissionIncome(ctx, info, goodsTradeAmount, remainderCommission, clientConfig)
+	//
+	//	if err != nil {
+	//		return ret, err
+	//	}
+	//}
 
 	return true, err
 }
