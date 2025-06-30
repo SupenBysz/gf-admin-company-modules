@@ -185,7 +185,7 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	ret := (co_model.IEmployeeRes)(&co_model.EmployeeRes{
-		CompanyEmployee: co_entity.CompanyEmployee{},
+		CompanyEmployeeView: co_entity.CompanyEmployeeView{},
 		User:            &co_model.EmployeeUser{},
 		Detail:          &sys_entity.SysUserDetail{},
 		TeamList:        []co_model.Team{},
@@ -254,7 +254,6 @@ func (s *sEmployee[
 	if toUserType != fromUserEmployee.CompanyType {
 		return false, nil
 	}
-
 
 	newEmployee, err := co_service.EmployeeView().GetEmployeeById(ctx, registerInfo.Id, false)
 
@@ -557,11 +556,11 @@ func (s *sEmployee[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) GetEmployeeById(ctx context.Context, id int64) (response TR, err error) {
-	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	sessionUser := sys_service.SysSession().Get(ctx)
 
 	// 从数据库中根据ID获取员工数据
 	data, err := daoctl.GetByIdWithError[TR](
-		s.modules.Dao().Employee.Ctx(ctx),
+		co_dao.CompanyEmployeeView.Ctx(ctx).Where(co_dao.CompanyEmployeeView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()),
 		id,
 	)
 
@@ -574,7 +573,7 @@ func (s *sEmployee[
 	}
 
 	// 如果data为nil，则直接返回，避免空指针异常
-	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() || sessionUser == nil || sessionUser.SysUser.SysUser == nil {
+	if reflect.ValueOf(data).IsNil() || reflect.ValueOf(*data).IsNil() || sessionUser == nil || sessionUser.JwtClaimsUser.SysUser.SysUser == nil {
 		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 	}
 
@@ -583,10 +582,10 @@ func (s *sEmployee[
 	// 跨主体禁止查看员工信息，下级公司可查看上级公司员工信息
 	if response.Data() != nil {
 		// 当前登录用户信息存在且不是超级管理员或系统管理员时进行权限校验
-		if sessionUser != nil && sessionUser.SysUser.SysUser != nil && sessionUser.Id != 0 && !sessionUser.IsAdmin && !sessionUser.IsSuperAdmin {
+		if sessionUser.JwtClaimsUser.SysUser.SysUser != nil && sessionUser.JwtClaimsUser.Id != 0 && !sessionUser.JwtClaimsUser.IsAdmin && !sessionUser.JwtClaimsUser.IsSuperAdmin {
 			employeeUnionMainId := response.Data().UnionMainId
 			// 检查员工所属主体是否与当前用户所属主体一致，或者是否是上级主体
-			if employeeUnionMainId != sessionUser.UnionMainId && employeeUnionMainId != sessionUser.ParentId {
+			if employeeUnionMainId != sessionUser.JwtClaimsUser.UnionMainId && employeeUnionMainId != sessionUser.JwtClaimsUser.ParentId {
 				return response, sys_service.SysLogs().ErrorSimple(ctx, nil, s.modules.T(ctx, "{#EmployeeName} {#error_Data_NotFound}"), s.modules.Dao().Employee.Table())
 			}
 		}
@@ -609,7 +608,7 @@ func (s *sEmployee[
 	ITFdRechargeRes,
 ]) GetEmployeeByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
-		s.modules.Dao().Employee.Ctx(ctx).Where(co_do.CompanyEmployee{Name: name}),
+		co_dao.CompanyEmployeeView.Ctx(ctx).Where(co_dao.CompanyEmployeeView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).Where(co_do.CompanyEmployee{Name: name}),
 	)
 
 	if err != nil {
@@ -742,7 +741,7 @@ func (s *sEmployee[
 	// 过滤UnionMainId字段查询条件
 	search = s.modules.Company().FilterUnionMainId(ctx, search)
 
-	model := s.modules.Dao().Employee.Ctx(ctx)
+	model := co_dao.CompanyEmployeeView.Ctx(ctx).Where(co_dao.CompanyEmployeeView.Columns().CompanyType, s.modules.GetConfig().UserType.Code())
 
 	includeIds := make([]int64, 0)
 	var teamId int64
@@ -1078,6 +1077,8 @@ func (s *sEmployee[
 			data.CreatedAt = gtime.Now()
 			data.UnionMainId = info.UnionMainId
 			data.CommissionRate = info.CommissionRate
+			data.Mobile = info.Mobile
+			data.Email = info.Email
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(data)
@@ -1305,7 +1306,7 @@ func (s *sEmployee[
 ]) GetEmployeeDetailById(ctx context.Context, id int64) (response TR, err error) {
 	sessionUser := sys_service.SysSession().Get(ctx).JwtClaimsUser
 
-	model := s.modules.Dao().Employee.Ctx(ctx)
+	model := co_dao.CompanyEmployeeView.Ctx(ctx).Where(co_dao.CompanyEmployeeView.Columns().CompanyType, s.modules.GetConfig().UserType.Code())
 
 	// 非管理员需要校验权限
 	if !sessionUser.IsAdmin {
@@ -1367,7 +1368,7 @@ func (s *sEmployee[
 	}
 
 	result, err := daoctl.Query[TR](
-		s.modules.Dao().Employee.Ctx(ctx),
+		co_dao.CompanyEmployeeView.Ctx(ctx).Where(co_dao.CompanyEmployeeView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()),
 		&base_model.SearchParams{
 			Filter: append(make([]base_model.FilterInfo, 0), base_model.FilterInfo{
 				Field: s.modules.Dao().Employee.Columns().Id,
@@ -1549,7 +1550,7 @@ func (s *sEmployee[
 				_ = g.Try(ctx, func(ctx context.Context) {
 					// 获取到该员工的所有团队成员信息记录ids
 					ids, err := s.dao.TeamMember.Ctx(ctx).
-						Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployee.Id}).Fields([]string{co_dao.CompanyTeamMember.Columns().TeamId}).All()
+						Where(co_do.CompanyTeamMember{EmployeeId: data.Data().CompanyEmployeeView.Id}).Fields([]string{co_dao.CompanyTeamMember.Columns().TeamId}).All()
 
 					temIds := ids.Array()
 
@@ -1582,7 +1583,7 @@ func (s *sEmployee[
 	}
 
 	// user相关附加数据
-	if data.Data().CompanyEmployee.Id > 0 {
+	if data.Data().CompanyEmployeeView.Id > 0 {
 		//if exclude.Contains("user") {
 		//	data.Data().User = nil
 		//} else {
@@ -1594,11 +1595,11 @@ func (s *sEmployee[
 				//ctx = base_funs.AttrBuilder[TR, TR](ctx, s.modules.Dao().Employee.Columns().Id)
 				//ctx = base_funs.AttrBuilder[sys_model.SysUser, *sys_model.SysUserDetail](ctx, sys_dao.SysUser.Columns().Id)
 
-				if data.Data().CompanyEmployee.Id == 0 {
+				if data.Data().CompanyEmployeeView.Id == 0 {
 					return res
 				}
 
-				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployee.Id)
+				user, _ := sys_service.SysUser().GetSysUserById(ctx, data.Data().CompanyEmployeeView.Id)
 
 				if user != nil {
 					_ = gconv.Struct(user, &data.Data().User)
