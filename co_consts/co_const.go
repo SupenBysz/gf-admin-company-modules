@@ -38,7 +38,7 @@ var (
 )
 
 func init() {
-	defaultCurrency, _ := g.Cfg().Get(context.Background(), "service.defaultCurrency")
+	defaultCurrency, _ := g.Cfg().Get(context.Background(), "service.defaultCurrency", "CNY")
 	Global.DefaultCurrency = defaultCurrency.String()
 	Global.PlatformUserTypeArr = g.Cfg().MustGet(context.Background(), "service.platformUserType", []int{}).Ints()
 
@@ -54,6 +54,7 @@ func init() {
 			EmployeeNameCanRepeated:           false,
 			AutoCreateUserFinanceAccount:      false,
 			RegisterBindMemberLevelId:         0,
+			DefaultCurrency:                    defaultCurrency.String(),
 		}
 
 		err := gconv.Struct(clientConfig, &configItem)
@@ -70,7 +71,10 @@ func (s global) GetClientConfig(ctx context.Context) (*co_model.ClientConfig, er
 	xClient := ghttp.RequestFromCtx(ctx).Header.Get("X-CLIENT-ID")
 
 	for _, v := range s.ClientConfig {
-		if strings.EqualFold(v.XClientToken, xClient) {
+		if strings.EqualFold(v.XClientToken, xClient) 	{
+			if v.DefaultCurrency == "" {
+				v.DefaultCurrency = Global.DefaultCurrency
+			}
 			return &v, nil
 		}
 	}
