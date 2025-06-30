@@ -10,7 +10,7 @@ type TeamView struct {
 }
 
 type TeamViewRes struct {
-	TeamView  `json:"employeeView"`
+	TeamView
 	Owner     *co_entity.CompanyEmployeeView `json:"owner" dc:"部门｜团队所有者/业务总监/业务经理/团队队长"`
 	Captain   *co_entity.CompanyEmployeeView `json:"captain" dc:"部门｜团队队长编号/小组组长"`
 	UnionMain *co_entity.CompanyView         `json:"unionMain" dc:"所属单位"`

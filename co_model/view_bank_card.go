@@ -11,8 +11,8 @@ type FdBankCardView struct {
 }
 
 type FdBankCardViewRes struct {
-	FdBankCardView `json:"employeeView"`
-	User           *sys_model.SysUser `json:"user" dc:"用户"`
+	FdBankCardView
+	User *sys_model.SysUser `json:"user" dc:"用户"`
 }
 
 type FdBankCardViewListRes base_model.CollectRes[FdBankCardViewRes]

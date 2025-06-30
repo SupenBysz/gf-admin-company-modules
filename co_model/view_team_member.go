@@ -10,11 +10,11 @@ type TeamMemberView struct {
 }
 
 type TeamMemberViewRes struct {
-	TeamMemberView `json:"employeeView"`
-	Team           *co_entity.CompanyTeamView     `json:"team" dc:"团队信息"`
-	Employee       *co_entity.CompanyEmployeeView `json:"employee" dc:"员工信息"`
-	InviteUser     *co_entity.CompanyEmployeeView `json:"inviteUser" dc:"邀人人"`
-	UnionMain      *co_entity.CompanyView         `json:"unionMain" dc:"所属单位"`
+	TeamMemberView
+	Team       *co_entity.CompanyTeamView     `json:"team" dc:"团队信息"`
+	Employee   *co_entity.CompanyEmployeeView `json:"employee" dc:"员工信息"`
+	InviteUser *co_entity.CompanyEmployeeView `json:"inviteUser" dc:"邀人人"`
+	UnionMain  *co_entity.CompanyView         `json:"unionMain" dc:"所属单位"`
 }
 
 type TeamViewMemberListRes base_model.CollectRes[TeamMemberViewRes]
