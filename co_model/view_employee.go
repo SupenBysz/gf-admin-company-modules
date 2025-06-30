@@ -11,10 +11,10 @@ type EmployeeView struct {
 }
 
 type EmployeeViewRes struct {
-	EmployeeView `json:"employeeView"`
-	TeamList     *[]TeamViewRes         `json:"teamList" dc:"团队列表"`
-	User         *sys_model.SysUser     `json:"user" dc:"用户"`
-	UnionMain    *co_entity.CompanyView `json:"unionMain" dc:"所属单位"`
+	EmployeeView
+	TeamList  *[]TeamViewRes         `json:"teamList" dc:"团队列表"`
+	User      *sys_model.SysUser     `json:"user" dc:"用户"`
+	UnionMain *co_entity.CompanyView `json:"unionMain" dc:"所属单位"`
 }
 
 type EmployeeViewListRes base_model.CollectRes[EmployeeViewRes]

@@ -5,6 +5,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/api_v1"
 	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-community/sys_model/sys_dao"
+	"github.com/SupenBysz/gf-admin-community/sys_model/sys_enum"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-community/utility/funs"
 	"github.com/SupenBysz/gf-admin-company-modules/api/co_company_api"
@@ -22,15 +23,15 @@ import (
 )
 
 type EmployeeController[
-	ITCompanyRes co_model.ICompanyRes,
-	TIRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+TIRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	modules co_interface.IModules[
 		ITCompanyRes,
@@ -50,15 +51,15 @@ type EmployeeController[
 }
 
 func Employee[
-	ITCompanyRes co_model.ICompanyRes,
-	TIRes co_model.IEmployeeRes,
-	ITTeamRes co_model.ITeamRes,
-	ITFdAccountRes co_model.IFdAccountRes,
-	ITFdAccountBillRes co_model.IFdAccountBillsRes,
-	ITFdBankCardRes co_model.IFdBankCardRes,
-	ITFdInvoiceRes co_model.IFdInvoiceRes,
-	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-	ITFdRechargeRes co_model.IFdRechargeRes,
+ITCompanyRes co_model.ICompanyRes,
+TIRes co_model.IEmployeeRes,
+ITTeamRes co_model.ITeamRes,
+ITFdAccountRes co_model.IFdAccountRes,
+ITFdAccountBillRes co_model.IFdAccountBillsRes,
+ITFdBankCardRes co_model.IFdBankCardRes,
+ITFdInvoiceRes co_model.IFdInvoiceRes,
+ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	TIRes,
@@ -203,12 +204,19 @@ func (c *EmployeeController[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) CreateEmployee(ctx context.Context, req *co_company_api.CreateEmployeeReq) (TIRes, error) {
-
-	req.UnionMainId = sys_service.SysSession().Get(ctx).JwtClaimsUser.UnionMainId
+	session := sys_service.SysSession().Get(ctx).JwtClaimsUser
+	req.UnionMainId = session.UnionMainId
 	permission := c.getPermission(ctx, co_permission.Employee.PermissionType(c.modules).Create)
 	return funs.CheckPermission(ctx,
 		func() (TIRes, error) {
-			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee, nil)
+			user, err := sys_service.SysUser().CreateUser(ctx, req.UserInnerRegister, sys_enum.User.State.Normal, sys_enum.User.Type.New(session.Type, ""))
+
+			if err != nil {
+				var ret TIRes
+				return ret, err
+			}
+
+			ret, err := c.employee.CreateEmployee(c.makeMore(ctx), &req.Employee, user)
 			return ret, err
 		},
 		permission,

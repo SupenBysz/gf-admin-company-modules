@@ -1,6 +1,7 @@
 package co_company_api
 
 import (
+	"github.com/SupenBysz/gf-admin-community/sys_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/kysion/base-library/base_model"
 )
@@ -30,6 +31,7 @@ type QueryEmployeeListReq struct {
 
 type CreateEmployeeReq struct {
 	co_model.Employee
+	sys_model.UserInnerRegister
 	Include []string `json:"include" dc:"需要附加数据的返回值字段集，如果没有填写，默认不附加数据"`
 }
 

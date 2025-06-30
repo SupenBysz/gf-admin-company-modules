@@ -284,7 +284,7 @@ func (s *sCompany[
 	ITFdRechargeRes,
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.ICompanyRes = &co_model.CompanyRes{
-		Company:   &co_entity.Company{},
+		CompanyView:   &co_entity.CompanyView{},
 		AdminUser: nil,
 	}
 	return ret.(TR)
@@ -306,7 +306,7 @@ func (s *sCompany[
 	if id == 0 {
 		return response, sys_service.SysLogs().WarnSimple(ctx, nil, s.modules.T(ctx, "error_Id_NotNull"), s.dao.Company.Table())
 	}
-	m := s.dao.Company.Ctx(ctx)
+	m := co_dao.CompanyView.Ctx(ctx).Where(co_dao.CompanyView.Columns().CompanyType, s.modules.GetConfig().UserType.Code())
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
@@ -340,7 +340,7 @@ func (s *sCompany[
 	ITFdRechargeRes,
 ]) GetCompanyByName(ctx context.Context, name string) (response TR, err error) {
 	data, err := daoctl.ScanWithError[TR](
-		s.dao.Company.Ctx(ctx).
+		co_dao.CompanyView.Ctx(ctx).Where(co_dao.CompanyView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).
 			Where(co_do.Company{Name: name}),
 	)
 
@@ -404,7 +404,7 @@ func (s *sCompany[
 		export = isExport[0]
 	}
 
-	m := s.dao.Company.Ctx(ctx)
+	m := co_dao.CompanyView.Ctx(ctx).Where(co_dao.CompanyView.Columns().CompanyType, s.modules.GetConfig().UserType.Code())
 
 	if !slices.Contains(co_consts.Global.PlatformUserTypeArr, sessionUser.Type) && !sessionUser.IsSuperAdmin && sessionUser.UnionMainId != s.superAdminMainId {
 		m = m.Where(co_do.Company{ParentId: sessionUser.UnionMainId}).WhereOr(co_do.Company{Id: sessionUser.UnionMainId})
@@ -550,6 +550,14 @@ func (s *sCompany[
 				}
 				employeeData := employeeDoData.(*co_model.Employee)
 
+				if employeeData.Mobile == "" && bindUser.Mobile != ""{
+					employeeData.Mobile = bindUser.Mobile
+				}
+
+				if employeeData.Email == "" && bindUser.Email != ""{
+					employeeData.Email = bindUser.Email
+				}
+
 				// 1.构建员工信息 + user登录信息
 				employee, err = s.modules.Employee().CreateEmployee(ctx, employeeData, bindUser)
 				if err != nil {
@@ -605,38 +613,7 @@ func (s *sCompany[
 			if affected == 0 || err != nil {
 				return sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "{#CompanyName} {#error_Data_Save_Failed}"), s.dao.Company.Table())
 			}
-
-			{
-				// 创建员工账户时会自动根据配置创建财务账户，所以这里注释掉不需要了
-				// 4.创建主财务账号  通用账户
-				//accountData := co_do.FdAccount{}
-				//_ = gconv.Struct(info, &accountData)
-				//
-				//account := &co_model.FdAccountRegister{
-				//	Name: *info.Name,
-				//	//UnionLicenseId:     0, // 刚注册的公司暂时还没有主体资质
-				//
-				//	UnionUserId:        gconv.Int64(data.UserId),
-				//	UnionMainId:        unionMainId,
-				//	CurrencyCode:       "CNY",
-				//	PrecisionOfBalance: 100,
-				//	SceneType:          0,                                         // 不限
-				//	AccountType:        co_enum.Finance.AccountType.System.Code(), // 一个主体只会有一个系统财务账号，并且编号为空
-				//	AccountNumber:      "",                                        // 账户编号
-				//	AllowExceed:        1,                                         // 系统账号默认是可以存在负余额
-				//}
-				//
-				//createAccount, err := s.modules.Account().CreateAccount(ctx, *account, sessionUser.Id)
-				//if err != nil || reflect.ValueOf(createAccount).IsNil() {
-				//	return err
-				//}
-			}
-
 		} else {
-			//if gstr.Contains(*info.ContactMobile, "***") || *info.ContactMobile == "" {
-			//	data.ContactMobile = nil
-			//}
-
 			data.UpdatedBy = sessionUser.Id
 			data.UpdatedAt = gtime.Now()
 			data.Id = nil
@@ -700,7 +677,7 @@ func (s *sCompany[
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
 ]) GetCompanyDetail(ctx context.Context, id int64) (response TR, err error) {
-	m := s.dao.Company.Ctx(ctx)
+	m := co_dao.CompanyView.Ctx(ctx).Where(co_dao.CompanyView.Columns().CompanyType, s.modules.GetConfig().UserType.Code())
 
 	data, err := daoctl.GetByIdWithError[TR](m, id)
 
@@ -755,7 +732,6 @@ func (s *sCompany[
 	}
 
 	invitePerson, err := sys_service.SysInvite().GetInvitePersonByUserId(ctx, companyInfo.UserId)
-
 
 	if invitePerson != nil {
 		canOperation = invitePerson.FormUserId == actionUserId

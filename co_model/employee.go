@@ -19,7 +19,7 @@ type Employee struct {
 	Avatar         string                                         `json:"avatar"       dc:"头像"`
 	WorkCardAvatar string                                         `json:"workCardAvatar" orm:"work_card_avatar" description:"工牌头像"`
 	Name           string                                         `json:"name"         v:"required|max-length:32#姓名不能为空|姓名长度超出限定32字符" dc:"姓名"`
-	Mobile         string                                         `json:"mobile"       v:"phone#手机号校验失败" dc:"手机号"`
+	Mobile         string                                         `json:"mobile"       dc:"手机号"`
 	State          int                                            `json:"state"        v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 	UnionMainId    int64                                          `json:"-"            dc:"所属主体"`
 	HiredAt        *gtime.Time                                    `json:"hiredAt"      v:"date-format:Y-m-d#入职日期格式错误" dc:"入职日期"`
@@ -39,7 +39,7 @@ type UpdateEmployee struct {
 	Avatar         string                                         `json:"avatar"            dc:"头像"`
 	WorkCardAvatar string                                         `json:"workCardAvatar"    orm:"work_card_avatar" description:"工牌头像"`
 	Name           *string                                        `json:"name"              v:"required|max-length:32#姓名不能为空|姓名长度超出限定32字符" dc:"姓名"`
-	Mobile         *string                                        `json:"mobile"            v:"phone#手机号校验失败" dc:"手机号"`
+	Mobile         *string                                        `json:"mobile"            dc:"手机号"`
 	State          *int                                           `json:"state"             v:"in:-1,0,1#请选择员工状态" dc:"状态：-1已离职，0待确认，1已入职"`
 	HiredAt        *gtime.Time                                    `json:"hiredAt"           v:"date-format:Y-m-d#入职日期格式错误" dc:"入职日期"`
 	Sex            *int                                           `json:"sex"               dc:"性别：0未知、1男、2女"`
@@ -60,7 +60,7 @@ type EmployeeUser struct {
 }
 
 type EmployeeRes struct {
-	co_entity.CompanyEmployee
+	co_entity.CompanyEmployeeView
 	User     *EmployeeUser             ` json:"user"`
 	Detail   *sys_entity.SysUserDetail ` json:"detail"`
 	TeamList []Team                    `json:"teamList"`

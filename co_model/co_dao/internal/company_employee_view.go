@@ -27,60 +27,86 @@ type CompanyEmployeeViewDao struct {
 
 // CompanyEmployeeViewColumns defines and stores column names for table co_company_employee_view.
 type CompanyEmployeeViewColumns struct {
-	Id             string //
-	No             string //
-	Avatar         string //
-	Name           string //
-	Mobile         string //
-	UnionMainId    string //
-	State          string //
-	LastActiveIp   string //
-	HiredAt        string //
-	CreatedBy      string //
-	CreatedAt      string //
-	UpdatedBy      string //
-	UpdatedAt      string //
-	DeletedBy      string //
-	DeletedAt      string //
-	Sex            string //
-	Remark         string //
-	CountryCode    string //
-	Region         string //
-	Email          string //
-	WeixinAccount  string //
-	Address        string //
-	WorkCardAvatar string //
-	CommissionRate string //
-	CompanyType    string //
+	Id                   string //
+	No                   string //
+	Avatar               string //
+	Name                 string //
+	Mobile               string //
+	UnionMainId          string //
+	State                string //
+	LastActiveIp         string //
+	HiredAt              string //
+	CreatedBy            string //
+	CreatedAt            string //
+	UpdatedBy            string //
+	UpdatedAt            string //
+	DeletedBy            string //
+	DeletedAt            string //
+	Sex                  string //
+	Remark               string //
+	CountryCode          string //
+	Region               string //
+	Email                string //
+	WeixinAccount        string //
+	Address              string //
+	WorkCardAvatar       string //
+	CommissionRate       string //
+	FdAccountId          string //
+	FdLimitState         string //
+	FdAllowExceed        string //
+	FdCurrencyCode       string //
+	FdAccountType        string //
+	FdPrecisionOfBalance string //
+	FdBalance            string //
+	FdFrozenBlance       string //
+	FdTodayAccountSum    string //
+	FdWeekAccountSum     string //
+	FdMonthAccountSum    string //
+	FdQuarterAccountSum  string //
+	FdYearAccountSum     string //
+	CompanyType          string //
 }
 
 // companyEmployeeViewColumns holds the columns for table co_company_employee_view.
 var companyEmployeeViewColumns = CompanyEmployeeViewColumns{
-	Id:             "id",
-	No:             "no",
-	Avatar:         "avatar",
-	Name:           "name",
-	Mobile:         "mobile",
-	UnionMainId:    "union_main_id",
-	State:          "state",
-	LastActiveIp:   "last_active_ip",
-	HiredAt:        "hired_at",
-	CreatedBy:      "created_by",
-	CreatedAt:      "created_at",
-	UpdatedBy:      "updated_by",
-	UpdatedAt:      "updated_at",
-	DeletedBy:      "deleted_by",
-	DeletedAt:      "deleted_at",
-	Sex:            "sex",
-	Remark:         "remark",
-	CountryCode:    "country_code",
-	Region:         "region",
-	Email:          "email",
-	WeixinAccount:  "weixin_account",
-	Address:        "address",
-	WorkCardAvatar: "work_card_avatar",
-	CommissionRate: "commission_rate",
-	CompanyType:    "company_type",
+	Id:                   "id",
+	No:                   "no",
+	Avatar:               "avatar",
+	Name:                 "name",
+	Mobile:               "mobile",
+	UnionMainId:          "union_main_id",
+	State:                "state",
+	LastActiveIp:         "last_active_ip",
+	HiredAt:              "hired_at",
+	CreatedBy:            "created_by",
+	CreatedAt:            "created_at",
+	UpdatedBy:            "updated_by",
+	UpdatedAt:            "updated_at",
+	DeletedBy:            "deleted_by",
+	DeletedAt:            "deleted_at",
+	Sex:                  "sex",
+	Remark:               "remark",
+	CountryCode:          "country_code",
+	Region:               "region",
+	Email:                "email",
+	WeixinAccount:        "weixin_account",
+	Address:              "address",
+	WorkCardAvatar:       "work_card_avatar",
+	CommissionRate:       "commission_rate",
+	FdAccountId:          "fd_account_id",
+	FdLimitState:         "fd_limit_state",
+	FdAllowExceed:        "fd_allow_exceed",
+	FdCurrencyCode:       "fd_currency_code",
+	FdAccountType:        "fd_account_type",
+	FdPrecisionOfBalance: "fd_precision_of_balance",
+	FdBalance:            "fd_balance",
+	FdFrozenBlance:       "fd_frozen_blance",
+	FdTodayAccountSum:    "fd_today_account_sum",
+	FdWeekAccountSum:     "fd_week_account_sum",
+	FdMonthAccountSum:    "fd_month_account_sum",
+	FdQuarterAccountSum:  "fd_quarter_account_sum",
+	FdYearAccountSum:     "fd_year_account_sum",
+	CompanyType:          "company_type",
 }
 
 // NewCompanyEmployeeViewDao creates and returns a new DAO object for table data access.
