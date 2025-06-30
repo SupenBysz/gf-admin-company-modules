@@ -2,7 +2,6 @@ package finance
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
@@ -296,7 +295,7 @@ func (s *sFdAccountBills[
 		// 1. 添加一条收入财务账单流水
 		info.BeforeBalance = account.Data().Balance
 		info.AfterBalance = afterBalance
-		gconv.Struct(info, bill.Data())
+		_ = gconv.Struct(info, bill.Data())
 		bill.Data().Id = idgen.NextId()
 		bill.Data().CreatedAt = gtime.Now()
 		//bill.Data().CreatedBy = sessionUser.Id
@@ -336,16 +335,7 @@ func (s *sFdAccountBills[
 		}
 
 		// 如果类型是保证金则增加冻结金额
-		if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() && info.TradeState == co_enum.Finance.TradeState.Frozen.Code() {
-			rowsAffected, err := daoctl.UpdateWithError(s.dao.FdAccountBills.Ctx(ctx).
-				Where(s.dao.FdAccountBills.Columns().Id, bill.Data().Id), map[string]interface{}{
-				s.dao.FdAccountBills.Columns().TradeState: co_enum.Finance.TradeState.Unfrozen.Code(),
-			})
-
-			if rowsAffected > 0 || err != nil {
-				return errors.Join(err, errors.New("{#error_Transaction_Failed}"))
-			}
-
+		if info.TradeType == co_enum.Finance.TradeType.SecurityDeposit.Code() && info.TradeState == co_enum.Finance.TradeState.Unfrozen.Code() {
 			increment, err = s.modules.Account().DecrementFrozenAmount(ctx, account.Data().Id, info.Amount)
 		}
 
@@ -482,13 +472,13 @@ func (s *sFdAccountBills[
 				return err
 			}
 
-			g.Try(ctx, func(ctx context.Context) {
+			_ = g.Try(ctx, func(ctx context.Context) {
 				s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 					// 在事务中 && 订阅key是收入类型的
 					if key.InTransaction && key.InOutType == co_enum.Finance.InOutType.Out {
 						// 订阅的交易类型一致
 						if key.TradeType.Code()&info.TradeType == info.TradeType {
-							value(ctx, key, bill)
+							_ = value(ctx, key, bill)
 						}
 					}
 				})
@@ -504,11 +494,11 @@ func (s *sFdAccountBills[
 		return false, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_Transaction_Failed"), s.dao.FdAccountBills.Table())
 	}
 
-	g.Try(ctx, func(ctx context.Context) {
+	_ = g.Try(ctx, func(ctx context.Context) {
 		s.hookArr.Iterator(func(key co_hook.AccountBillHookKey, value co_hook.AccountBillHookFunc) {
 			if !key.InTransaction && key.InOutType == co_enum.Finance.InOutType.Out {
 				if key.TradeType.Code()&info.TradeType == info.TradeType {
-					value(ctx, key, bill)
+					_ = value(ctx, key, bill)
 				}
 			}
 		})
