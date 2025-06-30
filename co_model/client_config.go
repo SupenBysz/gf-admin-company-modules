@@ -29,4 +29,6 @@ type ClientConfig struct {
 	AutoCreateUserFinanceAccount bool `json:"auto_create_user_finance_account" dc:"是否自动创建员工财务账户"`
 	// 是否自动创建财务账户: true自动创建、false不创建
 	RegisterBindMemberLevelId int64 `json:"register_bind_member_level_id" dc:"是否自动创建财务账户: true自动创建、false不创建"`
+	// 资金账户默认货币类型
+	DefaultCurrency string `json:"default_currency" dc:"资金账户默认货币类型"`
 }
