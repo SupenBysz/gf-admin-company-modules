@@ -11,10 +11,10 @@ type CompanyView struct {
 }
 
 type CompanyViewRes struct {
-	CompanyView `json:"employeeView"`
-	License     *co_entity.License             `json:"license" dc:"资质信息"`
-	Employee    *co_entity.CompanyEmployeeView `json:"employee" dc:"员工信息"`
-	User        *sys_model.SysUser             `json:"user" dc:"用户信息"`
+	CompanyView
+	License  *co_entity.License             `json:"license" dc:"资质信息"`
+	Employee *co_entity.CompanyEmployeeView `json:"employee" dc:"员工信息"`
+	User     *sys_model.SysUser             `json:"user" dc:"用户信息"`
 }
 
 type CompanyViewListRes base_model.CollectRes[CompanyViewRes]

@@ -27,58 +27,84 @@ type CompanyViewDao struct {
 
 // CompanyViewColumns defines and stores column names for table co_company_view.
 type CompanyViewColumns struct {
-	Id             string //
-	Name           string //
-	ContactName    string //
-	ContactMobile  string //
-	UserId         string //
-	State          string //
-	Remark         string //
-	CreatedBy      string //
-	CreatedAt      string //
-	UpdatedBy      string //
-	UpdatedAt      string //
-	DeletedBy      string //
-	DeletedAt      string //
-	ParentId       string //
-	Address        string //
-	LicenseId      string //
-	LicenseState   string //
-	LogoId         string //
-	StartLevel     string //
-	CountryCode    string //
-	Region         string //
-	Score          string //
-	CommissionRate string //
-	CompanyType    string //
+	Id                   string //
+	Name                 string //
+	ContactName          string //
+	ContactMobile        string //
+	UserId               string //
+	State                string //
+	Remark               string //
+	CreatedBy            string //
+	CreatedAt            string //
+	UpdatedBy            string //
+	UpdatedAt            string //
+	DeletedBy            string //
+	DeletedAt            string //
+	ParentId             string //
+	Address              string //
+	LicenseId            string //
+	LicenseState         string //
+	LogoId               string //
+	StartLevel           string //
+	CountryCode          string //
+	Region               string //
+	Score                string //
+	CommissionRate       string //
+	FdAccountId          string //
+	FdLimitState         string //
+	FdAllowExceed        string //
+	FdCurrencyCode       string //
+	FdAccountType        string //
+	FdPrecisionOfBalance string //
+	FdBalance            string //
+	FdFrozenBlance       string //
+	FdTodayAccountSum    string //
+	FdWeekAccountSum     string //
+	FdMonthAccountSum    string //
+	FdQuarterAccountSum  string //
+	FdYearAccountSum     string //
+	CompanyType          string //
 }
 
 // companyViewColumns holds the columns for table co_company_view.
 var companyViewColumns = CompanyViewColumns{
-	Id:             "id",
-	Name:           "name",
-	ContactName:    "contact_name",
-	ContactMobile:  "contact_mobile",
-	UserId:         "user_id",
-	State:          "state",
-	Remark:         "remark",
-	CreatedBy:      "created_by",
-	CreatedAt:      "created_at",
-	UpdatedBy:      "updated_by",
-	UpdatedAt:      "updated_at",
-	DeletedBy:      "deleted_by",
-	DeletedAt:      "deleted_at",
-	ParentId:       "parent_id",
-	Address:        "address",
-	LicenseId:      "license_id",
-	LicenseState:   "license_state",
-	LogoId:         "logo_id",
-	StartLevel:     "start_level",
-	CountryCode:    "country_code",
-	Region:         "region",
-	Score:          "score",
-	CommissionRate: "commission_rate",
-	CompanyType:    "company_type",
+	Id:                   "id",
+	Name:                 "name",
+	ContactName:          "contact_name",
+	ContactMobile:        "contact_mobile",
+	UserId:               "user_id",
+	State:                "state",
+	Remark:               "remark",
+	CreatedBy:            "created_by",
+	CreatedAt:            "created_at",
+	UpdatedBy:            "updated_by",
+	UpdatedAt:            "updated_at",
+	DeletedBy:            "deleted_by",
+	DeletedAt:            "deleted_at",
+	ParentId:             "parent_id",
+	Address:              "address",
+	LicenseId:            "license_id",
+	LicenseState:         "license_state",
+	LogoId:               "logo_id",
+	StartLevel:           "start_level",
+	CountryCode:          "country_code",
+	Region:               "region",
+	Score:                "score",
+	CommissionRate:       "commission_rate",
+	FdAccountId:          "fd_account_id",
+	FdLimitState:         "fd_limit_state",
+	FdAllowExceed:        "fd_allow_exceed",
+	FdCurrencyCode:       "fd_currency_code",
+	FdAccountType:        "fd_account_type",
+	FdPrecisionOfBalance: "fd_precision_of_balance",
+	FdBalance:            "fd_balance",
+	FdFrozenBlance:       "fd_frozen_blance",
+	FdTodayAccountSum:    "fd_today_account_sum",
+	FdWeekAccountSum:     "fd_week_account_sum",
+	FdMonthAccountSum:    "fd_month_account_sum",
+	FdQuarterAccountSum:  "fd_quarter_account_sum",
+	FdYearAccountSum:     "fd_year_account_sum",
+	CompanyType:          "company_type",
 }
 
 // NewCompanyViewDao creates and returns a new DAO object for table data access.
