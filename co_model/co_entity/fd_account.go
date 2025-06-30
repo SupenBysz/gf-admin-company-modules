@@ -31,5 +31,5 @@ type FdAccount struct {
 	AccountNumber      string      `json:"accountNumber"      orm:"account_number"       description:"账户编号，例如银行卡号、支付宝账号、微信账号等对应账户类型的编号"`
 	UnionMainId        int64       `json:"unionMainId"        orm:"union_main_id"        description:"关联主体ID，与union_license_id 中的union_main_id 一致"`
 	AllowExceed        int         `json:"allowExceed"        orm:"allow_exceed"         description:"是否允许存在负余额: 0禁止、1允许"`
-	FrozenBlance       int64       `json:"frozenBlance"       orm:"frozen_blance"        description:"冻结金额"`
+	FrozenAmount       int64       `json:"frozenAmount"       orm:"frozen_amount"        description:"冻结金额"`
 }

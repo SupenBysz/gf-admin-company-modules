@@ -34,5 +34,10 @@ type FdAccountView struct {
 	UnionMainId        interface{} //
 	AllowExceed        interface{} //
 	FrozenBlance       interface{} //
+	TodayAccountSum    interface{} //
+	WeekAccountSum     interface{} //
+	MonthAccountSum    interface{} //
+	QuarterAccountSum  interface{} //
+	YearAccountSum     interface{} //
 	CompanyType        interface{} //
 }

@@ -38,7 +38,7 @@ type UpdateAccount struct {
 type FdAccountListRes base_model.CollectRes[FdAccountRes]
 
 type FdAccountRes struct {
-	co_entity.FdAccount
+	co_entity.FdAccountView
 
 	Detail *co_entity.FdAccountDetail `json:"detail" dc:"财务账号周期金额统计"`
 }

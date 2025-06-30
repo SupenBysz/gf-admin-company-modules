@@ -116,7 +116,7 @@ func (s *sFdAccount[
 ]) FactoryMakeResponseInstance() TR {
 	var ret co_model.IFdAccountRes
 	ret = &co_model.FdAccountRes{
-		FdAccount: co_entity.FdAccount{},
+		FdAccountView: co_entity.FdAccountView{},
 		Detail:    &co_entity.FdAccountDetail{},
 	}
 	return ret.(TR)
@@ -195,7 +195,7 @@ func (s *sFdAccount[
 	if id == 0 {
 		return response, gerror.New(s.modules.T(ctx, "error_AccountId_NonNull"))
 	}
-	data, err := daoctl.GetByIdWithError[TR](s.dao.FdAccount.Ctx(ctx), id)
+	data, err := daoctl.GetByIdWithError[TR](co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()), id)
 
 	if err != nil {
 		return response, sys_service.SysLogs().ErrorSimple(ctx, err, s.modules.T(ctx, "error_GetAccountById_Failed"), s.dao.FdAccount.Table())
@@ -214,8 +214,8 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
-]) IncrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error) {
-	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Increment(s.dao.FdAccount.Columns().FrozenBlance, addAmount)
+]) IncrementFrozenAmount(ctx context.Context, id int64, amount int64) (bool, error) {
+	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Increment(s.dao.FdAccount.Columns().FrozenAmount, amount)
 
 	if err != nil {
 		return false, errors.Join(err, errors.New("error_update_account_frozen_amount_failed"))
@@ -239,8 +239,8 @@ func (s *sFdAccount[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
-]) DecrementFrozenAmount(ctx context.Context, id int64, addAmount int64) (bool, error) {
-	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Decrement(s.dao.FdAccount.Columns().FrozenBlance, addAmount)
+]) DecrementFrozenAmount(ctx context.Context, id int64, amount int64) (bool, error) {
+	result, err := s.dao.FdAccount.Ctx(ctx).Where(s.dao.FdAccount.Columns().Id, id).Decrement(s.dao.FdAccount.Columns().FrozenAmount, amount)
 
 	if err != nil {
 		return false, errors.Join(err, errors.New("error_update_account_frozen_amount_failed"))
@@ -333,7 +333,7 @@ func (s *sFdAccount[
 ]) HasAccountByName(ctx context.Context, name string) (response TR, err error) {
 	response = s.FactoryMakeResponseInstance()
 
-	err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{Name: name}).Scan(response.Data())
+	err = co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).Where(co_do.FdAccount{Name: name}).Scan(response.Data())
 
 	if err != nil {
 		var ret TR
@@ -408,7 +408,7 @@ func (s *sFdAccount[
 		return nil, gerror.New("用户id不能为空")
 	}
 
-	data, err := daoctl.Query[TR](s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{UnionUserId: userId}), nil, false)
+	data, err := daoctl.Query[TR](co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).Where(co_do.FdAccount{UnionUserId: userId}), nil, false)
 
 	config, err := co_consts.Global.GetClientConfig(ctx)
 
@@ -427,7 +427,7 @@ func (s *sFdAccount[
 			Name:               "System",
 			UnionUserId:        userId,
 			UnionMainId:        employee.Data().UnionMainId,
-			CurrencyCode:       co_consts.Global.DefaultCurrency,
+			CurrencyCode:       config.DefaultCurrency,
 			PrecisionOfBalance: 100,
 			SceneType:          0,
 			AccountType:        1,
@@ -546,7 +546,7 @@ func (s *sFdAccount[
 	response = s.FactoryMakeResponseInstance()
 
 	// 查找指定用户名下指定货币类型的财务账号
-	err = s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
+	err = co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).Where(co_do.FdAccount{
 		UnionUserId:  unionUserId,
 		CurrencyCode: currencyCode,
 	}).Scan(response.Data())
@@ -571,7 +571,7 @@ func (s *sFdAccount[
 	}
 
 	response = s.FactoryMakeResponseInstance()
-	doWhere := s.dao.FdAccount.Ctx(ctx).Where(co_do.FdAccount{
+	doWhere := co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).Where(co_do.FdAccount{
 		UnionUserId: unionUserId,
 		AccountType: accountType.Code(),
 	})
@@ -755,9 +755,9 @@ func (s *sFdAccount[
 	ITFdRechargeRes,
 ]) GetUserDefaultFdAccountByUserId(ctx context.Context, userId int64) (*co_model.FdAccountViewRes, error) {
 	accountInfo := co_model.FdAccountViewRes{}
-	err := s.dao.FdAccount.Ctx(ctx).
-		Where(s.dao.FdAccount.Columns().UnionUserId, userId).
-		OrderAsc(s.dao.FdAccount.Columns().CreatedAt).Scan(&accountInfo)
+	err := co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).
+		Where(co_dao.FdAccountView.Columns().UnionUserId, userId).
+		OrderAsc(co_dao.FdAccountView.Columns().CreatedAt).Scan(&accountInfo)
 
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
@@ -809,7 +809,7 @@ func (s *sFdAccount[
 			return nil, err
 		}
 
-		err = s.dao.FdAccount.Ctx(ctx).
+		err = co_dao.FdAccountView.Ctx(ctx).Where(co_dao.FdAccountView.Columns().CompanyType, s.modules.GetConfig().UserType.Code()).
 			Where(s.dao.FdAccount.Columns().UnionUserId, userId).
 			OrderAsc(s.dao.FdAccount.Columns().CreatedAt).Scan(&accountInfo)
 
@@ -1159,7 +1159,7 @@ func makeMore[TR co_model.IFdAccountRes](ctx context.Context, dao co_dao.FdAccou
 		"id",
 		func() TR {
 			_ = g.Try(ctx, func(ctx context.Context) {
-				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccount.Id)
+				accountDetail, err := daoctl.GetByIdWithError[co_entity.FdAccountDetail](dao.Ctx(ctx), info.Data().FdAccountView.Id)
 				if err != nil {
 					return
 				}

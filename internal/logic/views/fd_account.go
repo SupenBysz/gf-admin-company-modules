@@ -156,19 +156,19 @@ func (s *sFdAccountView) makeMore(ctx context.Context, data *co_model.FdAccountV
 
 	// 为data添加财务账户的详细信息
 	// 添加财务账户的详细信息
-	base_funs.AttrMake[*co_model.FdAccountViewRes](ctx,
-		co_dao.FdAccountView.Columns().Id,
-		func() (res *co_model.FdAccountDetailView) {
-			// 获取并设置财务账户的详细信息
-			_ = g.Try(ctx, func(ctx context.Context) {
-				FdAccountDetail, _ := daoctl.GetByIdWithError[co_model.FdAccountDetailView](co_dao.FdAccountDetailView.Ctx(ctx), data.FdAccountView.Id)
-				if FdAccountDetail != nil {
-					data.FdAccountDetailView = *FdAccountDetail
-				}
-			})
-			return &data.FdAccountDetailView
-		},
-	)
+	//base_funs.AttrMake[*co_model.FdAccountViewRes](ctx,
+	//	co_dao.FdAccountView.Columns().Id,
+	//	func() (res *co_model.FdAccountDetailView) {
+	//		// 获取并设置财务账户的详细信息
+	//		_ = g.Try(ctx, func(ctx context.Context) {
+	//			FdAccountDetail, _ := daoctl.GetByIdWithError[co_model.FdAccountDetailView](co_dao.FdAccountDetailView.Ctx(ctx), data.FdAccountView.Id)
+	//			if FdAccountDetail != nil {
+	//				data.FdAccountDetailView = *FdAccountDetail
+	//			}
+	//		})
+	//		return &data.FdAccountDetailView
+	//	},
+	//)
 
 	// 为data添加用户信息
 	// 当data的Id大于0时，说明需要添加用户信息

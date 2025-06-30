@@ -49,6 +49,11 @@ type FdAccountViewColumns struct {
 	UnionMainId        string //
 	AllowExceed        string //
 	FrozenBlance       string //
+	TodayAccountSum    string //
+	WeekAccountSum     string //
+	MonthAccountSum    string //
+	QuarterAccountSum  string //
+	YearAccountSum     string //
 	CompanyType        string //
 }
 
@@ -76,6 +81,11 @@ var fdAccountViewColumns = FdAccountViewColumns{
 	UnionMainId:        "union_main_id",
 	AllowExceed:        "allow_exceed",
 	FrozenBlance:       "frozen_blance",
+	TodayAccountSum:    "today_account_sum",
+	WeekAccountSum:     "week_account_sum",
+	MonthAccountSum:    "month_account_sum",
+	QuarterAccountSum:  "quarter_account_sum",
+	YearAccountSum:     "year_account_sum",
 	CompanyType:        "company_type",
 }
 

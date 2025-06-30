@@ -16,7 +16,7 @@ type FdAccountDetailView struct {
 type FdAccountViewRes struct {
 	Id int64 `json:"id"                 orm:"id"                   description:""`
 	FdAccountView
-	FdAccountDetailView
+	//FdAccountDetailView
 	User      *sys_model.SysUser             `json:"user" dc:"用户"`
 	Employee  *co_entity.CompanyEmployeeView `json:"employee" dc:"职工/员工/会员/队员"`
 	UnionMain *co_entity.CompanyView         `json:"unionMain" dc:"所属单位"`
