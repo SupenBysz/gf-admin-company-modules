@@ -41,7 +41,7 @@ type CompanyEmployeeView struct {
 	FdAccountType        int         `json:"fdAccountType"        orm:"fd_account_type"         description:""`
 	FdPrecisionOfBalance int         `json:"fdPrecisionOfBalance" orm:"fd_precision_of_balance" description:""`
 	FdBalance            int64       `json:"fdBalance"            orm:"fd_balance"              description:""`
-	FdFrozenBlance       int64       `json:"fdFrozenBlance"       orm:"fd_frozen_blance"        description:""`
+	FdFrozenAmount       int64       `json:"fdFrozenAmount"       orm:"fd_frozen_amount"        description:""`
 	FdTodayAccountSum    int         `json:"fdTodayAccountSum"    orm:"fd_today_account_sum"    description:""`
 	FdWeekAccountSum     int         `json:"fdWeekAccountSum"     orm:"fd_week_account_sum"     description:""`
 	FdMonthAccountSum    int         `json:"fdMonthAccountSum"    orm:"fd_month_account_sum"    description:""`

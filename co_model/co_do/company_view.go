@@ -42,7 +42,7 @@ type CompanyView struct {
 	FdAccountType        interface{} //
 	FdPrecisionOfBalance interface{} //
 	FdBalance            interface{} //
-	FdFrozenBlance       interface{} //
+	FdFrozenAmount       interface{} //
 	FdTodayAccountSum    interface{} //
 	FdWeekAccountSum     interface{} //
 	FdMonthAccountSum    interface{} //

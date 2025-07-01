@@ -58,7 +58,7 @@ type CompanyEmployeeViewColumns struct {
 	FdAccountType        string //
 	FdPrecisionOfBalance string //
 	FdBalance            string //
-	FdFrozenBlance       string //
+	FdFrozenAmount       string //
 	FdTodayAccountSum    string //
 	FdWeekAccountSum     string //
 	FdMonthAccountSum    string //
@@ -100,7 +100,7 @@ var companyEmployeeViewColumns = CompanyEmployeeViewColumns{
 	FdAccountType:        "fd_account_type",
 	FdPrecisionOfBalance: "fd_precision_of_balance",
 	FdBalance:            "fd_balance",
-	FdFrozenBlance:       "fd_frozen_blance",
+	FdFrozenAmount:       "fd_frozen_amount",
 	FdTodayAccountSum:    "fd_today_account_sum",
 	FdWeekAccountSum:     "fd_week_account_sum",
 	FdMonthAccountSum:    "fd_month_account_sum",

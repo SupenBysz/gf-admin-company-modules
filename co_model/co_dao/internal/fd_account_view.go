@@ -48,7 +48,7 @@ type FdAccountViewColumns struct {
 	AccountNumber      string //
 	UnionMainId        string //
 	AllowExceed        string //
-	FrozenBlance       string //
+	FrozenAmount       string //
 	TodayAccountSum    string //
 	WeekAccountSum     string //
 	MonthAccountSum    string //
@@ -80,7 +80,7 @@ var fdAccountViewColumns = FdAccountViewColumns{
 	AccountNumber:      "account_number",
 	UnionMainId:        "union_main_id",
 	AllowExceed:        "allow_exceed",
-	FrozenBlance:       "frozen_blance",
+	FrozenAmount:       "frozen_amount",
 	TodayAccountSum:    "today_account_sum",
 	WeekAccountSum:     "week_account_sum",
 	MonthAccountSum:    "month_account_sum",

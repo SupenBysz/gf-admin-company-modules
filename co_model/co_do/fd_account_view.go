@@ -33,7 +33,7 @@ type FdAccountView struct {
 	AccountNumber      interface{} //
 	UnionMainId        interface{} //
 	AllowExceed        interface{} //
-	FrozenBlance       interface{} //
+	FrozenAmount       interface{} //
 	TodayAccountSum    interface{} //
 	WeekAccountSum     interface{} //
 	MonthAccountSum    interface{} //

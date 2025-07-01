@@ -31,7 +31,7 @@ type FdAccountView struct {
 	AccountNumber      string      `json:"accountNumber"      orm:"account_number"       description:""`
 	UnionMainId        int64       `json:"unionMainId"        orm:"union_main_id"        description:""`
 	AllowExceed        int         `json:"allowExceed"        orm:"allow_exceed"         description:""`
-	FrozenBlance       int64       `json:"frozenBlance"       orm:"frozen_blance"        description:""`
+	FrozenAmount       int64       `json:"frozenAmount"       orm:"frozen_amount"        description:""`
 	TodayAccountSum    int         `json:"todayAccountSum"    orm:"today_account_sum"    description:""`
 	WeekAccountSum     int         `json:"weekAccountSum"     orm:"week_account_sum"     description:""`
 	MonthAccountSum    int         `json:"monthAccountSum"    orm:"month_account_sum"    description:""`
