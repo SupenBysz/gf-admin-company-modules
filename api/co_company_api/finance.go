@@ -96,7 +96,7 @@ type SetAccountAllowExceedReq struct {
 	AllowExceed int   `json:"allowExceed" dc:"是否允许存在负余额: 0禁止、1允许，主体默认财务账号是允许超出" v:"required|in:0,1#请正确填写是否允许"`
 }
 
-type UpdateAccountBalanceReq struct {
+type ReversedAmountReq struct {
 	AccountId int64 `json:"accountId" dc:"财务账号id" v:"required#请输入财务账号id"`
 	Amount    int64 `json:"amount" dc:"冲正金额"`
 }

@@ -30,7 +30,7 @@ type permissionType[T co_interface.IConfig] struct {
 	UpdateAccountAmount Permission
 	UpdateAccountState  Permission
 	//UpdateAccountDetail    Permission
-	UpdateAccountBalance   Permission
+	ReversedAmount   	Permission
 	SetAccountCurrencyCode Permission
 }
 
@@ -62,7 +62,7 @@ var (
 			UpdateAccountAmount: base_permission.New(5953153121849348, "UpdateAccountAmount", "修改财务金额", "修改财务账号金额明细"),
 			UpdateAccountState:  base_permission.New(5953153121849349, "UpdateAccountState", "修改财务账号状态", "修改财务账号状态"),
 			//UpdateAccountDetail:    base_permission.New(5953153121898321, "UpdateAccountDetail", "修改财务账号详情", "修改财务账号详情"),
-			UpdateAccountBalance:   base_permission.New(5953153121849323, "UpdateAccountBalance", "财务账号金额冲正", "财务账号金额冲正"),
+			ReversedAmount:   base_permission.New(5953153121849323, "UpdateAccountBalance", "财务账号金额冲正", "财务账号金额冲正"),
 			SetAccountCurrencyCode: base_permission.New(5953153121898322, "SetAccountCurrencyCode", "设置财务账号货币单位", "设置财务账号货币单位"),
 		})
 		for k, v := range gconv.Map(result) {

@@ -159,6 +159,8 @@ type (
 		UpdateAccountLimitState(ctx context.Context, id int64, limitState int, userId int64) (bool, error)
 		// SetAccountCurrencyCode 设置财务账号货币单位
 		SetAccountCurrencyCode(ctx context.Context, accountId int64, currencyCode string, userId int64) (bool, error)
+		// ReversedAmount 冲正账户金额
+		ReversedAmount(ctx context.Context, accountId int64, amount int64, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (bool, error)
 		// UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
 		UpdateAccountBalance(ctx context.Context, accountId int64, amount int64, version int, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (int64, error)
 		// GetAccountDetailById 根据财务账号id查询账单金额明细统计记录，如果主体id找不到财务账号的时候就创建财务账号
@@ -261,13 +263,13 @@ type (
 		InstallTradeHook(hookKey co_hook.AccountBillHookKey, hookFunc co_hook.AccountBillHookFunc)
 		// GetTradeHook 获取Hook
 		GetTradeHook() base_hook.BaseHook[co_hook.AccountBillHookKey, co_hook.AccountBillHookFunc]
-		// HasAccountBillsByUnionOrderId 获取财务账单
+		// HasAccountBillsByUnionMainId 获取财务账单
 		HasAccountBillsByUnionMainId(ctx context.Context, accountId, unionOrderId, unionMainId int64) (bool, error)
 		// CreateAccountBills 创建财务账单
 		CreateAccountBills(ctx context.Context, info co_model.AccountBillsRegister) (bool, error)
 		// SetBillsTradeState 设置财务账单交易状态
 		SetBillsTradeState(ctx context.Context, id int64, tradeState co_enum.FinanceTradeState) (bool, error)
-		//  SetBillsExtJson 设置财务账单扩展信息
+		// SetBillsExtJson 设置财务账单扩展信息
 		SetBillsExtJson(ctx context.Context, id int64, extJson string) (bool, error)
 	}
 

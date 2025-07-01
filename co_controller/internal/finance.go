@@ -412,7 +412,6 @@ func (c *FinanceController[
 	)
 }
 
-// UpdateAccountBalance 财务账号金额冲正
 func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -423,14 +422,14 @@ func (c *FinanceController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
-]) UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
+]) ReversedAmount(ctx context.Context, req *co_company_api.ReversedAmountReq) (api_v1.BoolRes, error) {
 	return funs.CheckPermission(ctx,
-		func() (api_v1.Int64Res, error) {
+		func() (api_v1.BoolRes, error) {
 			user := sys_service.SysSession().Get(ctx).JwtClaimsUser
-			ret, err := c.modules.Account().UpdateAccountBalance(ctx, req.AccountId, req.Amount, -1, co_enum.Finance.InOutType.Auto, user.Id)
-			return api_v1.Int64Res(ret), err
+			ret, err := c.modules.Account().ReversedAmount(ctx, req.AccountId, req.Amount, co_enum.Finance.InOutType.Auto, user.Id)
+			return api_v1.BoolRes(ret), err
 		},
-		co_permission.Finance.PermissionType(c.modules).UpdateAccountBalance,
+		co_permission.Finance.PermissionType(c.modules).ReversedAmount,
 	)
 }
 

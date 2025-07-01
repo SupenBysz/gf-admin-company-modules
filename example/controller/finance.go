@@ -311,7 +311,7 @@ func (c *FinanceController[
 	return ret, err
 }
 
-// UpdateAccountBalance 财务账号金额冲正
+// ReversedAmount 财务账号金额冲正
 func (c *FinanceController[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -322,8 +322,8 @@ func (c *FinanceController[
 	ITFdInvoiceRes,
 	ITFdInvoiceDetailRes,
 	ITFdRechargeRes,
-]) UpdateAccountBalance(ctx context.Context, req *co_v1.UpdateAccountBalanceReq) (api_v1.Int64Res, error) {
-	ret, err := c.IFinance.UpdateAccountBalance(ctx, &req.UpdateAccountBalanceReq)
+]) ReversedAmount(ctx context.Context, req *co_v1.ReversedAmountReq) (api_v1.BoolRes, error) {
+	ret, err := c.IFinance.ReversedAmount(ctx, &req.ReversedAmountReq)
 
 	return ret, err
 }

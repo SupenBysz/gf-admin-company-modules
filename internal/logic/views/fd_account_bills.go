@@ -5,7 +5,7 @@ import (
 	"github.com/SupenBysz/gf-admin-community/sys_service"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model"
 	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_dao"
-	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_do"
+	"github.com/SupenBysz/gf-admin-company-modules/co_model/co_entity"
 	"github.com/SupenBysz/gf-admin-company-modules/co_service"
 	"github.com/kysion/base-library/base_model"
 	"github.com/kysion/base-library/utility/daoctl"
@@ -22,7 +22,7 @@ func NewFdBillsView() co_service.IFdBillsView {
 	return &sFdBillsView{}
 }
 
-func (s *sFdBillsView)  GetBillsById(ctx context.Context, id int64, makeResource bool) (*co_model.CompanyBillsViewRes, error) {
+func (s *sFdBillsView) GetBillsById(ctx context.Context, id int64, makeResource bool) (*co_model.CompanyBillsViewRes, error) {
 	data, err := daoctl.GetByIdWithError[co_model.CompanyBillsViewRes](co_dao.FdAccountBillsView.Ctx(ctx), id)
 
 	if data == nil || err != nil {
@@ -73,7 +73,7 @@ func (s *sFdBillsView) makeBillsMore(ctx context.Context, data *co_model.Company
 		}
 	}
 	if data.FdAccountId > 0 {
-		fdAccount := daoctl.GetById[co_do.FdAccount](co_dao.FdAccountView.Ctx(ctx), data.FdAccountId)
+		fdAccount := daoctl.GetById[co_entity.FdAccount](co_dao.FdAccountView.Ctx(ctx), data.FdAccountId)
 		data.FdAccount = fdAccount
 	}
 

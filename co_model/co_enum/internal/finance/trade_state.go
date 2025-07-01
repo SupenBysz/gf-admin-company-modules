@@ -9,6 +9,7 @@ type TradeStateEnum interface {
 }
 
 type tradeState struct {
+	None           TradeStateEnum
 	WaitPay        TradeStateEnum
 	Paying         TradeStateEnum
 	Paid           TradeStateEnum
@@ -28,6 +29,7 @@ type tradeState struct {
 
 var TradeState = func() tradeState {
 	ts := tradeState{
+		None:           enum.New[TradeStateEnum](0, "无"),
 		WaitPay:        enum.New[TradeStateEnum](1, "待支付"),
 		Paying:         enum.New[TradeStateEnum](2, "支付中"),
 		Paid:           enum.New[TradeStateEnum](4, "已支付"),
@@ -45,6 +47,7 @@ var TradeState = func() tradeState {
 
 	// 初始化映射表
 	states := []TradeStateEnum{
+		ts.None,
 		ts.WaitPay, ts.Paying, ts.Paid, ts.Cancel,
 		ts.Completed, ts.Refunding, ts.Refunded,
 		ts.PaymentTimeout, ts.Closed, ts.Frozen,

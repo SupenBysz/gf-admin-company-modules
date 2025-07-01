@@ -86,9 +86,9 @@ type SetAccountAllowExceedReq struct {
 	co_company_api.SetAccountAllowExceedReq
 }
 
-type UpdateAccountBalanceReq struct {
+type ReversedAmountReq struct {
 	g.Meta ` method:"post" summary:"财务账号金额冲正" tags:"组织单位/财务服务"`
-	co_company_api.UpdateAccountBalanceReq
+	co_company_api.ReversedAmountReq
 }
 
 type GetCurrencyByCodeReq struct {

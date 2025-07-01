@@ -22,6 +22,7 @@ import (
 	"github.com/kysion/base-library/utility/base_gen"
 	"github.com/kysion/base-library/utility/format_utils"
 	"github.com/kysion/base-library/utility/kconv"
+	"math"
 
 	"reflect"
 
@@ -36,15 +37,15 @@ import (
 )
 
 type sFdAccount[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-TR co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillsRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-ITFdRechargeRes co_model.IFdRechargeRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	TR co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ] struct {
 	base_hook.ResponseFactoryHook[TR]
 	modules co_interface.IModules[
@@ -62,15 +63,15 @@ ITFdRechargeRes co_model.IFdRechargeRes,
 }
 
 func NewFdAccount[
-ITCompanyRes co_model.ICompanyRes,
-ITEmployeeRes co_model.IEmployeeRes,
-ITTeamRes co_model.ITeamRes,
-TR co_model.IFdAccountRes,
-ITFdAccountBillRes co_model.IFdAccountBillsRes,
-ITFdBankCardRes co_model.IFdBankCardRes,
-ITFdInvoiceRes co_model.IFdInvoiceRes,
-ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
-ITFdRechargeRes co_model.IFdRechargeRes,
+	ITCompanyRes co_model.ICompanyRes,
+	ITEmployeeRes co_model.IEmployeeRes,
+	ITTeamRes co_model.ITeamRes,
+	TR co_model.IFdAccountRes,
+	ITFdAccountBillRes co_model.IFdAccountBillsRes,
+	ITFdBankCardRes co_model.IFdBankCardRes,
+	ITFdInvoiceRes co_model.IFdInvoiceRes,
+	ITFdInvoiceDetailRes co_model.IFdInvoiceDetailRes,
+	ITFdRechargeRes co_model.IFdRechargeRes,
 ](modules co_interface.IModules[
 	ITCompanyRes,
 	ITEmployeeRes,
@@ -117,7 +118,7 @@ func (s *sFdAccount[
 	var ret co_model.IFdAccountRes
 	ret = &co_model.FdAccountRes{
 		FdAccountView: co_entity.FdAccountView{},
-		Detail:    &co_entity.FdAccountDetail{},
+		Detail:        &co_entity.FdAccountDetail{},
 	}
 	return ret.(TR)
 
@@ -460,6 +461,61 @@ func (s *sFdAccount[
 	data.Records = dataList
 
 	return data, nil
+}
+
+// ReversedAmount 冲正账户金额
+func (s *sFdAccount[
+	ITCompanyRes,
+	ITEmployeeRes,
+	ITTeamRes,
+	TR,
+	ITFdAccountBillRes,
+	ITFdBankCardRes,
+	ITFdInvoiceRes,
+	ITFdInvoiceDetailRes,
+	ITFdRechargeRes,
+]) ReversedAmount(ctx context.Context, accountId int64, amount int64, inOutType co_enum.FinanceInOutType, sysSessionUserId int64) (bool, error) {
+	info, err := daoctl.GetByIdWithError[co_model.FdAccountRes](s.dao.FdAccount.Ctx(ctx), accountId)
+
+	if err != nil || info == nil {
+		return false, gerror.New(s.modules.T(ctx, "error_Account_NotExist"))
+	}
+
+	if inOutType.Code() == co_enum.Finance.InOutType.Auto.Code() {
+		if amount > 0 {
+			inOutType = co_enum.Finance.InOutType.In
+		} else if amount < 0 {
+			amount = int64(math.Abs(float64(amount)))
+			inOutType = co_enum.Finance.InOutType.Out
+		} else {
+			return true, nil
+		}
+	}
+
+	ok, err := s.modules.AccountBills().CreateAccountBills(ctx, co_model.AccountBillsRegister{
+		FromUserId:    0,
+		ToUserId:      info.UnionUserId,
+		FdAccountId:   info.Id,
+		BeforeBalance: info.Balance,
+		Amount:        amount,
+		UnionOrderId:  0,
+		UnionMainId:   info.UnionMainId,
+		BuyerUserId:   0,
+		InOutType:     inOutType.Code(),
+		TradeType:     co_enum.Finance.TradeType.ReversedAmount.Code(),
+		TradeAt:       gtime.Now(),
+		Remark:        "",
+		TradeState:    co_enum.Finance.TradeState.None.Code(),
+		HandlingFee:   0,
+		ExtJson:       "",
+		CreatedBy:     sysSessionUserId,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	return ok, err
 }
 
 // UpdateAccountBalance 修改财务账户余额(上下文, 财务账号id, 需要修改的钱数目, 版本, 收支类型)
@@ -1077,13 +1133,13 @@ func (s *sFdAccount[
 	// 季度
 	quarter := format_utils.GetQuarter(account.QuarterUpdatedAt)
 	quarter2 := format_utils.GetQuarter(now)
-	if account.QuarterUpdatedAt.Year() == now.Year() && quarter != quarter2 {
+	if account.QuarterUpdatedAt == nil || account.QuarterUpdatedAt.Year() == now.Year() && quarter != quarter2 {
 		data.QuarterAccountSum = amount
 	} else {
 		data.QuarterAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().QuarterAccountSum + operator + gconv.String(amount))
 	}
 
-	if account.YearUpdatedAt.Year() != now.Year() {
+	if account.YearUpdatedAt == nil || account.YearUpdatedAt.Year() != now.Year() {
 		data.YearAccountSum = amount
 	} else {
 		data.YearAccountSum = gdb.Raw(s.dao.FdAccountDetail.Columns().YearAccountSum + operator + gconv.String(amount))

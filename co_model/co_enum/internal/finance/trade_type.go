@@ -15,6 +15,7 @@ type tradeType struct {
 	CashWithdrawal  TradeTypeEnum
 	Recharge        TradeTypeEnum
 	OperatingIncome TradeTypeEnum
+	ReversedAmount  TradeTypeEnum
 	Other           TradeTypeEnum
 }
 
@@ -29,6 +30,7 @@ var TradeType = tradeType{
 	CashWithdrawal:  enum.New[TradeTypeEnum](128, "提现"),
 	Recharge:        enum.New[TradeTypeEnum](256, "充值"),
 	OperatingIncome: enum.New[TradeTypeEnum](512, "营收"),
+	ReversedAmount:  enum.New[TradeTypeEnum](1024, "冲正"),
 	Other:           enum.New[TradeTypeEnum](8192, "其它"),
 }
 
@@ -43,6 +45,7 @@ func (e tradeType) New(code int, description string) TradeTypeEnum {
 		(code&TradeType.CashWithdrawal.Code()) == TradeType.CashWithdrawal.Code() ||
 		(code&TradeType.Recharge.Code()) == TradeType.Recharge.Code() ||
 		(code&TradeType.OperatingIncome.Code()) == TradeType.OperatingIncome.Code() ||
+		(code&TradeType.ReversedAmount.Code()) == TradeType.ReversedAmount.Code() ||
 		(code&TradeType.Other.Code()) == TradeType.Other.Code() {
 		return enum.New[TradeTypeEnum](code, description)
 	}

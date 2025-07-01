@@ -61,8 +61,8 @@ type IFinance[
 	// SetAccountCurrencyCode 设置财务账号币种
 	SetAccountCurrencyCode(ctx context.Context, req *co_company_api.SetAccountCurrencyCodeReq) (api_v1.BoolRes, error)
 
-	// UpdateAccountBalance 财务账号金额冲正
-	UpdateAccountBalance(ctx context.Context, req *co_company_api.UpdateAccountBalanceReq) (api_v1.Int64Res, error)
+	// ReversedAmount 财务账号金额冲正
+	ReversedAmount(ctx context.Context, req *co_company_api.ReversedAmountReq) (api_v1.BoolRes, error)
 
 	// GetCurrencyByCode 获取币种信息
 	//GetCurrencyByCode(ctx context.Context, req *co_company_api.GetCurrencyByCodeReq) (*co_model.FdCurrencyRes, error)

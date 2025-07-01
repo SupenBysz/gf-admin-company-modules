@@ -301,6 +301,10 @@ func (s *sFdAccountBills[
 		//bill.Data().CreatedBy = sessionUser.Id
 		bill.Data().CreatedBy = info.ToUserId
 
+		if info.CreatedBy > 0 {
+			bill.Data().CreatedBy = info.CreatedBy
+		}
+
 		data := kconv.Struct(bill.Data(), &co_do.FdAccountBills{})
 
 		if data.ExtJson == "" {
@@ -421,6 +425,10 @@ func (s *sFdAccountBills[
 			bill.Data().CreatedBy = info.FromUserId
 
 			data := kconv.Struct(bill.Data(), &co_do.FdAccountBills{})
+
+			if data.ExtJson == "" {
+				data.ExtJson = nil
+			}
 
 			// 重载Do模型
 			doData, err := info.OverrideDo.DoFactory(*data)
