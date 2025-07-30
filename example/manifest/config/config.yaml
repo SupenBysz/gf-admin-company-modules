@@ -59,6 +59,8 @@ service:
           registerBindMemberLevelId: 680135658520645
           # 资金账户默认货币类型。如果不设置，则默认跟随 service.defaultCurrency 中的设置，支持：USD/HKD/TWD/JPY/CNY/EUR/BTC/USDT/ETH
           defaultCurrency: "CNY"
+          # 用户类型白名单，用户类型在 model/enum/user/type.go 中定义白名单中的用户类型将允许访问用户类型对应的额员工信息和公司信息
+          userTypeWhitelist: [ ]
     # 超级管理员主体ID
     superAdminMainId: 1
     # 需要存储到数据库中的日志，支持：all,error,warn,info

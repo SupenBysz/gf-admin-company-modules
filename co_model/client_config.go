@@ -1,5 +1,7 @@
 package co_model
 
+import "github.com/kysion/base-library/utility/base_funs"
+
 type ClientConfig struct {
 	XClientToken string `json:"identifier"     dc:"客户端token"`
 	// 是否允许跨级创建子公司单位
@@ -31,4 +33,10 @@ type ClientConfig struct {
 	RegisterBindMemberLevelId int64 `json:"register_bind_member_level_id" dc:"是否自动创建财务账户: true自动创建、false不创建"`
 	// 资金账户默认货币类型
 	DefaultCurrency string `json:"default_currency" dc:"资金账户默认货币类型"`
+	// 用户类型白名单，用户类型在 model/enum/user/type.go 中定义白名单中的用户类型将允许访问用户类型对应的额员工信息和公司信息
+	UserTypeWhitelist []int `json:"user_type_whitelist" dc:"用户类型白名单"`
+}
+
+func (c ClientConfig) HasUserTypeWhitelist(userType int) bool {
+	return base_funs.Contains(c.UserTypeWhitelist, userType)
 }
