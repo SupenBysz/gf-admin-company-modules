@@ -47,5 +47,6 @@ type CompanyEmployeeView struct {
 	FdMonthAccountSum    int         `json:"fdMonthAccountSum"    orm:"fd_month_account_sum"    description:""`
 	FdQuarterAccountSum  int         `json:"fdQuarterAccountSum"  orm:"fd_quarter_account_sum"  description:""`
 	FdYearAccountSum     int64       `json:"fdYearAccountSum"     orm:"fd_year_account_sum"     description:""`
+	ParentUserId         int64       `json:"parentUserId"         orm:"parent_user_id"          description:""`
 	CompanyType          int         `json:"companyType"          orm:"company_type"            description:""`
 }

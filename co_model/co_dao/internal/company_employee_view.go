@@ -64,6 +64,7 @@ type CompanyEmployeeViewColumns struct {
 	FdMonthAccountSum    string //
 	FdQuarterAccountSum  string //
 	FdYearAccountSum     string //
+	ParentUserId         string //
 	CompanyType          string //
 }
 
@@ -106,6 +107,7 @@ var companyEmployeeViewColumns = CompanyEmployeeViewColumns{
 	FdMonthAccountSum:    "fd_month_account_sum",
 	FdQuarterAccountSum:  "fd_quarter_account_sum",
 	FdYearAccountSum:     "fd_year_account_sum",
+	ParentUserId:         "parent_user_id",
 	CompanyType:          "company_type",
 }
 

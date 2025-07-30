@@ -49,5 +49,6 @@ type CompanyEmployeeView struct {
 	FdMonthAccountSum    interface{} //
 	FdQuarterAccountSum  interface{} //
 	FdYearAccountSum     interface{} //
+	ParentUserId         interface{} //
 	CompanyType          interface{} //
 }
