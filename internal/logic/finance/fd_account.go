@@ -918,12 +918,13 @@ func (s *sFdAccount[
 		return false, errors.Join(err, errors.New("{#error_Transaction_Failed}{#error_ToUserAccount_NoExist}"))
 	}
 
+
 	// 4、查询作业员工所属公司财务默认账户信息
 	companyAccountInfo := base_funs.If[*co_model.FdAccountViewRes](
 		accountInfo.UnionUserId == companyEmployeeInfo.Id,
 		accountInfo,
 		func() *co_model.FdAccountViewRes {
-			_companyAccountInfo, err := s.GetUserDefaultFdAccountByUserId(ctx, companyEmployeeInfo.Id)
+			_companyAccountInfo, err := co_service.FdAccountView().GetFdAccountById(ctx, companyEmployeeInfo.FdAccountId, false)
 			if err != nil {
 				panic(err)
 			}
